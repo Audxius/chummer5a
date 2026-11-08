@@ -40,7 +40,6 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Extensions.ObjectPool;
 using Microsoft.VisualStudio.Threading;
-using Microsoft.Win32;
 using NLog;
 using Microsoft.IO;
 using System.Xml.XPath;
