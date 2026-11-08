@@ -2010,8 +2010,8 @@ namespace Chummer
                         try
                         {
                             _objGenericToken.ThrowIfCancellationRequested();
-                            if (objCache.OnMyAfterSelect != null)
-                                await objCache.OnMyAfterSelect(sender, e, _objGenericToken).ConfigureAwait(false);
+                            if (CharacterCacheUiHooks.Get(objCache).OnMyAfterSelect != null)
+                                await CharacterCacheUiHooks.Get(objCache).OnMyAfterSelect(sender, e, _objGenericToken).ConfigureAwait(false);
                             await UpdateCharacter(objCache, _objGenericToken).ConfigureAwait(false);
                         }
                         finally
@@ -2051,8 +2051,8 @@ namespace Chummer
                         CursorWait objCursorWait = await CursorWait.NewAsync(this, token: _objGenericToken).ConfigureAwait(false);
                         try
                         {
-                            if (objCache.OnMyDoubleClick != null)
-                                await objCache.OnMyDoubleClick(sender, e, _objGenericToken).ConfigureAwait(false);
+                            if (CharacterCacheUiHooks.Get(objCache).OnMyDoubleClick != null)
+                                await CharacterCacheUiHooks.Get(objCache).OnMyDoubleClick(sender, e, _objGenericToken).ConfigureAwait(false);
                         }
                         finally
                         {
@@ -2076,9 +2076,9 @@ namespace Chummer
             {
                 TreeNode t = await treCharacterList.DoThreadSafeFuncAsync(x => x.SelectedNode, _objGenericToken).ConfigureAwait(false);
 
-                if (t?.Tag is CharacterCache objCache && objCache.OnMyKeyDown != null)
+                if (t?.Tag is CharacterCache objCache && CharacterCacheUiHooks.Get(objCache).OnMyKeyDown != null)
                 {
-                    await objCache.OnMyKeyDown(sender, new ValueTuple<KeyEventArgs, TreeNode>(e, t), _objGenericToken).ConfigureAwait(false);
+                    await CharacterCacheUiHooks.Get(objCache).OnMyKeyDown(sender, new ValueTuple<KeyEventArgs, TreeNode>(e, t), _objGenericToken).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)
@@ -2233,9 +2233,9 @@ namespace Chummer
             {
                 TreeNode t = await treCharacterList.DoThreadSafeFuncAsync(x => x.SelectedNode, _objGenericToken).ConfigureAwait(false);
 
-                if (t?.Tag is CharacterCache objCache && objCache.OnMyContextMenuDeleteClick != null)
+                if (t?.Tag is CharacterCache objCache && CharacterCacheUiHooks.Get(objCache).OnMyContextMenuDeleteClick != null)
                 {
-                    await objCache.OnMyContextMenuDeleteClick(t, e, _objGenericToken).ConfigureAwait(false);
+                    await CharacterCacheUiHooks.Get(objCache).OnMyContextMenuDeleteClick(t, e, _objGenericToken).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)

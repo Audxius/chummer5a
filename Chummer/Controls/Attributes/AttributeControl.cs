@@ -109,7 +109,7 @@ namespace Chummer.UI.Attributes
                     {
                         Anchor = AnchorStyles.Right,
                         AutoSize = true,
-                        InterceptMouseWheel = GlobalSettings.InterceptMode,
+                        InterceptMouseWheel = WinFormsSettings.InterceptMode,
                         Margin = new Padding(3, 0, 3, 0),
                         Maximum = 99m,
                         MinimumSize = new Size(35, 0),
@@ -123,7 +123,7 @@ namespace Chummer.UI.Attributes
                     {
                         Anchor = AnchorStyles.Right,
                         AutoSize = true,
-                        InterceptMouseWheel = GlobalSettings.InterceptMode,
+                        InterceptMouseWheel = WinFormsSettings.InterceptMode,
                         Margin = new Padding(3, 0, 3, 0),
                         Maximum = 99m,
                         MinimumSize = new Size(35, 0),

@@ -46,7 +46,6 @@ using Chummer.Backend.Enums;
 using Chummer.Backend.Equipment;
 using Chummer.Backend.Skills;
 using Chummer.Backend.Uniques;
-using Chummer.Plugins;
 using Microsoft.ApplicationInsights;
 using Microsoft.IO;
 using Newtonsoft.Json;
@@ -5652,7 +5651,7 @@ namespace Chummer
                                 // <plugins>
                                 await objWriter.WriteStartElementAsync("plugins", token: innerToken)
                                     .ConfigureAwait(false);
-                                foreach (IPlugin objPlugin in lstActivePlugins)
+                                foreach (ICharacterDataPlugin objPlugin in lstActivePlugins)
                                 {
                                     try
                                     {
@@ -54477,12 +54476,12 @@ namespace Chummer
         /// Alias map for SourceDetail control text and tooltip assignation.
         /// </summary>
         /// <param name="sourceControl"></param>
-        public void SetSourceDetail(Control sourceControl)
+        public void SetSourceDetail(object sourceControl)
         {
             SourceDetail.SetControl(sourceControl);
         }
 
-        public async Task SetSourceDetailAsync(Control sourceControl, CancellationToken token = default)
+        public async Task SetSourceDetailAsync(object sourceControl, CancellationToken token = default)
         {
             await (await GetSourceDetailAsync(token).ConfigureAwait(false)).SetControlAsync(sourceControl, token).ConfigureAwait(false);
         }

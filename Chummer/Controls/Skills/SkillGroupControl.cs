@@ -95,7 +95,7 @@ namespace Chummer.UI.Skills
                         {
                             Anchor = AnchorStyles.Right,
                             AutoSize = true,
-                            InterceptMouseWheel = GlobalSettings.InterceptMode,
+                            InterceptMouseWheel = WinFormsSettings.InterceptMode,
                             Margin = new Padding(3, 2, 3, 2),
                             Name = "nudKarma"
                         };
@@ -103,7 +103,7 @@ namespace Chummer.UI.Skills
                         {
                             Anchor = AnchorStyles.Right,
                             AutoSize = true,
-                            InterceptMouseWheel = GlobalSettings.InterceptMode,
+                            InterceptMouseWheel = WinFormsSettings.InterceptMode,
                             Margin = new Padding(3, 2, 3, 2),
                             Name = "nudSkill"
                         };

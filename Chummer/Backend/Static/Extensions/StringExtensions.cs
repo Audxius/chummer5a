@@ -7561,78 +7561,6 @@ namespace Chummer
         }
 
         /// <summary>
-        /// Surrounds a plaintext string with basic RTF formatting so that it can be processed as an RTF string
-        /// </summary>
-        /// <param name="strInput">String to process</param>
-        /// <param name="token">Cancellation token to listen to.</param>
-        /// <returns>Version of <paramref name="strInput"/> surrounded with RTF formatting codes</returns>
-        public static string PlainTextToRtf(this string strInput, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (string.IsNullOrEmpty(strInput))
-                return string.Empty;
-            if (strInput.IsRtf())
-                return strInput;
-            strInput = strInput.NormalizeWhiteSpace();
-            s_RtbRtfManipulatorLock.SafeWait(token);
-            try
-            {
-                if (!s_RtbRtfManipulator.Value.IsHandleCreated)
-                {
-                    Utils.RunOnMainThread(() => s_RtbRtfManipulator.Value.CreateControl(), token: token);
-                }
-
-                return s_RtbRtfManipulator.Value.DoThreadSafeFunc(x =>
-                {
-                    x.Text = strInput;
-                    return x.Rtf;
-                }, token);
-            }
-            finally
-            {
-                s_RtbRtfManipulatorLock.Release();
-            }
-        }
-
-        /// <summary>
-        /// Surrounds a plaintext string with basic RTF formatting so that it can be processed as an RTF string
-        /// </summary>
-        /// <param name="strInput">String to process</param>
-        /// <param name="token">Cancellation token to listen to.</param>
-        /// <returns>Version of <paramref name="strInput"/> surrounded with RTF formatting codes</returns>
-        public static Task<string> PlainTextToRtfAsync(this string strInput, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            return string.IsNullOrEmpty(strInput) ? Task.FromResult(string.Empty) : InnerDo(token);
-
-            async Task<string> InnerDo(CancellationToken innerToken)
-            {
-                if (strInput.IsRtf())
-                    return strInput;
-                strInput = strInput.NormalizeWhiteSpace();
-                await s_RtbRtfManipulatorLock.WaitAsync(innerToken).ConfigureAwait(false);
-                try
-                {
-                    if (!s_RtbRtfManipulator.Value.IsHandleCreated)
-                    {
-                        await Utils.RunOnMainThreadAsync(() => s_RtbRtfManipulator.Value.CreateControl(), innerToken)
-                                   .ConfigureAwait(false);
-                    }
-
-                    return await s_RtbRtfManipulator.Value.DoThreadSafeFuncAsync(x =>
-                    {
-                        x.Text = strInput;
-                        return x.Rtf;
-                    }, innerToken).ConfigureAwait(false);
-                }
-                finally
-                {
-                    s_RtbRtfManipulatorLock.Release();
-                }
-            }
-        }
-
-        /// <summary>
         /// Strips RTF formatting from a string
         /// </summary>
         /// <param name="strInput">String to process</param>
@@ -8605,8 +8533,6 @@ namespace Chummer
         // Order is important so that we replace composites before chars
         private static readonly string[] s_astrEscapedLineEndingStrings = new[] { "\\r\\n", "\\n\\r", "\\n", "\\r" };
 
-        private static readonly DebuggableSemaphoreSlim s_RtbRtfManipulatorLock = new DebuggableSemaphoreSlim();
-        private static readonly Lazy<RichTextBox> s_RtbRtfManipulator = new Lazy<RichTextBox>(() => Utils.RunOnMainThread(() => new RichTextBox(), token: CancellationToken.None));
 
         /// <summary>
         /// Strip RTF Tags from RTF Text.

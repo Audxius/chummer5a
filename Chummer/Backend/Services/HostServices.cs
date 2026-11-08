@@ -52,6 +52,8 @@ namespace Chummer
 
         private static IUiDispatcher s_objDispatcher = new HeadlessUiDispatcher();
 
+        private static ITextDisplayService s_objTextDisplay = new HeadlessTextDisplayService();
+
         public static IMessageService Messages
         {
             get => s_objMessages;
@@ -126,6 +128,15 @@ namespace Chummer
         {
             get => s_objDispatcher;
             set => s_objDispatcher = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Puts engine-computed text and tooltips onto UI elements passed in by the UI.
+        /// </summary>
+        public static ITextDisplayService TextDisplay
+        {
+            get => s_objTextDisplay;
+            set => s_objTextDisplay = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }

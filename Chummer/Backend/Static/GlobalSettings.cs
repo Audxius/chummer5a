@@ -1202,15 +1202,44 @@ namespace Chummer
         /// <summary>
         /// Whether custom improvements that belong to a group show the group name in tooltips instead of the individual custom name.
         /// </summary>
+        private static Guid s_guidUploadClientId;
+
+        /// <summary>
+        /// Anonymous id used for telemetry, created on first use and kept in the settings store.
+        /// </summary>
+        public static Guid UploadClientId
+        {
+            get
+            {
+                Guid guidReturn = s_guidUploadClientId;
+                if (guidReturn != Guid.Empty)
+                    return guidReturn;
+                string strStored = string.Empty;
+                if (s_ObjBaseChummerKey != null)
+                    LoadStringFromRegistry(ref strStored, "uploadclientid");
+                if (!Guid.TryParse(strStored, out guidReturn) || guidReturn == Guid.Empty)
+                {
+                    guidReturn = Guid.NewGuid();
+                    try
+                    {
+                        s_ObjBaseChummerKey?.SetValue("uploadclientid", guidReturn.ToString("D", InvariantCultureInfo));
+                    }
+                    catch (Exception e) when (!(e is OperationCanceledException))
+                    {
+                        Log.Warn(e, "Could not store the telemetry client id");
+                    }
+                }
+                s_guidUploadClientId = guidReturn;
+                return guidReturn;
+            }
+        }
+
         public static bool UseImprovementGroupNameInTooltips
         {
             get => _blnUseImprovementGroupNameInTooltips;
             set => _blnUseImprovementGroupNameInTooltips = value;
         }
 
-        public static NumericUpDownEx.InterceptMouseWheelMode InterceptMode => AllowHoverIncrement
-            ? NumericUpDownEx.InterceptMouseWheelMode.WhenMouseOver
-            : NumericUpDownEx.InterceptMouseWheelMode.WhenFocus;
 
         /// <summary>
         /// Whether dice rolling is allowed for Skills.

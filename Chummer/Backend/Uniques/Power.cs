@@ -3747,7 +3747,7 @@ namespace Chummer
 
         #endregion Complex Properties
 
-        public void SetSourceDetail(Control sourceControl)
+        public void SetSourceDetail(object sourceControl)
         {
             using (LockObject.EnterReadLock())
             {
@@ -3757,7 +3757,7 @@ namespace Chummer
             }
         }
 
-        public async Task SetSourceDetailAsync(Control sourceControl, CancellationToken token = default)
+        public async Task SetSourceDetailAsync(object sourceControl, CancellationToken token = default)
         {
             IAsyncDisposable objLocker = await LockObject.EnterReadLockAsync(token).ConfigureAwait(false);
             try

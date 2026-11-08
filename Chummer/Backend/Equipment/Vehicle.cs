@@ -34,8 +34,6 @@ using System.Xml;
 using System.Xml.XPath;
 using Chummer.Annotations;
 using NLog;
-using TreeNode = System.Windows.Forms.TreeNode;
-using TreeNodeCollection = System.Windows.Forms.TreeNodeCollection;
 
 namespace Chummer.Backend.Equipment
 {
@@ -5890,14 +5888,14 @@ namespace Chummer.Backend.Equipment
             return true;
         }
 
-        public void SetSourceDetail(Control sourceControl)
+        public void SetSourceDetail(object sourceControl)
         {
             if (_objCachedSourceDetail.Language != GlobalSettings.Language)
                 _objCachedSourceDetail = default;
             SourceDetail.SetControl(sourceControl);
         }
 
-        public async Task SetSourceDetailAsync(Control sourceControl, CancellationToken token = default)
+        public async Task SetSourceDetailAsync(object sourceControl, CancellationToken token = default)
         {
             if (_objCachedSourceDetail.Language != GlobalSettings.Language)
                 _objCachedSourceDetail = default;

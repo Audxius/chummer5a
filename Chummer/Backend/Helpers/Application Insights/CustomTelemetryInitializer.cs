@@ -19,7 +19,6 @@
 
 using System;
 using System.Diagnostics;
-using Chummer.Plugins;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using NLog;
@@ -45,18 +44,12 @@ namespace Chummer
                 telemetry.Context.GlobalProperties.Add("Milestone", Utils.IsMilestoneVersion.ToString(GlobalSettings.InvariantCultureInfo));
 
             telemetry.Context.Device.OperatingSystem = Environment.OSVersion.ToString();
-            if (Properties.Settings.Default.UploadClientId == Guid.Empty
-                //sometimes, there are odd values stored in the UploadClientId.
-                || !Properties.Settings.Default.UploadClientId.ToString().IsGuid())
-            {
-                Properties.Settings.Default.UploadClientId = Guid.NewGuid();
-                Properties.Settings.Default.Save();
-            }
-            telemetry.Context.Cloud.RoleInstance = Properties.Settings.Default.UploadClientId.ToString();
-            telemetry.Context.Cloud.RoleName = Properties.Settings.Default.UploadClientId.ToString();
+            string strUploadClientId = GlobalSettings.UploadClientId.ToString();
+            telemetry.Context.Cloud.RoleInstance = strUploadClientId;
+            telemetry.Context.Cloud.RoleName = strUploadClientId;
             telemetry.Context.Device.Id = Environment.MachineName;
-            telemetry.Context.Session.Id = Properties.Settings.Default.UploadClientId.ToString();
-            telemetry.Context.User.Id = Properties.Settings.Default.UploadClientId.ToString();
+            telemetry.Context.Session.Id = strUploadClientId;
+            telemetry.Context.User.Id = strUploadClientId;
 
             telemetry.Context.Component.Version = Utils.CurrentChummerVersion.ToString();
 

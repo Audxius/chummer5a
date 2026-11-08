@@ -323,59 +323,47 @@ namespace Chummer
         }
 
         /// <summary>
-        /// Set the Text and ToolTips for the selected control.
+        /// Set the Text and ToolTips for the selected UI element (an opaque handle supplied by the UI).
         /// </summary>
-        public void SetControl(Control source)
+        public void SetControl(object source)
         {
             if (source == null)
                 return;
-            string strText = ToString();
-            source.DoThreadSafe(x => x.Text = strText);
-            source.SetToolTip(LanguageBookTooltip);
+            HostServices.TextDisplay.SetTextAndToolTip(source, ToString(), LanguageBookTooltip);
         }
 
         /// <summary>
-        /// Set the Text and ToolTips for the selected control.
+        /// Set the Text and ToolTips for the selected UI element (an opaque handle supplied by the UI).
         /// </summary>
-        public void SetControl(Control source, Form frmParent)
+        public void SetControl(object source, object frmParent)
         {
             if (source == null)
                 return;
-            string strText = ToString();
-            source.DoThreadSafe(x => x.Text = strText);
-            string strToolTip = LanguageBookTooltip;
-            if (source is IControlWithToolTip objSourceWithToolTip)
-                objSourceWithToolTip.ToolTipText = strToolTip;
-            else
-                source.SetToolTip(frmParent, strToolTip);
+            HostServices.TextDisplay.SetTextAndToolTip(source, ToString(), LanguageBookTooltip, frmParent);
         }
 
         /// <summary>
-        /// Set the Text and ToolTips for the selected control.
+        /// Set the Text and ToolTips for the selected UI element (an opaque handle supplied by the UI).
         /// </summary>
-        public async Task SetControlAsync(Control source, CancellationToken token = default)
+        public async Task SetControlAsync(object source, CancellationToken token = default)
         {
             if (source == null)
                 return;
             string strText = await ToStringAsync(token).ConfigureAwait(false);
-            await source.DoThreadSafeAsync(x => x.Text = strText, token).ConfigureAwait(false);
-            await source.SetToolTipAsync(await GetLanguageBookTooltipAsync(token).ConfigureAwait(false), token).ConfigureAwait(false);
+            await HostServices.TextDisplay.SetTextAndToolTipAsync(source, strText,
+                await GetLanguageBookTooltipAsync(token).ConfigureAwait(false), token).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Set the Text and ToolTips for the selected control.
+        /// Set the Text and ToolTips for the selected UI element (an opaque handle supplied by the UI).
         /// </summary>
-        public async Task SetControlAsync(Control source, Form frmParent, CancellationToken token = default)
+        public async Task SetControlAsync(object source, object frmParent, CancellationToken token = default)
         {
             if (source == null)
                 return;
             string strText = await ToStringAsync(token).ConfigureAwait(false);
-            await source.DoThreadSafeAsync(x => x.Text = strText, token).ConfigureAwait(false);
-            string strToolTip = await GetLanguageBookTooltipAsync(token).ConfigureAwait(false);
-            if (source is IControlWithToolTip objSourceWithToolTip)
-                await objSourceWithToolTip.SetToolTipTextAsync(strToolTip, token).ConfigureAwait(false);
-            else
-                await source.SetToolTipAsync(frmParent, strToolTip, token).ConfigureAwait(false);
+            await HostServices.TextDisplay.SetTextAndToolTipAsync(source, strText,
+                await GetLanguageBookTooltipAsync(token).ConfigureAwait(false), frmParent, token).ConfigureAwait(false);
         }
 
         public bool Equals(SourceString other)

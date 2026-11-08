@@ -27,8 +27,8 @@ namespace Chummer
     {
         SourceString SourceDetail { get; }
 
-        void SetSourceDetail(Control sourceControl);
+        void SetSourceDetail(object sourceControl);
 
-        Task SetSourceDetailAsync(Control sourceControl, CancellationToken token = default);
+        Task SetSourceDetailAsync(object sourceControl, CancellationToken token = default);
     }
 }

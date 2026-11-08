@@ -398,7 +398,7 @@ namespace Chummer
             }
         }
 
-        private static readonly Lazy<Version> s_ObjCurrentChummerVersion = new Lazy<Version>(() => typeof(Program).Assembly.GetName().Version);
+        private static readonly Lazy<Version> s_ObjCurrentChummerVersion = new Lazy<Version>(() => typeof(Utils).Assembly.GetName().Version);
 
         public static Version CurrentChummerVersion => s_ObjCurrentChummerVersion.Value;
 
@@ -429,6 +429,26 @@ namespace Chummer
         {
             if (string.IsNullOrEmpty(strPath))
                 return false;
+#if !NETFRAMEWORK
+            // Cross-platform: ACLs are Windows-only, so just try to write a probe file next to the target.
+            string strDirectory = Path.GetDirectoryName(strPath);
+            if (string.IsNullOrEmpty(strDirectory) || !Directory.Exists(strDirectory))
+                return false;
+            string strProbe = Path.Combine(strDirectory, ".chummer-write-probe-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                using (new FileStream(strProbe, FileMode.CreateNew, FileAccess.Write, FileShare.None, 1, FileOptions.DeleteOnClose))
+                    return true;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+#else
             try
             {
                 WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
@@ -455,6 +475,7 @@ namespace Chummer
             {
                 return false;
             }
+#endif
         }
 
         /// <summary>

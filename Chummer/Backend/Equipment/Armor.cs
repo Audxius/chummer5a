@@ -3830,14 +3830,14 @@ namespace Chummer.Backend.Equipment
         /// Alias map for SourceDetail control text and tooltip assignation.
         /// </summary>
         /// <param name="sourceControl"></param>
-        public void SetSourceDetail(Control sourceControl)
+        public void SetSourceDetail(object sourceControl)
         {
             if (_objCachedSourceDetail.Language != GlobalSettings.Language)
                 _objCachedSourceDetail = default;
             SourceDetail.SetControl(sourceControl);
         }
 
-        public async Task SetSourceDetailAsync(Control sourceControl, CancellationToken token = default)
+        public async Task SetSourceDetailAsync(object sourceControl, CancellationToken token = default)
         {
             if (_objCachedSourceDetail.Language != GlobalSettings.Language)
                 _objCachedSourceDetail = default;

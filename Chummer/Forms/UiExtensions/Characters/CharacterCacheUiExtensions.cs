@@ -57,5 +57,25 @@ namespace Chummer
                 }
             }
         }
+
+        public static async Task OnDefaultContextMenuDeleteClick(this Chummer.CharacterCache objThis,object sender, EventArgs e, CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            if (sender is TreeNode t)
+            {
+                switch (t.Parent.Tag?.ToString())
+                {
+                    case "Recent":
+                        await GlobalSettings.MostRecentlyUsedCharacters.RemoveAsync(await objThis.GetFilePathAsync(token).ConfigureAwait(false), token)
+                            .ConfigureAwait(false);
+                        break;
+
+                    case "Favorite":
+                        await GlobalSettings.FavoriteCharacters.RemoveAsync(await objThis.GetFilePathAsync(token).ConfigureAwait(false), token)
+                            .ConfigureAwait(false);
+                        break;
+                }
+            }
+        }
     }
 }

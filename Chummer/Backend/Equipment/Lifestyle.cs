@@ -5116,7 +5116,7 @@ namespace Chummer.Backend.Equipment
             return true;
         }
 
-        public void SetSourceDetail(Control sourceControl)
+        public void SetSourceDetail(object sourceControl)
         {
             using (LockObject.EnterReadLock())
             {
@@ -5126,7 +5126,7 @@ namespace Chummer.Backend.Equipment
             }
         }
 
-        public async Task SetSourceDetailAsync(Control sourceControl, CancellationToken token = default)
+        public async Task SetSourceDetailAsync(object sourceControl, CancellationToken token = default)
         {
             IAsyncDisposable objLocker = await LockObject.EnterReadLockAsync(token).ConfigureAwait(false);
             try

@@ -62,10 +62,6 @@ namespace Chummer
         private bool _blnIsCritter;
         private string _strSettingsFile;
         private readonly ConcurrentDictionary<string, object> _dicMyPluginData = new ConcurrentDictionary<string, object>();
-        private SafeAsyncEventHandler _onMyDoubleClick;
-        private SafeAsyncEventHandler _onMyContextMenuDeleteClick;
-        private SafeAsyncEventHandler<TreeViewEventArgs> _onMyAfterSelect;
-        private SafeAsyncEventHandler<ValueTuple<KeyEventArgs, TreeNode>> _onMyKeyDown;
 
         public AsyncFriendlyReaderWriterLock LockObject { get; } = new AsyncFriendlyReaderWriterLock();
 
@@ -546,7 +542,6 @@ namespace Chummer
 
         public CharacterCache()
         {
-            SetDefaultEventHandlers();
         }
 
         /// <summary>
@@ -668,64 +663,6 @@ namespace Chummer
             }
         }
 
-        private void SetDefaultEventHandlers()
-        {
-            using (LockObject.EnterWriteLock())
-            {
-                _onMyDoubleClick += OnDefaultDoubleClick;
-                _onMyKeyDown += this.OnDefaultKeyDown;
-                _onMyContextMenuDeleteClick += OnDefaultContextMenuDeleteClick;
-            }
-        }
-
-        [JsonIgnore]
-        [XmlIgnore]
-        [IgnoreDataMember]
-        public SafeAsyncEventHandler OnMyDoubleClick
-        {
-            get
-            {
-                using (LockObject.EnterReadLock())
-                    return _onMyDoubleClick;
-            }
-        }
-
-        [JsonIgnore]
-        [XmlIgnore]
-        [IgnoreDataMember]
-        public SafeAsyncEventHandler OnMyContextMenuDeleteClick
-        {
-            get
-            {
-                using (LockObject.EnterReadLock())
-                    return _onMyContextMenuDeleteClick;
-            }
-        }
-
-        [JsonIgnore]
-        [XmlIgnore]
-        [IgnoreDataMember]
-        public SafeAsyncEventHandler<TreeViewEventArgs> OnMyAfterSelect
-        {
-            get
-            {
-                using (LockObject.EnterReadLock())
-                    return _onMyAfterSelect;
-            }
-        }
-
-        [JsonIgnore]
-        [XmlIgnore]
-        [IgnoreDataMember]
-        public SafeAsyncEventHandler<ValueTuple<KeyEventArgs, TreeNode>> OnMyKeyDown
-        {
-            get
-            {
-                using (LockObject.EnterReadLock())
-                    return _onMyKeyDown;
-            }
-        }
-
         public async Task OnDefaultDoubleClick(object sender, EventArgs e, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
@@ -756,26 +693,6 @@ namespace Chummer
 
             if (!await HostServices.Shell.SwitchToOpenCharacterAsync(objOpenCharacter, token).ConfigureAwait(false))
                 await HostServices.Shell.OpenCharacterAsync(objOpenCharacter, token).ConfigureAwait(false);
-        }
-
-        public async Task OnDefaultContextMenuDeleteClick(object sender, EventArgs e, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (sender is TreeNode t)
-            {
-                switch (t.Parent.Tag?.ToString())
-                {
-                    case "Recent":
-                        await GlobalSettings.MostRecentlyUsedCharacters.RemoveAsync(await GetFilePathAsync(token).ConfigureAwait(false), token)
-                            .ConfigureAwait(false);
-                        break;
-
-                    case "Favorite":
-                        await GlobalSettings.FavoriteCharacters.RemoveAsync(await GetFilePathAsync(token).ConfigureAwait(false), token)
-                            .ConfigureAwait(false);
-                        break;
-                }
-            }
         }
 
         public bool LoadFromFile(string strFile, CancellationToken token = default)
