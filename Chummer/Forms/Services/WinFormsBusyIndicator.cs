@@ -31,7 +31,7 @@ namespace Chummer
     {
         private static Control ResolveOwner(object owner)
         {
-            return ReferenceEquals(owner, UiServices.MainWindow) ? Program.MainForm : owner as Control;
+            return ReferenceEquals(owner, HostServices.MainWindow) ? Program.MainForm : owner as Control;
         }
 
         public IDisposable Begin(object owner = null)

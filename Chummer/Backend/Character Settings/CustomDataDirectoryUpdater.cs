@@ -31,7 +31,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.XPath;
-using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using NLog;
 
@@ -199,9 +198,9 @@ namespace Chummer
             s_dicInstalledReleaseVersions[objInfo.InternalId] = objVersion;
             try
             {
-                RegistryKey objKey = Registry.CurrentUser.CreateSubKey(
-                    "Software\\Chummer5\\" + StrInstalledReleaseVersionsSubKey, true);
-                objKey?.SetValue(objInfo.InternalId, objVersion.ToString(), RegistryValueKind.String);
+                using (ISettingsKey objRoot = HostServices.Settings.CreateRoot())
+                using (ISettingsKey objKey = objRoot?.CreateSubKey(StrInstalledReleaseVersionsSubKey))
+                    objKey?.SetValue(objInfo.InternalId, objVersion.ToString());
             }
             catch (Exception ex) when (!(ex is OperationCanceledException))
             {
@@ -587,14 +586,16 @@ namespace Chummer
             s_blnInstalledReleaseVersionsLoaded = true;
             try
             {
-                RegistryKey objKey = Registry.CurrentUser.OpenSubKey(
-                    "Software\\Chummer5\\" + StrInstalledReleaseVersionsSubKey);
-                if (objKey == null)
-                    return;
-                foreach (string strGuid in objKey.GetValueNames())
+                using (ISettingsKey objRoot = HostServices.Settings.OpenRoot())
+                using (ISettingsKey objKey = objRoot?.OpenSubKey(StrInstalledReleaseVersionsSubKey))
                 {
-                    if (ValueVersion.TryParse(objKey.GetValue(strGuid)?.ToString(), out ValueVersion objVersion))
-                        s_dicInstalledReleaseVersions[strGuid] = objVersion;
+                    if (objKey == null)
+                        return;
+                    foreach (string strGuid in objKey.GetValueNames())
+                    {
+                        if (ValueVersion.TryParse(objKey.GetValue(strGuid)?.ToString(), out ValueVersion objVersion))
+                            s_dicInstalledReleaseVersions[strGuid] = objVersion;
+                    }
                 }
             }
             catch (Exception ex) when (!(ex is OperationCanceledException))

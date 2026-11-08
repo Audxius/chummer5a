@@ -22,11 +22,12 @@ using System;
 namespace Chummer
 {
     /// <summary>
-    /// Registry of the UI services the engine (Backend) calls into. The engine never references a UI toolkit
-    /// directly; the host application (WinForms today, Avalonia in the native port) registers implementations
-    /// at startup. Headless defaults are used until then, which is what unit tests run against.
+    /// Registry of the host services the engine (Backend) calls into: UI (message boxes, busy indicators...) and
+    /// platform (settings storage...). The engine never references a UI toolkit or OS API directly; the host
+    /// application (WinForms today, Avalonia in the native port) registers implementations at startup.
+    /// Headless defaults are used until then, which is what unit tests run against.
     /// </summary>
-    public static class UiServices
+    public static class HostServices
     {
         /// <summary>
         /// Placeholder owner meaning "the application's main window", for engine code that has no UI element of its own.
@@ -36,6 +37,8 @@ namespace Chummer
         private static IMessageService s_objMessages = new HeadlessMessageService();
 
         private static IBusyIndicator s_objBusy = new HeadlessBusyIndicator();
+
+        private static ISettingsStore s_objSettings = new MemorySettingsStore();
 
         public static IMessageService Messages
         {
@@ -47,6 +50,16 @@ namespace Chummer
         {
             get => s_objBusy;
             set => s_objBusy = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Global settings storage. Must be registered before GlobalSettings is first touched, as its static
+        /// constructor loads from here.
+        /// </summary>
+        public static ISettingsStore Settings
+        {
+            get => s_objSettings;
+            set => s_objSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }

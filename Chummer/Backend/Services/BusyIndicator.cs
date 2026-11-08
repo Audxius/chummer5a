@@ -28,10 +28,10 @@ namespace Chummer
     /// </summary>
     public interface IBusyIndicator
     {
-        /// <param name="owner">Opaque UI element to show the indicator on, <see cref="UiServices.MainWindow"/>, or null for application-wide.</param>
+        /// <param name="owner">Opaque UI element to show the indicator on, <see cref="HostServices.MainWindow"/>, or null for application-wide.</param>
         IDisposable Begin(object owner = null);
 
-        /// <param name="owner">Opaque UI element to show the indicator on, <see cref="UiServices.MainWindow"/>, or null for application-wide.</param>
+        /// <param name="owner">Opaque UI element to show the indicator on, <see cref="HostServices.MainWindow"/>, or null for application-wide.</param>
         Task<IAsyncDisposable> BeginAsync(object owner = null, CancellationToken token = default);
     }
 

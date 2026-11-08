@@ -128,14 +128,14 @@ namespace Chummer
         public static MessageResult Show(string message, string caption = null, MessageButtons buttons = MessageButtons.OK,
             MessageIcon icon = MessageIcon.None, MessageDefaultButton defaultButton = MessageDefaultButton.Button1)
         {
-            return UiServices.Messages.Show(null, message, caption, buttons, icon, defaultButton);
+            return HostServices.Messages.Show(null, message, caption, buttons, icon, defaultButton);
         }
 
         public static Task<MessageResult> ShowAsync(string message, string caption = null, MessageButtons buttons = MessageButtons.OK,
             MessageIcon icon = MessageIcon.None, MessageDefaultButton defaultButton = MessageDefaultButton.Button1,
             CancellationToken token = default)
         {
-            return UiServices.Messages.ShowAsync(null, message, caption, buttons, icon, defaultButton, token);
+            return HostServices.Messages.ShowAsync(null, message, caption, buttons, icon, defaultButton, token);
         }
     }
 }

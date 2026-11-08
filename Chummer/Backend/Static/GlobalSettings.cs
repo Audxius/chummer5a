@@ -35,7 +35,6 @@ using System.Xml;
 using System.Xml.XPath;
 using iText.Kernel.Pdf;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Win32;
 using NLog;
 
 namespace Chummer
@@ -233,7 +232,7 @@ namespace Chummer
         private static readonly MostRecentlyUsedCollection<string> s_LstMostRecentlyUsedCharacters = new MostRecentlyUsedCollection<string>(MaxMruSize);
         private static readonly MostRecentlyUsedCollection<string> s_LstFavoriteCharacters = new MostRecentlyUsedCollection<string>(MaxMruSize);
 
-        private static readonly RegistryKey s_ObjBaseChummerKey;
+        private static readonly ISettingsKey s_ObjBaseChummerKey;
         public const string DefaultLanguage = "en-us";
         public const string DefaultCharacterSheetDefaultValue = "Shadowrun 5 (Skills grouped by Rating greater 0)";
         public const string DefaultCharacterSettingDefaultValue = "223a11ff-80e0-428b-89a9-6ef1c243b8b6"; // GUID for built-in Standard option
@@ -317,7 +316,7 @@ namespace Chummer
         /// </summary>
         public static bool LoadBoolFromRegistry(ref bool blnStorage, string strBoolName, string strSubKey = "", bool blnDeleteAfterFetch = false)
         {
-            RegistryKey objKey = string.IsNullOrWhiteSpace(strSubKey)
+            ISettingsKey objKey = string.IsNullOrWhiteSpace(strSubKey)
                 ? s_ObjBaseChummerKey
                 : s_ObjBaseChummerKey.OpenSubKey(strSubKey);
             if (objKey == null)
@@ -330,14 +329,14 @@ namespace Chummer
                     if (bool.TryParse(objRegistryResult.ToString(), out bool blnTemp))
                         blnStorage = blnTemp;
                     if (blnDeleteAfterFetch)
-                        objKey.DeleteValue(strBoolName, false);
+                        objKey.DeleteValue(strBoolName);
                     return true;
                 }
             }
             finally
             {
                 if (objKey != s_ObjBaseChummerKey)
-                    objKey.Close();
+                    objKey.Dispose();
             }
 
             return false;
@@ -349,7 +348,7 @@ namespace Chummer
         public static bool LoadInt32FromRegistry(ref int intStorage, string strIntName, string strSubKey = "",
                                                  bool blnDeleteAfterFetch = false)
         {
-            RegistryKey objKey = string.IsNullOrWhiteSpace(strSubKey)
+            ISettingsKey objKey = string.IsNullOrWhiteSpace(strSubKey)
                 ? s_ObjBaseChummerKey
                 : s_ObjBaseChummerKey.OpenSubKey(strSubKey);
             if (objKey == null)
@@ -362,14 +361,14 @@ namespace Chummer
                     if (int.TryParse(objRegistryResult.ToString(), out int intTemp))
                         intStorage = intTemp;
                     if (blnDeleteAfterFetch)
-                        objKey.DeleteValue(strIntName, false);
+                        objKey.DeleteValue(strIntName);
                     return true;
                 }
             }
             finally
             {
                 if (objKey != s_ObjBaseChummerKey)
-                    objKey.Close();
+                    objKey.Dispose();
             }
 
             return false;
@@ -380,7 +379,7 @@ namespace Chummer
         /// </summary>
         public static bool LoadDecFromRegistry(ref decimal decStorage, string strDecName, string strSubKey = "", bool blnDeleteAfterFetch = false)
         {
-            RegistryKey objKey = string.IsNullOrWhiteSpace(strSubKey)
+            ISettingsKey objKey = string.IsNullOrWhiteSpace(strSubKey)
                 ? s_ObjBaseChummerKey
                 : s_ObjBaseChummerKey.OpenSubKey(strSubKey);
             if (objKey == null)
@@ -393,14 +392,14 @@ namespace Chummer
                     if (decimal.TryParse(objRegistryResult.ToString(), NumberStyles.Any, InvariantCultureInfo, out decimal decTemp))
                         decStorage = decTemp;
                     if (blnDeleteAfterFetch)
-                        objKey.DeleteValue(strDecName, false);
+                        objKey.DeleteValue(strDecName);
                     return true;
                 }
             }
             finally
             {
                 if (objKey != s_ObjBaseChummerKey)
-                    objKey.Close();
+                    objKey.Dispose();
             }
 
             return false;
@@ -411,7 +410,7 @@ namespace Chummer
         /// </summary>
         public static bool LoadStringFromRegistry(ref string strStorage, string strStringName, string strSubKey = "", bool blnDeleteAfterFetch = false)
         {
-            RegistryKey objKey = string.IsNullOrWhiteSpace(strSubKey)
+            ISettingsKey objKey = string.IsNullOrWhiteSpace(strSubKey)
                 ? s_ObjBaseChummerKey
                 : s_ObjBaseChummerKey.OpenSubKey(strSubKey);
             if (objKey == null)
@@ -423,14 +422,14 @@ namespace Chummer
                 {
                     strStorage = objRegistryResult.ToString();
                     if (blnDeleteAfterFetch)
-                        objKey.DeleteValue(strStringName, false);
+                        objKey.DeleteValue(strStringName);
                     return true;
                 }
             }
             finally
             {
                 if (objKey != s_ObjBaseChummerKey)
-                    objKey.Close();
+                    objKey.Dispose();
             }
 
             return false;
@@ -444,9 +443,9 @@ namespace Chummer
             bool blnFirstEverLaunch = false;
             try
             {
-                using (RegistryKey objKey = Registry.CurrentUser.OpenSubKey("Software\\Chummer5"))
+                using (ISettingsKey objKey = HostServices.Settings.OpenRoot())
                     blnFirstEverLaunch = objKey == null;
-                s_ObjBaseChummerKey = Registry.CurrentUser.CreateSubKey("Software\\Chummer5", true);
+                s_ObjBaseChummerKey = HostServices.Settings.CreateRoot();
             }
             catch (Exception ex)
             {
@@ -508,7 +507,7 @@ namespace Chummer
                 _intResetLogging--;
                 try
                 {
-                    using (RegistryKey objRegistry = Registry.CurrentUser.CreateSubKey("Software\\Chummer5"))
+                    using (ISettingsKey objRegistry = HostServices.Settings.CreateRoot())
                     {
                         if (objRegistry == null)
                             return;
@@ -707,13 +706,13 @@ namespace Chummer
                 _intSavedImageQuality = int.MaxValue;
 
             // Retrieve CustomDataDirectoryInfo objects from registry
-            using (RegistryKey objCustomDataDirectoryKey = s_ObjBaseChummerKey.OpenSubKey("CustomDataDirectory"))
+            using (ISettingsKey objCustomDataDirectoryKey = s_ObjBaseChummerKey.OpenSubKey("CustomDataDirectory"))
             {
                 if (objCustomDataDirectoryKey != null)
                 {
                     foreach (string strDirectoryName in objCustomDataDirectoryKey.GetSubKeyNames())
                     {
-                        using (RegistryKey objLoopKey = objCustomDataDirectoryKey.OpenSubKey(strDirectoryName))
+                        using (ISettingsKey objLoopKey = objCustomDataDirectoryKey.OpenSubKey(strDirectoryName))
                         {
                             if (objLoopKey == null)
                                 continue;
@@ -866,7 +865,7 @@ namespace Chummer
                     if (i <= intNumFavorites)
                         s_ObjBaseChummerKey.SetValue("stickymru" + i.ToString(InvariantCultureInfo), s_LstFavoriteCharacters[i - 1]);
                     else
-                        s_ObjBaseChummerKey.DeleteValue("stickymru" + i.ToString(InvariantCultureInfo), false);
+                        s_ObjBaseChummerKey.DeleteValue("stickymru" + i.ToString(InvariantCultureInfo));
                 }
                 s_LstFavoriteCharacters.CollectionChangedAsync += LstFavoritedCharactersOnCollectionChanged;
             }
@@ -906,7 +905,7 @@ namespace Chummer
             token.ThrowIfCancellationRequested();
             try
             {
-                RegistryKey objRegistry = s_ObjBaseChummerKey ?? throw new InvalidOperationException(nameof(Registry));
+                ISettingsKey objRegistry = s_ObjBaseChummerKey ?? throw new InvalidOperationException("Registry");
                 objRegistry.SetValue("autoupdate", AutomaticUpdate.ToString(InvariantCultureInfo));
                 objRegistry.SetValue("livecustomdata", LiveCustomData.ToString(InvariantCultureInfo));
                 objRegistry.SetValue("liveupdatecleancharacterfiles",
@@ -952,7 +951,7 @@ namespace Chummer
                 objRegistry.SetValue("allowskilldicerolling", AllowSkillDiceRolling.ToString(InvariantCultureInfo));
                 objRegistry.SetValue("pluginsenabled", PluginsEnabled.ToString(InvariantCultureInfo));
                 objRegistry.SetValue("alloweastereggs", AllowEasterEggs.ToString(InvariantCultureInfo));
-                objRegistry.DeleteValue("defaultcharacteroption", false); // For 5.214.x Nightly users
+                objRegistry.DeleteValue("defaultcharacteroption"); // For 5.214.x Nightly users
                 objRegistry.SetValue("defaultcharactersetting", DefaultCharacterSetting);
                 objRegistry.SetValue("defaultmasterindexsetting", DefaultMasterIndexSetting);
                 objRegistry.SetValue("usecustomdatetime", CustomDateTimeFormats.ToString(InvariantCultureInfo));
@@ -973,12 +972,12 @@ namespace Chummer
 
                 token.ThrowIfCancellationRequested();
                 // Save the SourcebookInfo.
-                using (RegistryKey objSourceRegistry = objRegistry.CreateSubKey("Sourcebook", true))
+                using (ISettingsKey objSourceRegistry = objRegistry.CreateSubKey("Sourcebook"))
                 {
                     if (objSourceRegistry != null)
                     {
                         foreach (string strCustomSourcebookKey in s_DicCustomSourcebookCodes)
-                            objSourceRegistry.DeleteValue(strCustomSourcebookKey, false);
+                            objSourceRegistry.DeleteValue(strCustomSourcebookKey);
 
                         IReadOnlyDictionary<string, SourcebookInfo> dicSourcebookInfos = await GetSourcebookInfosAsync(token).ConfigureAwait(false);
                         foreach (KeyValuePair<string, SourcebookInfo> kvpSourcebookInfo in dicSourcebookInfos)
@@ -993,16 +992,16 @@ namespace Chummer
                 }
 
                 // Save the Custom Data Directory Info.
-                objRegistry.DeleteSubKeyTree("CustomDataDirectory", false);
-                using (RegistryKey objCustomDataDirectoryRegistry = objRegistry.CreateSubKey("CustomDataDirectory", true))
+                objRegistry.DeleteSubKeyTree("CustomDataDirectory");
+                using (ISettingsKey objCustomDataDirectoryRegistry = objRegistry.CreateSubKey("CustomDataDirectory"))
                 {
                     if (objCustomDataDirectoryRegistry != null)
                     {
                         foreach (CustomDataDirectoryInfo objCustomDataDirectory in CustomDataDirectoryInfos)
                         {
                             token.ThrowIfCancellationRequested();
-                            using (RegistryKey objLoopKey =
-                                   objCustomDataDirectoryRegistry.CreateSubKey(objCustomDataDirectory.Name, true))
+                            using (ISettingsKey objLoopKey =
+                                   objCustomDataDirectoryRegistry.CreateSubKey(objCustomDataDirectory.Name))
                             {
                                 objLoopKey?.SetValue("Path",
                                                      objCustomDataDirectory.DirectoryPath.Replace(
@@ -1022,7 +1021,7 @@ namespace Chummer
                 await MessageBoxes.ShowAsync(
                     await LanguageManager.GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token).ConfigureAwait(false), token: token).ConfigureAwait(false);
             }
-            catch (ArgumentNullException e) when (e.ParamName == nameof(Registry))
+            catch (ArgumentNullException e) when (e.ParamName == "Registry")
             {
                 await MessageBoxes.ShowAsync(
                     await LanguageManager.GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token).ConfigureAwait(false), token: token).ConfigureAwait(false);
@@ -2388,13 +2387,13 @@ namespace Chummer
                 if (_blnShowCharacterCustomDataWarning == value)
                     return;
                 _blnShowCharacterCustomDataWarning = value;
-                using (RegistryKey objRegistry = Registry.CurrentUser.CreateSubKey("Software\\Chummer5"))
+                using (ISettingsKey objRegistry = HostServices.Settings.CreateRoot())
                 {
                     if (objRegistry == null)
                         return;
                     if (value)
                     {
-                        objRegistry.DeleteValue("charactercustomdatawarningshown", false);
+                        objRegistry.DeleteValue("charactercustomdatawarningshown");
                     }
                     else
                     {
@@ -2462,7 +2461,7 @@ namespace Chummer
             {
                 if (Interlocked.Exchange(ref _strImageFolder, value) != value)
                 {
-                    using (RegistryKey objRegistry = Registry.CurrentUser.CreateSubKey("Software\\Chummer5"))
+                    using (ISettingsKey objRegistry = HostServices.Settings.CreateRoot())
                         objRegistry?.SetValue("recentimagefolder", value);
                 }
             }
@@ -2489,8 +2488,7 @@ namespace Chummer
                                 s_ObjBaseChummerKey.SetValue("stickymru" + i.ToString(InvariantCultureInfo),
                                     await s_LstFavoriteCharacters.GetValueAtAsync(i - 1, token).ConfigureAwait(false));
                             else
-                                s_ObjBaseChummerKey.DeleteValue("stickymru" + i.ToString(InvariantCultureInfo),
-                                    false);
+                                s_ObjBaseChummerKey.DeleteValue("stickymru" + i.ToString(InvariantCultureInfo));
                         }
 
                         break;
@@ -2504,7 +2502,7 @@ namespace Chummer
                                 s_ObjBaseChummerKey.SetValue("stickymru" + i.ToString(InvariantCultureInfo),
                                     await s_LstFavoriteCharacters.GetValueAtAsync(i - 1, token).ConfigureAwait(false));
                             else
-                                s_ObjBaseChummerKey.DeleteValue("stickymru" + i.ToString(InvariantCultureInfo), false);
+                                s_ObjBaseChummerKey.DeleteValue("stickymru" + i.ToString(InvariantCultureInfo));
                         }
 
                         break;
@@ -2525,8 +2523,7 @@ namespace Chummer
                                         await s_LstFavoriteCharacters.GetValueAtAsync(i - 1, token)
                                             .ConfigureAwait(false));
                                 else
-                                    s_ObjBaseChummerKey.DeleteValue("stickymru" + i.ToString(InvariantCultureInfo),
-                                        false);
+                                    s_ObjBaseChummerKey.DeleteValue("stickymru" + i.ToString(InvariantCultureInfo));
                             }
                         }
 
@@ -2568,7 +2565,7 @@ namespace Chummer
                                 s_ObjBaseChummerKey.SetValue("stickymru" + i.ToString(InvariantCultureInfo),
                                     await s_LstFavoriteCharacters.GetValueAtAsync(i - 1, token).ConfigureAwait(false));
                             else
-                                s_ObjBaseChummerKey.DeleteValue("stickymru" + i.ToString(InvariantCultureInfo), false);
+                                s_ObjBaseChummerKey.DeleteValue("stickymru" + i.ToString(InvariantCultureInfo));
                         }
 
                         break;
@@ -2591,7 +2588,7 @@ namespace Chummer
                         .GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token)
                         .ConfigureAwait(false), token: token).ConfigureAwait(false);
             }
-            catch (ArgumentNullException ex) when (ex.ParamName == nameof(Registry))
+            catch (ArgumentNullException ex) when (ex.ParamName == "Registry")
             {
                 await MessageBoxes.ShowAsync(
                     await LanguageManager
@@ -2618,7 +2615,7 @@ namespace Chummer
                                     await s_LstMostRecentlyUsedCharacters.GetValueAtAsync(i - 1, token)
                                         .ConfigureAwait(false));
                             else
-                                s_ObjBaseChummerKey.DeleteValue("mru" + i.ToString(InvariantCultureInfo), false);
+                                s_ObjBaseChummerKey.DeleteValue("mru" + i.ToString(InvariantCultureInfo));
                         }
 
                         break;
@@ -2633,7 +2630,7 @@ namespace Chummer
                                     await s_LstMostRecentlyUsedCharacters.GetValueAtAsync(i - 1, token)
                                         .ConfigureAwait(false));
                             else
-                                s_ObjBaseChummerKey.DeleteValue("mru" + i.ToString(InvariantCultureInfo), false);
+                                s_ObjBaseChummerKey.DeleteValue("mru" + i.ToString(InvariantCultureInfo));
                         }
 
                         break;
@@ -2656,7 +2653,7 @@ namespace Chummer
                                         await s_LstMostRecentlyUsedCharacters.GetValueAtAsync(i - 1, token)
                                             .ConfigureAwait(false));
                                 else
-                                    s_ObjBaseChummerKey.DeleteValue("mru" + i.ToString(InvariantCultureInfo), false);
+                                    s_ObjBaseChummerKey.DeleteValue("mru" + i.ToString(InvariantCultureInfo));
                             }
                         }
 
@@ -2699,7 +2696,7 @@ namespace Chummer
                                     await s_LstMostRecentlyUsedCharacters.GetValueAtAsync(i - 1, token)
                                         .ConfigureAwait(false));
                             else
-                                s_ObjBaseChummerKey.DeleteValue("mru" + i.ToString(InvariantCultureInfo), false);
+                                s_ObjBaseChummerKey.DeleteValue("mru" + i.ToString(InvariantCultureInfo));
                         }
 
                         break;
@@ -2722,7 +2719,7 @@ namespace Chummer
                         .GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token)
                         .ConfigureAwait(false), token: token).ConfigureAwait(false);
             }
-            catch (ArgumentNullException ex) when (ex.ParamName == nameof(Registry))
+            catch (ArgumentNullException ex) when (ex.ParamName == "Registry")
             {
                 await MessageBoxes.ShowAsync(
                     await LanguageManager

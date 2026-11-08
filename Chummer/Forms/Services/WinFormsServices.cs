@@ -26,8 +26,9 @@ namespace Chummer
     {
         public static void Register()
         {
-            UiServices.Messages = new WinFormsMessageService();
-            UiServices.Busy = new WinFormsBusyIndicator();
+            HostServices.Messages = new WinFormsMessageService();
+            HostServices.Busy = new WinFormsBusyIndicator();
+            HostServices.Settings = new RegistrySettingsStore();
         }
     }
 }
