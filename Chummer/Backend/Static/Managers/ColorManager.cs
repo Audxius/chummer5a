@@ -23,31 +23,14 @@ using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Chummer.UI.Skills;
-using Chummer.UI.Table;
-using Microsoft.Win32;
-using BorderStyle = System.Windows.Forms.BorderStyle;
-using Button = System.Windows.Forms.Button;
-using CheckBox = System.Windows.Forms.CheckBox;
-using ListBox = System.Windows.Forms.ListBox;
-using ListView = System.Windows.Forms.ListView;
 using SystemColors = System.Drawing.SystemColors;
-using TableCell = Chummer.UI.Table.TableCell;
-using TextBox = System.Windows.Forms.TextBox;
 using Timer = System.Timers.Timer;
-using TreeNode = System.Windows.Forms.TreeNode;
-using TreeView = System.Windows.Forms.TreeView;
 
 namespace Chummer
 {
     public static class ColorManager
     {
-        // The setting for whether stuff uses dark mode or light mode is accessible purely through a specific registry key
-        // So we save that key for accessing both at startup and should the setting be changed while Chummer is running
-        private static readonly RegistryKey s_ObjPersonalizeKey;
-
-        // While events that trigger on changes to a registry value are possible, they're a PITA in C#.
-        // Checking for dark mode on a timer interval is less elegant, but also easier to set up, track, and debug.
+        // The host (HostServices.Theme) reports the OS light/dark preference; it is polled on a timer while in Automatic mode.
         private static readonly Timer s_TmrDarkModeCheckerTimer;
 
         static ColorManager()
@@ -55,20 +38,7 @@ namespace Chummer
             if (Utils.IsDesignerMode || Utils.IsRunningInVisualStudio)
                 return;
 
-            try
-            {
-                s_ObjPersonalizeKey = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize");
-            }
-            catch (ObjectDisposedException)
-            {
-                //swallow this
-            }
-            catch (System.Security.SecurityException)
-            {
-                //swallow this
-            }
-
-            s_TmrDarkModeCheckerTimer = new Timer { Interval = 5000 }; // Poll registry every 5 seconds
+            s_TmrDarkModeCheckerTimer = new Timer { Interval = 5000 }; // Poll the OS preference every 5 seconds
             s_TmrDarkModeCheckerTimer.Elapsed += TmrDarkModeCheckerTimerOnTick;
             switch (GlobalSettings.ColorModeSetting)
             {
@@ -111,13 +81,7 @@ namespace Chummer
             }
         }
 
-        public static bool DoesRegistrySayDarkMode()
-        {
-            object objLightModeResult = s_ObjPersonalizeKey?.GetValue("AppsUseLightTheme");
-            if (objLightModeResult != null && int.TryParse(objLightModeResult.ToString(), out int intTemp))
-                return intTemp == 0;
-            return false;
-        }
+        public static bool DoesRegistrySayDarkMode() => HostServices.Theme.SystemPrefersDarkMode;
 
         public static void DisableAutoTimer()
         {
@@ -135,11 +99,7 @@ namespace Chummer
                 if (_blnIsLightMode == value)
                     return;
                 _blnIsLightMode = value;
-                ChummerMainForm frmMain = Program.MainForm;
-                if (frmMain == null)
-                    return;
-                using (CursorWait.New(frmMain))
-                    frmMain.UpdateLightDarkMode(CancellationToken.None);
+                HostServices.Theme.OnLightDarkModeChanged(value);
             }
         }
 
@@ -148,20 +108,7 @@ namespace Chummer
             if (_blnIsLightMode == blnNewValue)
                 return Task.CompletedTask;
             _blnIsLightMode = blnNewValue;
-            ChummerMainForm frmMain = Program.MainForm;
-            return frmMain == null ? Task.CompletedTask : Inner();
-            async Task Inner()
-            {
-                CursorWait objCursorWait = await CursorWait.NewAsync(frmMain, token: token).ConfigureAwait(false);
-                try
-                {
-                    await frmMain.UpdateLightDarkModeAsync(token).ConfigureAwait(false);
-                }
-                finally
-                {
-                    await objCursorWait.DisposeAsync().ConfigureAwait(false);
-                }
-            }
+            return HostServices.Theme.OnLightDarkModeChangedAsync(blnNewValue, token);
         }
 
         private static readonly ConcurrentDictionary<Color, Color> s_DicDarkModeColors = new ConcurrentDictionary<Color, Color>();

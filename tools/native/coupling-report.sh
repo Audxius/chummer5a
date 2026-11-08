@@ -25,6 +25,5 @@ count 'Tree/menu building (TreeNode, ContextMenu)'  '\bTreeNode\b|ContextMenuStr
 count 'Cursor (CursorWait / UseWaitCursor)'         'CursorWait|UseWaitCursor'
 count 'Images (System.Drawing.Image/Bitmap)'        '\bImage\b|\bBitmap\b'
 count 'Registry'                                    '\bRegistry(Key)?\b'
-count 'Colors / ColorManager'                       'ColorManager\.'
 count 'P/Invoke (NativeMethods)'                    'NativeMethods\.|DllImport'
 echo

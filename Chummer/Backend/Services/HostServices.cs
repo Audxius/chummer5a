@@ -40,6 +40,8 @@ namespace Chummer
 
         private static ISettingsStore s_objSettings = new MemorySettingsStore();
 
+        private static IThemeService s_objTheme = new HeadlessThemeService();
+
         public static IMessageService Messages
         {
             get => s_objMessages;
@@ -60,6 +62,15 @@ namespace Chummer
         {
             get => s_objSettings;
             set => s_objSettings = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// OS light/dark preference and UI restyling. Must be registered before ColorManager is first touched.
+        /// </summary>
+        public static IThemeService Theme
+        {
+            get => s_objTheme;
+            set => s_objTheme = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }
