@@ -46,11 +46,14 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
+    - name: Setup MSBuild (full framework, same toolchain as the official AppVeyor builds)
+      uses: microsoft/setup-msbuild@v2
+
     - name: Build tests
       run: |
         # Forward slashes: a trailing backslash before a closing quote would escape the quote on Windows.
         $solutionDir = "$env:GITHUB_WORKSPACE/" -replace '\\', '/'
-        dotnet build Chummer.Tests/Chummer.Tests.csproj --configuration Release "-p:SolutionDir=$solutionDir" 2>&1 | Tee-Object -FilePath build.log
+        msbuild Chummer.Tests/Chummer.Tests.csproj -restore -m -verbosity:minimal -p:Configuration=Release "-p:SolutionDir=$solutionDir" 2>&1 | Tee-Object -FilePath build.log
         $code = $LASTEXITCODE
         # Surface errors as annotations, since job logs need authentication to read.
         Select-String -Path build.log -Pattern ': error |error MSB|error NU|error CS' | Select-Object -First 40 | ForEach-Object { Write-Output "::error::$($_.Line)" }
