@@ -12247,13 +12247,13 @@ namespace Chummer
                         if (bmpMugshot.PixelFormat == PixelFormat.Format32bppPArgb)
                         {
                             await (await CharacterObject.GetMugshotsAsync(GenericToken).ConfigureAwait(false)).AddAsync(
-                                    bmpMugshot.Clone() as Bitmap, token)
+                                    ((Bitmap)bmpMugshot.Clone()).ToMugshot(), token)
                                 .ConfigureAwait(false); // Clone makes sure file handle is closed
                         }
                         else
                         {
                             await (await CharacterObject.GetMugshotsAsync(GenericToken).ConfigureAwait(false)).AddAsync(
-                                    bmpMugshot.ConvertPixelFormat(PixelFormat.Format32bppPArgb), token)
+                                    bmpMugshot.ConvertPixelFormat(PixelFormat.Format32bppPArgb).ToMugshot(), token)
                                 .ConfigureAwait(false);
                         }
                     }
@@ -12296,15 +12296,15 @@ namespace Chummer
                 return;
             }
 
-            ThreadSafeList<Image> lstMugshots = await CharacterObject.GetMugshotsAsync(token).ConfigureAwait(false);
+            ThreadSafeList<MugshotImage> lstMugshots = await CharacterObject.GetMugshotsAsync(token).ConfigureAwait(false);
             if (intCurrentMugshotIndexInList >= await lstMugshots.GetCountAsync(token).ConfigureAwait(false))
             {
                 await picMugshot.DoThreadSafeAsync(x => x.Image = null, token: token).ConfigureAwait(false);
                 return;
             }
 
-            Image imgMugshot = await lstMugshots.GetValueAtAsync(intCurrentMugshotIndexInList, token)
-                .ConfigureAwait(false);
+            Image imgMugshot = (await lstMugshots.GetValueAtAsync(intCurrentMugshotIndexInList, token)
+                .ConfigureAwait(false)).GetImage(token);
             if (imgMugshot == null)
             {
                 await picMugshot.DoThreadSafeAsync(x => x.Image = null, token: token).ConfigureAwait(false);
@@ -12337,7 +12337,7 @@ namespace Chummer
             if (intCurrentMugshotIndexInList < 0)
                 return;
 
-            ThreadSafeList<Image> lstMugshots = await CharacterObject.GetMugshotsAsync(token).ConfigureAwait(false);
+            ThreadSafeList<MugshotImage> lstMugshots = await CharacterObject.GetMugshotsAsync(token).ConfigureAwait(false);
             if (intCurrentMugshotIndexInList >= await lstMugshots.GetCountAsync(token).ConfigureAwait(false))
                 return;
 

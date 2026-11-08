@@ -5321,7 +5321,7 @@ namespace Chummer
                                 await objMerge.SetBurntStreetCredAsync(await objVessel.GetBurntStreetCredAsync(GenericToken).ConfigureAwait(false), GenericToken).ConfigureAwait(false);
                                 await objMerge.SetNotorietyAsync(await objVessel.GetNotorietyAsync(GenericToken).ConfigureAwait(false), GenericToken).ConfigureAwait(false);
                                 await objMerge.SetPublicAwarenessAsync(await objVessel.GetPublicAwarenessAsync(GenericToken).ConfigureAwait(false), GenericToken).ConfigureAwait(false);
-                                ThreadSafeList<Image> lstMergeMugshots = await objMerge.GetMugshotsAsync(GenericToken).ConfigureAwait(false);
+                                ThreadSafeList<MugshotImage> lstMergeMugshots = await objMerge.GetMugshotsAsync(GenericToken).ConfigureAwait(false);
                                 await (await objVessel.GetMugshotsAsync(GenericToken).ConfigureAwait(false)).ForEachWithSideEffectsAsync(objMugshot =>
                                     lstMergeMugshots.AddAsync(objMugshot, GenericToken), GenericToken).ConfigureAwait(false);
                             }
@@ -19550,7 +19550,7 @@ namespace Chummer
                             await cmdContactRemoveLinkedFile.DoThreadSafeAsync(x => x.Enabled = true, token).ConfigureAwait(false);
                         }
 
-                        Image imgMugshot = await objContact.GetMainMugshotAsync(token).ConfigureAwait(false);
+                        Image imgMugshot = (await objContact.GetMainMugshotAsync(token).ConfigureAwait(false)).GetImage(token);
                         if (imgMugshot != null)
                         {
                             await picContactMugshot.DoThreadSafeAsync(x =>

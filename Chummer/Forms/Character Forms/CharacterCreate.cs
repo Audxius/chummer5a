@@ -13792,7 +13792,7 @@ namespace Chummer
                             await cmdContactRemoveLinkedFile.DoThreadSafeAsync(x => x.Enabled = true, token).ConfigureAwait(false);
                         }
 
-                        Image imgMugshot = await objContact.GetMainMugshotAsync(token).ConfigureAwait(false);
+                        Image imgMugshot = (await objContact.GetMainMugshotAsync(token).ConfigureAwait(false)).GetImage(token);
                         if (imgMugshot != null)
                         {
                             await picContactMugshot.DoThreadSafeAsync(x =>

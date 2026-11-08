@@ -28,15 +28,15 @@ namespace Chummer
 {
     public interface IHasMugshots : IDisposable, IAsyncDisposable
     {
-        ThreadSafeList<Image> Mugshots { get; }
-        Image MainMugshot { get; set; }
+        ThreadSafeList<MugshotImage> Mugshots { get; }
+        MugshotImage MainMugshot { get; set; }
         int MainMugshotIndex { get; set; }
 
-        Task<ThreadSafeList<Image>> GetMugshotsAsync(CancellationToken token = default);
+        Task<ThreadSafeList<MugshotImage>> GetMugshotsAsync(CancellationToken token = default);
 
-        Task<Image> GetMainMugshotAsync(CancellationToken token = default);
+        Task<MugshotImage> GetMainMugshotAsync(CancellationToken token = default);
 
-        Task SetMainMugshotAsync(Image value, CancellationToken token = default);
+        Task SetMainMugshotAsync(MugshotImage value, CancellationToken token = default);
 
         Task<int> GetMainMugshotIndexAsync(CancellationToken token = default);
 

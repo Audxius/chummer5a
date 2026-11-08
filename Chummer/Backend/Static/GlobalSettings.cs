@@ -30,7 +30,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Xml;
 using System.Xml.XPath;
 using iText.Kernel.Pdf;
@@ -2379,12 +2378,10 @@ namespace Chummer
         /// </summary>
         /// <param name="objImageToSave">Image whose Base64 string should be created.</param>
         /// <param name="token">Cancellation token to listen to.</param>
-        public static string ImageToBase64StringForStorage(Image objImageToSave, CancellationToken token = default)
+        public static string ImageToBase64StringForStorage(MugshotImage objImageToSave, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            return SavedImageQuality == int.MaxValue
-                ? objImageToSave.ToBase64String(token: token)
-                : objImageToSave.ToBase64StringAsJpeg(SavedImageQuality, token);
+            return HostServices.ImageCodec.ToStorageBase64(objImageToSave, SavedImageQuality, token);
         }
 
         /// <summary>
@@ -2392,13 +2389,11 @@ namespace Chummer
         /// </summary>
         /// <param name="objImageToSave">Image whose Base64 string should be created.</param>
         /// <param name="token">Cancellation token to listen to.</param>
-        public static Task<string> ImageToBase64StringForStorageAsync(Image objImageToSave, CancellationToken token = default)
+        public static Task<string> ImageToBase64StringForStorageAsync(MugshotImage objImageToSave, CancellationToken token = default)
         {
             if (token.IsCancellationRequested)
                 return Task.FromCanceled<string>(token);
-            return SavedImageQuality == int.MaxValue
-                ? objImageToSave.ToBase64StringAsync(token: token)
-                : objImageToSave.ToBase64StringAsJpegAsync(SavedImageQuality, token: token);
+            return HostServices.ImageCodec.ToStorageBase64Async(objImageToSave, SavedImageQuality, token);
         }
 
         /// <summary>

@@ -23,7 +23,6 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Microsoft.VisualStudio.Threading;
 
 namespace Chummer

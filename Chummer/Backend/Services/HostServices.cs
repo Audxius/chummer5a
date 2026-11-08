@@ -54,6 +54,8 @@ namespace Chummer
 
         private static ITextDisplayService s_objTextDisplay = new HeadlessTextDisplayService();
 
+        private static IImageCodec s_objImageCodec = new PassThroughImageCodec();
+
         public static IMessageService Messages
         {
             get => s_objMessages;
@@ -137,6 +139,15 @@ namespace Chummer
         {
             get => s_objTextDisplay;
             set => s_objTextDisplay = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Image re-encoding for character files and printed sheets.
+        /// </summary>
+        public static IImageCodec ImageCodec
+        {
+            get => s_objImageCodec;
+            set => s_objImageCodec = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }

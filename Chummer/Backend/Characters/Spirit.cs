@@ -32,7 +32,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Xml;
 using System.Xml.XPath;
 using Chummer.Annotations;
@@ -60,7 +59,7 @@ namespace Chummer
         private Color _colNotes = ColorManager.HasNotesColor;
         private Character _objLinkedCharacter;
 
-        private readonly ThreadSafeList<Image> _lstMugshots;
+        private readonly ThreadSafeList<MugshotImage> _lstMugshots;
         private int _intMainMugshotIndex = -1;
 
         private string _strSource;
@@ -97,7 +96,7 @@ namespace Chummer
             CharacterObject = objCharacter ?? throw new ArgumentNullException(nameof(objCharacter));
             LockObject = objCharacter.LockObject;
             _objCachedSourceDetailLock = new AsyncFriendlyReaderWriterLock(LockObject, true);
-            _lstMugshots = new ThreadSafeList<Image>(3, LockObject);
+            _lstMugshots = new ThreadSafeList<MugshotImage>(3, LockObject);
         }
 
         /// <summary>
@@ -3163,7 +3162,7 @@ namespace Chummer
         /// <summary>
         /// Character's portraits encoded using Base64.
         /// </summary>
-        public ThreadSafeList<Image> Mugshots
+        public ThreadSafeList<MugshotImage> Mugshots
         {
             get
             {
@@ -3175,7 +3174,7 @@ namespace Chummer
         /// <summary>
         /// Character's portraits encoded using Base64.
         /// </summary>
-        public async Task<ThreadSafeList<Image>> GetMugshotsAsync(CancellationToken token = default)
+        public async Task<ThreadSafeList<MugshotImage>> GetMugshotsAsync(CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
             IAsyncDisposable objLocker = await LockObject.EnterReadLockAsync(token).ConfigureAwait(false);
@@ -3196,7 +3195,7 @@ namespace Chummer
         /// <summary>
         /// Character's main portrait encoded using Base64.
         /// </summary>
-        public Image MainMugshot
+        public MugshotImage MainMugshot
         {
             get
             {
@@ -3244,7 +3243,7 @@ namespace Chummer
         /// <summary>
         /// Character's main portrait encoded using Base64.
         /// </summary>
-        public async Task<Image> GetMainMugshotAsync(CancellationToken token = default)
+        public async Task<MugshotImage> GetMainMugshotAsync(CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
             IAsyncDisposable objLocker = await LockObject.EnterReadLockAsync(token).ConfigureAwait(false);
@@ -3255,7 +3254,7 @@ namespace Chummer
                 if (objLinkedCharacter != null)
                     return await objLinkedCharacter.GetMainMugshotAsync(token).ConfigureAwait(false);
                 int intIndex = await GetMainMugshotIndexAsync(token).ConfigureAwait(false);
-                ThreadSafeList<Image> lstMugshots = await GetMugshotsAsync(token).ConfigureAwait(false);
+                ThreadSafeList<MugshotImage> lstMugshots = await GetMugshotsAsync(token).ConfigureAwait(false);
                 if (intIndex >= await lstMugshots.GetCountAsync(token).ConfigureAwait(false) || intIndex < 0)
                     return null;
 
@@ -3270,7 +3269,7 @@ namespace Chummer
         /// <summary>
         /// Character's main portrait encoded using Base64.
         /// </summary>
-        public async Task SetMainMugshotAsync(Image value, CancellationToken token = default)
+        public async Task SetMainMugshotAsync(MugshotImage value, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
             if (value == null)
@@ -3289,7 +3288,7 @@ namespace Chummer
                 }
                 else
                 {
-                    ThreadSafeList<Image> lstMugshots = await GetMugshotsAsync(token).ConfigureAwait(false);
+                    ThreadSafeList<MugshotImage> lstMugshots = await GetMugshotsAsync(token).ConfigureAwait(false);
                     int intNewMainMugshotIndex = await lstMugshots.IndexOfAsync(value, token).ConfigureAwait(false);
                     if (intNewMainMugshotIndex != -1)
                     {
@@ -3463,7 +3462,7 @@ namespace Chummer
                     // <mugshot>
                     using (objWriter.StartElement("mugshots"))
                     {
-                        foreach (Image imgMugshot in Mugshots)
+                        foreach (MugshotImage imgMugshot in Mugshots)
                         {
                             objWriter.WriteElementString(
                                 "mugshot", GlobalSettings.ImageToBase64StringForStorage(imgMugshot, token));
@@ -3535,7 +3534,7 @@ namespace Chummer
 
                         if (xmlMugshotsList.Count > 1)
                         {
-                            Bitmap[] objMugshotImages = new Bitmap[xmlMugshotsList.Count];
+                            MugshotImage[] objMugshotImages = new MugshotImage[xmlMugshotsList.Count];
                             token.ThrowIfCancellationRequested();
                             ParallelOptions objOptions = new ParallelOptions
                             {
@@ -3546,13 +3545,13 @@ namespace Chummer
                                             {
                                                 string strLoop = astrMugshotsBase64[i];
                                                 if (!string.IsNullOrEmpty(strLoop))
-                                                    objMugshotImages[i] = strLoop.ToImage(PixelFormat.Format32bppPArgb, token);
+                                                    objMugshotImages[i] = MugshotImage.FromBase64(strLoop);
                                                 else
                                                     objMugshotImages[i] = null;
                                             });
                             for (int i = 0; i < xmlMugshotsList.Count; ++i)
                             {
-                                Image objLoop = objMugshotImages[i];
+                                MugshotImage objLoop = objMugshotImages[i];
                                 if (objLoop != null)
                                     _lstMugshots.Add(objLoop);
                             }
@@ -3561,7 +3560,7 @@ namespace Chummer
                         {
                             string strLoop = astrMugshotsBase64[0];
                             if (!string.IsNullOrEmpty(strLoop))
-                                _lstMugshots.Add(strLoop.ToImage(PixelFormat.Format32bppPArgb, token));
+                                _lstMugshots.Add(MugshotImage.FromBase64(strLoop));
                         }
                     }
                     finally
@@ -3599,16 +3598,16 @@ namespace Chummer
 
                         if (xmlMugshotsList.Count > 1)
                         {
-                            Bitmap[] aobjMugshots = await ParallelExtensions.ForAsync(0, xmlMugshotsList.Count, (i, t) =>
+                            MugshotImage[] aobjMugshots = await ParallelExtensions.ForAsync(0, xmlMugshotsList.Count, (i, t) =>
                             {
                                 if (t.IsCancellationRequested)
-                                    return Task.FromCanceled<Bitmap>(t);
+                                    return Task.FromCanceled<MugshotImage>(t);
                                 string strLoop = astrMugshotsBase64[i];
                                 if (!string.IsNullOrEmpty(strLoop))
-                                    return strLoop.ToImageAsync(PixelFormat.Format32bppPArgb, t);
-                                return Task.FromResult<Bitmap>(null);
+                                    return Task.FromResult(MugshotImage.FromBase64(strLoop));
+                                return Task.FromResult<MugshotImage>(null);
                             }, token).ConfigureAwait(false);
-                            foreach (Bitmap objImage in aobjMugshots)
+                            foreach (MugshotImage objImage in aobjMugshots)
                             {
                                 if (objImage != null)
                                     await _lstMugshots.AddAsync(objImage, token).ConfigureAwait(false);
@@ -3618,7 +3617,7 @@ namespace Chummer
                         {
                             string strLoop = astrMugshotsBase64[0];
                             if (!string.IsNullOrEmpty(strLoop))
-                                await _lstMugshots.AddAsync(await strLoop.ToImageAsync(PixelFormat.Format32bppPArgb, token).ConfigureAwait(false), token).ConfigureAwait(false);
+                                await _lstMugshots.AddAsync(MugshotImage.FromBase64(strLoop), token).ConfigureAwait(false);
                         }
                     }
                     finally
@@ -3646,20 +3645,20 @@ namespace Chummer
                     await objLinkedCharacter.PrintMugshots(objWriter, token).ConfigureAwait(false);
                 else
                 {
-                    ThreadSafeList<Image> lstMugshots = await GetMugshotsAsync(token).ConfigureAwait(false);
+                    ThreadSafeList<MugshotImage> lstMugshots = await GetMugshotsAsync(token).ConfigureAwait(false);
                     if (await lstMugshots.GetCountAsync(token).ConfigureAwait(false) > 0)
                     {
                         // Note: Internet Explorer 8 and earlier are the only browsers that do not support data URIs.
                         // The workaround for them would require saving each image to a file first and then referencing that file instead of embedding the image's base64 directly.
                         // However, users who only use IE8 and earlier are so vanishingly small compared to the effort this workaround requires that we are just not going to bother.
 
-                        Image imgMainMugshot = await GetMainMugshotAsync(token).ConfigureAwait(false);
+                        MugshotImage imgMainMugshot = await GetMainMugshotAsync(token).ConfigureAwait(false);
                         if (imgMainMugshot != null)
                         {
                             // <mainmugshotbase64 />
                             await objWriter
                                   .WriteElementStringAsync("mainmugshotbase64",
-                                                           await imgMainMugshot.ToBase64StringAsJpegAsync(token: token)
+                                                           await HostServices.ImageCodec.ToJpegBase64Async(imgMainMugshot, token: token)
                                                                                .ConfigureAwait(false), token: token)
                                   .ConfigureAwait(false);
                         }
@@ -3678,7 +3677,7 @@ namespace Chummer
                             {
                                 if (i == await GetMainMugshotIndexAsync(token).ConfigureAwait(false))
                                     continue;
-                                Image imgMugshot = await lstMugshots.GetValueAtAsync(i, token).ConfigureAwait(false);
+                                MugshotImage imgMugshot = await lstMugshots.GetValueAtAsync(i, token).ConfigureAwait(false);
                                 // <mugshot>
                                 XmlElementWriteHelper objMugshotElement
                                     = await objWriter.StartElementAsync("mugshot", token: token).ConfigureAwait(false);
@@ -3686,7 +3685,7 @@ namespace Chummer
                                 {
                                     await objWriter
                                           .WriteElementStringAsync("stringbase64",
-                                                                   await imgMugshot.ToBase64StringAsJpegAsync(token: token)
+                                                                   await HostServices.ImageCodec.ToJpegBase64Async(imgMugshot, token: token)
                                                                                    .ConfigureAwait(false), token: token)
                                           .ConfigureAwait(false);
                                 }
@@ -3745,7 +3744,7 @@ namespace Chummer
                         CharacterRegistry.OpenCharacters.Remove(objOldLinkedCharacter);
                     }
                 }
-                foreach (Image imgMugshot in _lstMugshots)
+                foreach (MugshotImage imgMugshot in _lstMugshots)
                     imgMugshot.Dispose();
                 _lstMugshots.Dispose();
                 _objCachedSourceDetailLock.Dispose();

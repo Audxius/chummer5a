@@ -27,7 +27,6 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Xml.Serialization;
 using System.Xml.XPath;
 using Newtonsoft.Json;
@@ -57,7 +56,7 @@ namespace Chummer
         private string _strCharacterAlias;
         private string _strBuildMethod;
         private string _strEssence;
-        private Image _imgMugshot;
+        private MugshotImage _imgMugshot;
         private bool _blnCreated;
         private bool _blnIsCritter;
         private string _strSettingsFile;
@@ -436,7 +435,7 @@ namespace Chummer
         [JsonIgnore]
         [XmlIgnore]
         [IgnoreDataMember]
-        public Image Mugshot
+        public MugshotImage Mugshot
         {
             get
             {
@@ -445,7 +444,7 @@ namespace Chummer
             }
         }
 
-        public async Task<Image> GetMugshotAsync(CancellationToken token = default)
+        public async Task<MugshotImage> GetMugshotAsync(CancellationToken token = default)
         {
             IAsyncDisposable objLocker = await LockObject.EnterReadLockAsync(token).ConfigureAwait(false);
             try
@@ -618,7 +617,8 @@ namespace Chummer
                 _strMetavariant = objExistingCache.Metavariant;
                 _strPlayerName = objExistingCache.PlayerName;
                 _strSettingsFile = objExistingCache.SettingsFile;
-                Interlocked.Exchange(ref _imgMugshot, objExistingCache.Mugshot.Clone() as Image)?.Dispose();
+                MugshotImage objExistingMugshot = objExistingCache.Mugshot;
+                Interlocked.Exchange(ref _imgMugshot, objExistingMugshot == null ? null : new MugshotImage(objExistingMugshot.EncodedBytes))?.Dispose();
             }
         }
 
@@ -649,8 +649,8 @@ namespace Chummer
                     _strMetavariant = await objExistingCache.GetMetavariantAsync(token).ConfigureAwait(false);
                     _strPlayerName = await objExistingCache.GetPlayerNameAsync(token).ConfigureAwait(false);
                     _strSettingsFile = await objExistingCache.GetSettingsFileAsync(token).ConfigureAwait(false);
-                    Image objMugshot = await objExistingCache.GetMugshotAsync(token).ConfigureAwait(false);
-                    Interlocked.Exchange(ref _imgMugshot, objMugshot.Clone() as Image)?.Dispose();
+                    MugshotImage objMugshot = await objExistingCache.GetMugshotAsync(token).ConfigureAwait(false);
+                    Interlocked.Exchange(ref _imgMugshot, objMugshot == null ? null : new MugshotImage(objMugshot.EncodedBytes))?.Dispose();
                 }
                 finally
                 {
@@ -843,22 +843,8 @@ namespace Chummer
 
                     if (!string.IsNullOrEmpty(strMugshotBase64))
                     {
-                        Image imgNewMugshot;
-                        if (blnSync)
-                        {
-                            // ReSharper disable once MethodHasAsyncOverload
-                            using (Image imgMugshot = strMugshotBase64.ToImage(token))
-                                // ReSharper disable once MethodHasAsyncOverload
-                                imgNewMugshot = imgMugshot.GetCompressedImage(token: token);
-                        }
-                        else
-                        {
-                            using (Image imgMugshot
-                                   = await strMugshotBase64.ToImageAsync(token: token).ConfigureAwait(false))
-                                imgNewMugshot = await imgMugshot.GetCompressedImageAsync(token: token)
-                                                                .ConfigureAwait(false);
-                        }
-                        Image objOldMugshot = Interlocked.Exchange(ref _imgMugshot, imgNewMugshot);
+                        MugshotImage imgNewMugshot = MugshotImage.FromBase64(strMugshotBase64); // the roster UI scales it for display
+                        MugshotImage objOldMugshot = Interlocked.Exchange(ref _imgMugshot, imgNewMugshot);
                         if (objOldMugshot != null && !ReferenceEquals(objOldMugshot, imgNewMugshot))
                             objOldMugshot.Dispose();
                     }

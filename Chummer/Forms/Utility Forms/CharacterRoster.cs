@@ -1873,7 +1873,7 @@ namespace Chummer
                                     strBuildMethod = await LanguageManager.GetStringAsync("String_" + strBuildMethod, false, token).ConfigureAwait(false);
                                 await lblBuildMethod.DoThreadSafeAsync(x =>
                                     x.Text = string.IsNullOrEmpty(strBuildMethod) ? strUnknown : strBuildMethod, token).ConfigureAwait(false);
-                                Image objMugshot = await objCache.GetMugshotAsync(token).ConfigureAwait(false);
+                                Image objMugshot = (await objCache.GetMugshotAsync(token).ConfigureAwait(false)).GetImage(token);
                                 await picMugshot.DoThreadSafeAsync(x => x.Image = objMugshot, token).ConfigureAwait(false);
                                 // Populate character information fields.
                                 string strMetatype = await objCache.GetMetatypeAsync(token).ConfigureAwait(false);
