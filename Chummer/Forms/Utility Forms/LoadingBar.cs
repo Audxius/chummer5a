@@ -25,8 +25,12 @@ using System.Windows.Forms;
 
 namespace Chummer
 {
-    public partial class LoadingBar : Form
+    public partial class LoadingBar : Form, IProgressReporter
     {
+        void IProgressReporter.PerformStep(string strStepName) => PerformStep(strStepName);
+
+        Task IProgressReporter.PerformStepAsync(string strStepName, CancellationToken token) => PerformStepAsync(strStepName, token: token);
+
         private string _strCharacterFile = string.Empty;
 
         public enum ProgressBarTextPatterns

@@ -6156,10 +6156,10 @@ namespace Chummer
         /// Load the Character from an XML file synchronously.
         /// </summary>
         /// <param name="strFileName">Name of the file to load the character from. Leave empty if the character should be loaded from FileName.</param>
-        /// <param name="frmLoadingForm">Instance of frmLoading to use to update with loading progress. <see cref="LoadingBar.PerformStep(string, LoadingBar.ProgressBarTextPatterns)"/> is called <see cref="NumLoadingSections"/> times within this method, so plan accordingly.</param>
+        /// <param name="frmLoadingForm">Instance of frmLoading to use to update with loading progress. <see cref="IProgressReporter.PerformStep(string)"/> is called <see cref="NumLoadingSections"/> times within this method, so plan accordingly.</param>
         /// <param name="showWarnings">Whether warnings about book content and other character content should be loaded.</param>
         /// <param name="token">Cancellation token to use.</param>
-        public bool Load(string strFileName = "", LoadingBar frmLoadingForm = null, bool showWarnings = true, CancellationToken token = default)
+        public bool Load(string strFileName = "", IProgressReporter frmLoadingForm = null, bool showWarnings = true, CancellationToken token = default)
         {
             return Utils.SafelyRunSynchronously(t => LoadCoreAsync(true, strFileName, frmLoadingForm, showWarnings, t), token);
         }
@@ -6168,10 +6168,10 @@ namespace Chummer
         /// Load the Character from an XML file asynchronously.
         /// </summary>
         /// <param name="strFileName">Name of the file to load the character from. Leave empty if the character should be loaded from FileName.</param>
-        /// <param name="frmLoadingForm">Instance of frmLoading to use to update with loading progress. <see cref="LoadingBar.PerformStepAsync(string, LoadingBar.ProgressBarTextPatterns, CancellationToken)"/> is called <see cref="NumLoadingSections"/> times within this method, so plan accordingly.</param>
+        /// <param name="frmLoadingForm">Instance of frmLoading to use to update with loading progress. <see cref="IProgressReporter.PerformStepAsync(string, CancellationToken)"/> is called <see cref="NumLoadingSections"/> times within this method, so plan accordingly.</param>
         /// <param name="showWarnings">Whether warnings about book content and other character content should be loaded.</param>
         /// <param name="token">Cancellation token to use.</param>
-        public Task<bool> LoadAsync(string strFileName = "", LoadingBar frmLoadingForm = null, bool showWarnings = true, CancellationToken token = default)
+        public Task<bool> LoadAsync(string strFileName = "", IProgressReporter frmLoadingForm = null, bool showWarnings = true, CancellationToken token = default)
         {
             return LoadCoreAsync(false, strFileName, frmLoadingForm, showWarnings, token);
         }
@@ -6185,10 +6185,10 @@ namespace Chummer
         /// </summary>
         /// <param name="blnSync">Flag for whether method should always use synchronous code or not.</param>
         /// <param name="strFileName">Name of the file to load the character from. Leave empty if the character should be loaded from FileName.</param>
-        /// <param name="frmLoadingForm">Instance of frmLoading to use to update with loading progress. <see cref="LoadingBar.PerformStep(string, LoadingBar.ProgressBarTextPatterns)"/> or <see cref="LoadingBar.PerformStepAsync(string, LoadingBar.ProgressBarTextPatterns, CancellationToken)"/> is called <see cref="NumLoadingSections"/> times within this method, so plan accordingly.</param>
+        /// <param name="frmLoadingForm">Instance of frmLoading to use to update with loading progress. <see cref="IProgressReporter.PerformStep(string)"/> or <see cref="IProgressReporter.PerformStepAsync(string, CancellationToken)"/> is called <see cref="NumLoadingSections"/> times within this method, so plan accordingly.</param>
         /// <param name="showWarnings">Whether warnings about book content and other character content should be loaded.</param>
         /// <param name="token">Cancellation token to use.</param>
-        private async Task<bool> LoadCoreAsync(bool blnSync, string strFileName = "", LoadingBar frmLoadingForm = null,
+        private async Task<bool> LoadCoreAsync(bool blnSync, string strFileName = "", IProgressReporter frmLoadingForm = null,
                                                bool showWarnings = true, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
