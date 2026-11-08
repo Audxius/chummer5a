@@ -2223,7 +2223,7 @@ namespace Chummer
                 if (!blnOpenOptions || await MessageBoxes.ShowAsync(await LanguageManager.GetStringAsync("Message_NoPDFProgramSet", token: token).ConfigureAwait(false),
                         await LanguageManager.GetStringAsync("MessageTitle_NoPDFProgramSet", token: token).ConfigureAwait(false), MessageButtons.YesNo, MessageIcon.Question, token: token).ConfigureAwait(false) != MessageResult.Yes)
                     return;
-                CursorWait objCursorWait = await CursorWait.NewAsync(Program.MainForm, token: token).ConfigureAwait(false);
+                IAsyncDisposable objCursorWait = await UiServices.Busy.BeginAsync(UiServices.MainWindow, token).ConfigureAwait(false);
                 try
                 {
                     using (ThreadSafeForm<EditGlobalSettings> frmOptions
@@ -2269,7 +2269,7 @@ namespace Chummer
                 if (await MessageBoxes.ShowAsync(StringExtensions.FastFormat(await LanguageManager.GetStringAsync("Message_NoLinkedPDF", token: token).ConfigureAwait(false), await LanguageBookLongAsync(strBook, token: token).ConfigureAwait(false)),
                         await LanguageManager.GetStringAsync("MessageTitle_NoLinkedPDF", token: token).ConfigureAwait(false), MessageButtons.YesNo, MessageIcon.Question, token: token).ConfigureAwait(false) != MessageResult.Yes)
                     return;
-                CursorWait objCursorWait = await CursorWait.NewAsync(Program.MainForm, token: token).ConfigureAwait(false);
+                IAsyncDisposable objCursorWait = await UiServices.Busy.BeginAsync(UiServices.MainWindow, token).ConfigureAwait(false);
                 try
                 {
                     using (ThreadSafeForm<EditGlobalSettings> frmOptions

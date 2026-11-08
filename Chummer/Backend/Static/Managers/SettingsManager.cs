@@ -65,7 +65,7 @@ namespace Chummer
 
         private static async void ObjSettingsFolderWatcherOnChanged(object sender, FileSystemEventArgs e)
         {
-            CursorWait objCursorWait = await CursorWait.NewAsync().ConfigureAwait(false);
+            System.IAsyncDisposable objCursorWait = await UiServices.Busy.BeginAsync().ConfigureAwait(false);
             try
             {
                 switch (e.ChangeType)

@@ -49,7 +49,7 @@ namespace CrashHandler
         [STAThread]
         private static void Main(string[] args)
         {
-            Chummer.UiServices.Messages = new Chummer.WinFormsMessageService();
+            Chummer.WinFormsServices.Register();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Chummer.Program.SetProcessDPI(GlobalSettings.DpiScalingMethodSetting);

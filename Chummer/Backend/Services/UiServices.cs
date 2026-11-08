@@ -28,12 +28,25 @@ namespace Chummer
     /// </summary>
     public static class UiServices
     {
+        /// <summary>
+        /// Placeholder owner meaning "the application's main window", for engine code that has no UI element of its own.
+        /// </summary>
+        public static readonly object MainWindow = new object();
+
         private static IMessageService s_objMessages = new HeadlessMessageService();
+
+        private static IBusyIndicator s_objBusy = new HeadlessBusyIndicator();
 
         public static IMessageService Messages
         {
             get => s_objMessages;
             set => s_objMessages = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        public static IBusyIndicator Busy
+        {
+            get => s_objBusy;
+            set => s_objBusy = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }
