@@ -152,16 +152,16 @@ namespace Chummer.Forms
                     tlpTop.Padding = new Padding(tlpTop.Padding.Right, tlpTop.Padding.Top, tlpTop.Padding.Right, tlpTop.Padding.Bottom);
                     break;
                 case MessageBoxIcon.Error:
-                    imgIcon.Image = Utils.GetStockIconBitmapsForSystemIcon(SystemIcons.Error);
+                    imgIcon.Image = WinFormsIcons.GetStockIconBitmapsForSystemIcon(SystemIcons.Error);
                     break;
                 case MessageBoxIcon.Question:
-                    imgIcon.Image = Utils.GetStockIconBitmapsForSystemIcon(SystemIcons.Question);
+                    imgIcon.Image = WinFormsIcons.GetStockIconBitmapsForSystemIcon(SystemIcons.Question);
                     break;
                 case MessageBoxIcon.Warning:
-                    imgIcon.Image = Utils.GetStockIconBitmapsForSystemIcon(SystemIcons.Warning);
+                    imgIcon.Image = WinFormsIcons.GetStockIconBitmapsForSystemIcon(SystemIcons.Warning);
                     break;
                 case MessageBoxIcon.Information:
-                    imgIcon.Image = Utils.GetStockIconBitmapsForSystemIcon(SystemIcons.Information);
+                    imgIcon.Image = WinFormsIcons.GetStockIconBitmapsForSystemIcon(SystemIcons.Information);
                     break;
             }
 

@@ -5,12 +5,12 @@
 set -eu
 cd "$(dirname "$0")/../../Chummer/Backend"
 
-ui_helpers='Static/Extensions/WinFormsExtensions.cs|Static/Extensions/DispatcherExtensions.cs|Helpers/CenterableMessageBox.cs|Helpers/TooltipFactory.cs|Helpers/HoverDisplayCoordinator.cs|Helpers/DataGridViewTextBoxColumnTranslated.cs|Datastructures/ListViewItemWithValue.cs'
+ui_helpers='^$'  # all known UI helper files have been moved to Chummer/Forms
 
 count() { # $1 = label, $2 = regex
     local sites files
-    sites=$(grep -rE --include=*.cs "$2" . | grep -vE "$ui_helpers" | grep -vE "^[^:]+:\s*//" | wc -l)
-    files=$(grep -rE --include=*.cs "$2" . | grep -vE "$ui_helpers" | grep -vE "^[^:]+:\s*//" | cut -d: -f1 | sort -u | wc -l)
+    sites=$(grep -rE --include=*.cs "$2" . | grep -vE "^[^:]+:\s*//" | wc -l)
+    files=$(grep -rE --include=*.cs "$2" . | grep -vE "^[^:]+:\s*//" | cut -d: -f1 | sort -u | wc -l)
     printf '%-46s %6s sites %5s files\n' "$1" "$sites" "$files"
 }
 
@@ -28,5 +28,3 @@ count 'Registry'                                    '\bRegistry(Key)?\b'
 count 'Colors / ColorManager'                       'ColorManager\.'
 count 'P/Invoke (NativeMethods)'                    'NativeMethods\.|DllImport'
 echo
-echo "UI helper files still under Backend (move out wholesale):"
-for f in ${ui_helpers//|/ }; do [ -f "$f" ] && echo "  $f"; done
