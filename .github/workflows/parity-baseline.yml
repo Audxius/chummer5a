@@ -1,0 +1,66 @@
+name: Parity Baseline
+
+# Captures golden-master output from the original .NET Framework 4.8 engine (Windows only),
+# then re-runs the parity suite against it in a fresh process to surface nondeterministic output
+# that the normalizer still needs to handle. Download the "parity-golden" artifact and commit it
+# to Chummer.Parity/Golden once the determinism check is clean.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ native ]
+    paths:
+      - 'Chummer.Tests/Parity/**'
+      - '.github/workflows/parity-baseline.yml'
+
+jobs:
+  capture:
+    runs-on: windows-latest
+    timeout-minutes: 120
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build tests
+      run: dotnet build Chummer.Tests/Chummer.Tests.csproj --configuration Release "-p:SolutionDir=${{ github.workspace }}\"
+
+    - name: Capture golden output (net48 reference engine)
+      env:
+        CHUMMER_PARITY_MODE: capture
+        CHUMMER_PARITY_GOLDEN_DIR: ${{ github.workspace }}\parity\Golden
+      run: dotnet test Chummer.Tests/Chummer.Tests.csproj --configuration Release --no-build --filter "FullyQualifiedName~Chummer.Tests.Parity" --logger "console;verbosity=normal"
+
+    - name: Determinism check (verify against the capture in a fresh process)
+      id: determinism
+      continue-on-error: true
+      env:
+        CHUMMER_PARITY_MODE: verify
+        CHUMMER_PARITY_GOLDEN_DIR: ${{ github.workspace }}\parity\Golden
+      run: dotnet test Chummer.Tests/Chummer.Tests.csproj --configuration Release --no-build --filter "FullyQualifiedName~Chummer.Tests.Parity" --logger "console;verbosity=normal"
+
+    - name: Upload golden output
+      uses: actions/upload-artifact@v4
+      with:
+        name: parity-golden
+        path: parity/Golden
+
+    - name: Upload nondeterministic output
+      if: steps.determinism.outcome == 'failure'
+      uses: actions/upload-artifact@v4
+      with:
+        name: parity-nondeterministic
+        path: parity/Actual

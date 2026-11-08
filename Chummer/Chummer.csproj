@@ -307,7 +307,7 @@
     <Content Include="customdata\Education Qualities Apply Karma Discount in Create Mode\manifest.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="customdata\Exclude German Sourcebooks\manifest.xml">
+    <Content Include="customdata\Exclude German sourcebooks\manifest.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="customdata\Fixed Nitama Sporter Stats\amend_weapons.xml">
@@ -1033,7 +1033,7 @@
     <Content Include="customdata\Education Qualities Apply Karma Discount in Create Mode\amend_qualities.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="customdata\Exclude German Sourcebooks\amend_german_books.xml">
+    <Content Include="customdata\Exclude German sourcebooks\amend_german_books.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="customdata\Hand-Based Cyberware Can Go Anywhere\amend_cyberware.xml">
