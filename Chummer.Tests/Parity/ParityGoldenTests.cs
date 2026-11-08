@@ -125,43 +125,76 @@ namespace Chummer.Tests.Parity
             ReportFailures();
         }
 
-        [TestMethod, Timeout(60 * 60 * 1000, CooperativeCancellation = true)]
-        public void ExportsAndSheets()
+        /// <summary>
+        /// English print XML for every character, plus the JSON and Squad Manager exports and the default sheet.
+        /// </summary>
+        [TestMethod, Timeout(120 * 60 * 1000, CooperativeCancellation = true)]
+        public void ExportsEnglish()
         {
             CancellationToken token = TestContext.CancellationToken;
             string strDefaultSheet = GlobalSettings.DefaultCharacterSheetDefaultValue;
             foreach (FileInfo objFile in TestFiles)
             {
                 string strName = Path.GetFileNameWithoutExtension(objFile.Name);
-                bool blnAllSheets = s_astrFullSheetCharacters.Contains(strName);
                 using (Character objCharacter = UnitTestUtils.LoadCharacter(objFile, token: token))
+                {
+                    XmlDocument xmlExport = GenerateExport(objCharacter, "en-us", token);
+                    CheckXml(Path.Combine("exports", "en-us", strName + ".xml"), xmlExport.OuterXml);
+                    CheckText(Path.Combine("exports", "json", strName + ".json"),
+                              JsonConvert.SerializeXmlNode(xmlExport, Newtonsoft.Json.Formatting.Indented));
+                    CheckText(Path.Combine("exports", "squad-manager", strName + ".txt"),
+                              Transform(Path.Combine(Utils.GetStartupPath, "export", "Squad Manager.xsl"), xmlExport, token));
+                    CheckText(Path.Combine("sheets", "en-us", strDefaultSheet, strName + ".html"),
+                              Transform(Path.Combine(Utils.GetStartupPath, "sheets", strDefaultSheet + ".xsl"), xmlExport, token));
+                }
+            }
+            ReportFailures();
+        }
+
+        /// <summary>
+        /// Print XML for every character in every non-English language.
+        /// </summary>
+        [TestMethod, Timeout(120 * 60 * 1000, CooperativeCancellation = true)]
+        public void ExportsOtherLanguages()
+        {
+            CancellationToken token = TestContext.CancellationToken;
+            foreach (FileInfo objFile in TestFiles)
+            {
+                string strName = Path.GetFileNameWithoutExtension(objFile.Name);
+                using (Character objCharacter = UnitTestUtils.LoadCharacter(objFile, token: token))
+                {
+                    foreach (string strLanguage in s_astrLanguages.Where(x => x != "en-us"))
+                    {
+                        XmlDocument xmlExport = GenerateExport(objCharacter, strLanguage, token);
+                        CheckXml(Path.Combine("exports", strLanguage, strName + ".xml"), xmlExport.OuterXml);
+                    }
+                }
+            }
+            ReportFailures();
+        }
+
+        /// <summary>
+        /// Every sheet in every language for a few representative characters.
+        /// </summary>
+        [TestMethod, Timeout(120 * 60 * 1000, CooperativeCancellation = true)]
+        public void SheetsAllLanguages()
+        {
+            CancellationToken token = TestContext.CancellationToken;
+            foreach (string strName in s_astrFullSheetCharacters)
+            {
+                using (Character objCharacter = UnitTestUtils.LoadCharacter(new FileInfo(Path.Combine(TestFilesDirectory, strName + ".chum5")), token: token))
                 {
                     foreach (string strLanguage in s_astrLanguages)
                     {
                         XmlDocument xmlExport = GenerateExport(objCharacter, strLanguage, token);
-                        CheckXml(Path.Combine("exports", strLanguage, strName + ".xml"), xmlExport.OuterXml);
-
                         string strSheetDirectory = strLanguage == "en-us"
                             ? Path.Combine(Utils.GetStartupPath, "sheets")
                             : Path.Combine(Utils.GetStartupPath, "sheets", strLanguage);
-                        IEnumerable<string> lstSheets = blnAllSheets
-                            ? Directory.GetFiles(strSheetDirectory, "*.xsl").Select(Path.GetFileNameWithoutExtension)
-                                       .OrderBy(x => x, StringComparer.Ordinal)
-                            : strLanguage == "en-us"
-                                ? new[] { strDefaultSheet }
-                                : Enumerable.Empty<string>();
-                        foreach (string strSheet in lstSheets)
+                        foreach (string strSheet in Directory.GetFiles(strSheetDirectory, "*.xsl").Select(Path.GetFileNameWithoutExtension)
+                                                             .OrderBy(x => x, StringComparer.Ordinal))
                         {
-                            string strHtml = Transform(Path.Combine(strSheetDirectory, strSheet + ".xsl"), xmlExport, token);
-                            CheckText(Path.Combine("sheets", strLanguage, strSheet, strName + ".html"), strHtml);
-                        }
-
-                        if (strLanguage == "en-us")
-                        {
-                            CheckText(Path.Combine("exports", "json", strName + ".json"),
-                                      JsonConvert.SerializeXmlNode(xmlExport, Newtonsoft.Json.Formatting.Indented));
-                            CheckText(Path.Combine("exports", "squad-manager", strName + ".txt"),
-                                      Transform(Path.Combine(Utils.GetStartupPath, "export", "Squad Manager.xsl"), xmlExport, token));
+                            CheckText(Path.Combine("sheets", strLanguage, strSheet, strName + ".html"),
+                                      Transform(Path.Combine(strSheetDirectory, strSheet + ".xsl"), xmlExport, token));
                         }
                     }
                 }

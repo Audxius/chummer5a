@@ -5,8 +5,9 @@ name: Parity Baseline
 # that the normalizer still needs to handle. Download the "parity-golden" artifact and commit it
 # to Chummer.Parity/Golden once the determinism check is clean.
 #
-# The engine is always checked out at the `parity-baseline` tag (the last commit before the port
-# started changing engine code), never at the commit that triggered the run.
+# The engine is always the `parity-baseline` tag (the last commit before the port started changing
+# engine code). The parity harness itself (Chummer.Tests/Parity) is taken from the triggering commit
+# and overlaid, so the harness can evolve without moving the reference engine.
 
 on:
   workflow_dispatch:
@@ -18,20 +19,34 @@ on:
     branches: [ native ]
     paths:
       - '.github/workflows/parity-baseline.yml'
+      - 'Chummer.Tests/Parity/**'
 
 jobs:
   capture:
     runs-on: windows-latest
-    timeout-minutes: 120
+    timeout-minutes: 360
     defaults:
       run:
         shell: pwsh
+        working-directory: ref
 
     steps:
     - name: Checkout reference engine
       uses: actions/checkout@v4
       with:
         ref: ${{ github.event.inputs.ref || 'parity-baseline' }}
+        path: ref
+
+    - name: Checkout current harness
+      uses: actions/checkout@v4
+      with:
+        path: harness
+
+    - name: Overlay current parity harness onto the reference engine
+      run: |
+        if (Test-Path Chummer.Tests/Parity) { Remove-Item Chummer.Tests/Parity -Recurse -Force }
+        Copy-Item ../harness/Chummer.Tests/Parity Chummer.Tests/Parity -Recurse
+        Get-ChildItem Chummer.Tests/Parity
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
@@ -42,7 +57,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        key: ${{ runner.os }}-nuget-${{ hashFiles('ref/**/*.csproj') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
 
@@ -52,7 +67,7 @@ jobs:
     - name: Build tests
       run: |
         # Forward slashes: a trailing backslash before a closing quote would escape the quote on Windows.
-        $solutionDir = "$env:GITHUB_WORKSPACE/" -replace '\\', '/'
+        $solutionDir = "$env:GITHUB_WORKSPACE/ref/" -replace '\\', '/'
         msbuild Chummer.Tests/Chummer.Tests.csproj -restore -m -verbosity:minimal -p:Configuration=Release "-p:SolutionDir=$solutionDir" 2>&1 | Tee-Object -FilePath build.log
         $code = $LASTEXITCODE
         # Surface errors as annotations, since job logs need authentication to read.
@@ -66,7 +81,7 @@ jobs:
       run: |
         dotnet test Chummer.Tests/Chummer.Tests.csproj --configuration Release --no-build --filter "FullyQualifiedName~Chummer.Tests.Parity" --logger "console;verbosity=normal" 2>&1 | Tee-Object -FilePath capture.log
         $code = $LASTEXITCODE
-        Select-String -Path capture.log -Pattern 'Failed |Error Message|mismatch|Exception' | Select-Object -First 40 | ForEach-Object { Write-Output "::error::$($_.Line)" }
+        Select-String -Path capture.log -Pattern 'Failed |Passed |Error Message|mismatch|Exception:' | Select-Object -First 40 | ForEach-Object { Write-Output "::warning::$($_.Line)" }
         exit $code
 
     - name: Determinism check (verify against the capture in a fresh process)
@@ -78,7 +93,7 @@ jobs:
       run: |
         dotnet test Chummer.Tests/Chummer.Tests.csproj --configuration Release --no-build --filter "FullyQualifiedName~Chummer.Tests.Parity" --logger "console;verbosity=normal" 2>&1 | Tee-Object -FilePath determinism.log
         $code = $LASTEXITCODE
-        Select-String -Path determinism.log -Pattern 'differs at line|no golden|not well-formed|Failed ' | Select-Object -First 60 | ForEach-Object { Write-Output "::warning::$($_.Line)" }
+        Select-String -Path determinism.log -Pattern 'differs at line|no golden|not well-formed|Failed |Passed ' | Select-Object -First 60 | ForEach-Object { Write-Output "::warning::$($_.Line)" }
         exit $code
 
     - name: Upload golden output
@@ -102,5 +117,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: parity-logs
-        path: '*.log'
+        path: ref/*.log
         if-no-files-found: ignore
