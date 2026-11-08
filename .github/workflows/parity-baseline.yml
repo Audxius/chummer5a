@@ -4,23 +4,34 @@ name: Parity Baseline
 # then re-runs the parity suite against it in a fresh process to surface nondeterministic output
 # that the normalizer still needs to handle. Download the "parity-golden" artifact and commit it
 # to Chummer.Parity/Golden once the determinism check is clean.
+#
+# The engine is always checked out at the `parity-baseline` tag (the last commit before the port
+# started changing engine code), never at the commit that triggered the run.
 
 on:
   workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Engine commit/tag to capture from'
+        default: 'parity-baseline'
   push:
     branches: [ native ]
     paths:
-      - 'Chummer.Tests/Parity/**'
       - '.github/workflows/parity-baseline.yml'
 
 jobs:
   capture:
     runs-on: windows-latest
     timeout-minutes: 120
+    defaults:
+      run:
+        shell: pwsh
 
     steps:
-    - name: Checkout repository
+    - name: Checkout reference engine
       uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.inputs.ref || 'parity-baseline' }}
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
@@ -36,13 +47,24 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Build tests
-      run: dotnet build Chummer.Tests/Chummer.Tests.csproj --configuration Release "-p:SolutionDir=${{ github.workspace }}\"
+      run: |
+        # Forward slashes: a trailing backslash before a closing quote would escape the quote on Windows.
+        $solutionDir = "$env:GITHUB_WORKSPACE/" -replace '\\', '/'
+        dotnet build Chummer.Tests/Chummer.Tests.csproj --configuration Release "-p:SolutionDir=$solutionDir" 2>&1 | Tee-Object -FilePath build.log
+        $code = $LASTEXITCODE
+        # Surface errors as annotations, since job logs need authentication to read.
+        Select-String -Path build.log -Pattern ': error |error MSB|error NU|error CS' | Select-Object -First 40 | ForEach-Object { Write-Output "::error::$($_.Line)" }
+        exit $code
 
     - name: Capture golden output (net48 reference engine)
       env:
         CHUMMER_PARITY_MODE: capture
         CHUMMER_PARITY_GOLDEN_DIR: ${{ github.workspace }}\parity\Golden
-      run: dotnet test Chummer.Tests/Chummer.Tests.csproj --configuration Release --no-build --filter "FullyQualifiedName~Chummer.Tests.Parity" --logger "console;verbosity=normal"
+      run: |
+        dotnet test Chummer.Tests/Chummer.Tests.csproj --configuration Release --no-build --filter "FullyQualifiedName~Chummer.Tests.Parity" --logger "console;verbosity=normal" 2>&1 | Tee-Object -FilePath capture.log
+        $code = $LASTEXITCODE
+        Select-String -Path capture.log -Pattern 'Failed |Error Message|mismatch|Exception' | Select-Object -First 40 | ForEach-Object { Write-Output "::error::$($_.Line)" }
+        exit $code
 
     - name: Determinism check (verify against the capture in a fresh process)
       id: determinism
@@ -50,17 +72,32 @@ jobs:
       env:
         CHUMMER_PARITY_MODE: verify
         CHUMMER_PARITY_GOLDEN_DIR: ${{ github.workspace }}\parity\Golden
-      run: dotnet test Chummer.Tests/Chummer.Tests.csproj --configuration Release --no-build --filter "FullyQualifiedName~Chummer.Tests.Parity" --logger "console;verbosity=normal"
+      run: |
+        dotnet test Chummer.Tests/Chummer.Tests.csproj --configuration Release --no-build --filter "FullyQualifiedName~Chummer.Tests.Parity" --logger "console;verbosity=normal" 2>&1 | Tee-Object -FilePath determinism.log
+        $code = $LASTEXITCODE
+        Select-String -Path determinism.log -Pattern 'differs at line|no golden|not well-formed|Failed ' | Select-Object -First 60 | ForEach-Object { Write-Output "::warning::$($_.Line)" }
+        exit $code
 
     - name: Upload golden output
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: parity-golden
         path: parity/Golden
+        if-no-files-found: ignore
 
     - name: Upload nondeterministic output
-      if: steps.determinism.outcome == 'failure'
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: parity-nondeterministic
         path: parity/Actual
+        if-no-files-found: ignore
+
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: parity-logs
+        path: '*.log'
+        if-no-files-found: ignore
