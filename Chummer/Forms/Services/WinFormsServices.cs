@@ -31,6 +31,8 @@ namespace Chummer
             HostServices.Settings = new RegistrySettingsStore();
             HostServices.Theme = new WinFormsThemeService();
             HostServices.Dialogs = new WinFormsDialogService();
+            HostServices.Shell = new WinFormsAppShell();
+            HostServices.Plugins = new WinFormsPluginHost();
         }
     }
 }

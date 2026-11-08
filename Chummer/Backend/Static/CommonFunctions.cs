@@ -2222,7 +2222,7 @@ namespace Chummer
                         if (string.IsNullOrWhiteSpace(strPdfAppPath) || !File.Exists(strPdfAppPath))
                             // ReSharper disable once AccessToDisposedClosure
                             await frmOptions.MyForm.DoLinkPdfReader(token).ConfigureAwait(false);
-                        if (await frmOptions.ShowDialogSafeAsync(Program.MainForm, token).ConfigureAwait(false) != DialogOutcome.OK)
+                        if (await frmOptions.ShowDialogSafeAsync(HostServices.MainWindow, token).ConfigureAwait(false) != DialogOutcome.OK)
                             return;
                         strPdfParameters = GlobalSettings.PdfParameters;
                         strPdfAppPath = GlobalSettings.PdfAppPath;
@@ -2267,7 +2267,7 @@ namespace Chummer
                     {
                         // ReSharper disable once AccessToDisposedClosure
                         await frmOptions.MyForm.DoLinkPdf(objBookInfo.Code, token).ConfigureAwait(false);
-                        if (await frmOptions.ShowDialogSafeAsync(Program.MainForm, token).ConfigureAwait(false) != DialogOutcome.OK)
+                        if (await frmOptions.ShowDialogSafeAsync(HostServices.MainWindow, token).ConfigureAwait(false) != DialogOutcome.OK)
                             return;
                         uriPath = null;
                         try

@@ -573,7 +573,7 @@ namespace Chummer
 
             // Which version of the Internet Explorer's rendering engine will be emulated for rendering the character view.
             LoadInt32FromRegistry(ref _intEmulatedBrowserVersion, "emulatedbrowserversion");
-            Utils.SetupWebBrowserRegistryKeys(_intEmulatedBrowserVersion);
+            HostServices.Shell.OnEmulatedBrowserVersionChanged(_intEmulatedBrowserVersion);
 
             // Default character sheet.
             LoadStringFromRegistry(ref _strDefaultCharacterSheet, "defaultsheet");
@@ -1264,13 +1264,8 @@ namespace Chummer
                 bool blnNewDisableTelemetry = value < UseAILogging.OnlyMetric;
                 bool blnOldDisableTelemetry = InterlockedExtensions.Exchange(ref _eUseLoggingApplicationInsights, value)
                                               < UseAILogging.OnlyMetric;
-                if (blnOldDisableTelemetry != blnNewDisableTelemetry && Program.ChummerTelemetryClient.IsValueCreated)
-                {
-                    // Sets up logging if the option is changed during runtime
-                    TelemetryConfiguration objConfiguration = Program.ActiveTelemetryConfiguration;
-                    if (objConfiguration != null)
-                        objConfiguration.DisableTelemetry = blnNewDisableTelemetry;
-                }
+                if (blnOldDisableTelemetry != blnNewDisableTelemetry)
+                    HostServices.Shell.OnTelemetryDisabledChanged(blnNewDisableTelemetry);
             }
         }
 
@@ -1405,7 +1400,7 @@ namespace Chummer
             set
             {
                 if (Interlocked.Exchange(ref _intEmulatedBrowserVersion, value) != value)
-                    Utils.SetupWebBrowserRegistryKeys(value);
+                    HostServices.Shell.OnEmulatedBrowserVersionChanged(value);
             }
         }
 
@@ -1430,52 +1425,7 @@ namespace Chummer
                 // Set default cultures based on the currently set language
                 CultureInfo.DefaultThreadCurrentCulture = _objLanguageCultureInfo;
                 CultureInfo.DefaultThreadCurrentUICulture = _objLanguageCultureInfo;
-                ChummerMainForm frmMain = Program.MainForm;
-                if (frmMain == null)
-                    return;
-                try
-                {
-                    frmMain.TranslateWinForm();
-                    IReadOnlyCollection<Form> lstToProcess = frmMain.OpenCharacterEditorForms;
-                    if (lstToProcess != null && lstToProcess.Count > 0)
-                    {
-                        foreach (Form frmLoop in lstToProcess)
-                        {
-                            frmLoop.TranslateWinForm();
-                        }
-                    }
-
-                    lstToProcess = frmMain.OpenCharacterSheetViewers;
-                    if (lstToProcess != null && lstToProcess.Count > 0)
-                    {
-                        foreach (Form frmLoop in lstToProcess)
-                        {
-                            frmLoop.TranslateWinForm();
-                        }
-                    }
-
-                    lstToProcess = frmMain.OpenCharacterExportForms;
-                    if (lstToProcess != null && lstToProcess.Count > 0)
-                    {
-                        foreach (Form frmLoop in lstToProcess)
-                        {
-                            frmLoop.TranslateWinForm();
-                        }
-                    }
-
-                    frmMain.PrintMultipleCharactersForm?.TranslateWinForm();
-                    frmMain.CharacterRoster?.TranslateWinForm();
-                    frmMain.MasterIndex?.TranslateWinForm();
-                    frmMain.RefreshAllTabTitles();
-                }
-                catch (ObjectDisposedException)
-                {
-                    //swallow this
-                }
-                catch (OperationCanceledException)
-                {
-                    //swallow this
-                }
+                HostServices.Shell.OnLanguageChanged();
             }
         }
 
@@ -1494,36 +1444,7 @@ namespace Chummer
             // Set default cultures based on the currently set language
             CultureInfo.DefaultThreadCurrentCulture = _objLanguageCultureInfo;
             CultureInfo.DefaultThreadCurrentUICulture = _objLanguageCultureInfo;
-            ChummerMainForm frmMain = Program.MainForm;
-            if (frmMain != null)
-            {
-                await frmMain.TranslateWinFormAsync(token: token).ConfigureAwait(false);
-                ThreadSafeObservableCollection<CharacterShared> lstToProcess1 = frmMain.OpenCharacterEditorForms;
-                if (lstToProcess1 != null && await lstToProcess1.GetCountAsync(token).ConfigureAwait(false) > 0)
-                {
-                    await lstToProcess1.ForEachAsync((x, t) => x.TranslateWinFormAsync(token: t), token).ConfigureAwait(false);
-                }
-                ThreadSafeObservableCollection<CharacterSheetViewer> lstToProcess2 = frmMain.OpenCharacterSheetViewers;
-                if (lstToProcess2 != null && await lstToProcess2.GetCountAsync(token).ConfigureAwait(false) > 0)
-                {
-                    await lstToProcess2.ForEachAsync((x, t) => x.TranslateWinFormAsync(token: t), token).ConfigureAwait(false);
-                }
-                ThreadSafeObservableCollection<ExportCharacter> lstToProcess3 = frmMain.OpenCharacterExportForms;
-                if (lstToProcess3 != null && await lstToProcess3.GetCountAsync(token).ConfigureAwait(false) > 0)
-                {
-                    await lstToProcess3.ForEachAsync((x, t) => x.TranslateWinFormAsync(token: t), token).ConfigureAwait(false);
-                }
-                Form frmToProcess = frmMain.PrintMultipleCharactersForm;
-                if (frmToProcess != null)
-                    await frmToProcess.TranslateWinFormAsync(token: token).ConfigureAwait(false);
-                frmToProcess = frmMain.CharacterRoster;
-                if (frmToProcess != null)
-                    await frmToProcess.TranslateWinFormAsync(token: token).ConfigureAwait(false);
-                frmToProcess = frmMain.MasterIndex;
-                if (frmToProcess != null)
-                    await frmToProcess.TranslateWinFormAsync(token: token).ConfigureAwait(false);
-                await frmMain.RefreshAllTabTitlesAsync(token).ConfigureAwait(false);
-            }
+            await HostServices.Shell.OnLanguageChangedAsync(token).ConfigureAwait(false);
         }
 
         /// <summary>

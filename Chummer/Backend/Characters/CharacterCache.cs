@@ -736,7 +736,7 @@ namespace Chummer
             {
                 token.ThrowIfCancellationRequested();
                 string strFileName = await GetFileNameAsync(token).ConfigureAwait(false);
-                objOpenCharacter = await Program.OpenCharacters
+                objOpenCharacter = await CharacterRegistry.OpenCharacters
                     .FirstOrDefaultAsync(async (x, t) => string.Equals(await x.GetFileNameAsync(t).ConfigureAwait(false), strFileName, Utils.PathStringComparison), token)
                     .ConfigureAwait(false);
                 if (objOpenCharacter == null)
@@ -751,17 +751,11 @@ namespace Chummer
 
             if (!string.IsNullOrEmpty(strFilePath))
             {
-                using (ThreadSafeForm<LoadingBar> frmLoadingBar = await Program
-                               .CreateAndShowProgressBarAsync(
-                                   strFilePath, Character.NumLoadingSections, token)
-                               .ConfigureAwait(false))
-                    objOpenCharacter = await Program
-                        .LoadCharacterAsync(strFilePath, frmLoadingBar: frmLoadingBar.MyForm, token: token)
-                        .ConfigureAwait(false);
+                objOpenCharacter = await HostServices.Shell.LoadCharacterAsync(strFilePath, token: token).ConfigureAwait(false);
             }
 
-            if (!await Program.SwitchToOpenCharacter(objOpenCharacter, token).ConfigureAwait(false))
-                await Program.OpenCharacter(objOpenCharacter, token: token).ConfigureAwait(false);
+            if (!await HostServices.Shell.SwitchToOpenCharacterAsync(objOpenCharacter, token).ConfigureAwait(false))
+                await HostServices.Shell.OpenCharacterAsync(objOpenCharacter, token).ConfigureAwait(false);
         }
 
         public async Task OnDefaultContextMenuDeleteClick(object sender, EventArgs e, CancellationToken token = default)
@@ -1023,28 +1017,24 @@ namespace Chummer
                         sbdReturn.Append(strSpace, strLeftPar, LanguageManager.GetString(Created ? "Title_CareerMode" : "Title_CreateMode"), strRightPar);
                     }
 
-                    if (blnAddMarkerIfOpen && Program.MainForm != null)
+                    if (blnAddMarkerIfOpen)
                     {
-                        string strFilePath = FilePath;
-                        using (new FetchSafelyFromObjectPool<StringBuilder>(Utils.StringBuilderPool, out StringBuilder sbdMarker))
+                        CharacterWindowKinds eOpenIn = HostServices.Shell.GetOpenWindowKinds(FilePath);
+                        if (eOpenIn != CharacterWindowKinds.None)
                         {
-                            if (Program.MainForm.OpenCharacterEditorForms?.Any(
-                                x => !x.CharacterObject.IsDisposed && string.Equals(x.CharacterObject.FileName, strFilePath,
-                                    Utils.PathStringComparison)) == true)
-                                sbdMarker.Append('*');
-                            if (Program.MainForm.OpenCharacterSheetViewers?.Any(
-                                    x => x.CharacterObjects.Any(y =>
-                                        !y.IsDisposed && string.Equals(y.FileName, strFilePath,
-                                            Utils.PathStringComparison))) == true)
-                                sbdMarker.Append('^');
-                            if (Program.MainForm.OpenCharacterExportForms?.Any(
-                                    x => !x.CharacterObject.IsDisposed && string.Equals(x.CharacterObject.FileName, strFilePath,
-                                        Utils.PathStringComparison)) == true)
-                                sbdMarker.Append('\'');
-                            if (sbdMarker.Length > 0)
+                            using (new FetchSafelyFromObjectPool<StringBuilder>(Utils.StringBuilderPool, out StringBuilder sbdMarker))
+                            {
+                                if ((eOpenIn & CharacterWindowKinds.Editor) != 0)
+                                    sbdMarker.Append('*');
+                                if ((eOpenIn & CharacterWindowKinds.SheetViewer) != 0)
+                                    sbdMarker.Append('^');
+                                if ((eOpenIn & CharacterWindowKinds.Export) != 0)
+                                    sbdMarker.Append('\'');
                                 sbdReturn.Insert(0, sbdMarker.Append(strSpace).ToString());
+                            }
                         }
                     }
+
                 }
 
                 return sbdReturn.ToTrimmedString();
@@ -1093,47 +1083,24 @@ namespace Chummer
                                          .ConfigureAwait(false), strRightPar);
                     }
 
-                    if (blnAddMarkerIfOpen && Program.MainForm != null)
+                    if (blnAddMarkerIfOpen)
                     {
-                        string strFilePath = await GetFilePathAsync(token).ConfigureAwait(false);
-                        using (new FetchSafelyFromObjectPool<StringBuilder>(Utils.StringBuilderPool, out StringBuilder sbdMarker))
+                        CharacterWindowKinds eOpenIn = await HostServices.Shell.GetOpenWindowKindsAsync(await GetFilePathAsync(token).ConfigureAwait(false), token).ConfigureAwait(false);
+                        if (eOpenIn != CharacterWindowKinds.None)
                         {
-                            ThreadSafeObservableCollection<CharacterShared> lstToProcess1
-                                = Program.MainForm.OpenCharacterEditorForms;
-                            if (lstToProcess1 != null && await lstToProcess1.GetCountAsync(token).ConfigureAwait(false) > 0
-                                && await lstToProcess1
-                                    .AnyAsync(
-                                        async (x, t) => !x.CharacterObject.IsDisposed &&
-                                                   string.Equals(
-                                                       await x.CharacterObject.GetFileNameAsync(t).ConfigureAwait(false),
-                                                       strFilePath, Utils.PathStringComparison), token)
-                                    .ConfigureAwait(false))
-                                sbdMarker.Append('*');
-                            ThreadSafeObservableCollection<CharacterSheetViewer> lstToProcess2
-                                = Program.MainForm.OpenCharacterSheetViewers;
-                            if (lstToProcess2 != null && await lstToProcess2.GetCountAsync(token).ConfigureAwait(false) > 0
-                                && await lstToProcess2
-                                    .AnyAsync(
-                                        (x, t1) => x.CharacterObjects.AnyAsync(
-                                            async (y, t2) => !y.IsDisposed && string.Equals(
-                                                await y.GetFileNameAsync(t2).ConfigureAwait(false), strFilePath,
-                                                Utils.PathStringComparison), t1), token).ConfigureAwait(false))
-                                sbdMarker.Append('^');
-                            ThreadSafeObservableCollection<ExportCharacter> lstToProcess3
-                                = Program.MainForm.OpenCharacterExportForms;
-                            if (lstToProcess3 != null && await lstToProcess3.GetCountAsync(token).ConfigureAwait(false) > 0
-                                && await lstToProcess3
-                                    .AnyAsync(
-                                        async (x, t) => !x.CharacterObject.IsDisposed &&
-                                                   string.Equals(
-                                                       await x.CharacterObject.GetFileNameAsync(t).ConfigureAwait(false),
-                                                       strFilePath, Utils.PathStringComparison), token)
-                                    .ConfigureAwait(false))
-                                sbdMarker.Append('\'');
-                            if (sbdMarker.Length > 0)
+                            using (new FetchSafelyFromObjectPool<StringBuilder>(Utils.StringBuilderPool, out StringBuilder sbdMarker))
+                            {
+                                if ((eOpenIn & CharacterWindowKinds.Editor) != 0)
+                                    sbdMarker.Append('*');
+                                if ((eOpenIn & CharacterWindowKinds.SheetViewer) != 0)
+                                    sbdMarker.Append('^');
+                                if ((eOpenIn & CharacterWindowKinds.Export) != 0)
+                                    sbdMarker.Append('\'');
                                 sbdReturn.Insert(0, sbdMarker.Append(strSpace).ToString());
+                            }
                         }
                     }
+
                 }
                 finally
                 {

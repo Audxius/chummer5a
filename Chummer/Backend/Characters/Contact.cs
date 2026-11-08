@@ -3313,13 +3313,9 @@ namespace Chummer
                         if (strFile.EndsWith(".chum5", Utils.PathStringComparison)
                             || strFile.EndsWith(".chum5lz", Utils.PathStringComparison))
                         {
-                            if ((_objLinkedCharacter = Program.OpenCharacters.Find(x => string.Equals(x.FileName, strFile, Utils.PathStringComparison))) == null)
+                            if ((_objLinkedCharacter = CharacterRegistry.OpenCharacters.Find(x => string.Equals(x.FileName, strFile, Utils.PathStringComparison))) == null)
                             {
-                                using (ThreadSafeForm<LoadingBar> frmLoadingBar
-                                       = Program.CreateAndShowProgressBar(strFile, Character.NumLoadingSections))
-                                    _objLinkedCharacter
-                                        = Program.LoadCharacter(strFile, string.Empty, false, false,
-                                                                frmLoadingBar.MyForm, token);
+                                _objLinkedCharacter = HostServices.Shell.LoadCharacter(strFile, false, token);
                             }
 
                             if (_objLinkedCharacter != null)
@@ -3343,14 +3339,13 @@ namespace Chummer
                                 }
                             }
 
-                            if (Program.OpenCharacters.Contains(objOldLinkedCharacter))
+                            if (CharacterRegistry.OpenCharacters.Contains(objOldLinkedCharacter))
                             {
-                                if (Program.OpenCharacters.All(x => x == _objLinkedCharacter
+                                if (CharacterRegistry.OpenCharacters.All(x => x == _objLinkedCharacter
                                                                     || !x.LinkedCharacters.Contains(
                                                                         objOldLinkedCharacter), token)
-                                    && Program.MainForm.OpenFormsWithCharacters.All(
-                                        x => !x.CharacterObjects.Contains(objOldLinkedCharacter)))
-                                    Program.OpenCharacters.Remove(objOldLinkedCharacter);
+                                    && !HostServices.Shell.IsCharacterOpenInAnyWindow(objOldLinkedCharacter))
+                                    CharacterRegistry.OpenCharacters.Remove(objOldLinkedCharacter);
                             }
                             else
                                 objOldLinkedCharacter.Dispose();
@@ -3432,17 +3427,11 @@ namespace Chummer
                         if (strFile.EndsWith(".chum5", Utils.PathStringComparison)
                             || strFile.EndsWith(".chum5lz", Utils.PathStringComparison))
                         {
-                            if ((_objLinkedCharacter = await Program.OpenCharacters
+                            if ((_objLinkedCharacter = await CharacterRegistry.OpenCharacters
                                     .FirstOrDefaultAsync(async (x, t) => string.Equals(strFile, await x.GetFileNameAsync(t).ConfigureAwait(false), Utils.PathStringComparison),
                                         token: token).ConfigureAwait(false)) == null)
                             {
-                                using (ThreadSafeForm<LoadingBar> frmLoadingBar
-                                       = await Program
-                                           .CreateAndShowProgressBarAsync(strFile, Character.NumLoadingSections, token)
-                                           .ConfigureAwait(false))
-                                    _objLinkedCharacter
-                                        = await Program.LoadCharacterAsync(strFile, string.Empty, false, false,
-                                            frmLoadingBar.MyForm, token).ConfigureAwait(false);
+                                _objLinkedCharacter = await HostServices.Shell.LoadCharacterAsync(strFile, false, token).ConfigureAwait(false);
                             }
 
                             if (_objLinkedCharacter != null)
@@ -3456,15 +3445,15 @@ namespace Chummer
                         {
                             objOldLinkedCharacter.MultiplePropertiesChangedAsync -= LinkedCharacterOnPropertyChanged;
 
-                            if (await Program.OpenCharacters.ContainsAsync(objOldLinkedCharacter, token)
+                            if (await CharacterRegistry.OpenCharacters.ContainsAsync(objOldLinkedCharacter, token)
                                     .ConfigureAwait(false))
                             {
-                                if (await Program.OpenCharacters.AllAsync(async (x, t) => x == _objLinkedCharacter
+                                if (await CharacterRegistry.OpenCharacters.AllAsync(async (x, t) => x == _objLinkedCharacter
                                                                                || !(await x.GetLinkedCharactersAsync(t).ConfigureAwait(false)).Contains(
                                                                                    objOldLinkedCharacter), token: token)
                                         .ConfigureAwait(false)
-                                    && !await Program.MainForm.AnyOpenFormContainsCharacter(objOldLinkedCharacter, token: token).ConfigureAwait(false))
-                                    await Program.OpenCharacters.RemoveAsync(objOldLinkedCharacter, token)
+                                    && !await HostServices.Shell.IsCharacterOpenInAnyWindowAsync(objOldLinkedCharacter, token).ConfigureAwait(false))
+                                    await CharacterRegistry.OpenCharacters.RemoveAsync(objOldLinkedCharacter, token)
                                         .ConfigureAwait(false);
                             }
                             else
@@ -4144,11 +4133,11 @@ namespace Chummer
                             CharacterObject.LinkedCharacters.Remove(objOldLinkedCharacter);
                         }
                     }
-                    if (!Utils.IsUnitTest && Program.OpenCharacters.All(x => x == objOldLinkedCharacter
+                    if (!Utils.IsUnitTest && CharacterRegistry.OpenCharacters.All(x => x == objOldLinkedCharacter
                             || !x.LinkedCharacters.Contains(objOldLinkedCharacter))
-                        && Program.MainForm.OpenFormsWithCharacters.All(x => !x.CharacterObjects.Contains(objOldLinkedCharacter)))
+                        && !HostServices.Shell.IsCharacterOpenInAnyWindow(objOldLinkedCharacter))
                     {
-                        Program.OpenCharacters.Remove(objOldLinkedCharacter);
+                        CharacterRegistry.OpenCharacters.Remove(objOldLinkedCharacter);
                     }
                 }
 
@@ -4202,11 +4191,11 @@ namespace Chummer
                             CharacterObject.LinkedCharacters.Remove(objOldLinkedCharacter);
                         }
                     }
-                    if (!Utils.IsUnitTest && await Program.OpenCharacters.AllAsync(async x => x == objOldLinkedCharacter
+                    if (!Utils.IsUnitTest && await CharacterRegistry.OpenCharacters.AllAsync(async x => x == objOldLinkedCharacter
                             || !(await x.GetLinkedCharactersAsync().ConfigureAwait(false)).Contains(objOldLinkedCharacter)).ConfigureAwait(false)
-                        && !await Program.MainForm.AnyOpenFormContainsCharacter(objOldLinkedCharacter).ConfigureAwait(false))
+                        && !await HostServices.Shell.IsCharacterOpenInAnyWindowAsync(objOldLinkedCharacter).ConfigureAwait(false))
                     {
-                        await Program.OpenCharacters.RemoveAsync(objOldLinkedCharacter).ConfigureAwait(false);
+                        await CharacterRegistry.OpenCharacters.RemoveAsync(objOldLinkedCharacter).ConfigureAwait(false);
                     }
                 }
 

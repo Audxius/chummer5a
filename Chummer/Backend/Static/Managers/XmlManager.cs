@@ -1930,9 +1930,9 @@ namespace Chummer
                     if (s_DicCustomFilePathsWithExceptions.TryGetValue(strFile, out Exception ex))
                     {
                         string strFileNoPath = Path.GetFileName(strFile);
-                        Program.ShowMessageBox(
+                        MessageBoxes.Show(
                             StringExtensions.FastFormat(strMessage, strFile, ex.Message),
-                            StringExtensions.FastFormat(strTitle, strFileNoPath), icon: System.Windows.Forms.MessageBoxIcon.Error);
+                            StringExtensions.FastFormat(strTitle, strFileNoPath), icon: MessageIcon.Error);
                     }
                 }
             }
@@ -2244,9 +2244,9 @@ namespace Chummer
                     if (s_DicCustomFilePathsWithExceptions.TryGetValue(strFile, out Exception ex))
                     {
                         string strFileNoPath = Path.GetFileName(strFile);
-                        await Program.ShowMessageBoxAsync(
+                        await MessageBoxes.ShowAsync(
                             StringExtensions.FastFormat(strMessage, strFile, ex.Message),
-                            StringExtensions.FastFormat(strTitle, strFileNoPath), icon: System.Windows.Forms.MessageBoxIcon.Error, token: token).ConfigureAwait(false);
+                            StringExtensions.FastFormat(strTitle, strFileNoPath), icon: MessageIcon.Error, token: token).ConfigureAwait(false);
                     }
                 }
             }

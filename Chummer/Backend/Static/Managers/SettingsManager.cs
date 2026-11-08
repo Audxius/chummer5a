@@ -492,7 +492,7 @@ namespace Chummer
                     }, token: token).ConfigureAwait(false);
                     return strReturn;
                 }, Utils.JoinableTaskFactory);
-                await Program.OpenCharacters.ForEachAsync(async (objCharacter, t) =>
+                await CharacterRegistry.OpenCharacters.ForEachAsync(async (objCharacter, t) =>
                 {
                     System.IAsyncDisposable objLocker2 = await objCharacter.LockObject.EnterUpgradeableReadLockAsync(t).ConfigureAwait(false);
                     try
@@ -568,7 +568,7 @@ namespace Chummer
                     if (objToDelete != null)
                     {
                         string strKeyToDelete = await objToDelete.GetDictionaryKeyAsync(token).ConfigureAwait(false);
-                        await Program.OpenCharacters.ForEachAsync(async (objCharacter, t) =>
+                        await CharacterRegistry.OpenCharacters.ForEachAsync(async (objCharacter, t) =>
                         {
                             if (await objCharacter.GetSettingsKeyAsync(t).ConfigureAwait(false) == strKeyToDelete)
                                 await objCharacter.SetSettingsKeyAsync(strKey, t).ConfigureAwait(false);

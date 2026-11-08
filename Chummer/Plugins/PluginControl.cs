@@ -38,7 +38,11 @@ using NLog;
 namespace Chummer.Plugins
 {
     [InheritedExport(typeof(IPlugin))]
-    public interface IPlugin : IDisposable
+    /// <summary>
+    /// WinForms plugin. The members the engine needs (saving/loading plugin data with characters, telemetry)
+    /// live in <see cref="ICharacterDataPlugin"/>.
+    /// </summary>
+    public interface IPlugin : ICharacterDataPlugin, IDisposable
     {
         //only very rudimentary initialization should take place here. Make it QUICK.
         void CustomInitialize(ChummerMainForm mainControl);
@@ -49,24 +53,13 @@ namespace Chummer.Plugins
 
         Task<ICollection<ToolStripMenuItem>> GetMenuItems(ToolStripMenuItem menu, CancellationToken token = default);
 
-        [CLSCompliant(false)]
-#pragma warning disable CS3010 // CLS-compliant interfaces must have only CLS-compliant members
-        ITelemetry SetTelemetryInitialize(ITelemetry telemetry);
-#pragma warning restore CS3010 // CLS-compliant interfaces must have only CLS-compliant members
-
         bool ProcessCommandLine(string parameter);
 
         Task<ICollection<TreeNode>> GetCharacterRosterTreeNode(CharacterRoster frmCharRoster, bool forceUpdate, CancellationToken token = default);
 
         UserControl GetOptionsControl();
 
-        string GetSaveToFileElement(Character input);
-
-        void LoadFileElement(Character input, string fileElement);
-
         void SetIsUnitTest(bool isUnitTest);
-
-        Assembly GetPluginAssembly();
 
         bool SetCharacterRosterNode(TreeNode objNode);
 

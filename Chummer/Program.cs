@@ -100,14 +100,7 @@ namespace Chummer
         /// <summary>
         /// Check this to see if we are currently in the Main Thread.
         /// </summary>
-        [ThreadStatic]
-        // ReSharper disable once ThreadStaticFieldHasInitializer
-        // ReSharper disable once ConvertToConstant.Global
-#pragma warning disable CA2019
-#pragma warning disable VSTHRD117 // Avoid initialization of ThreadStatic fields in a type initializer
-        public static readonly bool IsMainThread = true;
-#pragma warning restore VSTHRD117 // Avoid initialization of ThreadStatic fields in a type initializer
-#pragma warning restore CA2019
+        public static bool IsMainThread => Utils.IsMainThread;
 
         /// <summary>
         /// The main entry point for the application.
@@ -1218,7 +1211,7 @@ namespace Chummer
         /// <summary>
         /// List of all currently loaded characters (either in an open form or linked to a character in an open form via contact, spirit, or pet)
         /// </summary>
-        public static ThreadSafeObservableCollection<Character> OpenCharacters { get; } = new ThreadSafeObservableCollection<Character>();
+        public static ThreadSafeObservableCollection<Character> OpenCharacters => CharacterRegistry.OpenCharacters;
 
         private static async Task OpenCharactersOnBeforeClearCollectionChanged(object sender, NotifyCollectionChangedEventArgs e, CancellationToken token = default)
         {

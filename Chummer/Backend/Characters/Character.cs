@@ -4895,12 +4895,12 @@ namespace Chummer
                             objWriter.WriteEndElement();
 
                             //Plugins
-                            IReadOnlyList<IPlugin> lstActivePlugins = Program.PluginLoader?.MyActivePlugins;
+                            IReadOnlyList<ICharacterDataPlugin> lstActivePlugins = HostServices.Plugins.ActivePlugins;
                             if (lstActivePlugins?.Count > 0)
                             {
                                 // <plugins>
                                 objWriter.WriteStartElement("plugins");
-                                foreach (IPlugin plugin in lstActivePlugins)
+                                foreach (ICharacterDataPlugin plugin in lstActivePlugins)
                                 {
                                     try
                                     {
@@ -5646,9 +5646,7 @@ namespace Chummer
                             await objWriter.WriteEndElementAsync().ConfigureAwait(false);
 
                             //Plugins
-                            IReadOnlyList<IPlugin> lstActivePlugins = Program.PluginLoader != null
-                                ? await Program.PluginLoader.GetMyActivePluginsAsync(innerToken).ConfigureAwait(false)
-                                : null;
+                            IReadOnlyList<ICharacterDataPlugin> lstActivePlugins = await HostServices.Plugins.GetActivePluginsAsync(innerToken).ConfigureAwait(false);
                             if (lstActivePlugins?.Count > 0)
                             {
                                 // <plugins>
@@ -6507,7 +6505,7 @@ namespace Chummer
                                         if (Version.TryParse(strMinimumVersion, out Version objMinimumVersion)
                                             && objMinimumVersion > Utils.CurrentChummerVersion)
                                         {
-                                            Program.ShowMessageBox(
+                                            MessageBoxes.Show(
                                                 StringExtensions.FastFormat(
                                                               blnSync
                                                                   // ReSharper disable once MethodHasAsyncOverload
@@ -6526,13 +6524,13 @@ namespace Chummer
                                                             .GetStringAsync(
                                                                 "MessageTitle_OlderThanChummerSaveMinimumVersion",
                                                                 token: token).ConfigureAwait(false),
-                                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                                MessageButtons.OK, MessageIcon.Error);
                                             return false;
                                         }
                                     }
 
-                                    if (_verSavedVersion > Utils.CurrentChummerVersion && DialogResult.Yes
-                                        != Program.ShowMessageBox(
+                                    if (_verSavedVersion > Utils.CurrentChummerVersion && MessageResult.Yes
+                                        != MessageBoxes.Show(
                                             StringExtensions.FastFormat(
                                                           blnSync
                                                               // ReSharper disable once MethodHasAsyncOverload
@@ -6548,7 +6546,7 @@ namespace Chummer
                                                 : await LanguageManager
                                                         .GetStringAsync("MessageTitle_OutdatedChummerSave",
                                                                         token: token).ConfigureAwait(false),
-                                            MessageBoxButtons.YesNo, MessageBoxIcon.Warning))
+                                            MessageButtons.YesNo, MessageIcon.Warning))
                                     {
                                         return false;
                                     }
@@ -11092,9 +11090,9 @@ namespace Chummer
                             //Plugins
                             using (Timekeeper.StartSyncron("load_char_plugins", loadActivity))
                             {
-                                foreach (IPlugin plugin in blnSync
-                                             ? Program.PluginLoader.MyActivePlugins
-                                             : await Program.PluginLoader.GetMyActivePluginsAsync(token)
+                                foreach (ICharacterDataPlugin plugin in blnSync
+                                             ? HostServices.Plugins.ActivePlugins
+                                             : await HostServices.Plugins.GetActivePluginsAsync(token)
                                                  .ConfigureAwait(false))
                                 {
                                     foreach (XmlNode objXmlPlugin in objXmlCharacter.SelectNodes("plugins/" +
@@ -13040,8 +13038,8 @@ namespace Chummer
             if (LockObject.IsDisposed)
                 return;
 
-            if (Program.OpenCharacters.Contains(this)
-                || Program.OpenCharacters.Any(x => x.LinkedCharacters.Contains(this)))
+            if (CharacterRegistry.OpenCharacters.Contains(this)
+                || CharacterRegistry.OpenCharacters.Any(x => x.LinkedCharacters.Contains(this)))
                 return; // Do not actually dispose any characters who are still in the open characters list or required by a character who is
 
             if (Interlocked.CompareExchange(ref _intIsDisposed, 1, 0) > 0)
@@ -13162,8 +13160,8 @@ namespace Chummer
             if (LockObject.IsDisposed)
                 return;
 
-            if (await Program.OpenCharacters.ContainsAsync(this).ConfigureAwait(false)
-                || await Program.OpenCharacters.AnyAsync(async x => (await x.GetLinkedCharactersAsync().ConfigureAwait(false)).Contains(this)).ConfigureAwait(false))
+            if (await CharacterRegistry.OpenCharacters.ContainsAsync(this).ConfigureAwait(false)
+                || await CharacterRegistry.OpenCharacters.AnyAsync(async x => (await x.GetLinkedCharactersAsync().ConfigureAwait(false)).Contains(this)).ConfigureAwait(false))
                 return; // Do not actually dispose any characters who are still in the open characters list or required by a character who is
 
             if (Interlocked.CompareExchange(ref _intIsDisposed, 1, 0) > 0)

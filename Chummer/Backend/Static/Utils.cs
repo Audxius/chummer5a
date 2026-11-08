@@ -51,6 +51,18 @@ namespace Chummer
 {
     public static class Utils
     {
+        /// <summary>
+        /// True on the host's main (UI) thread: the thread that first initialized this class.
+        /// </summary>
+        [ThreadStatic]
+        // ReSharper disable once ThreadStaticFieldHasInitializer
+        // ReSharper disable once ConvertToConstant.Global
+#pragma warning disable CA2019
+#pragma warning disable VSTHRD117 // Avoid initialization of ThreadStatic fields in a type initializer
+        public static readonly bool IsMainThread = true;
+#pragma warning restore VSTHRD117 // Avoid initialization of ThreadStatic fields in a type initializer
+#pragma warning restore CA2019
+
         private static readonly Lazy<Logger> s_ObjLogger = new Lazy<Logger>(LogManager.GetCurrentClassLogger);
         private static Logger Log => s_ObjLogger.Value;
 
@@ -86,7 +98,7 @@ namespace Chummer
 
         public static JoinableTaskContext CreateSynchronizationContext()
         {
-            if (!Program.IsMainThread)
+            if (!Utils.IsMainThread)
                 throw new InvalidOperationException("Cannot call CreateSynchronizationContext outside of the main thread.");
             if (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
                 throw new InvalidOperationException("Should not call CreateSynchronizationContext on a non-STA thread.");
@@ -119,7 +131,7 @@ namespace Chummer
 
         // Need this as a Lazy, otherwise it won't fire properly in the designer if we just cache it, and the check itself is also quite expensive
         private static readonly Lazy<bool> s_BlnIsRunningInVisualStudio =
-            new Lazy<bool>(() => Program.MyProcess.ProcessName == "devenv");
+            new Lazy<bool>(() => Process.GetCurrentProcess().ProcessName == "devenv");
 
         /// <summary>
         /// Returns if we are running inside Visual Studio, e.g. if we are in the designer.
@@ -1194,7 +1206,7 @@ namespace Chummer
         public static void RunOnMainThread(Action func, JoinableTaskCreationOptions eOptions = JoinableTaskCreationOptions.None, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
                 func.Invoke();
             else
             {
@@ -1214,7 +1226,7 @@ namespace Chummer
         public static void RunOnMainThread(Action<CancellationToken> func, JoinableTaskCreationOptions eOptions = JoinableTaskCreationOptions.None, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
                 func.Invoke(token);
             else
             {
@@ -1234,7 +1246,7 @@ namespace Chummer
         public static T RunOnMainThread<T>(Func<T> func, JoinableTaskCreationOptions eOptions = JoinableTaskCreationOptions.None, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            return Program.IsMainThread
+            return Utils.IsMainThread
                 ? func.Invoke()
                 : JoinableTaskFactory.Run(async () =>
                 {
@@ -1251,7 +1263,7 @@ namespace Chummer
         public static T RunOnMainThread<T>(Func<CancellationToken, T> func, JoinableTaskCreationOptions eOptions = JoinableTaskCreationOptions.None, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            return Program.IsMainThread
+            return Utils.IsMainThread
                 ? func.Invoke(token)
                 : JoinableTaskFactory.Run(async () =>
                 {
@@ -1519,7 +1531,7 @@ namespace Chummer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SafeSleep(int intDurationMilliseconds, bool blnForceDoEvents = false)
         {
-            if (Program.IsMainThread && EverDoEvents)
+            if (Utils.IsMainThread && EverDoEvents)
             {
                 s_objThreadStopwatch.Value.Restart();
                 try
@@ -1566,7 +1578,7 @@ namespace Chummer
         public static void SafeSleep(int intDurationMilliseconds, CancellationToken token, bool blnForceDoEvents = false)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread && EverDoEvents)
+            if (Utils.IsMainThread && EverDoEvents)
             {
                 s_objThreadStopwatch.Value.Restart();
                 try
@@ -1706,7 +1718,7 @@ namespace Chummer
         /// <summary>
         /// Never wait around in designer mode, we should not care about thread locking, and running in a background thread can mess up IsDesignerMode checks inside that thread
         /// </summary>
-        public static bool EverDoEvents => Program.IsMainThread && !IsDesignerMode && !IsRunningInVisualStudio;
+        public static bool EverDoEvents => Utils.IsMainThread && !IsDesignerMode && !IsRunningInVisualStudio;
 
         /// <summary>
         /// Don't run events during unit tests, but still run in the background so that we can catch any issues caused by our setup.
@@ -1729,7 +1741,7 @@ namespace Chummer
         public static void SafelyRunSynchronously(Func<Task> funcToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
                 JoinableTaskFactory.Run(() => token.IsCancellationRequested ? Task.FromCanceled(token) : funcToRun());
             else
                 funcToRun.Invoke().GetAwaiter().GetResult();
@@ -1745,7 +1757,7 @@ namespace Chummer
         public static void SafelyRunSynchronously(Func<CancellationToken, Task> funcToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
                 JoinableTaskFactory.Run(() => token.IsCancellationRequested ? Task.FromCanceled(token) : funcToRun(token));
             else
                 funcToRun.Invoke(token).GetAwaiter().GetResult();
@@ -1761,7 +1773,7 @@ namespace Chummer
         public static T SafelyRunSynchronously<T>(Func<Task<T>> funcToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            return Program.IsMainThread
+            return Utils.IsMainThread
                 ? JoinableTaskFactory.Run(() => token.IsCancellationRequested ? Task.FromCanceled<T>(token) : funcToRun())
                 : funcToRun.Invoke().GetAwaiter().GetResult();
         }
@@ -1776,7 +1788,7 @@ namespace Chummer
         public static T SafelyRunSynchronously<T>(Func<CancellationToken, Task<T>> funcToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            return Program.IsMainThread
+            return Utils.IsMainThread
                 ? JoinableTaskFactory.Run(() => token.IsCancellationRequested ? Task.FromCanceled<T>(token) : funcToRun(token))
                 : funcToRun.Invoke(token).GetAwaiter().GetResult();
         }
@@ -1791,7 +1803,7 @@ namespace Chummer
         public static void SafelyRunSynchronously(IEnumerable<Func<Task>> afuncToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
             {
                 JoinableTaskFactory.Run(async () =>
                 {
@@ -1826,7 +1838,7 @@ namespace Chummer
         public static void SafelyRunSynchronously(IEnumerable<Func<CancellationToken, Task>> afuncToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
             {
                 JoinableTaskFactory.Run(async () =>
                 {
@@ -1863,7 +1875,7 @@ namespace Chummer
             token.ThrowIfCancellationRequested();
             int intCount = afuncToRun.Count;
             T[] aobjReturn = new T[intCount];
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
             {
                 JoinableTaskFactory.Run(async () =>
                 {
@@ -1903,7 +1915,7 @@ namespace Chummer
             token.ThrowIfCancellationRequested();
             int intCount = afuncToRun.Count;
             T[] aobjReturn = new T[intCount];
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
             {
                 JoinableTaskFactory.Run(async () =>
                 {
@@ -1942,7 +1954,7 @@ namespace Chummer
         public static void SafelyRunSynchronously(Func<Task> funcToRun, JoinableTaskCreationOptions eOptions, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
                 JoinableTaskFactory.Run(() => token.IsCancellationRequested ? Task.FromCanceled(token) : funcToRun(), eOptions);
             else
                 funcToRun.Invoke().GetAwaiter().GetResult();
@@ -1959,7 +1971,7 @@ namespace Chummer
         public static void SafelyRunSynchronously(Func<CancellationToken, Task> funcToRun, JoinableTaskCreationOptions eOptions, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
                 JoinableTaskFactory.Run(() => token.IsCancellationRequested ? Task.FromCanceled(token) : funcToRun(token), eOptions);
             else
                 funcToRun.Invoke(token).GetAwaiter().GetResult();
@@ -1976,7 +1988,7 @@ namespace Chummer
         public static T SafelyRunSynchronously<T>(Func<Task<T>> funcToRun, JoinableTaskCreationOptions eOptions, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            return Program.IsMainThread
+            return Utils.IsMainThread
                 ? JoinableTaskFactory.Run(() => token.IsCancellationRequested ? Task.FromCanceled<T>(token) : funcToRun(), eOptions)
                 : funcToRun.Invoke().GetAwaiter().GetResult();
         }
@@ -1992,7 +2004,7 @@ namespace Chummer
         public static T SafelyRunSynchronously<T>(Func<CancellationToken, Task<T>> funcToRun, JoinableTaskCreationOptions eOptions, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            return Program.IsMainThread
+            return Utils.IsMainThread
                 ? JoinableTaskFactory.Run(() => token.IsCancellationRequested ? Task.FromCanceled<T>(token) : funcToRun(token), eOptions)
                 : funcToRun.Invoke(token).GetAwaiter().GetResult();
         }
@@ -2008,7 +2020,7 @@ namespace Chummer
         public static void SafelyRunSynchronously(IEnumerable<Func<Task>> afuncToRun, JoinableTaskCreationOptions eOptions, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
             {
                 JoinableTaskFactory.Run(async () =>
                 {
@@ -2043,7 +2055,7 @@ namespace Chummer
         public static void SafelyRunSynchronously(IEnumerable<Func<CancellationToken, Task>> afuncToRun, JoinableTaskCreationOptions eOptions, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
             {
                 JoinableTaskFactory.Run(async () =>
                 {
@@ -2080,7 +2092,7 @@ namespace Chummer
             token.ThrowIfCancellationRequested();
             int intCount = afuncToRun.Count;
             T[] aobjReturn = new T[intCount];
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
             {
                 JoinableTaskFactory.Run(async () =>
                 {
@@ -2121,7 +2133,7 @@ namespace Chummer
             token.ThrowIfCancellationRequested();
             int intCount = afuncToRun.Count;
             T[] aobjReturn = new T[intCount];
-            if (Program.IsMainThread)
+            if (Utils.IsMainThread)
             {
                 JoinableTaskFactory.Run(async () =>
                 {
@@ -2203,7 +2215,7 @@ namespace Chummer
         public static void RunWithoutThreadLock(Action funcToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (!EverDoEvents || (Program.IsMainThread && _intIsOkToRunDoEvents < 1))
+            if (!EverDoEvents || (Utils.IsMainThread && _intIsOkToRunDoEvents < 1))
             {
                 token.ThrowIfCancellationRequested();
                 funcToRun.Invoke();
@@ -2226,7 +2238,7 @@ namespace Chummer
         public static void RunWithoutThreadLock(Action<CancellationToken> funcToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (!EverDoEvents || (Program.IsMainThread && _intIsOkToRunDoEvents < 1))
+            if (!EverDoEvents || (Utils.IsMainThread && _intIsOkToRunDoEvents < 1))
             {
                 token.ThrowIfCancellationRequested();
                 funcToRun.Invoke(token);
@@ -2274,7 +2286,7 @@ namespace Chummer
         {
             token.ThrowIfCancellationRequested();
 
-            if (!EverDoEvents || (Program.IsMainThread && _intIsOkToRunDoEvents < 1))
+            if (!EverDoEvents || (Utils.IsMainThread && _intIsOkToRunDoEvents < 1))
             {
                 Action[] afuncToRun = new Action[2]
                 {
@@ -2318,7 +2330,7 @@ namespace Chummer
         {
             token.ThrowIfCancellationRequested();
 
-            if (!EverDoEvents || (Program.IsMainThread && _intIsOkToRunDoEvents < 1))
+            if (!EverDoEvents || (Utils.IsMainThread && _intIsOkToRunDoEvents < 1))
             {
                 Action[] afuncToRun = new Action[3]
                 {
@@ -2365,7 +2377,7 @@ namespace Chummer
         {
             token.ThrowIfCancellationRequested();
 
-            if (!EverDoEvents || (Program.IsMainThread && _intIsOkToRunDoEvents < 1))
+            if (!EverDoEvents || (Utils.IsMainThread && _intIsOkToRunDoEvents < 1))
             {
                 Action[] afuncToRun = new Action[4]
                 {
@@ -2419,7 +2431,7 @@ namespace Chummer
                     return;
             }
 
-            if (!EverDoEvents || (Program.IsMainThread && _intIsOkToRunDoEvents < 1))
+            if (!EverDoEvents || (Utils.IsMainThread && _intIsOkToRunDoEvents < 1))
             {
                 if (token == CancellationToken.None)
                     Parallel.ForEach(afuncToRun, x => x.Invoke());
@@ -2496,7 +2508,7 @@ namespace Chummer
                     return;
             }
 
-            if (!EverDoEvents || (Program.IsMainThread && _intIsOkToRunDoEvents < 1))
+            if (!EverDoEvents || (Utils.IsMainThread && _intIsOkToRunDoEvents < 1))
             {
                 if (token == CancellationToken.None)
                     Parallel.ForEach(afuncToRun, x => x.Invoke(token));
@@ -2541,7 +2553,7 @@ namespace Chummer
         public static T RunWithoutThreadLock<T>(Func<T> funcToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (!EverDoEvents || (Program.IsMainThread && _intIsOkToRunDoEvents < 1))
+            if (!EverDoEvents || (Utils.IsMainThread && _intIsOkToRunDoEvents < 1))
             {
                 token.ThrowIfCancellationRequested();
                 return funcToRun.Invoke();
@@ -2564,7 +2576,7 @@ namespace Chummer
         public static T RunWithoutThreadLock<T>(Func<CancellationToken, T> funcToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (!EverDoEvents || (Program.IsMainThread && _intIsOkToRunDoEvents < 1))
+            if (!EverDoEvents || (Utils.IsMainThread && _intIsOkToRunDoEvents < 1))
             {
                 token.ThrowIfCancellationRequested();
                 return funcToRun.Invoke(token);
@@ -2618,7 +2630,7 @@ namespace Chummer
                 aobjReturn[0] = RunWithoutThreadLock(lstFuncToRun.ElementAtBetter(0), token);
                 return aobjReturn;
             }
-            if (!EverDoEvents || (Program.IsMainThread && _intIsOkToRunDoEvents < 1))
+            if (!EverDoEvents || (Utils.IsMainThread && _intIsOkToRunDoEvents < 1))
             {
                 if (token == CancellationToken.None)
                 {
@@ -2689,7 +2701,7 @@ namespace Chummer
                 aobjReturn[0] = RunWithoutThreadLock(lstFuncToRun.ElementAtBetter(0), token);
                 return aobjReturn;
             }
-            if (!EverDoEvents || (Program.IsMainThread && _intIsOkToRunDoEvents < 1))
+            if (!EverDoEvents || (Utils.IsMainThread && _intIsOkToRunDoEvents < 1))
             {
                 if (token == CancellationToken.None)
                 {
@@ -2751,7 +2763,7 @@ namespace Chummer
         public static T RunWithoutThreadLock<T>(Func<Task<T>> funcToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread && _intIsOkToRunDoEvents < 1)
+            if (Utils.IsMainThread && _intIsOkToRunDoEvents < 1)
             {
                 return JoinableTaskFactory.Run(() => token.IsCancellationRequested ? Task.FromCanceled<T>(token) : funcToRun());
             }
@@ -2778,7 +2790,7 @@ namespace Chummer
         public static T RunWithoutThreadLock<T>(Func<CancellationToken, Task<T>> funcToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread && _intIsOkToRunDoEvents < 1)
+            if (Utils.IsMainThread && _intIsOkToRunDoEvents < 1)
             {
                 return JoinableTaskFactory.Run(() => token.IsCancellationRequested ? Task.FromCanceled<T>(token) : funcToRun(token));
             }
@@ -2826,7 +2838,7 @@ namespace Chummer
                 return aobjReturn;
             }
 
-            if (Program.IsMainThread && _intIsOkToRunDoEvents < 1)
+            if (Utils.IsMainThread && _intIsOkToRunDoEvents < 1)
             {
                 token.ThrowIfCancellationRequested();
                 JoinableTaskFactory.Run(async () =>
@@ -2952,7 +2964,7 @@ namespace Chummer
                 return aobjReturn;
             }
 
-            if (Program.IsMainThread && _intIsOkToRunDoEvents < 1)
+            if (Utils.IsMainThread && _intIsOkToRunDoEvents < 1)
             {
                 token.ThrowIfCancellationRequested();
                 JoinableTaskFactory.Run(async () =>
@@ -3068,7 +3080,7 @@ namespace Chummer
         public static void RunWithoutThreadLock(Func<Task> funcToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread && _intIsOkToRunDoEvents < 1)
+            if (Utils.IsMainThread && _intIsOkToRunDoEvents < 1)
             {
                 token.ThrowIfCancellationRequested();
                 JoinableTaskFactory.Run(() => token.IsCancellationRequested ? Task.FromCanceled(token) : funcToRun());
@@ -3102,7 +3114,7 @@ namespace Chummer
         public static void RunWithoutThreadLock(Func<CancellationToken, Task> funcToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread && _intIsOkToRunDoEvents < 1)
+            if (Utils.IsMainThread && _intIsOkToRunDoEvents < 1)
             {
                 token.ThrowIfCancellationRequested();
                 JoinableTaskFactory.Run(() => token.IsCancellationRequested ? Task.FromCanceled(token) : funcToRun(token));
@@ -3159,7 +3171,7 @@ namespace Chummer
         public static void RunWithoutThreadLock(IEnumerable<Func<Task>> lstFuncToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread && _intIsOkToRunDoEvents < 1)
+            if (Utils.IsMainThread && _intIsOkToRunDoEvents < 1)
             {
                 token.ThrowIfCancellationRequested();
                 JoinableTaskFactory.Run(async () =>
@@ -3254,7 +3266,7 @@ namespace Chummer
         public static void RunWithoutThreadLock(IEnumerable<Func<CancellationToken, Task>> lstFuncToRun, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            if (Program.IsMainThread && _intIsOkToRunDoEvents < 1)
+            if (Utils.IsMainThread && _intIsOkToRunDoEvents < 1)
             {
                 token.ThrowIfCancellationRequested();
                 JoinableTaskFactory.Run(async () =>
@@ -3358,7 +3370,7 @@ namespace Chummer
                     return;
             }
 
-            if (Program.IsMainThread && _intIsOkToRunDoEvents < 1)
+            if (Utils.IsMainThread && _intIsOkToRunDoEvents < 1)
             {
                 token.ThrowIfCancellationRequested();
                 JoinableTaskFactory.Run(async () =>
@@ -3462,7 +3474,7 @@ namespace Chummer
                     return;
             }
 
-            if (Program.IsMainThread && _intIsOkToRunDoEvents < 1)
+            if (Utils.IsMainThread && _intIsOkToRunDoEvents < 1)
             {
                 token.ThrowIfCancellationRequested();
                 JoinableTaskFactory.Run(async () =>
@@ -3675,43 +3687,6 @@ namespace Chummer
                 strReturn = string.Empty;
             }
             return string.IsNullOrEmpty(strReturn) ? "Unknown" : strReturn;
-        }
-
-        public static void SetupWebBrowserRegistryKeys(int intEmulatedBrowserVersion)
-        {
-            int intInternetExplorerVersionKey = intEmulatedBrowserVersion * 1000;
-            string strChummerExeName = AppDomain.CurrentDomain.FriendlyName;
-            try
-            {
-                using (RegistryKey objRegistry = Registry.CurrentUser.CreateSubKey(
-                           "Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION", true))
-                    objRegistry?.SetValue(strChummerExeName, intInternetExplorerVersionKey, RegistryValueKind.DWord);
-
-                using (RegistryKey objRegistry = Registry.CurrentUser.CreateSubKey(
-                           "Software\\WOW6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION", true))
-                    objRegistry?.SetValue(strChummerExeName, intInternetExplorerVersionKey, RegistryValueKind.DWord);
-
-                // These two needed to have WebBrowser control obey DPI settings for Chummer
-                using (RegistryKey objRegistry = Registry.CurrentUser.CreateSubKey(
-                           "Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_96DPI_PIXEL", true))
-                    objRegistry?.SetValue(strChummerExeName, 1, RegistryValueKind.DWord);
-
-                using (RegistryKey objRegistry = Registry.CurrentUser.CreateSubKey(
-                           "Software\\WOW6432Node\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_96DPI_PIXEL", true))
-                    objRegistry?.SetValue(strChummerExeName, 1, RegistryValueKind.DWord);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Swallow this
-            }
-            catch (IOException)
-            {
-                // Swallow this
-            }
-            catch (SecurityException)
-            {
-                // Swallow this
-            }
         }
 
         public const int HandleCountThresholdForWarning = 9500;

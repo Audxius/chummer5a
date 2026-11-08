@@ -44,6 +44,10 @@ namespace Chummer
 
         private static IDialogService s_objDialogs = new HeadlessDialogService();
 
+        private static IAppShell s_objShell = new HeadlessAppShell();
+
+        private static IPluginHost s_objPlugins = new HeadlessPluginHost();
+
         public static IMessageService Messages
         {
             get => s_objMessages;
@@ -82,6 +86,24 @@ namespace Chummer
         {
             get => s_objDialogs;
             set => s_objDialogs = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// The application shell: windows showing characters, opening characters, reacting to global setting changes.
+        /// </summary>
+        public static IAppShell Shell
+        {
+            get => s_objShell;
+            set => s_objShell = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Active plugins (character file data, telemetry).
+        /// </summary>
+        public static IPluginHost Plugins
+        {
+            get => s_objPlugins;
+            set => s_objPlugins = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }
