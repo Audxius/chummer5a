@@ -5331,22 +5331,7 @@ namespace Chummer
             return lstReturn;
         }
 
-        #region UI Methods
-
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsImprovement, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            TreeNode objNode = new TreeNode
-            {
-                Name = InternalId,
-                Text = CustomName,
-                Tag = this,
-                ContextMenuStrip = cmsImprovement,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-            return objNode;
-        }
+#region UI Methods
 
         public Color PreferredColor
         {

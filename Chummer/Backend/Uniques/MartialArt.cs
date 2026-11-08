@@ -50,7 +50,7 @@ namespace Chummer
         private readonly TaggedObservableCollection<MartialArtTechnique> _lstTechniques;
         private string _strNotes = string.Empty;
         private Color _colNotes = ColorManager.HasNotesColor;
-        private readonly Character _objCharacter;
+        internal readonly Character _objCharacter;
         private bool _blnIsQuality;
 
         public Character CharacterObject => _objCharacter; // readonly member, no locking needed
@@ -1027,48 +1027,8 @@ namespace Chummer
             }
         }
 
-        #endregion Properties
-
-        #region Methods
-
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsMartialArt, ContextMenuStrip cmsMartialArtTechnique, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            IAsyncDisposable objLocker = await LockObject.EnterReadLockAsync(token).ConfigureAwait(false);
-            try
-            {
-                token.ThrowIfCancellationRequested();
-                if (IsQuality && !string.IsNullOrEmpty(Source) && !await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).BookEnabledAsync(Source, token).ConfigureAwait(false))
-                    return null;
-
-                TreeNode objNode = new TreeNode
-                {
-                    Name = InternalId,
-                    Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                    Tag = this,
-                    ContextMenuStrip = cmsMartialArt,
-                    ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                    ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-                };
-
-                TreeNodeCollection lstChildNodes = objNode.Nodes;
-                await Techniques.ForEachAsync(async (objTechnique, t) =>
-                {
-                    TreeNode objLoopNode = await objTechnique.CreateTreeNode(cmsMartialArtTechnique, t).ConfigureAwait(false);
-                    if (objLoopNode != null)
-                    {
-                        lstChildNodes.Add(objLoopNode);
-                        objNode.Expand();
-                    }
-                }, token).ConfigureAwait(false);
-
-                return objNode;
-            }
-            finally
-            {
-                await objLocker.DisposeAsync().ConfigureAwait(false);
-            }
-        }
+#endregion Properties
+#region Methods
 
         public static async Task<bool> Purchase(Character objCharacter, CancellationToken token = default)
         {

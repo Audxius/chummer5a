@@ -105,7 +105,7 @@ namespace Chummer
             mnuForceCrash.Click += mnuForceCrash_Click;
             toolsMenu.DropDownItems.Add(mnuForceCrash);
 #endif
-            tabForms.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
+            tabForms.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
             this.UpdateLightDarkMode();
             this.TranslateWinForm();
             this.UpdateParentForToolTipControls();

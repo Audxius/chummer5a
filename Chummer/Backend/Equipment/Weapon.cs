@@ -78,7 +78,7 @@ namespace Chummer.Backend.Equipment
         //private Guid _guiAmmoLoaded2 = Guid.Empty;
         //private Guid _guiAmmoLoaded3 = Guid.Empty;
         //private Guid _guiAmmoLoaded4 = Guid.Empty;
-        private int _intActiveAmmoSlot = 1;
+        internal int _intActiveAmmoSlot = 1;
 
         private string _strAvail = string.Empty;
         private string _strCost = string.Empty;
@@ -148,7 +148,7 @@ namespace Chummer.Backend.Equipment
         private int _intMatrixCMFilled;
         private int _intSortOrder;
         private bool _blnStolen;
-        private readonly Character _objCharacter;
+        internal readonly Character _objCharacter;
         private string _strMount;
         private string _strExtraMount;
 
@@ -1246,7 +1246,7 @@ namespace Chummer.Backend.Equipment
             { string.Empty, "2", "3", "4" });
 
         private static readonly char[] s_achrMultiplySymbols = new[] { '×', 'x' };
-        private static readonly char[] s_achrMultiplyOrAddSymbols = new[] { '×', 'x', '+' };
+        internal static readonly char[] s_achrMultiplyOrAddSymbols = new[] { '×', 'x', '+' };
 
         /// <summary>
         /// Recreates the single internal clip used by weapons that have an ammo capacity but do not require ammo (i.e. they use charges)
@@ -1315,7 +1315,7 @@ namespace Chummer.Backend.Equipment
         /// <summary>
         /// Recreates the single internal clip used by weapons that have an ammo capacity but do not require ammo (i.e. they use charges)
         /// </summary>
-        private async Task RecreateInternalClipAsync(CancellationToken token = default)
+        internal async Task RecreateInternalClipAsync(CancellationToken token = default)
         {
             if (RequireAmmo || string.IsNullOrWhiteSpace(Ammo) || Ammo == "0")
                 return;
@@ -3723,7 +3723,7 @@ namespace Chummer.Backend.Equipment
         /// <summary>
         /// The total number of rounds that the weapon can load.
         /// </summary>
-        private static string AmmoCapacity(string strAmmo)
+        internal static string AmmoCapacity(string strAmmo)
         {
             int intPos = strAmmo.IndexOfAny(s_achrMultiplySymbols);
             if (intPos >= 0)
@@ -12842,397 +12842,6 @@ namespace Chummer.Backend.Equipment
             return intRestrictedCount;
         }
 
-        public async Task Reload(IAsyncCollection<Gear> lstGears, TreeView treGearView,
-                                      CancellationToken token = default)
-        {
-            List<string> lstCount = new List<string>(1);
-            string ammoString
-                = await CalculatedAmmoAsync(GlobalSettings.InvariantCultureInfo, GlobalSettings.DefaultLanguage, token)
-                    .ConfigureAwait(false);
-            if (!RequireAmmo)
-            {
-                // For weapons that have ammo capacities but no requirement for ammo, these are charges
-                // We treat this function differently for them, letting the character reload as many charges as they see fit
-
-                Clip objInternalClip = GetClip(ActiveAmmoSlot);
-                if (objInternalClip == null)
-                {
-                    await RecreateInternalClipAsync(token).ConfigureAwait(false);
-                    objInternalClip = GetClip(ActiveAmmoSlot) ?? throw new InvalidOperationException(nameof(objInternalClip));
-                }
-
-                int intCurrentAmmoCount = objInternalClip.Ammo;
-
-                // Determine which loading methods are available to the Weapon.
-                if (ammoString.IndexOfAny(s_achrMultiplyOrAddSymbols) != -1 ||
-                    ammoString.Contains(" or ", StringComparison.OrdinalIgnoreCase) ||
-                    ammoString.Contains("Special", StringComparison.OrdinalIgnoreCase) ||
-                    ammoString.Contains("External Source", StringComparison.OrdinalIgnoreCase))
-                {
-                    string strWeaponAmmo = ammoString.FastEscape("External Source", StringComparison.OrdinalIgnoreCase);
-                    strWeaponAmmo = strWeaponAmmo.ToLowerInvariant();
-                    // Get rid of or belt, and + energy.
-                    strWeaponAmmo = strWeaponAmmo.FastEscapeOnceFromEnd(" + energy", eComparison: StringComparison.OrdinalIgnoreCase)
-                                                 .Replace(" or belt", " or 250(belt)");
-
-                    foreach (string strAmmo in
-                             strWeaponAmmo.SplitNoAlloc(" or ", StringSplitOptions.RemoveEmptyEntries, StringComparison.OrdinalIgnoreCase))
-                    {
-                        lstCount.Add(AmmoCapacity(strAmmo));
-                    }
-                }
-                else
-                {
-                    // Nothing weird in the ammo string, so just use the number given.
-                    string strAmmo = ammoString;
-                    int intPos = strAmmo.IndexOf('(');
-                    if (intPos != -1)
-                        strAmmo = strAmmo.Substring(0, intPos);
-                    lstCount.Add(strAmmo);
-                }
-
-                int intMaxAmmoCount = 0;
-
-                foreach (string strAmmo in lstCount)
-                {
-                    if (int.TryParse(strAmmo, NumberStyles.Any, GlobalSettings.InvariantCultureInfo, out intMaxAmmoCount))
-                    {
-                        break;
-                    }
-                }
-
-                if (intMaxAmmoCount <= intCurrentAmmoCount)
-                    return;
-
-                string strDescription = StringExtensions.FastFormat(
-                    await LanguageManager.GetStringAsync("Message_SelectNumberOfCharges", token: token)
-                                         .ConfigureAwait(false),
-                    await GetCurrentDisplayNameAsync(token).ConfigureAwait(false));
-                using (ThreadSafeForm<SelectNumber> frmNewAmmoCount = await ThreadSafeForm<SelectNumber>.GetAsync(
-                           () => new SelectNumber(0)
-                           {
-                               AllowCancel = true,
-                               Maximum = intMaxAmmoCount,
-                               Minimum = intCurrentAmmoCount,
-                               Description = strDescription
-                           }, token).ConfigureAwait(false))
-                {
-                    if (await frmNewAmmoCount.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false)
-                        != DialogResult.OK)
-                        return;
-
-                    objInternalClip.Ammo = frmNewAmmoCount.MyForm.SelectedValue.ToInt32();
-                }
-
-                return;
-            }
-
-            bool blnExternalSource = false;
-            List<Gear> lstAmmo = new List<Gear>(1);
-            // Determine which loading methods are available to the Weapon.
-            if (ammoString.IndexOfAny(s_achrMultiplyOrAddSymbols) != -1 ||
-                ammoString.Contains(" or ", StringComparison.OrdinalIgnoreCase) ||
-                ammoString.Contains("Special", StringComparison.OrdinalIgnoreCase) ||
-                ammoString.Contains("External Source", StringComparison.OrdinalIgnoreCase))
-            {
-                string strWeaponAmmo = ammoString;
-                if (strWeaponAmmo.Contains("External Source", StringComparison.OrdinalIgnoreCase))
-                {
-                    blnExternalSource = true;
-                    strWeaponAmmo = strWeaponAmmo.FastEscape("External Source", StringComparison.OrdinalIgnoreCase);
-                }
-
-                strWeaponAmmo = strWeaponAmmo.ToLowerInvariant();
-                // Get rid of or belt, and + energy.
-                strWeaponAmmo = strWeaponAmmo.FastEscapeOnceFromEnd(" + energy", eComparison: StringComparison.OrdinalIgnoreCase)
-                                             .Replace(" or belt", " or 250(belt)");
-
-                foreach (string strAmmo in
-                         strWeaponAmmo.SplitNoAlloc(" or ", StringSplitOptions.RemoveEmptyEntries, StringComparison.OrdinalIgnoreCase))
-                {
-                    lstCount.Add(AmmoCapacity(strAmmo));
-                }
-            }
-            else
-            {
-                // Nothing weird in the ammo string, so just use the number given.
-                string strAmmo = ammoString;
-                int intPos = strAmmo.IndexOf('(');
-                if (intPos != -1)
-                    strAmmo = strAmmo.Substring(0, intPos);
-                lstCount.Add(strAmmo);
-            }
-
-            Gear objExternalSource = null;
-            if (blnExternalSource)
-            {
-                lstCount.Add(await LanguageManager.GetStringAsync("String_ExternalSource", token: token)
-                                                  .ConfigureAwait(false));
-                objExternalSource = new Gear(_objCharacter);
-                try
-                {
-                    objExternalSource.Name = await LanguageManager.GetStringAsync("String_ExternalSource", token: token)
-                                                .ConfigureAwait(false);
-                    objExternalSource.SourceID = Guid.Empty;
-                }
-                catch
-                {
-                    await objExternalSource.DeleteGearAsync(token: CancellationToken.None).ConfigureAwait(false);
-                    throw;
-                }
-            }
-
-            if (RequireAmmo)
-            {
-                lstAmmo.AddRange(GetAmmoReloadable(lstGears));
-                // Make sure the character has some form of Ammunition for this Weapon.
-                if (lstAmmo.Count == 0)
-                {
-                    await MessageBoxes.ShowAsync(StringExtensions.FastFormat(
-                            await LanguageManager
-                                .GetStringAsync("Message_OutOfAmmoType", token: token)
-                                .ConfigureAwait(false),
-                            await GetCurrentDisplayNameAsync(token).ConfigureAwait(false)),
-                        await LanguageManager.GetStringAsync("Message_OutOfAmmo", token: token)
-                            .ConfigureAwait(false),
-                        icon: MessageIcon.Warning, token: token).ConfigureAwait(false);
-                    return;
-                }
-            }
-
-            if (objExternalSource != null)
-                lstAmmo.Add(objExternalSource);
-
-            // Show the Ammunition Selection window.
-            using (ThreadSafeForm<ReloadWeapon> frmReloadWeapon = await ThreadSafeForm<ReloadWeapon>.GetAsync(
-                       () => new ReloadWeapon(this)
-                       {
-                           Ammo = lstAmmo,
-                           Count = lstCount
-                       }, token).ConfigureAwait(false))
-            {
-                if (await frmReloadWeapon.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false)
-                    != DialogResult.OK)
-                    return;
-
-                Gear objCurrentlyLoadedAmmo = AmmoLoaded;
-                Gear objSelectedAmmo;
-                decimal decQty = await frmReloadWeapon.MyForm.GetSelectedCountAsync(token).ConfigureAwait(false);
-                string strSelectedAmmo = await frmReloadWeapon.MyForm.GetSelectedAmmoAsync(token).ConfigureAwait(false);
-                // If an External Source is not being used, consume ammo.
-                if (strSelectedAmmo != objExternalSource?.InternalId)
-                {
-                    objSelectedAmmo = await lstGears.DeepFindByIdAsync(strSelectedAmmo, token: token).ConfigureAwait(false);
-
-                    // If the Ammo is coming from a Spare Clip, reduce the container quantity instead of the plugin quantity.
-                    if (objSelectedAmmo.Parent is Gear objParent &&
-                        (objParent.Name.StartsWith("Spare Clip", StringComparison.Ordinal)
-                         || objParent.Name.StartsWith("Speed Loader", StringComparison.Ordinal)))
-                    {
-                        if (objParent.Quantity > 1)
-                        {
-                            // Duplicate the clip into a new entry where we can directly deduct from the quantity as we fire
-                            Gear objDuplicatedParent = new Gear(_objCharacter);
-                            try
-                            {
-                                await objDuplicatedParent.CopyAsync(objParent, token).ConfigureAwait(false);
-                                await objDuplicatedParent.SetQuantityAsync(1, token).ConfigureAwait(false);
-                                await lstGears.AddAsync(objDuplicatedParent, token).ConfigureAwait(false);
-                                await objParent.SetQuantityAsync(objParent.Quantity - 1, token).ConfigureAwait(false);
-                                Gear objNewSelectedAmmo
-                                    = await objDuplicatedParent.Children.DeepFindByIdAsync(strSelectedAmmo, token: token).ConfigureAwait(false);
-                                if (objNewSelectedAmmo == null)
-                                {
-                                    objNewSelectedAmmo = new Gear(_objCharacter);
-                                    try
-                                    {
-                                        await objNewSelectedAmmo.CopyAsync(objSelectedAmmo, token).ConfigureAwait(false);
-                                        await objDuplicatedParent.Children.AddAsync(objNewSelectedAmmo, token)
-                                                                 .ConfigureAwait(false);
-                                    }
-                                    catch
-                                    {
-                                        await objNewSelectedAmmo.DeleteGearAsync(token: CancellationToken.None).ConfigureAwait(false);
-                                        throw;
-                                    }
-                                }
-
-                                objSelectedAmmo = objNewSelectedAmmo;
-                            }
-                            catch
-                            {
-                                await objDuplicatedParent.DeleteGearAsync(token: CancellationToken.None).ConfigureAwait(false);
-                                throw;
-                            }
-                        }
-
-                        string strParentText = await objParent.GetCurrentDisplayNameAsync(token).ConfigureAwait(false);
-                        await treGearView.DoThreadSafeAsync(x =>
-                        {
-                            TreeNode objNode = x.FindNode(objParent.InternalId);
-                            if (objNode != null)
-                                objNode.Text = strParentText;
-                        }, token: token).ConfigureAwait(false);
-                    }
-
-                    if (objSelectedAmmo.IsIdenticalToOtherGear(objCurrentlyLoadedAmmo))
-                    {
-                        // Just top up the currently loaded ammo
-                        decimal decTopUp = decQty - objCurrentlyLoadedAmmo.Quantity;
-                        if (decTopUp > objSelectedAmmo.Quantity)
-                        {
-                            // We need more ammo for a full top-up than the quantity of gear, so just merge the gears and delete the old gear.
-                            await objCurrentlyLoadedAmmo.SetQuantityAsync(objCurrentlyLoadedAmmo.Quantity - objSelectedAmmo.Quantity, token).ConfigureAwait(false);
-                            await objSelectedAmmo.DeleteGearAsync(token: token).ConfigureAwait(false);
-                            GetClip(_intActiveAmmoSlot).Ammo
-                                = objCurrentlyLoadedAmmo.Quantity
-                                                        .ToInt32(); // Bypass AmmoRemaining so as not to alter the gear quantity
-                        }
-                        else
-                        {
-                            await objCurrentlyLoadedAmmo.SetQuantityAsync(decQty, token).ConfigureAwait(false);
-                            await objSelectedAmmo.SetQuantityAsync(objSelectedAmmo.Quantity - decTopUp, token).ConfigureAwait(false);
-                            string strCurrentlyLoadedText = await objCurrentlyLoadedAmmo
-                                                                  .GetCurrentDisplayNameAsync(token)
-                                                                  .ConfigureAwait(false);
-                            string strSelectedText = await objSelectedAmmo
-                                                           .GetCurrentDisplayNameAsync(token)
-                                                           .ConfigureAwait(false);
-                            await treGearView.DoThreadSafeAsync(x =>
-                            {
-                                // Refresh the Gear tree.
-                                TreeNode objSelectedNode = x.FindNode(objCurrentlyLoadedAmmo.InternalId);
-                                if (objSelectedNode != null)
-                                    objSelectedNode.Text = strCurrentlyLoadedText;
-                                objSelectedNode = x.FindNode(objSelectedAmmo.InternalId);
-                                if (objSelectedNode != null)
-                                    objSelectedNode.Text = strSelectedText;
-                            }, token: token).ConfigureAwait(false);
-                            GetClip(_intActiveAmmoSlot).Ammo
-                                = decQty.ToInt32(); // Bypass AmmoRemaining so as not to alter the gear quantity
-                        }
-
-                        return;
-                    }
-
-                    if (objSelectedAmmo.Quantity > decQty)
-                    {
-                        // Duplicate the ammo into a new entry where we can directly deduct from the quantity as we fire
-                        Gear objNewSelectedAmmo = new Gear(_objCharacter);
-                        try
-                        {
-                            await objNewSelectedAmmo.CopyAsync(objSelectedAmmo, token).ConfigureAwait(false);
-                            await objNewSelectedAmmo.SetQuantityAsync(decQty, token).ConfigureAwait(false);
-                            await lstGears.AddAsync(objNewSelectedAmmo, token).ConfigureAwait(false);
-                            await objSelectedAmmo.SetQuantityAsync(objSelectedAmmo.Quantity - decQty, token).ConfigureAwait(false);
-                            string strId2 = objSelectedAmmo.InternalId;
-                            string strText2 = await objSelectedAmmo.GetCurrentDisplayNameAsync(token).ConfigureAwait(false);
-                            await treGearView.DoThreadSafeAsync(x =>
-                            {
-                                // Refresh the Gear tree.
-                                TreeNode objSelectedNode = x.FindNode(strId2);
-                                if (objSelectedNode != null)
-                                    objSelectedNode.Text = strText2;
-                            }, token: token).ConfigureAwait(false);
-                            objSelectedAmmo = objNewSelectedAmmo;
-                        }
-                        catch
-                        {
-                            await objNewSelectedAmmo.DeleteGearAsync(token: CancellationToken.None).ConfigureAwait(false);
-                            throw;
-                        }
-                    }
-                    else if (decQty > objSelectedAmmo.Quantity)
-                    {
-                        decQty = objSelectedAmmo.Quantity;
-                    }
-
-                    string strId = objSelectedAmmo.InternalId;
-                    string strText = await objSelectedAmmo.GetCurrentDisplayNameAsync(token).ConfigureAwait(false);
-                    await treGearView.DoThreadSafeAsync(x =>
-                    {
-                        // Refresh the Gear tree.
-                        TreeNode objSelectedNode = x.FindNode(strId);
-                        if (objSelectedNode != null)
-                            objSelectedNode.Text = strText;
-                    }, token: token).ConfigureAwait(false);
-                }
-                else
-                {
-                    objSelectedAmmo = objExternalSource;
-                }
-
-                await SetAmmoLoadedAsync(objSelectedAmmo, token).ConfigureAwait(false);
-                if (objCurrentlyLoadedAmmo != objSelectedAmmo)
-                {
-                    if (objCurrentlyLoadedAmmo != null)
-                    {
-                        string strId = objCurrentlyLoadedAmmo.InternalId;
-                        string strText = await objCurrentlyLoadedAmmo.GetCurrentDisplayNameAsync(token)
-                            .ConfigureAwait(false);
-                        if (objSelectedAmmo != null)
-                        {
-                            string strId2 = objSelectedAmmo.InternalId;
-                            string strText2 = await objSelectedAmmo.GetCurrentDisplayNameAsync(token)
-                                .ConfigureAwait(false);
-                            await treGearView.DoThreadSafeAsync(x =>
-                            {
-                                // Refresh the Gear tree.
-                                TreeNode objSelectedNode = x.FindNode(strId);
-                                if (objSelectedNode != null)
-                                    objSelectedNode.Text = strText;
-                                objSelectedNode = x.FindNode(strId2);
-                                if (objSelectedNode != null)
-                                    objSelectedNode.Text = strText2;
-                            }, token: token).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            await treGearView.DoThreadSafeAsync(x =>
-                            {
-                                // Refresh the Gear tree.
-                                TreeNode objSelectedNode = x.FindNode(strId);
-                                if (objSelectedNode != null)
-                                    objSelectedNode.Text = strText;
-                            }, token: token).ConfigureAwait(false);
-                        }
-                    }
-                    else
-                    {
-                        string strId = objSelectedAmmo.InternalId;
-                        string strText = await objSelectedAmmo.GetCurrentDisplayNameAsync(token)
-                            .ConfigureAwait(false);
-                        await treGearView.DoThreadSafeAsync(x =>
-                        {
-                            // Refresh the Gear tree.
-                            TreeNode objSelectedNode = x.FindNode(strId);
-                            if (objSelectedNode != null)
-                                objSelectedNode.Text = strText;
-                        }, token: token).ConfigureAwait(false);
-                    }
-                }
-
-                GetClip(_intActiveAmmoSlot).Ammo
-                    = decQty.ToInt32(); // Bypass AmmoRemaining so as not to alter the gear quantity
-            }
-        }
-
-        public async Task Unload(IAsyncCollection<Gear> lstGears, TreeView treGearView, CancellationToken token = default)
-        {
-            Clip objClip = GetClip(ActiveAmmoSlot);
-            Gear objAmmo = await UnloadGearAsync(lstGears, objClip, token).ConfigureAwait(false);
-            if (objAmmo == null)
-                return;
-            string strText = await objAmmo.GetCurrentDisplayNameAsync(token).ConfigureAwait(false);
-            await treGearView.DoThreadSafeAsync(x =>
-            {
-                // Refresh the Gear tree.
-                TreeNode objSelectedNode = x.FindNode(objAmmo.InternalId);
-                if (objSelectedNode != null)
-                    objSelectedNode.Text = strText;
-            }, token: token).ConfigureAwait(false);
-        }
-
         private static Gear UnloadGear(IAsyncCollection<Gear> lstGears, Clip clipToUnload)
         {
             Gear objAmmo = clipToUnload.AmmoGear;
@@ -13250,7 +12859,7 @@ namespace Chummer.Backend.Equipment
             return objAmmo;
         }
 
-        private static async Task<Gear> UnloadGearAsync(IAsyncCollection<Gear> lstGears, Clip clipToUnload,
+        internal static async Task<Gear> UnloadGearAsync(IAsyncCollection<Gear> lstGears, Clip clipToUnload,
                                                              CancellationToken token = default)
         {
             Gear objAmmo = clipToUnload.AmmoGear;
@@ -13349,55 +12958,7 @@ namespace Chummer.Backend.Equipment
             }
         }
 
-        #region UI Methods
-
-        /// <summary>
-        /// Add a Weapon to the TreeView.
-        /// </summary>
-        /// <param name="cmsWeapon">ContextMenuStrip for the Weapon Node.</param>
-        /// <param name="cmsWeaponAccessory">ContextMenuStrip for Vehicle Accessory Nodes.</param>
-        /// <param name="cmsWeaponAccessoryGear">ContextMenuStrip for Vehicle Weapon Accessory Gear Nodes.</param>
-        /// <param name="token">Cancellation token to listen to.</param>
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsWeapon, ContextMenuStrip cmsWeaponAccessory, ContextMenuStrip cmsWeaponAccessoryGear, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if ((Cyberware || Category == "Gear" || Category.StartsWith("Quality", StringComparison.Ordinal) || !string.IsNullOrEmpty(ParentID)) && !string.IsNullOrEmpty(Source)
-                && !await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).BookEnabledAsync(Source, token).ConfigureAwait(false))
-                return null;
-
-            TreeNode objNode = new TreeNode
-            {
-                Name = InternalId,
-                Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                Tag = this,
-                ContextMenuStrip = cmsWeapon,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-
-            TreeNodeCollection lstChildNodes = objNode.Nodes;
-            // Add Underbarrel Weapons.
-            await UnderbarrelWeapons.ForEachAsync(async (objUnderbarrelWeapon, t) =>
-            {
-                TreeNode objLoopNode =
-                    await objUnderbarrelWeapon.CreateTreeNode(cmsWeapon, cmsWeaponAccessory, cmsWeaponAccessoryGear,
-                        t).ConfigureAwait(false);
-                if (objLoopNode != null)
-                    lstChildNodes.Add(objLoopNode);
-            }, token).ConfigureAwait(false);
-            // Add attached Weapon Accessories.
-            await WeaponAccessories.ForEachAsync(async (objAccessory, t) =>
-            {
-                TreeNode objLoopNode = await objAccessory.CreateTreeNode(cmsWeaponAccessory, cmsWeaponAccessoryGear, t).ConfigureAwait(false);
-                if (objLoopNode != null)
-                    lstChildNodes.Add(objLoopNode);
-            }, token).ConfigureAwait(false);
-
-            if (objNode.GetNodeCount(false) > 0)
-                objNode.Expand();
-
-            return objNode;
-        }
+#region UI Methods
 
         public Color PreferredColor
         {
@@ -13427,163 +12988,6 @@ namespace Chummer.Backend.Equipment
             return Cyberware || Category == "Gear" || Category.StartsWith("Quality", StringComparison.Ordinal) || !string.IsNullOrEmpty(ParentID)
                     ? ColorManager.GrayText
                     : ColorManager.WindowText;
-        }
-
-        public void SetupChildrenWeaponsCollectionChanged(bool blnAdd, TreeView treWeapons, ContextMenuStrip cmsWeapon = null, ContextMenuStrip cmsWeaponAccessory = null, ContextMenuStrip cmsWeaponAccessoryGear = null, AsyncNotifyCollectionChangedEventHandler funcMakeDirty = null)
-        {
-            if (blnAdd)
-            {
-                Task FuncUnderbarrelWeaponsBeforeClearToAdd(object _, NotifyCollectionChangedEventArgs y,
-                    CancellationToken innerToken = default) =>
-                    this.RefreshChildrenWeaponsClearBindings(treWeapons, y, innerToken);
-
-                Task FuncUnderbarrelWeaponsToAdd(object _, NotifyCollectionChangedEventArgs y, CancellationToken innerToken = default) =>
-                    this.RefreshChildrenWeapons(treWeapons, cmsWeapon, cmsWeaponAccessory, cmsWeaponAccessoryGear,
-                        y, funcMakeDirty, token: innerToken);
-
-                Task FuncWeaponAccessoriesBeforeClearToAdd(object _, NotifyCollectionChangedEventArgs y,
-                    CancellationToken innerToken = default) =>
-                    this.RefreshWeaponAccessoriesClearBindings(treWeapons, y, innerToken);
-
-                Task FuncWeaponAccessoriesToAdd(object _, NotifyCollectionChangedEventArgs y, CancellationToken innerToken = default) =>
-                    this.RefreshWeaponAccessories(treWeapons, cmsWeaponAccessory, cmsWeaponAccessoryGear,
-                        t => UnderbarrelWeapons.GetCountAsync(t), y, funcMakeDirty, token: innerToken);
-
-                UnderbarrelWeapons.AddTaggedBeforeClearCollectionChanged(treWeapons,
-                    FuncUnderbarrelWeaponsBeforeClearToAdd);
-                UnderbarrelWeapons.AddTaggedCollectionChanged(treWeapons, FuncUnderbarrelWeaponsToAdd);
-                WeaponAccessories.AddTaggedBeforeClearCollectionChanged(treWeapons,
-                    FuncWeaponAccessoriesBeforeClearToAdd);
-                WeaponAccessories.AddTaggedCollectionChanged(treWeapons, FuncWeaponAccessoriesToAdd);
-                if (funcMakeDirty != null)
-                {
-                    UnderbarrelWeapons.AddTaggedCollectionChanged(treWeapons, funcMakeDirty);
-                    WeaponAccessories.AddTaggedCollectionChanged(treWeapons, funcMakeDirty);
-                }
-                foreach (Weapon objChild in UnderbarrelWeapons)
-                {
-                    objChild.SetupChildrenWeaponsCollectionChanged(true, treWeapons, cmsWeapon, cmsWeaponAccessory, cmsWeaponAccessoryGear, funcMakeDirty);
-                }
-
-                foreach (WeaponAccessory objChild in WeaponAccessories)
-                {
-                    Task FuncWeaponAccessoryGearBeforeClearToAdd(object _, NotifyCollectionChangedEventArgs y,
-                        CancellationToken innerToken = default) =>
-                        this.RefreshChildrenGearsClearBindings(treWeapons, y, innerToken);
-
-                    Task FuncWeaponAccessoryGearToAdd(object _, NotifyCollectionChangedEventArgs y,
-                        CancellationToken innerToken = default) =>
-                        objChild.RefreshChildrenGears(treWeapons, cmsWeaponAccessoryGear, null, y, funcMakeDirty,
-                            token: innerToken);
-
-                    TaggedObservableCollection<Gear> lstGearChildren = objChild.GearChildren;
-                    lstGearChildren.AddTaggedBeforeClearCollectionChanged(treWeapons,
-                        FuncWeaponAccessoryGearBeforeClearToAdd);
-                    lstGearChildren.AddTaggedCollectionChanged(treWeapons, FuncWeaponAccessoryGearToAdd);
-                    if (funcMakeDirty != null)
-                        lstGearChildren.AddTaggedCollectionChanged(treWeapons, funcMakeDirty);
-                    foreach (Gear objGear in lstGearChildren)
-                        objGear.SetupChildrenGearsCollectionChanged(true, treWeapons, cmsWeaponAccessoryGear, null, funcMakeDirty);
-                }
-            }
-            else
-            {
-                UnderbarrelWeapons.RemoveTaggedAsyncBeforeClearCollectionChanged(treWeapons);
-                UnderbarrelWeapons.RemoveTaggedAsyncCollectionChanged(treWeapons);
-                WeaponAccessories.RemoveTaggedAsyncBeforeClearCollectionChanged(treWeapons);
-                WeaponAccessories.RemoveTaggedAsyncCollectionChanged(treWeapons);
-                foreach (Weapon objChild in UnderbarrelWeapons)
-                {
-                    objChild.SetupChildrenWeaponsCollectionChanged(false, treWeapons);
-                }
-                foreach (WeaponAccessory objChild in WeaponAccessories)
-                {
-                    TaggedObservableCollection<Gear> lstGearChildren = objChild.GearChildren;
-                    lstGearChildren.RemoveTaggedAsyncBeforeClearCollectionChanged(treWeapons);
-                    lstGearChildren.RemoveTaggedAsyncCollectionChanged(treWeapons);
-                    foreach (Gear objGear in lstGearChildren)
-                        objGear.SetupChildrenGearsCollectionChanged(false, treWeapons);
-                }
-            }
-        }
-
-        public async Task SetupChildrenWeaponsCollectionChangedAsync(bool blnAdd, TreeView treWeapons, ContextMenuStrip cmsWeapon = null, ContextMenuStrip cmsWeaponAccessory = null, ContextMenuStrip cmsWeaponAccessoryGear = null, AsyncNotifyCollectionChangedEventHandler funcMakeDirty = null, CancellationToken token = default)
-        {
-            if (blnAdd)
-            {
-                Task FuncUnderbarrelWeaponsBeforeClearToAdd(object _, NotifyCollectionChangedEventArgs y,
-                    CancellationToken innerToken = default) =>
-                    this.RefreshChildrenWeaponsClearBindings(treWeapons, y, innerToken);
-
-                Task FuncUnderbarrelWeaponsToAdd(object _, NotifyCollectionChangedEventArgs y, CancellationToken innerToken = default) =>
-                    this.RefreshChildrenWeapons(treWeapons, cmsWeapon, cmsWeaponAccessory, cmsWeaponAccessoryGear,
-                        y, funcMakeDirty, token: innerToken);
-
-                Task FuncWeaponAccessoriesBeforeClearToAdd(object _, NotifyCollectionChangedEventArgs y,
-                    CancellationToken innerToken = default) =>
-                    this.RefreshWeaponAccessoriesClearBindings(treWeapons, y, innerToken);
-
-                Task FuncWeaponAccessoriesToAdd(object _, NotifyCollectionChangedEventArgs y, CancellationToken innerToken = default) =>
-                    this.RefreshWeaponAccessories(treWeapons, cmsWeaponAccessory, cmsWeaponAccessoryGear,
-                        t => UnderbarrelWeapons.GetCountAsync(t), y, funcMakeDirty, token: innerToken);
-
-                UnderbarrelWeapons.AddTaggedBeforeClearCollectionChanged(treWeapons,
-                    FuncUnderbarrelWeaponsBeforeClearToAdd);
-                UnderbarrelWeapons.AddTaggedCollectionChanged(treWeapons, FuncUnderbarrelWeaponsToAdd);
-                WeaponAccessories.AddTaggedBeforeClearCollectionChanged(treWeapons,
-                    FuncWeaponAccessoriesBeforeClearToAdd);
-                WeaponAccessories.AddTaggedCollectionChanged(treWeapons, FuncWeaponAccessoriesToAdd);
-                if (funcMakeDirty != null)
-                {
-                    UnderbarrelWeapons.AddTaggedCollectionChanged(treWeapons, funcMakeDirty);
-                    WeaponAccessories.AddTaggedCollectionChanged(treWeapons, funcMakeDirty);
-                }
-                await UnderbarrelWeapons.ForEachWithSideEffectsAsync(
-                    (objChild, t) => objChild.SetupChildrenWeaponsCollectionChangedAsync(true, treWeapons, cmsWeapon, cmsWeaponAccessory, cmsWeaponAccessoryGear, funcMakeDirty, t),
-                    token).ConfigureAwait(false);
-
-                await WeaponAccessories.ForEachWithSideEffectsAsync(async (objChild, t1) =>
-                {
-                    Task FuncWeaponAccessoryGearBeforeClearToAdd(object _, NotifyCollectionChangedEventArgs y,
-                        CancellationToken innerToken = default) =>
-                        this.RefreshChildrenGearsClearBindings(treWeapons, y, innerToken);
-
-                    Task FuncWeaponAccessoryGearToAdd(object _, NotifyCollectionChangedEventArgs y,
-                        CancellationToken innerToken = default) =>
-                        objChild.RefreshChildrenGears(treWeapons, cmsWeaponAccessoryGear, null, y, funcMakeDirty,
-                            token: innerToken);
-
-                    TaggedObservableCollection<Gear> lstGearChildren = objChild.GearChildren;
-                    lstGearChildren.AddTaggedBeforeClearCollectionChanged(treWeapons,
-                        FuncWeaponAccessoryGearBeforeClearToAdd);
-                    lstGearChildren.AddTaggedCollectionChanged(treWeapons, FuncWeaponAccessoryGearToAdd);
-                    if (funcMakeDirty != null)
-                        lstGearChildren.AddTaggedCollectionChanged(treWeapons, funcMakeDirty);
-                    await lstGearChildren.ForEachWithSideEffectsAsync(
-                        (objGear, t2) => objGear.SetupChildrenGearsCollectionChangedAsync(true, treWeapons,
-                            cmsWeaponAccessoryGear, null, funcMakeDirty, t2),
-                        t1).ConfigureAwait(false);
-                }, token).ConfigureAwait(false);
-            }
-            else
-            {
-                await UnderbarrelWeapons.RemoveTaggedAsyncBeforeClearCollectionChangedAsync(treWeapons, token).ConfigureAwait(false);
-                await UnderbarrelWeapons.RemoveTaggedAsyncCollectionChangedAsync(treWeapons, token).ConfigureAwait(false);
-                await WeaponAccessories.RemoveTaggedAsyncBeforeClearCollectionChangedAsync(treWeapons, token).ConfigureAwait(false);
-                await WeaponAccessories.RemoveTaggedAsyncCollectionChangedAsync(treWeapons, token).ConfigureAwait(false);
-                await UnderbarrelWeapons.ForEachWithSideEffectsAsync(
-                    (objChild, t) => objChild.SetupChildrenWeaponsCollectionChangedAsync(false, treWeapons, token: t),
-                    token).ConfigureAwait(false);
-                await WeaponAccessories.ForEachWithSideEffectsAsync(async (objChild, t1) =>
-                {
-                    TaggedObservableCollection<Gear> lstGearChildren = objChild.GearChildren;
-                    await lstGearChildren.RemoveTaggedAsyncBeforeClearCollectionChangedAsync(treWeapons, t1).ConfigureAwait(false);
-                    await lstGearChildren.RemoveTaggedAsyncCollectionChangedAsync(treWeapons, t1).ConfigureAwait(false);
-                    await lstGearChildren.ForEachWithSideEffectsAsync(
-                        (objGear, t2) => objGear.SetupChildrenGearsCollectionChangedAsync(false, treWeapons, token: t2),
-                        t1).ConfigureAwait(false);
-                }, token).ConfigureAwait(false);
-            }
         }
 
         #endregion UI Methods
@@ -13959,7 +13363,7 @@ namespace Chummer.Backend.Equipment
             }
         }
 
-        private Clip GetClip(int clip)
+        internal Clip GetClip(int clip)
         {
             //1 indexed due legacy
             return _lstAmmo[clip - 1];

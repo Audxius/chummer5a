@@ -482,7 +482,7 @@ namespace Chummer.UI.Shared
                                             int intTargetIndex = 0;
                                             for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                             {
-                                                if (CompareTreeNodes.CompareText(
+                                                if (CompareTreeNodesUiExtensions.CompareText(
                                                         lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                                                 {
                                                     break;
@@ -554,7 +554,7 @@ namespace Chummer.UI.Shared
                                             int intTargetIndex = 0;
                                             for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                             {
-                                                if (CompareTreeNodes.CompareText(
+                                                if (CompareTreeNodesUiExtensions.CompareText(
                                                         lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                                                 {
                                                     break;

@@ -615,35 +615,8 @@ namespace Chummer
             }
         }
 
-        #endregion Properties
-
-        #region Methods
-
-        public async Task<TreeNode> CreateTreeNode(Gear objGear, ContextMenuStrip cmsStackedFocus, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (objGear == null)
-                throw new ArgumentNullException(nameof(objGear));
-            IAsyncDisposable objLocker = await LockObject.EnterReadLockAsync(token).ConfigureAwait(false);
-            try
-            {
-                TreeNode objNode = await objGear.CreateTreeNode(cmsStackedFocus, null, token).ConfigureAwait(false);
-
-                objNode.Name = InternalId;
-                objNode.Text = await LanguageManager.GetStringAsync("String_StackedFocus", token: token).ConfigureAwait(false)
-                               + await LanguageManager.GetStringAsync("String_Colon", token: token).ConfigureAwait(false)
-                               + await LanguageManager.GetStringAsync("String_Space", token: token).ConfigureAwait(false)
-                               + await GetCurrentDisplayNameAsync(token).ConfigureAwait(false);
-                objNode.Tag = this;
-                objNode.Checked = Bonded;
-
-                return objNode;
-            }
-            finally
-            {
-                await objLocker.DisposeAsync().ConfigureAwait(false);
-            }
-        }
+#endregion Properties
+#region Methods
 
         #endregion Methods
 

@@ -259,11 +259,11 @@ namespace Chummer
                 }
             }
 
-            tabCharacterTabs.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            tabInfo.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            tabLongTexts.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            tabStreetGearTabs.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            tabContactTexts.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
+            tabCharacterTabs.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            tabInfo.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            tabLongTexts.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            tabStreetGearTabs.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            tabContactTexts.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
             tabSkillsUc.MakeDirtyWithCharacterUpdate += MakeDirtyWithCharacterUpdate;
             lmtControl.MakeDirty += MakeDirty;
             _tmrSpiritName.Tick += UpdateSpiritName;

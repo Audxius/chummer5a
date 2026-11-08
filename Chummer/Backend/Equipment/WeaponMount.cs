@@ -1961,52 +1961,7 @@ namespace Chummer.Backend.Equipment
             return intRestrictedCount;
         }
 
-        #region UI Methods
-
-        /// <summary>
-        /// Add a Weapon Mount to the TreeView
-        /// </summary>
-        /// <param name="cmsVehicleWeapon">ContextMenuStrip for Vehicle Weapons</param>
-        /// <param name="cmsVehicleWeaponAccessory">ContextMenuStrip for Vehicle Weapon Accessories</param>
-        /// <param name="cmsVehicleWeaponAccessoryGear">ContextMenuStrip for Vehicle Weapon Gear</param>
-        /// <param name="cmsVehicleWeaponMount">ContextMenuStrip for Vehicle Weapon Mounts</param>
-        /// <param name="cmsCyberware">ContextMenuStrip for Cyberware.</param>
-        /// <param name="cmsCyberwareGear">ContextMenuStrip for Gear in Cyberware.</param>
-        /// <param name="cmsVehicleMod">ContextMenuStrip for Vehicle Mods.</param>
-        /// <param name="token">Cancellation token to listen to.</param>
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsVehicleWeaponMount, ContextMenuStrip cmsVehicleWeapon, ContextMenuStrip cmsVehicleWeaponAccessory, ContextMenuStrip cmsVehicleWeaponAccessoryGear, ContextMenuStrip cmsCyberware, ContextMenuStrip cmsCyberwareGear, ContextMenuStrip cmsVehicleMod, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            // Because of the weird way in which weapon mounts work with and without Rigger 5.0, instead of hiding built-in mounts from disabled sourcebooks,
-            // we instead display them as if they were one of the CRB mounts, but give them a different name.
-
-            TreeNode objNode = new TreeNode
-            {
-                Name = InternalId,
-                Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                Tag = this,
-                ContextMenuStrip = cmsVehicleWeaponMount,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-
-            TreeNodeCollection lstChildNodes = objNode.Nodes;
-            // VehicleMods.
-            await VehicleMod.AddModsToTreeNodeCollection(Mods, lstChildNodes, cmsVehicleMod, cmsCyberware, cmsCyberwareGear,
-                cmsVehicleWeapon, cmsVehicleWeaponAccessory, cmsVehicleWeaponAccessoryGear, token).ConfigureAwait(false);
-            await Weapons.ForEachAsync(async (objWeapon, t) =>
-            {
-                TreeNode objLoopNode = await objWeapon.CreateTreeNode(cmsVehicleWeapon, cmsVehicleWeaponAccessory,
-                    cmsVehicleWeaponAccessoryGear, t).ConfigureAwait(false);
-                if (objLoopNode != null)
-                    lstChildNodes.Add(objLoopNode);
-            }, token).ConfigureAwait(false);
-
-            if (objNode.GetNodeCount(false) > 0)
-                objNode.Expand();
-
-            return objNode;
-        }
+#region UI Methods
 
         public Color PreferredColor
         {

@@ -523,28 +523,8 @@ namespace Chummer
                                                                     InternalId, token).ConfigureAwait(false);
         }
 
-        #endregion Methods
-
-        #region UI Methods
-
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsMartialArtTechnique, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            //if (!string.IsNullOrEmpty(ParentID) && !string.IsNullOrEmpty(Source) && !_objCharacter.Settings.BookEnabled(Source))
-            //return null;
-
-            TreeNode objNode = new TreeNode
-            {
-                Name = InternalId,
-                Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                Tag = this,
-                ContextMenuStrip = cmsMartialArtTechnique,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-
-            return objNode;
-        }
+#endregion Methods
+#region UI Methods
 
         public Color PreferredColor =>
             !string.IsNullOrEmpty(Notes)

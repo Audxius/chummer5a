@@ -81,7 +81,7 @@ namespace Chummer.Backend.Equipment
         private decimal _decAmmoBonusPercent;
         private int _intSortOrder;
         private bool _blnStolen;
-        private readonly Character _objCharacter;
+        internal readonly Character _objCharacter;
         private Vehicle _objParent;
         private WeaponMount _objWeaponMountParent;
 
@@ -2860,130 +2860,6 @@ namespace Chummer.Backend.Equipment
                 s_CategoryGroupOrder,
                 x => x.Equals(strKey, StringComparison.OrdinalIgnoreCase));
             return intIndex >= 0 ? intIndex : s_CategoryGroupOrder.Length;
-        }
-
-        /// <summary>
-        /// Creates a synthetic tree node that groups vehicle mods of this mod's category.
-        /// </summary>
-        /// <param name="token">Cancellation token to listen to.</param>
-        /// <returns>A tree node whose Tag is the category group key.</returns>
-        public async Task<TreeNode> CreateCategoryGroupTreeNode(CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            return new TreeNode
-            {
-                Tag = GetCategoryGroupTag(Category),
-                Text = await GetCategoryGroupDisplayNameAsync(Category, _objCharacter, token).ConfigureAwait(false)
-            };
-        }
-
-        /// <summary>
-        /// Adds vehicle mod tree nodes to a parent collection, optionally grouping by category.
-        /// </summary>
-        /// <param name="lstMods">Mods to add.</param>
-        /// <param name="lstChildNodes">Parent node collection to populate.</param>
-        /// <param name="cmsVehicleMod">ContextMenuStrip for Vehicle Mods.</param>
-        /// <param name="cmsCyberware">ContextMenuStrip for Cyberware.</param>
-        /// <param name="cmsCyberwareGear">ContextMenuStrip for Gear in Cyberware.</param>
-        /// <param name="cmsVehicleWeapon">ContextMenuStrip for Vehicle Weapons.</param>
-        /// <param name="cmsVehicleWeaponAccessory">ContextMenuStrip for Vehicle Weapon Accessories.</param>
-        /// <param name="cmsVehicleWeaponAccessoryGear">ContextMenuStrip for Gear in Vehicle Weapon Accessories.</param>
-        /// <param name="token">Cancellation token to listen to.</param>
-        public static async Task AddModsToTreeNodeCollection(
-            TaggedObservableCollection<VehicleMod> lstMods,
-            TreeNodeCollection lstChildNodes,
-            ContextMenuStrip cmsVehicleMod,
-            ContextMenuStrip cmsCyberware,
-            ContextMenuStrip cmsCyberwareGear,
-            ContextMenuStrip cmsVehicleWeapon,
-            ContextMenuStrip cmsVehicleWeaponAccessory,
-            ContextMenuStrip cmsVehicleWeaponAccessoryGear,
-            CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (lstMods == null || lstChildNodes == null)
-                return;
-
-            if (!GlobalSettings.GroupVehicleModsByCategory)
-            {
-                await lstMods.ForEachAsync(async (objMod, t) =>
-                {
-                    TreeNode objLoopNode = await objMod.CreateTreeNode(cmsVehicleMod, cmsCyberware, cmsCyberwareGear,
-                        cmsVehicleWeapon, cmsVehicleWeaponAccessory, cmsVehicleWeaponAccessoryGear, t).ConfigureAwait(false);
-                    if (objLoopNode != null)
-                        lstChildNodes.Add(objLoopNode);
-                }, token).ConfigureAwait(false);
-                return;
-            }
-
-            Dictionary<string, TreeNode> dicCategories = new Dictionary<string, TreeNode>(StringComparer.OrdinalIgnoreCase);
-            await lstMods.ForEachAsync(async (objMod, t) =>
-            {
-                TreeNode objLoopNode = await objMod.CreateTreeNode(cmsVehicleMod, cmsCyberware, cmsCyberwareGear,
-                    cmsVehicleWeapon, cmsVehicleWeaponAccessory, cmsVehicleWeaponAccessoryGear, t).ConfigureAwait(false);
-                if (objLoopNode == null)
-                    return;
-
-                string strCategoryKey = GetCategoryGroupKey(objMod.Category);
-                if (!dicCategories.TryGetValue(strCategoryKey, out TreeNode nodCategory))
-                {
-                    nodCategory = await objMod.CreateCategoryGroupTreeNode(t).ConfigureAwait(false);
-                    dicCategories.Add(strCategoryKey, nodCategory);
-                }
-
-                nodCategory.Nodes.Add(objLoopNode);
-                nodCategory.Expand();
-            }, token).ConfigureAwait(false);
-
-            foreach (string strCategoryKey in dicCategories.Keys
-                         .OrderBy(GetCategoryGroupSortOrder)
-                         .ThenBy(x => x, StringComparer.OrdinalIgnoreCase))
-            {
-                lstChildNodes.Add(dicCategories[strCategoryKey]);
-            }
-        }
-
-        /// <summary>
-        /// Add a piece of Armor to the Armor TreeView.
-        /// </summary>
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsVehicleMod, ContextMenuStrip cmsCyberware, ContextMenuStrip cmsCyberwareGear, ContextMenuStrip cmsVehicleWeapon, ContextMenuStrip cmsVehicleWeaponAccessory, ContextMenuStrip cmsVehicleWeaponAccessoryGear, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (IncludedInVehicle && !string.IsNullOrEmpty(Source) && !await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).BookEnabledAsync(Source, token).ConfigureAwait(false))
-                return null;
-
-            TreeNode objNode = new TreeNode
-            {
-                Name = InternalId,
-                Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                Tag = this,
-                ContextMenuStrip = cmsVehicleMod,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-
-            TreeNodeCollection lstChildNodes = objNode.Nodes;
-            // Cyberware.
-            await Cyberware.ForEachAsync(async (objCyberware, t) =>
-            {
-                TreeNode objLoopNode = await objCyberware.CreateTreeNode(cmsCyberware, cmsCyberwareGear, t).ConfigureAwait(false);
-                if (objLoopNode != null)
-                    lstChildNodes.Add(objLoopNode);
-            }, token).ConfigureAwait(false);
-
-            // VehicleWeapons.
-            await Weapons.ForEachAsync(async (objWeapon, t) =>
-            {
-                TreeNode objLoopNode = await objWeapon.CreateTreeNode(cmsVehicleWeapon, cmsVehicleWeaponAccessory,
-                    cmsVehicleWeaponAccessoryGear, t).ConfigureAwait(false);
-                if (objLoopNode != null)
-                    lstChildNodes.Add(objLoopNode);
-            }, token).ConfigureAwait(false);
-
-            if (objNode.GetNodeCount(false) > 0)
-                objNode.Expand();
-
-            return objNode;
         }
 
         public Color PreferredColor

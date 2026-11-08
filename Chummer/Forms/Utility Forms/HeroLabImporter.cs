@@ -43,7 +43,7 @@ namespace Chummer
         public HeroLabImporter()
         {
             InitializeComponent();
-            tabCharacterText.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
+            tabCharacterText.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
             this.UpdateLightDarkMode();
             this.TranslateWinForm();
             this.UpdateParentForToolTipControls();

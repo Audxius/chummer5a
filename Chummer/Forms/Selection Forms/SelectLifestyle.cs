@@ -293,7 +293,7 @@ namespace Chummer
                             int intTargetIndex = 0;
                             for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                             {
-                                if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                                if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                                 {
                                     break;
                                 }

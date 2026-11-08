@@ -136,40 +136,10 @@ namespace Chummer
 
     public static class CompareTreeNodes
     {
-        /// <summary>
-        /// Sort TreeNodes in alphabetical order, ignoring [].
-        /// </summary>
-        public static int CompareText(TreeNode tx, TreeNode ty)
-        {
-            if (tx == null)
-            {
-                if (ty == null)
-                    return 0;
-                return -1;
-            }
-            return ty == null ? 1 : string.Compare(tx.Text.FastEscape('[', ']'), ty.Text.FastEscape('[', ']'), GlobalSettings.CultureInfo, CompareOptions.StringSort);
-        }
     }
 
     public static class CompareListViewItems
     {
-        /// <summary>
-        /// Sort ListViewItems in reverse chronological order.
-        /// </summary>
-        public static int CompareTextAsDates(ListViewItem lx, ListViewItem ly)
-        {
-            if (lx == null || !DateTime.TryParse(lx.Text, GlobalSettings.CultureInfo, System.Globalization.DateTimeStyles.None, out DateTime datX))
-            {
-                if (ly == null || !DateTime.TryParse(ly.Text, GlobalSettings.CultureInfo, System.Globalization.DateTimeStyles.None, out _))
-                    return 0;
-                return -1;
-            }
-
-            if (ly == null || !DateTime.TryParse(ly.Text, GlobalSettings.CultureInfo, System.Globalization.DateTimeStyles.None, out DateTime datY))
-                return 1;
-
-            return DateTime.Compare(datY, datX);
-        }
     }
 
     public static class CompareListItems
@@ -218,7 +188,7 @@ namespace Chummer
                         intCompareResult = -(objListViewItemWithValueY.Value as IComparable)?.CompareTo(objListViewItemWithValueX.Value) ?? 0;
                 }
                 else
-                    intCompareResult = CompareListViewItems.CompareTextAsDates(objListViewX, objListViewY);
+                    intCompareResult = CompareListViewItemsUiExtensions.CompareTextAsDates(objListViewX, objListViewY);
             }
             else
             {

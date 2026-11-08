@@ -673,7 +673,7 @@ namespace Chummer
             using (LockObject.EnterWriteLock())
             {
                 _onMyDoubleClick += OnDefaultDoubleClick;
-                _onMyKeyDown += OnDefaultKeyDown;
+                _onMyKeyDown += this.OnDefaultKeyDown;
                 _onMyContextMenuDeleteClick += OnDefaultContextMenuDeleteClick;
             }
         }
@@ -1141,24 +1141,6 @@ namespace Chummer
                 }
 
                 return sbdReturn.ToTrimmedString();
-            }
-        }
-
-        public async Task OnDefaultKeyDown(object sender, ValueTuple<KeyEventArgs, TreeNode> args, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (args.Item1.KeyCode == Keys.Delete)
-            {
-                switch (args.Item2.Parent.Tag.ToString())
-                {
-                    case "Recent":
-                        await GlobalSettings.MostRecentlyUsedCharacters.RemoveAsync(await GetFilePathAsync(token).ConfigureAwait(false), token).ConfigureAwait(false);
-                        break;
-
-                    case "Favorite":
-                        await GlobalSettings.FavoriteCharacters.RemoveAsync(await GetFilePathAsync(token).ConfigureAwait(false), token).ConfigureAwait(false);
-                        break;
-                }
             }
         }
 

@@ -4238,61 +4238,7 @@ namespace Chummer
         #endregion IHasMugshots
 
         #region UI Methods
-        private readonly ConcurrentHashSet<TreeNode> _setNodesToTrackForUpdates = new ConcurrentHashSet<TreeNode>();
-        public bool StartTrackingTreeNodeForUpdates(TreeNode objNode)
-        {
-            return _setNodesToTrackForUpdates.TryAdd(objNode);
-        }
-
-        public bool StopTrackingTreeNodeForUpdates(TreeNode objNode)
-        {
-            return _setNodesToTrackForUpdates.Remove(objNode);
-        }
-
-        /// <summary>
-        /// Build up the Tree for the current contact, enemy, or pet.
-        /// </summary>
-        /// <param name="cmsContact">ContextMenuStrip for the contact, enemy, or pet to use.</param>
-        /// <param name="token">Cancellation token to listen to.</param>
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsContact, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-
-            string strNodeText = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false);
-            if (string.IsNullOrEmpty(strNodeText))
-                strNodeText = await LanguageManager.GetStringAsync("String_Unknown", token: token).ConfigureAwait(false);
-            TreeNode objNode = new TreeNode
-            {
-                Name = InternalId,
-                Text = strNodeText,
-                Tag = this,
-                ContextMenuStrip = cmsContact,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-
-            if (await GetEntityTypeAsync(token).ConfigureAwait(false) == ContactType.Pet)
-            {
-                string strMetatype = await GetDisplayMetatypeAsync(token).ConfigureAwait(false);
-                if (!string.IsNullOrEmpty(strMetatype))
-                    objNode.Nodes.Add("TypeData", strMetatype);
-            }
-            else
-            {
-                string strType = await GetDisplayTypeAsync(token).ConfigureAwait(false);
-                if (string.IsNullOrEmpty(strType))
-                    objNode.Nodes.Add("TypeData", await GetQuickTextAsync(token).ConfigureAwait(false));
-                else
-                    objNode.Nodes.Add("TypeData", strType
-                        + await LanguageManager.GetStringAsync("String_Space", token: token).ConfigureAwait(false)
-                        + await GetQuickTextAsync(token).ConfigureAwait(false));
-                string strLocation = await GetLocationAsync(token).ConfigureAwait(false);
-                if (!string.IsNullOrEmpty(strLocation))
-                    objNode.Nodes.Add("Location", strLocation);
-            }
-            objNode.Expand();
-            return objNode;
-        }
+        internal readonly ConcurrentHashSet<TreeNode> _setNodesToTrackForUpdates = new ConcurrentHashSet<TreeNode>();
 
         public void UpdateTrackedNodes_Text(CancellationToken token = default)
         {

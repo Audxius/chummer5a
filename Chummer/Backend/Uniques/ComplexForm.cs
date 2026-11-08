@@ -55,7 +55,7 @@ namespace Chummer
         private Color _colNotes = ColorManager.HasNotesColor;
         private string _strExtra = string.Empty;
         private int _intGrade;
-        private readonly Character _objCharacter;
+        internal readonly Character _objCharacter;
         private SourceString _objCachedSourceDetail;
 
         public Character CharacterObject => _objCharacter; // readonly member, no locking needed
@@ -1492,38 +1492,8 @@ namespace Chummer
             }
         }
 
-        #endregion Properties
-
-        #region UI Methods
-
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsComplexForm, bool blnForInitiationsTab = false, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            IAsyncDisposable objLocker = await LockObject.EnterReadLockAsync(token).ConfigureAwait(false);
-            try
-            {
-                token.ThrowIfCancellationRequested();
-                if ((blnForInitiationsTab ? Grade < 0 : Grade != 0) && !string.IsNullOrEmpty(Source) && !await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).BookEnabledAsync(Source, token).ConfigureAwait(false))
-                    return null;
-
-                TreeNode objNode = new TreeNode
-                {
-                    Name = InternalId,
-                    Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                    Tag = this,
-                    ContextMenuStrip = cmsComplexForm,
-                    ForeColor = blnForInitiationsTab
-                        ? await GetPreferredColorForInitiationsTabAsync(token).ConfigureAwait(false)
-                        : await GetPreferredColorAsync(token).ConfigureAwait(false),
-                    ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-                };
-                return objNode;
-            }
-            finally
-            {
-                await objLocker.DisposeAsync().ConfigureAwait(false);
-            }
-        }
+#endregion Properties
+#region UI Methods
 
         public Color PreferredColor
         {

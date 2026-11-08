@@ -38,45 +38,5 @@ namespace Chummer
 
     public static class Notes
     {
-        /// <summary>
-        /// Writes notes to an IHasNotes object, returns True if notes were changed and False otherwise.
-        /// </summary>
-        public static async Task<bool> WriteNotes(this IHasNotes objNotes, TreeNode treNode, CancellationToken token = default)
-        {
-            if (objNotes == null || treNode == null)
-                return false;
-            TreeView objTreeView = treNode.TreeView;
-            Form frmToUse = objTreeView != null
-                ? await objTreeView.DoThreadSafeFuncAsync(x => x.FindForm(), token: token).ConfigureAwait(false) ?? Program.MainForm
-                : Program.MainForm;
-            string strNotes = await objNotes.GetNotesAsync(token).ConfigureAwait(false);
-            Color objColor = await objNotes.GetNotesColorAsync(token).ConfigureAwait(false);
-            using (ThreadSafeForm<EditNotes> frmItemNotes = await ThreadSafeForm<EditNotes>.GetAsync(t => new EditNotes(strNotes, objColor, t), token).ConfigureAwait(false))
-            {
-                if (await frmItemNotes.ShowDialogSafeAsync(frmToUse, token).ConfigureAwait(false) != DialogResult.OK)
-                    return false;
-
-                await objNotes.SetNotesAsync(frmItemNotes.MyForm.Notes, token).ConfigureAwait(false);
-                await objNotes.SetNotesColorAsync(frmItemNotes.MyForm.NotesColor, token).ConfigureAwait(false);
-            }
-
-            strNotes = (await objNotes.GetNotesAsync(token).ConfigureAwait(false)).WordWrap();
-            objColor = await objNotes.GetPreferredColorAsync(token).ConfigureAwait(false);
-            if (objTreeView != null)
-            {
-                await objTreeView.DoThreadSafeAsync(() =>
-                {
-                    treNode.ForeColor = objColor;
-                    treNode.ToolTipText = strNotes;
-                }, token).ConfigureAwait(false);
-            }
-            else
-            {
-                treNode.ForeColor = objColor;
-                treNode.ToolTipText = strNotes;
-            }
-
-            return true;
-        }
     }
 }

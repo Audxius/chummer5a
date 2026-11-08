@@ -119,7 +119,7 @@ namespace Chummer
                     await objCursorWait.DisposeAsync().ConfigureAwait(false);
                 }
 
-                await LanguageManager
+                await LanguageManagerUiExtensions
                     .PopulateSheetLanguageListAsync(cboLanguage, GlobalSettings.DefaultCharacterSheet,
                                                     _objCharacter, _objExportCulture, token: _objGenericToken)
                     .ConfigureAwait(false);

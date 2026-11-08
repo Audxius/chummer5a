@@ -1941,33 +1941,8 @@ namespace Chummer.Backend.Equipment
 
         public Character CharacterObject => _objCharacter;
 
-        #endregion Properties
-
-        #region UI Methods
-
-        /// <summary>
-        /// Add a piece of Armor to the Armor TreeView.
-        /// </summary>
-        public async Task<TreeNode> CreateTreeNode(CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            //if (!string.IsNullOrEmpty(ParentID) && !string.IsNullOrEmpty(Source) && !_objCharacter.Settings.BookEnabled(Source))
-            //return null;
-
-            TreeNode objNode = new TreeNode
-            {
-                Name = InternalId,
-                Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                Tag = this,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-
-            if (objNode.GetNodeCount(false) > 0)
-                objNode.Expand();
-
-            return objNode;
-        }
+#endregion Properties
+#region UI Methods
 
         #endregion UI Methods
 

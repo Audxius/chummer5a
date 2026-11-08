@@ -4639,35 +4639,7 @@ namespace Chummer.Backend.Equipment
             await OnPropertyChangedAsync(nameof(LifestyleQualities), token).ConfigureAwait(false);
         }
 
-        #region UI Methods
-
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsBasicLifestyle, ContextMenuStrip cmsAdvancedLifestyle, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            IAsyncDisposable objLocker = await LockObject.EnterReadLockAsync(token).ConfigureAwait(false);
-            try
-            {
-                token.ThrowIfCancellationRequested();
-                //if (!string.IsNullOrEmpty(ParentID) && !string.IsNullOrEmpty(Source) && !_objCharacter.Settings.BookEnabled(Source))
-                //return null;
-                TreeNode objNode = new TreeNode
-                {
-                    Name = InternalId,
-                    Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                    Tag = this,
-                    ContextMenuStrip = await GetStyleTypeAsync(token).ConfigureAwait(false) == LifestyleType.Standard
-                        ? cmsBasicLifestyle
-                        : cmsAdvancedLifestyle,
-                    ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                    ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-                };
-                return objNode;
-            }
-            finally
-            {
-                await objLocker.DisposeAsync().ConfigureAwait(false);
-            }
-        }
+#region UI Methods
 
         public Color PreferredColor =>
             !string.IsNullOrEmpty(Notes)

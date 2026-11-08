@@ -64,7 +64,7 @@ namespace Chummer.Backend.Equipment
         private XmlNode _nodBonus;
         private XmlNode _nodWirelessBonus;
         private bool _blnWirelessOn = true;
-        private readonly Character _objCharacter;
+        internal readonly Character _objCharacter;
         private readonly TaggedObservableCollection<Gear> _lstGear;
         private string _strNotes = string.Empty;
         private Color _colNotes = ColorManager.HasNotesColor;
@@ -2619,38 +2619,8 @@ namespace Chummer.Backend.Equipment
             return intRestrictedCount;
         }
 
-        #endregion Methods
-
-        #region UI Methods
-
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsArmorMod, ContextMenuStrip cmsArmorGear, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (IncludedInArmor && !string.IsNullOrEmpty(Source) && !await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).BookEnabledAsync(Source, token).ConfigureAwait(false))
-                return null;
-
-            TreeNode objNode = new TreeNode
-            {
-                Name = InternalId,
-                Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                Tag = this,
-                ContextMenuStrip = string.IsNullOrEmpty(GearCapacity) ? cmsArmorMod : cmsArmorGear,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-
-            TreeNodeCollection lstChildNodes = objNode.Nodes;
-            await GearChildren.ForEachAsync(async (objGear, t) =>
-            {
-                TreeNode objLoopNode = await objGear.CreateTreeNode(cmsArmorGear, null, t).ConfigureAwait(false);
-                if (objLoopNode != null)
-                    lstChildNodes.Add(objLoopNode);
-            }, token).ConfigureAwait(false);
-            if (objNode.GetNodeCount(false) > 0)
-                objNode.Expand();
-
-            return objNode;
-        }
+#endregion Methods
+#region UI Methods
 
         public Color PreferredColor
         {

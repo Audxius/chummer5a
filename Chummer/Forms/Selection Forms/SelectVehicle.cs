@@ -64,7 +64,7 @@ namespace Chummer
         {
             _objCharacter = objCharacter ?? throw new ArgumentNullException(nameof(objCharacter));
             InitializeComponent();
-            tabViews.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
+            tabViews.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
             this.UpdateLightDarkMode();
             this.TranslateWinForm();
             this.UpdateParentForToolTipControls();

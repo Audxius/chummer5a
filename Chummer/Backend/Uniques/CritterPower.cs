@@ -55,7 +55,7 @@ namespace Chummer
         private XmlNode _nodBonus;
         private string _strNotes = string.Empty;
         private Color _colNotes = ColorManager.HasNotesColor;
-        private readonly Character _objCharacter;
+        internal readonly Character _objCharacter;
         private bool _blnCountTowardsLimit = true;
         private int _intRating;
         private int _intGrade;
@@ -973,27 +973,8 @@ namespace Chummer
             return objReturn;
         }
 
-        #endregion Properties
-
-        #region UI Methods
-
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsEnhancement, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (Grade < 0 && !string.IsNullOrEmpty(Source) && !await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).BookEnabledAsync(Source, token).ConfigureAwait(false))
-                return null;
-
-            TreeNode objNode = new TreeNode
-            {
-                Name = InternalId,
-                Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                Tag = this,
-                ContextMenuStrip = cmsEnhancement,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-            return objNode;
-        }
+#endregion Properties
+#region UI Methods
 
         public Color PreferredColor
         {

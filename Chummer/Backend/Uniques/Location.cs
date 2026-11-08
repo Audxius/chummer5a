@@ -463,34 +463,8 @@ namespace Chummer
 
         public ICollection<Location> Parent { get; }
 
-        #endregion Properties
-
-        #region UI Methods
-
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsLocation, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            IAsyncDisposable objLocker = await LockObject.EnterReadLockAsync(token).ConfigureAwait(false);
-            try
-            {
-                token.ThrowIfCancellationRequested();
-                TreeNode objNode = new TreeNode
-                {
-                    Name = InternalId,
-                    Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                    Tag = this,
-                    ContextMenuStrip = cmsLocation,
-                    ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                    ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-                };
-
-                return objNode;
-            }
-            finally
-            {
-                await objLocker.DisposeAsync().ConfigureAwait(false);
-            }
-        }
+#endregion Properties
+#region UI Methods
 
         public Color PreferredColor
         {

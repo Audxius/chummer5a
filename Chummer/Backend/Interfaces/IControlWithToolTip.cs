@@ -36,17 +36,5 @@ namespace Chummer
 
     public static class ControlWithToolTipExtensions
     {
-        /// <summary>
-        /// Unforunately, we need to use this method to make sure HtmlToolTip objects are set properly.
-        /// </summary>
-        public static void UpdateParentForToolTipControls(this Control objParentControl)
-        {
-            foreach (Control objControl in objParentControl.Controls)
-            {
-                if (objControl is IControlWithToolTip objControlCast)
-                    objControlCast.UpdateToolTipParent();
-                objControl.UpdateParentForToolTipControls();
-            }
-        }
     }
 }

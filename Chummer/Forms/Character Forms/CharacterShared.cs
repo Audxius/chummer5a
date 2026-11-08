@@ -2587,7 +2587,7 @@ namespace Chummer
                                 int intTargetIndex = 0;
                                 for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                 {
-                                    if (CompareTreeNodes.CompareText(nodMetamagicParentChildren[intTargetIndex], objNodeForInitiations)
+                                    if (CompareTreeNodesUiExtensions.CompareText(nodMetamagicParentChildren[intTargetIndex], objNodeForInitiations)
                                         >= 0)
                                     {
                                         break;
@@ -2614,7 +2614,7 @@ namespace Chummer
                         int intTargetIndex = 0;
                         for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                         {
-                            if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                            if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                             {
                                 break;
                             }
@@ -2764,7 +2764,7 @@ namespace Chummer
                         int intTargetIndex = 0;
                         for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                         {
-                            if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                            if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                             {
                                 break;
                             }
@@ -2946,7 +2946,7 @@ namespace Chummer
                                 int intTargetIndex = 0;
                                 for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                 {
-                                    if (CompareTreeNodes.CompareText(nodMetamagicParentChildren[intTargetIndex], objNodeForInitiations)
+                                    if (CompareTreeNodesUiExtensions.CompareText(nodMetamagicParentChildren[intTargetIndex], objNodeForInitiations)
                                         >= 0)
                                     {
                                         break;
@@ -2973,7 +2973,7 @@ namespace Chummer
                         int intTargetIndex = 0;
                         for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                         {
-                            if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                            if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                             {
                                 break;
                             }
@@ -3023,7 +3023,7 @@ namespace Chummer
                                 int intTargetIndex = intOffset;
                                 for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                 {
-                                    if (CompareTreeNodes.CompareText(lstRootNodes[intTargetIndex], objNode) >= 0)
+                                    if (CompareTreeNodesUiExtensions.CompareText(lstRootNodes[intTargetIndex], objNode) >= 0)
                                     {
                                         break;
                                     }
@@ -3124,7 +3124,7 @@ namespace Chummer
                         int intTargetIndex = 0;
                         for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                         {
-                            if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                            if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                             {
                                 break;
                             }
@@ -3145,7 +3145,7 @@ namespace Chummer
                         int intTargetIndex = 0;
                         for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                         {
-                            if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                            if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                             {
                                 break;
                             }
@@ -3166,7 +3166,7 @@ namespace Chummer
                         int intTargetIndex = 0;
                         for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                         {
-                            if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                            if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                             {
                                 break;
                             }
@@ -3188,7 +3188,7 @@ namespace Chummer
                         for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                         {
                             t.ThrowIfCancellationRequested();
-                            if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                            if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                             {
                                 break;
                             }
@@ -3209,7 +3209,7 @@ namespace Chummer
                         int intTargetIndex = 0;
                         for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                         {
-                            if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                            if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                             {
                                 break;
                             }
@@ -3232,7 +3232,7 @@ namespace Chummer
                             int intTargetIndex = 0;
                             for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                             {
-                                if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                                if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                                 {
                                     break;
                                 }
@@ -3334,7 +3334,7 @@ namespace Chummer
                             int intTargetIndex = 0;
                             for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                             {
-                                if (CompareTreeNodes.CompareText(nodMetamagicParentChildren[intTargetIndex], objNode)
+                                if (CompareTreeNodesUiExtensions.CompareText(nodMetamagicParentChildren[intTargetIndex], objNode)
                                     >= 0)
                                 {
                                     break;
@@ -3431,7 +3431,7 @@ namespace Chummer
                             int intTargetIndex = 0;
                             for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                             {
-                                if (CompareTreeNodes.CompareText(nodMetamagicParentChildren[intTargetIndex], objNode)
+                                if (CompareTreeNodesUiExtensions.CompareText(nodMetamagicParentChildren[intTargetIndex], objNode)
                                     >= 0)
                                 {
                                     break;
@@ -3603,7 +3603,7 @@ namespace Chummer
                         int intTargetIndex = 0;
                         for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                         {
-                            if (CompareTreeNodes.CompareText(nodMetamagicParentChildren[intTargetIndex], objNode)
+                            if (CompareTreeNodesUiExtensions.CompareText(nodMetamagicParentChildren[intTargetIndex], objNode)
                                 >= 0)
                             {
                                 break;
@@ -3634,7 +3634,7 @@ namespace Chummer
                                 int intTargetIndex = 0;
                                 for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                 {
-                                    if (CompareTreeNodes.CompareText(nodMetamagicParentChildren[intTargetIndex], objNode)
+                                    if (CompareTreeNodesUiExtensions.CompareText(nodMetamagicParentChildren[intTargetIndex], objNode)
                                         >= 0)
                                     {
                                         break;
@@ -3819,7 +3819,7 @@ namespace Chummer
                         int intTargetIndex = 0;
                         for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                         {
-                            if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                            if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                             {
                                 break;
                             }
@@ -4081,7 +4081,7 @@ namespace Chummer
                             int intTargetIndex = 0;
                             for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                             {
-                                if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                                if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                                 {
                                     break;
                                 }
@@ -6750,7 +6750,7 @@ namespace Chummer
                                     int intTargetIndex = 0;
                                     for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                     {
-                                        if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode)
+                                        if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode)
                                             >= 0)
                                         {
                                             break;
@@ -8417,7 +8417,7 @@ namespace Chummer
                                 int intTargetIndex = 0;
                                 for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                 {
-                                    if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >=
+                                    if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >=
                                         0)
                                     {
                                         break;
@@ -8678,7 +8678,7 @@ namespace Chummer
                                 int intTargetIndex = 0;
                                 for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                 {
-                                    if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >=
+                                    if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >=
                                         0)
                                     {
                                         break;
@@ -8784,7 +8784,7 @@ namespace Chummer
                                 int intTargetIndex = 0;
                                 for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                 {
-                                    if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
+                                    if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >= 0)
                                     {
                                         break;
                                     }
@@ -9141,7 +9141,7 @@ namespace Chummer
                                         int intTargetIndex = 0;
                                         for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                         {
-                                            if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex],
+                                            if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex],
                                                     objNode)
                                                 >=
                                                 0)
@@ -9201,7 +9201,7 @@ namespace Chummer
                                 int intTargetIndex = 0;
                                 for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                 {
-                                    if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >=
+                                    if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >=
                                         0)
                                     {
                                         break;
@@ -9374,7 +9374,7 @@ namespace Chummer
                                 int intTargetIndex = 0;
                                 for (; intTargetIndex < intNodesCount; ++intTargetIndex)
                                 {
-                                    if (CompareTreeNodes.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >=
+                                    if (CompareTreeNodesUiExtensions.CompareText(lstParentNodeChildren[intTargetIndex], objNode) >=
                                         0)
                                     {
                                         break;

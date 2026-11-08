@@ -76,7 +76,7 @@ namespace Chummer
             // Remove this line if cmdUploadPastebin_Click has some functionality if DEBUG is not enabled or if tabPage3 gets some other control that can be used if DEBUG is not enabled
             tabOptions.TabPages.Remove(tabGitHubIssues);
 #endif
-            tabOptions.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
+            tabOptions.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
             this.UpdateLightDarkMode(token: token);
             this.TranslateWinForm(token: token);
             pnlHasNotesColorPreview.BackColor = ColorManager.IsLightMode ? _objSelectedHasNotesColor : ColorManager.GenerateDarkModeColor(_objSelectedHasNotesColor);

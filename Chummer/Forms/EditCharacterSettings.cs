@@ -63,7 +63,7 @@ namespace Chummer
         public EditCharacterSettings(CharacterSettings objExistingSettings = null)
         {
             InitializeComponent();
-            tabOptions.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
+            tabOptions.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
             this.UpdateLightDarkMode();
             this.TranslateWinForm();
             this.UpdateParentForToolTipControls();

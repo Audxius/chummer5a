@@ -554,24 +554,8 @@ namespace Chummer
                 : ColorManager.WindowText;
         }
 
-        #endregion Complex Properties
-
-        #region Methods
-
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsInitiationGrade, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            TreeNode objNode = new TreeNode
-            {
-                ContextMenuStrip = cmsInitiationGrade,
-                Name = InternalId,
-                Text = await TextAsync(GlobalSettings.Language, token),
-                Tag = this,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-            return objNode;
-        }
+#endregion Complex Properties
+#region Methods
 
         public int CompareTo(object obj)
         {

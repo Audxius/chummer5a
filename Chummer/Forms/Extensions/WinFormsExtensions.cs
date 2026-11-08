@@ -4188,7 +4188,7 @@ namespace Chummer
                     if (!(objSiblingTag is ICanSort) || objSiblingTag is Location)
                         continue;
 
-                    if (CompareTreeNodes.CompareText(objSibling, objNode) >= 0)
+                    if (CompareTreeNodesUiExtensions.CompareText(objSibling, objNode) >= 0)
                     {
                         intInsertAt = i;
                         break;
@@ -4198,7 +4198,7 @@ namespace Chummer
                 {
                     if (!(objSiblingTag is Location))
                         continue;
-                    if (CompareTreeNodes.CompareText(objSibling, objNode) >= 0)
+                    if (CompareTreeNodesUiExtensions.CompareText(objSibling, objNode) >= 0)
                     {
                         intInsertAt = i;
                         break;
@@ -4212,7 +4212,7 @@ namespace Chummer
                         break;
                     }
 
-                    if (CompareTreeNodes.CompareText(objSibling, objNode) >= 0)
+                    if (CompareTreeNodesUiExtensions.CompareText(objSibling, objNode) >= 0)
                     {
                         intInsertAt = i;
                         break;
@@ -4245,7 +4245,7 @@ namespace Chummer
                     TreeNode[] aobjNodes = new TreeNode[intChildrenCount];
                     objLoopNodeChildren.CopyTo(aobjNodes, 0);
                     objLoopNodeChildren.Clear();
-                    Array.Sort(aobjNodes, CompareTreeNodes.CompareText);
+                    Array.Sort(aobjNodes, CompareTreeNodesUiExtensions.CompareText);
                     objLoopNodeChildren.AddRange(aobjNodes);
 
                     objLoopNode.Expand();
@@ -4279,7 +4279,7 @@ namespace Chummer
                     TreeNode[] aobjNodes = new TreeNode[intChildrenCount];
                     objLoopNodeChildren.CopyTo(aobjNodes, 0);
                     objLoopNodeChildren.Clear();
-                    Array.Sort(aobjNodes, CompareTreeNodes.CompareText);
+                    Array.Sort(aobjNodes, CompareTreeNodesUiExtensions.CompareText);
                     objLoopNodeChildren.AddRange(aobjNodes);
 
                     objLoopNode.Expand();
@@ -4374,7 +4374,7 @@ namespace Chummer
                         if (intCategoryCompare != 0)
                             return intCategoryCompare;
                         return GlobalSettings.AlphabetizeTreeNodesOnInsert
-                            ? CompareTreeNodes.CompareText(nodLeft, nodRight)
+                            ? CompareTreeNodesUiExtensions.CompareText(nodLeft, nodRight)
                             : 0;
                     }
 
@@ -4397,7 +4397,7 @@ namespace Chummer
                         if (intLocationCompare != 0)
                             return intLocationCompare;
                         return GlobalSettings.AlphabetizeTreeNodesOnInsert
-                            ? CompareTreeNodes.CompareText(nodLeft, nodRight)
+                            ? CompareTreeNodesUiExtensions.CompareText(nodLeft, nodRight)
                             : 0;
                     }
 
@@ -4408,7 +4408,7 @@ namespace Chummer
                     if (intSortCompare != 0)
                         return intSortCompare;
                     return GlobalSettings.AlphabetizeTreeNodesOnInsert
-                        ? CompareTreeNodes.CompareText(nodLeft, nodRight)
+                        ? CompareTreeNodesUiExtensions.CompareText(nodLeft, nodRight)
                         : 0;
                 }
 
@@ -4428,7 +4428,7 @@ namespace Chummer
                     return blnLeftMounts ? 1 : -1;
 
                 return GlobalSettings.AlphabetizeTreeNodesOnInsert
-                    ? CompareTreeNodes.CompareText(nodLeft, nodRight)
+                    ? CompareTreeNodesUiExtensions.CompareText(nodLeft, nodRight)
                     : 0;
             }
         }

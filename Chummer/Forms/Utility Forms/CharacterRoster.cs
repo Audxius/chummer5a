@@ -59,7 +59,7 @@ namespace Chummer
         {
             _objGenericToken = _objGenericFormClosingCancellationTokenSource.Token;
             InitializeComponent();
-            tabCharacterTexts.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
+            tabCharacterTexts.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
             this.UpdateLightDarkMode();
             this.TranslateWinForm();
             this.UpdateParentForToolTipControls();

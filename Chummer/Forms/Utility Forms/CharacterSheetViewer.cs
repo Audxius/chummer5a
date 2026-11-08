@@ -112,7 +112,7 @@ namespace Chummer
             try
             {
                 // Populate the XSLT list with all of the XSL files found in the sheets directory.
-                await LanguageManager.PopulateSheetLanguageListAsync(cboLanguage, _strSelectedSheet, _lstCharacters,
+                await LanguageManagerUiExtensions.PopulateSheetLanguageListAsync(cboLanguage, _strSelectedSheet, _lstCharacters,
                                                                      token: _objGenericToken).ConfigureAwait(false);
                 await PopulateXsltList(_objGenericToken).ConfigureAwait(false);
 
@@ -1361,7 +1361,7 @@ namespace Chummer
                 try
                 {
                     // Populate the XSLT list with all of the XSL files found in the sheets directory.
-                    await LanguageManager.PopulateSheetLanguageListAsync(cboLanguage, _strSelectedSheet, _lstCharacters, token: token).ConfigureAwait(false);
+                    await LanguageManagerUiExtensions.PopulateSheetLanguageListAsync(cboLanguage, _strSelectedSheet, _lstCharacters, token: token).ConfigureAwait(false);
                     await PopulateXsltList(token).ConfigureAwait(false);
                     await RefreshCharacters(token).ConfigureAwait(false);
                 }
@@ -1472,7 +1472,7 @@ namespace Chummer
                 try
                 {
                     // Populate the XSLT list with all of the XSL files found in the sheets directory.
-                    await LanguageManager.PopulateSheetLanguageListAsync(cboLanguage, _strSelectedSheet, _lstCharacters, token: token).ConfigureAwait(false);
+                    await LanguageManagerUiExtensions.PopulateSheetLanguageListAsync(cboLanguage, _strSelectedSheet, _lstCharacters, token: token).ConfigureAwait(false);
                     await PopulateXsltList(token).ConfigureAwait(false);
                     await RefreshCharacters(token).ConfigureAwait(false);
                 }

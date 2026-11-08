@@ -44,7 +44,7 @@ namespace Chummer.Backend.Equipment
         private static Logger Log => s_ObjLogger.Value;
         private Guid _guiID;
         private Guid _guiSourceID;
-        private readonly Character _objCharacter;
+        internal readonly Character _objCharacter;
         private XmlNode _nodAllowGear;
         private readonly TaggedObservableCollection<Gear> _lstGear;
         private Weapon _objParent;
@@ -2698,37 +2698,7 @@ namespace Chummer.Backend.Equipment
             return decReturn;
         }
 
-        #region UI Methods
-
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsWeaponAccessory, ContextMenuStrip cmsWeaponAccessoryGear, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (IncludedInWeapon && !string.IsNullOrEmpty(Source) && !await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).BookEnabledAsync(Source, token).ConfigureAwait(false))
-                return null;
-
-            TreeNode objNode = new TreeNode
-            {
-                Name = InternalId,
-                Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                Tag = this,
-                ContextMenuStrip = cmsWeaponAccessory,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-
-            TreeNodeCollection lstChildNodes = objNode.Nodes;
-            await GearChildren.ForEachAsync(async (objGear, t) =>
-            {
-                TreeNode objLoopNode = await objGear.CreateTreeNode(cmsWeaponAccessoryGear, null, t).ConfigureAwait(false);
-                if (objLoopNode != null)
-                {
-                    lstChildNodes.Add(objLoopNode);
-                    objNode.Expand();
-                }
-            }, token).ConfigureAwait(false);
-
-            return objNode;
-        }
+#region UI Methods
 
         public Color PreferredColor
         {

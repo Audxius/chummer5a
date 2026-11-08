@@ -2389,53 +2389,7 @@ namespace Chummer
             }
         }
 
-        private readonly ConcurrentHashSet<TreeNode> _setNodesToTrackForUpdates = new ConcurrentHashSet<TreeNode>();
-        public bool StartTrackingTreeNodeForUpdates(TreeNode objNode)
-        {
-            return _setNodesToTrackForUpdates.TryAdd(objNode);
-        }
-
-        public bool StopTrackingTreeNodeForUpdates(TreeNode objNode)
-        {
-            return _setNodesToTrackForUpdates.Remove(objNode);
-        }
-
-        /// <summary>
-        /// Build up the Tree for the current spirit.
-        /// </summary>
-        /// <param name="cmsSpirit">ContextMenuStrip for the Spirit to use.</param>
-        /// <param name="token">Cancellation token to listen to.</param>
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsSpirit, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-
-            string strNodeText = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false);
-            if (string.IsNullOrEmpty(strNodeText))
-                strNodeText = await LanguageManager.GetStringAsync("String_Unknown", token: token).ConfigureAwait(false);
-            TreeNode objNode = new TreeNode
-            {
-                Name = InternalId,
-                Text = strNodeText,
-                Tag = this,
-                ContextMenuStrip = cmsSpirit,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-
-            string strSpace = await LanguageManager.GetStringAsync("String_Space", token: token).ConfigureAwait(false);
-            string strTypeData = await GetNameAsync(token).ConfigureAwait(false);
-            if (string.IsNullOrEmpty(strTypeData))
-                strTypeData = await LanguageManager.GetStringAsync(await GetRatingLabelAsync(token).ConfigureAwait(false), token: token).ConfigureAwait(false)
-                    + strSpace + (await GetForceAsync(token).ConfigureAwait(false)).ToString(GlobalSettings.CultureInfo);
-            else
-                strTypeData += await LanguageManager.GetStringAsync("String_Comma", token: token).ConfigureAwait(false) + strSpace + await LanguageManager.GetStringAsync(await GetRatingLabelAsync(token).ConfigureAwait(false), token: token).ConfigureAwait(false)
-                    + strSpace + (await GetForceAsync(token).ConfigureAwait(false)).ToString(GlobalSettings.CultureInfo);
-            objNode.Nodes.Add("TypeData", strTypeData);
-            objNode.Nodes.Add("Services", await LanguageManager.GetStringAsync("Label_Spirit_ServicesOwed", token: token)
-                + strSpace + (await GetServicesOwedAsync(token).ConfigureAwait(false)).ToString(GlobalSettings.CultureInfo));
-            objNode.Expand();
-            return objNode;
-        }
+        internal readonly ConcurrentHashSet<TreeNode> _setNodesToTrackForUpdates = new ConcurrentHashSet<TreeNode>();
 
         public void UpdateTrackedNodes_Text(CancellationToken token = default)
         {
@@ -4208,20 +4162,6 @@ namespace Chummer
             {
                 await objLocker.DisposeAsync().ConfigureAwait(false);
             }
-        }
-
-        /// <summary>
-        /// Alias map for SourceDetail control text and tooltip assignation.
-        /// </summary>
-        /// <param name="sourceControl"></param>
-        public void SetSourceDetail(Control sourceControl)
-        {
-            SourceDetail.SetControl(sourceControl);
-        }
-
-        public async Task SetSourceDetailAsync(Control sourceControl, CancellationToken token = default)
-        {
-            await (await GetSourceDetailAsync(token).ConfigureAwait(false)).SetControlAsync(sourceControl, token).ConfigureAwait(false);
         }
 
         #endregion Source

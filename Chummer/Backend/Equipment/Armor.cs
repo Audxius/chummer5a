@@ -3741,45 +3741,7 @@ namespace Chummer.Backend.Equipment
             await GearChildren.ForEachWithSideEffectsAsync((x, t) => x.RefreshWirelessBonusesAsync(t), token: token).ConfigureAwait(false);
         }
 
-        #region UI Methods
-
-        /// <summary>
-        /// Add a piece of Armor to the Armor TreeView.
-        /// </summary>
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsArmor, ContextMenuStrip cmsArmorMod, ContextMenuStrip cmsArmorGear, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            //if (!string.IsNullOrEmpty(ParentID) && !string.IsNullOrEmpty(Source) && !_objCharacter.Settings.BookEnabled(Source))
-            //return null;
-
-            TreeNode objNode = new TreeNode
-            {
-                Name = InternalId,
-                Text = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false),
-                Tag = this,
-                ContextMenuStrip = cmsArmor,
-                ForeColor = await GetPreferredColorAsync(token).ConfigureAwait(false),
-                ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-            };
-
-            TreeNodeCollection lstChildNodes = objNode.Nodes;
-            await ArmorMods.ForEachAsync(async (objMod, t) =>
-            {
-                TreeNode objLoopNode = await objMod.CreateTreeNode(cmsArmorMod, cmsArmorGear, t).ConfigureAwait(false);
-                if (objLoopNode != null)
-                    lstChildNodes.Add(objLoopNode);
-            }, token).ConfigureAwait(false);
-            await GearChildren.ForEachAsync(async (objGear, t) =>
-            {
-                TreeNode objLoopNode = await objGear.CreateTreeNode(cmsArmorGear, null, t).ConfigureAwait(false);
-                if (objLoopNode != null)
-                    lstChildNodes.Add(objLoopNode);
-            }, token).ConfigureAwait(false);
-            if (objNode.GetNodeCount(false) > 0)
-                objNode.Expand();
-
-            return objNode;
-        }
+#region UI Methods
 
         public Color PreferredColor =>
             !string.IsNullOrEmpty(Notes)

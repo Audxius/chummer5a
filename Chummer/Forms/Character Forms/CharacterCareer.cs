@@ -282,16 +282,16 @@ namespace Chummer
             };
             lstNuyen.ListViewItemSorter = _lvwNuyenColumnSorter;
 
-            tabCharacterTabs.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            tabInfo.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            tabLongTexts.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            tabStreetGearTabs.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            tabArmorCM.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            tabCyberwareCM.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            tabGearCM.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            panVehicleCM.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            tabWeaponCM.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
-            tabContactTexts.MouseWheel += CommonFunctions.ShiftTabsOnMouseScroll;
+            tabCharacterTabs.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            tabInfo.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            tabLongTexts.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            tabStreetGearTabs.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            tabArmorCM.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            tabCyberwareCM.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            tabGearCM.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            panVehicleCM.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            tabWeaponCM.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
+            tabContactTexts.MouseWheel += CommonFunctionsUiExtensions.ShiftTabsOnMouseScroll;
             tabSkillsUc.MakeDirtyWithCharacterUpdate += MakeDirtyWithCharacterUpdate;
             lmtControl.MakeDirty += MakeDirty;
             _tmrSpiritName.Tick += UpdateSpiritName;

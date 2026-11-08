@@ -64,7 +64,7 @@ namespace Chummer
         private bool _blnCustomExtended;
         private string _strNotes = string.Empty;
         private Color _colNotes = ColorManager.HasNotesColor;
-        private readonly Character _objCharacter;
+        internal readonly Character _objCharacter;
         private bool _blnAlchemical;
         private bool _blnFreeBonus;
         private bool _blnBarehandedAdept;
@@ -2964,56 +2964,8 @@ namespace Chummer
             }
         }
 
-        #endregion ComplexProperties
-
-        #region UI Methods
-
-        public async Task<TreeNode> CreateTreeNode(ContextMenuStrip cmsSpell, bool blnForInitiationsTab = false, CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            IAsyncDisposable objLocker = await LockObject.EnterReadLockAsync(token).ConfigureAwait(false);
-            try
-            {
-                token.ThrowIfCancellationRequested();
-                if ((blnForInitiationsTab ? Grade < 0 : Grade != 0) && !string.IsNullOrEmpty(Source) && !await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).BookEnabledAsync(Source, token).ConfigureAwait(false))
-                    return null;
-
-                string strText = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false);
-                if (blnForInitiationsTab)
-                {
-                    switch (Category)
-                    {
-                        case "Rituals":
-                            strText = await LanguageManager.GetStringAsync("Label_Ritual", token: token)
-                                      + await LanguageManager.GetStringAsync("String_Space", token: token) + strText;
-                            break;
-
-                        case "Enchantments":
-                            strText = await LanguageManager.GetStringAsync("Label_Enchantment", token: token)
-                                      + await LanguageManager.GetStringAsync("String_Space", token: token) + strText;
-                            break;
-                    }
-                }
-
-                TreeNode objNode = new TreeNode
-                {
-                    Name = InternalId,
-                    Text = strText,
-                    Tag = this,
-                    ContextMenuStrip = cmsSpell,
-                    ForeColor = blnForInitiationsTab
-                        ? await GetPreferredColorForInitiationsTabAsync(token).ConfigureAwait(false)
-                        : await GetPreferredColorAsync(token).ConfigureAwait(false),
-                    ToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap()
-                };
-
-                return objNode;
-            }
-            finally
-            {
-                await objLocker.DisposeAsync().ConfigureAwait(false);
-            }
-        }
+#endregion ComplexProperties
+#region UI Methods
 
         public Color PreferredColor
         {
