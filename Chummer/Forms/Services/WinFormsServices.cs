@@ -30,6 +30,7 @@ namespace Chummer
             HostServices.Busy = new WinFormsBusyIndicator();
             HostServices.Settings = new RegistrySettingsStore();
             HostServices.Theme = new WinFormsThemeService();
+            HostServices.Dialogs = new WinFormsDialogService();
         }
     }
 }

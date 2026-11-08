@@ -1111,10 +1111,10 @@ namespace Chummer.Backend.Equipment
                                     string strDescription = StringExtensions.FastFormat(
                                                        LanguageManager.GetString("String_SelectVariableCost", token: token),
                                                        CurrentDisplayNameShort);
-                                    using (ThreadSafeForm<SelectNumber> frmPickNumber
+                                    using (ThreadSafeDialog<SelectNumberRequest> frmPickNumber
                                            // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                                           = ThreadSafeForm<SelectNumber>.Get(
-                                               () => new SelectNumber(_objCharacter.Settings.MaxNuyenDecimals)
+                                           = ThreadSafeDialog<SelectNumberRequest>.Get(
+                                               () => new SelectNumberRequest(_objCharacter.Settings.MaxNuyenDecimals)
                                                {
                                                    Minimum = decMin,
                                                    Maximum = decMax,
@@ -1123,7 +1123,7 @@ namespace Chummer.Backend.Equipment
                                                }))
                                     {
                                         // ReSharper disable once MethodHasAsyncOverload
-                                        if (frmPickNumber.ShowDialogSafe(_objCharacter, token) == DialogResult.Cancel)
+                                        if (frmPickNumber.ShowDialogSafe(_objCharacter, token) == DialogOutcome.Cancel)
                                         {
                                             _guiID = Guid.Empty;
                                             return;
@@ -1139,9 +1139,9 @@ namespace Chummer.Backend.Equipment
                                         await LanguageManager.GetStringAsync("String_SelectVariableCost", token: token).ConfigureAwait(false),
                                         await GetCurrentDisplayNameShortAsync(token).ConfigureAwait(false));
                                     int intDecimalPlaces = await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).GetMaxNuyenDecimalsAsync(token).ConfigureAwait(false);
-                                    using (ThreadSafeForm<SelectNumber> frmPickNumber
-                                           = await ThreadSafeForm<SelectNumber>.GetAsync(
-                                               () => new SelectNumber(intDecimalPlaces)
+                                    using (ThreadSafeDialog<SelectNumberRequest> frmPickNumber
+                                           = await ThreadSafeDialog<SelectNumberRequest>.GetAsync(
+                                               () => new SelectNumberRequest(intDecimalPlaces)
                                                {
                                                    Minimum = decMin,
                                                    Maximum = decMax,
@@ -1149,7 +1149,7 @@ namespace Chummer.Backend.Equipment
                                                    AllowCancel = false
                                                }, token).ConfigureAwait(false))
                                     {
-                                        if (await frmPickNumber.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                                        if (await frmPickNumber.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                                         {
                                             _guiID = Guid.Empty;
                                             return;
@@ -1696,7 +1696,7 @@ namespace Chummer.Backend.Equipment
                 }
                 else
                 {
-                    using (ThreadSafeForm<SelectSide> frmPickSide = ThreadSafeForm<SelectSide>.Get(() => new SelectSide
+                    using (ThreadSafeDialog<SelectSideRequest> frmPickSide = ThreadSafeDialog<SelectSideRequest>.Get(() => new SelectSideRequest
                            {
                                Description =
                                    StringExtensions.FastFormat(
@@ -1706,7 +1706,7 @@ namespace Chummer.Backend.Equipment
                     {
                         token.ThrowIfCancellationRequested();
                         // Make sure the dialogue window was not canceled.
-                        if (frmPickSide.ShowDialogSafe(_objCharacter, token) == DialogResult.Cancel)
+                        if (frmPickSide.ShowDialogSafe(_objCharacter, token) == DialogOutcome.Cancel)
                         {
                             _guiID = Guid.Empty;
                             return false;
@@ -1861,15 +1861,15 @@ namespace Chummer.Backend.Equipment
                     string strDescription = StringExtensions.FastFormat(
                         await LanguageManager.GetStringAsync("Label_SelectSide", token: token).ConfigureAwait(false),
                         await GetCurrentDisplayNameShortAsync(token).ConfigureAwait(false));
-                    using (ThreadSafeForm<SelectSide> frmPickSide = await ThreadSafeForm<SelectSide>.GetAsync(() =>
-                               new SelectSide
+                    using (ThreadSafeDialog<SelectSideRequest> frmPickSide = await ThreadSafeDialog<SelectSideRequest>.GetAsync(() =>
+                               new SelectSideRequest
                                {
                                    Description = strDescription
                                }, token).ConfigureAwait(false))
                     {
                         // Make sure the dialogue window was not canceled.
                         if (await frmPickSide.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) ==
-                            DialogResult.Cancel)
+                            DialogOutcome.Cancel)
                         {
                             _guiID = Guid.Empty;
                             return false;

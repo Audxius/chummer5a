@@ -461,7 +461,7 @@ namespace Chummer
             }
             else
             {
-                using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem()))
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest()))
                 {
                     frmPickItem.MyForm.SetRestrictedMode(_objCharacter);
                     if (!string.IsNullOrEmpty(ForcedValue))
@@ -470,7 +470,7 @@ namespace Chummer
                     frmPickItem.MyForm.AllowAutoSelect = !string.IsNullOrEmpty(ForcedValue);
 
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -520,7 +520,7 @@ namespace Chummer
                         lstTraditions.Sort(CompareListItems.CompareNames);
                     }
 
-                    using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                    using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                     {
                         AllowAutoSelect = false
                     }))
@@ -529,7 +529,7 @@ namespace Chummer
                         frmPickItem.MyForm.SelectedItem = _objCharacter.MagicTradition.SourceIDString;
 
                         // Make sure the dialogue window was not canceled.
-                        if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                        if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -602,8 +602,8 @@ namespace Chummer
             string strSelect = bonusNode.InnerTextViaPool();
             if (string.IsNullOrEmpty(strSelect))
             {
-                using (ThreadSafeForm<SelectSkillGroup> frmPickSkillGroup = ThreadSafeForm<SelectSkillGroup>.Get(
-                           () => new SelectSkillGroup(_objCharacter)
+                using (ThreadSafeDialog<SelectSkillGroupRequest> frmPickSkillGroup = ThreadSafeDialog<SelectSkillGroupRequest>.Get(
+                           () => new SelectSkillGroupRequest(_objCharacter)
                            {
                                Description = !string.IsNullOrEmpty(_strFriendlyName)
                                    ? StringExtensions.FastFormat(
@@ -622,7 +622,7 @@ namespace Chummer
                         frmPickSkillGroup.MyForm.ExcludeCategory = strExclude;
 
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickSkillGroup.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickSkillGroup.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -839,7 +839,7 @@ namespace Chummer
             if (bonusNode.Attributes?["excludecategory"] != null)
                 strExclude = bonusNode.Attributes["excludecategory"].InnerTextViaPool();
 
-            using (ThreadSafeForm<SelectSkillGroup> frmPickSkillGroup = ThreadSafeForm<SelectSkillGroup>.Get(() => new SelectSkillGroup(_objCharacter)
+            using (ThreadSafeDialog<SelectSkillGroupRequest> frmPickSkillGroup = ThreadSafeDialog<SelectSkillGroupRequest>.Get(() => new SelectSkillGroupRequest(_objCharacter)
             {
                 Description = !string.IsNullOrEmpty(_strFriendlyName)
                            ? StringExtensions.FastFormat(
@@ -857,7 +857,7 @@ namespace Chummer
                     frmPickSkillGroup.MyForm.ExcludeCategory = strExclude;
 
                 // Make sure the dialogue window was not canceled.
-                if (frmPickSkillGroup.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                if (frmPickSkillGroup.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -951,9 +951,9 @@ namespace Chummer
 
                             default:
                             {
-                                using (ThreadSafeForm<SelectAttribute> frmPickAttribute
-                                       = ThreadSafeForm<SelectAttribute>.Get(
-                                           () => new SelectAttribute(lstAbbrevs.ToArray())
+                                using (ThreadSafeDialog<SelectAttributeRequest> frmPickAttribute
+                                       = ThreadSafeDialog<SelectAttributeRequest>.Get(
+                                           () => new SelectAttributeRequest(lstAbbrevs.ToArray())
                                            {
                                                Description = !string.IsNullOrEmpty(_strFriendlyName)
                                                    ? StringExtensions.FastFormat(
@@ -964,7 +964,7 @@ namespace Chummer
                                            }))
                                 {
                                     // Make sure the dialogue window was not canceled.
-                                    if (frmPickAttribute.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                                    if (frmPickAttribute.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                                     {
                                         throw new AbortedException();
                                     }
@@ -1111,8 +1111,8 @@ namespace Chummer
                 default:
                 {
                     // Display the Select Attribute window and record which Skill was selected.
-                    using (ThreadSafeForm<SelectAttribute> frmPickAttribute = ThreadSafeForm<SelectAttribute>.Get(
-                               () => new SelectAttribute(lstAbbrevs.ToArray())
+                    using (ThreadSafeDialog<SelectAttributeRequest> frmPickAttribute = ThreadSafeDialog<SelectAttributeRequest>.Get(
+                               () => new SelectAttributeRequest(lstAbbrevs.ToArray())
                                {
                                    Description = !string.IsNullOrEmpty(_strFriendlyName)
                                        ? StringExtensions.FastFormat(
@@ -1122,7 +1122,7 @@ namespace Chummer
                                }))
                     {
                         // Make sure the dialogue window was not canceled.
-                        if (frmPickAttribute.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                        if (frmPickAttribute.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -1209,7 +1209,7 @@ namespace Chummer
             }
 
             // Display the Select Limit window and record which Limit was selected.
-            using (ThreadSafeForm<SelectLimit> frmPickLimit = ThreadSafeForm<SelectLimit>.Get(() => new SelectLimit(strLimits.ToArray())
+            using (ThreadSafeDialog<SelectLimitRequest> frmPickLimit = ThreadSafeDialog<SelectLimitRequest>.Get(() => new SelectLimitRequest(strLimits.ToArray())
             {
                 Description = !string.IsNullOrEmpty(_strFriendlyName)
                     ? StringExtensions.FastFormat(LanguageManager.GetString("String_Improvement_SelectLimitNamed"), _strFriendlyName)
@@ -1217,7 +1217,7 @@ namespace Chummer
             }))
             {
                 // Make sure the dialogue window was not canceled.
-                if (frmPickLimit.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                if (frmPickLimit.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -1335,7 +1335,7 @@ namespace Chummer
             else
             {
                 // Display the Select Attribute window and record which Skill was selected.
-                using (ThreadSafeForm<SelectAttribute> frmPickAttribute = ThreadSafeForm<SelectAttribute>.Get(() => new SelectAttribute(lstAbbrevs.ToArray())
+                using (ThreadSafeDialog<SelectAttributeRequest> frmPickAttribute = ThreadSafeDialog<SelectAttributeRequest>.Get(() => new SelectAttributeRequest(lstAbbrevs.ToArray())
                 {
                     Description = !string.IsNullOrEmpty(_strFriendlyName)
                         ? StringExtensions.FastFormat(LanguageManager.GetString("String_Improvement_SelectAttributeNamed"), _strFriendlyName)
@@ -1343,7 +1343,7 @@ namespace Chummer
                 }))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickAttribute.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickAttribute.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -1360,8 +1360,8 @@ namespace Chummer
             else
             {
                 // Display the Select Attribute window and record which Skill was selected.
-                using (ThreadSafeForm<SelectSkill> frmPickSkill = ThreadSafeForm<SelectSkill>.Get(() =>
-                           new SelectSkill(_objCharacter)
+                using (ThreadSafeDialog<SelectSkillRequest> frmPickSkill = ThreadSafeDialog<SelectSkillRequest>.Get(() =>
+                           new SelectSkillRequest(_objCharacter)
                            {
                                Description = !string.IsNullOrEmpty(_strFriendlyName)
                                    ? StringExtensions.FastFormat(
@@ -1399,7 +1399,7 @@ namespace Chummer
                     }
 
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickSkill.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickSkill.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -1468,8 +1468,8 @@ namespace Chummer
             else
             {
                 // Display the Select Attribute window and record which Skill was selected.
-                using (ThreadSafeForm<SelectAttribute> frmPickAttribute = ThreadSafeForm<SelectAttribute>.Get(() =>
-                           new SelectAttribute(lstAbbrevs.ToArray())
+                using (ThreadSafeDialog<SelectAttributeRequest> frmPickAttribute = ThreadSafeDialog<SelectAttributeRequest>.Get(() =>
+                           new SelectAttributeRequest(lstAbbrevs.ToArray())
                            {
                                Description = !string.IsNullOrEmpty(_strFriendlyName)
                                    ? StringExtensions.FastFormat(
@@ -1479,7 +1479,7 @@ namespace Chummer
                            }))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickAttribute.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickAttribute.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -1496,8 +1496,8 @@ namespace Chummer
             else
             {
                 // Display the Select Attribute window and record which Skill was selected.
-                using (ThreadSafeForm<SelectSkill> frmPickSkill = ThreadSafeForm<SelectSkill>.Get(() =>
-                           new SelectSkill(_objCharacter)
+                using (ThreadSafeDialog<SelectSkillRequest> frmPickSkill = ThreadSafeDialog<SelectSkillRequest>.Get(() =>
+                           new SelectSkillRequest(_objCharacter)
                            {
                                Description = !string.IsNullOrEmpty(_strFriendlyName)
                                    ? StringExtensions.FastFormat(
@@ -1535,7 +1535,7 @@ namespace Chummer
                     }
 
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickSkill.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickSkill.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -1559,7 +1559,7 @@ namespace Chummer
 
             XmlNode node;
             // Display the Select Spell window.
-            using (ThreadSafeForm<SelectSpell> frmPickSpell = ThreadSafeForm<SelectSpell>.Get(() => new SelectSpell(_objCharacter)))
+            using (ThreadSafeDialog<SelectSpellRequest> frmPickSpell = ThreadSafeDialog<SelectSpellRequest>.Get(() => new SelectSpellRequest(_objCharacter)))
             {
                 string strCategory = bonusNode.Attributes?["category"]?.InnerTextViaPool();
                 if (!string.IsNullOrEmpty(strCategory))
@@ -1574,7 +1574,7 @@ namespace Chummer
                 frmPickSpell.MyForm.IgnoreRequirements = bonusNode.Attributes?["ignorerequirements"]?.InnerTextIsTrueString() == true;
 
                 // Make sure the dialogue window was not canceled.
-                if (frmPickSpell.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                if (frmPickSpell.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -1596,7 +1596,7 @@ namespace Chummer
             XPathNavigator xmlSelectText = node.SelectSingleNodeAndCacheExpressionAsNavigator("bonus/selecttext");
             if (xmlSelectText != null)
             {
-                using (ThreadSafeForm<SelectText> frmPickText = ThreadSafeForm<SelectText>.Get(() => new SelectText
+                using (ThreadSafeDialog<SelectTextRequest> frmPickText = ThreadSafeDialog<SelectTextRequest>.Get(() => new SelectTextRequest
                        {
                            Description = StringExtensions.FastFormat(
                                LanguageManager.GetString("String_Improvement_SelectText"),
@@ -1604,7 +1604,7 @@ namespace Chummer
                        }))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickText.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickText.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                         throw new AbortedException();
 
                     strExtra = frmPickText.MyForm.SelectedValue;
@@ -1645,7 +1645,7 @@ namespace Chummer
             XPathNavigator xmlSelectText = node.SelectSingleNodeAndCacheExpressionAsNavigator("bonus/selecttext");
             if (xmlSelectText != null)
             {
-                using (ThreadSafeForm<SelectText> frmPickText = ThreadSafeForm<SelectText>.Get(() => new SelectText
+                using (ThreadSafeDialog<SelectTextRequest> frmPickText = ThreadSafeDialog<SelectTextRequest>.Get(() => new SelectTextRequest
                        {
                            Description = StringExtensions.FastFormat(
                                LanguageManager.GetString("String_Improvement_SelectText"),
@@ -1653,7 +1653,7 @@ namespace Chummer
                        }))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickText.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickText.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -1697,10 +1697,10 @@ namespace Chummer
             if (string.IsNullOrEmpty(strSelectedComplexForm))
             {
                 // Display the Select ComplexForm window.
-                using (ThreadSafeForm<SelectComplexForm> frmPickComplexForm = ThreadSafeForm<SelectComplexForm>.Get(() => new SelectComplexForm(_objCharacter)))
+                using (ThreadSafeDialog<SelectComplexFormRequest> frmPickComplexForm = ThreadSafeDialog<SelectComplexFormRequest>.Get(() => new SelectComplexFormRequest(_objCharacter)))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickComplexForm.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickComplexForm.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -1969,10 +1969,10 @@ namespace Chummer
             if (xmlProgram == null)
             {
                 // Display the Select Program window.
-                using (ThreadSafeForm<SelectAIProgram> frmPickProgram = ThreadSafeForm<SelectAIProgram>.Get(() => new SelectAIProgram(_objCharacter)))
+                using (ThreadSafeDialog<SelectAIProgramRequest> frmPickProgram = ThreadSafeDialog<SelectAIProgramRequest>.Get(() => new SelectAIProgramRequest(_objCharacter)))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickProgram.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickProgram.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -1987,7 +1987,7 @@ namespace Chummer
             XPathNavigator xmlSelectText = xmlProgram.SelectSingleNodeAndCacheExpressionAsNavigator("bonus/selecttext");
             if (xmlSelectText != null)
             {
-                using (ThreadSafeForm<SelectText> frmPickText = ThreadSafeForm<SelectText>.Get(() => new SelectText
+                using (ThreadSafeDialog<SelectTextRequest> frmPickText = ThreadSafeDialog<SelectTextRequest>.Get(() => new SelectTextRequest
                        {
                            Description = StringExtensions.FastFormat(
                                LanguageManager.GetString("String_Improvement_SelectText"),
@@ -1995,7 +1995,7 @@ namespace Chummer
                        }))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickText.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickText.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -2035,10 +2035,10 @@ namespace Chummer
             if (xmlProgram == null)
             {
                 // Display the Select Spell window.
-                using (ThreadSafeForm<SelectAIProgram> frmPickProgram = ThreadSafeForm<SelectAIProgram>.Get(() => new SelectAIProgram(_objCharacter, false, true)))
+                using (ThreadSafeDialog<SelectAIProgramRequest> frmPickProgram = ThreadSafeDialog<SelectAIProgramRequest>.Get(() => new SelectAIProgramRequest(_objCharacter, false, true)))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickProgram.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickProgram.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -2053,7 +2053,7 @@ namespace Chummer
             XPathNavigator xmlSelectText = xmlProgram.SelectSingleNodeAndCacheExpressionAsNavigator("bonus/selecttext");
             if (xmlSelectText != null)
             {
-                using (ThreadSafeForm<SelectText> frmPickText = ThreadSafeForm<SelectText>.Get(() => new SelectText
+                using (ThreadSafeDialog<SelectTextRequest> frmPickText = ThreadSafeDialog<SelectTextRequest>.Get(() => new SelectTextRequest
                        {
                            Description = StringExtensions.FastFormat(
                                LanguageManager.GetString("String_Improvement_SelectText"),
@@ -2061,7 +2061,7 @@ namespace Chummer
                        }))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickText.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickText.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -2119,13 +2119,13 @@ namespace Chummer
                 throw new AbortedException();
             }
 
-            using (ThreadSafeForm<SelectItem> frmSelect = ThreadSafeForm<SelectItem>.Get(() => new SelectItem()))
+            using (ThreadSafeDialog<SelectItemRequest> frmSelect = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest()))
             {
                 int count = 0;
                 //Black magic LINQ to cast content of list to another type
                 frmSelect.MyForm.SetGeneralItemsMode(lstSelectedContacts.Select(x => new ListItem(count++.ToString(GlobalSettings.InvariantCultureInfo), x.Name)));
 
-                if (frmSelect.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                if (frmSelect.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     throw new AbortedException();
 
                 Contact objSelectedContact = int.TryParse(frmSelect.MyForm.SelectedItem, out int intIndex)
@@ -2309,9 +2309,9 @@ namespace Chummer
 
                     default:
                     {
-                        using (ThreadSafeForm<SelectAttribute> frmPickAttribute = ThreadSafeForm<SelectAttribute>.Get(
+                        using (ThreadSafeDialog<SelectAttributeRequest> frmPickAttribute = ThreadSafeDialog<SelectAttributeRequest>.Get(
                                    () =>
-                                       new SelectAttribute(lstAbbrevs.ToArray())
+                                       new SelectAttributeRequest(lstAbbrevs.ToArray())
                                        {
                                            Description = !string.IsNullOrEmpty(_strFriendlyName)
                                                ? StringExtensions.FastFormat(
@@ -2322,7 +2322,7 @@ namespace Chummer
                                        }))
                         {
                             // Make sure the dialogue window was not canceled.
-                            if (frmPickAttribute.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                            if (frmPickAttribute.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                             {
                                 throw new AbortedException();
                             }
@@ -3571,8 +3571,8 @@ namespace Chummer
                         }
                     }
 
-                    using (ThreadSafeForm<SelectItem> frmPickCategory = ThreadSafeForm<SelectItem>.Get(() =>
-                                new SelectItem
+                    using (ThreadSafeDialog<SelectItemRequest> frmPickCategory = ThreadSafeDialog<SelectItemRequest>.Get(() =>
+                                new SelectItemRequest
                                 {
                                     Description = !string.IsNullOrEmpty(_strFriendlyName)
                                         ? StringExtensions.FastFormat(
@@ -3592,7 +3592,7 @@ namespace Chummer
                             frmPickCategory.MyForm.ForceItem(ForcedValue);
                         }
 
-                        if (frmPickCategory.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                        if (frmPickCategory.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -3670,7 +3670,7 @@ namespace Chummer
                 }
 
                 Weapon objSelectedWeapon;
-                using (ThreadSafeForm<SelectItem> frmPickWeapon = ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                using (ThreadSafeDialog<SelectItemRequest> frmPickWeapon = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                        {
                            Description = !string.IsNullOrEmpty(_strFriendlyName)
                                ? StringExtensions.FastFormat(
@@ -3688,7 +3688,7 @@ namespace Chummer
                     frmPickWeapon.MyForm.ForceItem(ForcedValue);
 
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickWeapon.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickWeapon.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -3710,13 +3710,13 @@ namespace Chummer
         {
             if (bonusNode == null)
                 throw new ArgumentNullException(nameof(bonusNode));
-            using (ThreadSafeForm<SelectMentorSpirit> frmPickMentorSpirit = ThreadSafeForm<SelectMentorSpirit>.Get(() => new SelectMentorSpirit(_objCharacter)
+            using (ThreadSafeDialog<SelectMentorSpiritRequest> frmPickMentorSpirit = ThreadSafeDialog<SelectMentorSpiritRequest>.Get(() => new SelectMentorSpiritRequest(_objCharacter)
             {
                 ForcedMentor = ForcedValue
             }))
             {
                 // Make sure the dialogue window was not canceled.
-                if (frmPickMentorSpirit.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                if (frmPickMentorSpirit.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -3756,13 +3756,13 @@ namespace Chummer
         {
             if (bonusNode == null)
                 throw new ArgumentNullException(nameof(bonusNode));
-            using (ThreadSafeForm<SelectMentorSpirit> frmPickMentorSpirit = ThreadSafeForm<SelectMentorSpirit>.Get(() => new SelectMentorSpirit(_objCharacter, "paragons.xml")
+            using (ThreadSafeDialog<SelectMentorSpiritRequest> frmPickMentorSpirit = ThreadSafeDialog<SelectMentorSpiritRequest>.Get(() => new SelectMentorSpiritRequest(_objCharacter, "paragons.xml")
             {
                 ForcedMentor = ForcedValue
             }))
             {
                 // Make sure the dialogue window was not canceled.
-                if (frmPickMentorSpirit.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                if (frmPickMentorSpirit.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -3963,7 +3963,7 @@ namespace Chummer
         {
             if (bonusNode == null)
                 throw new ArgumentNullException(nameof(bonusNode));
-            using (ThreadSafeForm<SelectSide> frmPickSide = ThreadSafeForm<SelectSide>.Get(() => new SelectSide
+            using (ThreadSafeDialog<SelectSideRequest> frmPickSide = ThreadSafeDialog<SelectSideRequest>.Get(() => new SelectSideRequest
             {
                 Description = StringExtensions.FastFormat(LanguageManager.GetString("Label_SelectSide"), _strFriendlyName)
             }))
@@ -3971,7 +3971,7 @@ namespace Chummer
                 if (!string.IsNullOrEmpty(ForcedValue))
                     frmPickSide.MyForm.ForceValue(ForcedValue);
                 // Make sure the dialogue window was not canceled.
-                else if (frmPickSide.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                else if (frmPickSide.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -4075,7 +4075,7 @@ namespace Chummer
                             int intLevels = ImprovementManager.ValueToInt(_objCharacter, objNode["val"]?.InnerTextViaPool(), _intRating);
                             string strPointsPerLevel = objNode["pointsperlevel"]?.InnerTextViaPool();
                             // Display the Select Power window and record which Power was selected.
-                            using (ThreadSafeForm<SelectPower> frmPickPower = ThreadSafeForm<SelectPower>.Get(() => new SelectPower(_objCharacter)))
+                            using (ThreadSafeDialog<SelectPowerRequest> frmPickPower = ThreadSafeDialog<SelectPowerRequest>.Get(() => new SelectPowerRequest(_objCharacter)))
                             {
                                 frmPickPower.MyForm.ForBonus = true;
                                 frmPickPower.MyForm.IgnoreLimits = objNode["ignorerating"]?.InnerTextIsTrueString() == true;
@@ -4090,7 +4090,7 @@ namespace Chummer
                                     frmPickPower.MyForm.LimitToPowers = strLimitToPowers;
 
                                 // Make sure the dialogue window was not canceled.
-                                if (frmPickPower.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                                if (frmPickPower.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                                     throw new AbortedException();
 
                                 objXmlPower = xmlDocument.TryGetNodeByNameOrId("/chummer/powers/power", frmPickPower.MyForm.SelectedPower)
@@ -4208,11 +4208,11 @@ namespace Chummer
                             throw new AbortedException();
                         }
 
-                        using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem()))
+                        using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest()))
                         {
                             frmPickItem.MyForm.SetGeneralItemsMode(lstArts);
                             // Don't do anything else if the form was canceled.
-                            if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                            if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                                 throw new AbortedException();
 
                             objXmlSelectedArt = objXmlDocument.TryGetNodeByNameOrId("/chummer/powers/power", frmPickItem.MyForm.SelectedItem)
@@ -4226,10 +4226,10 @@ namespace Chummer
                 }
                 else
                 {
-                    using (ThreadSafeForm<SelectArt> frmPickArt = ThreadSafeForm<SelectArt>.Get(() => new SelectArt(_objCharacter, SelectArt.Mode.Art)))
+                    using (ThreadSafeDialog<SelectArtRequest> frmPickArt = ThreadSafeDialog<SelectArtRequest>.Get(() => new SelectArtRequest(_objCharacter, SelectArtMode.Art)))
                     {
                         // Don't do anything else if the form was canceled.
-                        if (frmPickArt.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                        if (frmPickArt.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                             throw new AbortedException();
 
                         objXmlSelectedArt = objXmlDocument.TryGetNodeByNameOrId("/chummer/powers/power", frmPickArt.MyForm.SelectedItem)
@@ -4312,11 +4312,11 @@ namespace Chummer
                             throw new AbortedException();
                         }
 
-                        using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem()))
+                        using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest()))
                         {
                             frmPickItem.MyForm.SetGeneralItemsMode(lstMetamagics);
                             // Don't do anything else if the form was canceled.
-                            if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                            if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                                 throw new AbortedException();
 
                             objXmlSelectedMetamagic = objXmlDocument.TryGetNodeByNameOrId("/chummer/metamagics/metamagic", frmPickItem.MyForm.SelectedItem)
@@ -4339,10 +4339,10 @@ namespace Chummer
                 else
                 {
                     InitiationGrade objGrade = new InitiationGrade(_objCharacter) { Grade = -1 };
-                    using (ThreadSafeForm<SelectMetamagic> frmPickMetamagic = ThreadSafeForm<SelectMetamagic>.Get(() => new SelectMetamagic(_objCharacter, objGrade)))
+                    using (ThreadSafeDialog<SelectMetamagicRequest> frmPickMetamagic = ThreadSafeDialog<SelectMetamagicRequest>.Get(() => new SelectMetamagicRequest(_objCharacter, objGrade)))
                     {
                         // Don't do anything else if the form was canceled.
-                        if (frmPickMetamagic.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                        if (frmPickMetamagic.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                             throw new AbortedException();
 
                         objXmlSelectedMetamagic = objXmlDocument.TryGetNodeByNameOrId("/chummer/metamagics/metamagic", frmPickMetamagic.MyForm.SelectedMetamagic)
@@ -4426,11 +4426,11 @@ namespace Chummer
                             throw new AbortedException();
                         }
 
-                        using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem()))
+                        using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest()))
                         {
                             frmPickItem.MyForm.SetGeneralItemsMode(lstEchoes);
                             // Don't do anything else if the form was canceled.
-                            if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                            if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                                 throw new AbortedException();
 
                             xmlSelectedEcho = objXmlDocument.TryGetNodeByNameOrId("/chummer/echoes/echo", frmPickItem.MyForm.SelectedItem)
@@ -4453,10 +4453,10 @@ namespace Chummer
                 else
                 {
                     InitiationGrade objGrade = new InitiationGrade(_objCharacter) { Grade = -1, Technomancer = true };
-                    using (ThreadSafeForm<SelectMetamagic> frmPickMetamagic = ThreadSafeForm<SelectMetamagic>.Get(() => new SelectMetamagic(_objCharacter, objGrade)))
+                    using (ThreadSafeDialog<SelectMetamagicRequest> frmPickMetamagic = ThreadSafeDialog<SelectMetamagicRequest>.Get(() => new SelectMetamagicRequest(_objCharacter, objGrade)))
                     {
                         // Don't do anything else if the form was canceled.
-                        if (frmPickMetamagic.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                        if (frmPickMetamagic.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                             throw new AbortedException();
 
                         xmlSelectedEcho = objXmlDocument.TryGetNodeByNameOrId("/chummer/echoes/echo", frmPickMetamagic.MyForm.SelectedMetamagic)
@@ -5189,11 +5189,11 @@ namespace Chummer
                     }
                 }
 
-                using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem()))
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest()))
                 {
                     frmPickItem.MyForm.SetGeneralItemsMode(lstCritters);
 
-                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -5216,7 +5216,7 @@ namespace Chummer
             SelectedValue = string.Empty;
             if (nodeList.Count > 0)
             {
-                using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                 {
                     Description = StringExtensions.FastFormat(LanguageManager.GetString("String_Improvement_SelectText"), _strFriendlyName)
                 }))
@@ -5231,7 +5231,7 @@ namespace Chummer
                     }
 
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -5288,7 +5288,7 @@ namespace Chummer
 
                 if (lstArmors.Count > 0)
                 {
-                    using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                    using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                     {
                         Description = StringExtensions.FastFormat(
                                                            LanguageManager.GetString("String_Improvement_SelectText"),
@@ -5304,7 +5304,7 @@ namespace Chummer
                         }
 
                         // Make sure the dialogue window was not canceled.
-                        if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                        if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -5348,7 +5348,7 @@ namespace Chummer
 
                 if (list.Count == 0)
                     throw new AbortedException();
-                using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                 {
                     Description = StringExtensions.FastFormat(
                                                        LanguageManager.GetString("String_Improvement_SelectText"),
@@ -5364,7 +5364,7 @@ namespace Chummer
                     }
 
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -5389,7 +5389,7 @@ namespace Chummer
             {
                 // If the character is null (this is a Vehicle), the user must enter their own string.
                 // Display the Select Item window and record the value that was entered.
-                using (ThreadSafeForm<SelectText> frmPickText = ThreadSafeForm<SelectText>.Get(() => new SelectText
+                using (ThreadSafeDialog<SelectTextRequest> frmPickText = ThreadSafeDialog<SelectTextRequest>.Get(() => new SelectTextRequest
                 {
                     Description = StringExtensions.FastFormat(LanguageManager.GetString("String_Improvement_SelectText"), _strFriendlyName)
                 }))
@@ -5401,7 +5401,7 @@ namespace Chummer
                     }
 
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickText.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickText.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -5441,7 +5441,7 @@ namespace Chummer
                             throw new AbortedException();
                         }
 
-                        using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                        using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                         {
                             Description = StringExtensions.FastFormat(
                                                                LanguageManager.GetString(
@@ -5457,7 +5457,7 @@ namespace Chummer
                             }
 
                             // Make sure the dialogue window was not canceled.
-                            if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                            if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                             {
                                 throw new AbortedException();
                             }
@@ -5522,13 +5522,13 @@ namespace Chummer
                 }
 
                 // Display the Select Critter Power window and record which power was selected.
-                using (ThreadSafeForm<SelectOptionalPower> frmPickPower = ThreadSafeForm<SelectOptionalPower>.Get(() => new SelectOptionalPower(_objCharacter, lstPowerExtraPairs.ToArray())
+                using (ThreadSafeDialog<SelectOptionalPowerRequest> frmPickPower = ThreadSafeDialog<SelectOptionalPowerRequest>.Get(() => new SelectOptionalPowerRequest(_objCharacter, lstPowerExtraPairs.ToArray())
                 {
                     Description = LanguageManager.GetString("String_Improvement_SelectOptionalPower")
                 }))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickPower.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickPower.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -5643,14 +5643,14 @@ namespace Chummer
                     throw new AbortedException();
                 }
 
-                using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                 {
                     AllowAutoSelect = false
                 }))
                 {
                     frmPickItem.MyForm.SetGeneralItemsMode(lstItems);
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -5681,7 +5681,7 @@ namespace Chummer
 
                 default:
                 {
-                    using (ThreadSafeForm<SelectItem> frmSelect = ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                    using (ThreadSafeDialog<SelectItemRequest> frmSelect = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                     {
                         AllowAutoSelect = true
                     }))
@@ -5693,7 +5693,7 @@ namespace Chummer
                             frmSelect.MyForm.ForceItem(strText);
                         }
 
-                        if (frmSelect.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                        if (frmSelect.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -5785,12 +5785,12 @@ namespace Chummer
 
                 XmlNode objXmlSelectedQuality;
                 XmlNode objXmlBonusQuality;
-                using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem()))
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest()))
                 {
                     frmPickItem.MyForm.SetGeneralItemsMode(lstQualities);
 
                     // Don't do anything else if the form was canceled.
-                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                         throw new AbortedException();
                     objXmlSelectedQuality = objXmlDocument.TryGetNodeByNameOrId(
                         "/chummer/qualities/quality", frmPickItem.MyForm.SelectedItem);
@@ -5839,13 +5839,13 @@ namespace Chummer
                         throw new AbortedException();
                     }
 
-                    using (ThreadSafeForm<SelectItem> frmPickItem
-                           = ThreadSafeForm<SelectItem>.Get(() => new SelectItem()))
+                    using (ThreadSafeDialog<SelectItemRequest> frmPickItem
+                           = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest()))
                     {
                         frmPickItem.MyForm.SetGeneralItemsMode(lstQualities);
 
                         // Don't do anything else if the form was canceled.
-                        if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                        if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                             throw new AbortedException();
                         if (frmPickItem.MyForm.SelectedItem != "None")
                         {
@@ -5984,13 +5984,13 @@ namespace Chummer
             else
             {
                 // Display the Select Spell window.
-                using (ThreadSafeForm<SelectSpellCategory> frmPickSpellCategory = ThreadSafeForm<SelectSpellCategory>.Get(() => new SelectSpellCategory(_objCharacter)
+                using (ThreadSafeDialog<SelectSpellCategoryRequest> frmPickSpellCategory = ThreadSafeDialog<SelectSpellCategoryRequest>.Get(() => new SelectSpellCategoryRequest(_objCharacter)
                 {
                     Description = LanguageManager.GetString("Title_SelectSpellCategory")
                 }))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickSpellCategory.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickSpellCategory.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -6018,7 +6018,7 @@ namespace Chummer
             else
             {
                 // Display the Select Spell window.
-                using (ThreadSafeForm<SelectSpellCategory> frmPickSpellCategory = ThreadSafeForm<SelectSpellCategory>.Get(() => new SelectSpellCategory(_objCharacter)
+                using (ThreadSafeDialog<SelectSpellCategoryRequest> frmPickSpellCategory = ThreadSafeDialog<SelectSpellCategoryRequest>.Get(() => new SelectSpellCategoryRequest(_objCharacter)
                 {
                     Description = LanguageManager.GetString("Title_SelectSpellCategory")
                 }))
@@ -6026,7 +6026,7 @@ namespace Chummer
                     frmPickSpellCategory.MyForm.SetExcludeCategories(bonusNode.Attributes?["exclude"]?.InnerTextViaPool().SplitNoAlloc(',', StringSplitOptions.RemoveEmptyEntries));
 
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickSpellCategory.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickSpellCategory.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -6048,13 +6048,13 @@ namespace Chummer
             }
             else
             {
-                using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                 {
                     Description = LanguageManager.GetString("Title_SelectSpellDescriptor")
                 }))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -6077,13 +6077,13 @@ namespace Chummer
             }
             else
             {
-                using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                 {
                     Description = LanguageManager.GetString("Title_SelectSpellDescriptor")
                 }))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -6219,7 +6219,7 @@ namespace Chummer
                         }
                     }
 
-                    using (ThreadSafeForm<SelectItem> frmSelect = ThreadSafeForm<SelectItem>.Get(() => new SelectItem()))
+                    using (ThreadSafeDialog<SelectItemRequest> frmSelect = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest()))
                     {
                         frmSelect.MyForm.SetGeneralItemsMode(lstSpirits);
                         frmSelect.MyForm.ForceItem(TakeNextForcedValue());
@@ -6228,7 +6228,7 @@ namespace Chummer
                                 LanguageManager.GetString("String_Improvement_SelectSpiritType"),
                                 _strFriendlyName)
                             : LanguageManager.GetString("String_Improvement_SelectSpiritTypeGeneric");
-                        if (frmSelect.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                        if (frmSelect.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -6414,7 +6414,7 @@ namespace Chummer
                         lstSkills.Sort(CompareListItems.CompareNames);
                     }
 
-                    using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                    using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                     {
                         Description = LanguageManager.GetString("String_DisableSkillGroupPrompt"),
                         AllowAutoSelect = false
@@ -6423,7 +6423,7 @@ namespace Chummer
                         frmPickItem.MyForm.SetGeneralItemsMode(lstSkills);
 
                         // Make sure the dialogue window was not canceled.
-                        if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                        if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -6983,7 +6983,7 @@ namespace Chummer
                         lstActions.Sort(CompareListItems.CompareNames);
                     }
 
-                    using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                    using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                     {
                         AllowAutoSelect = false
                     }))
@@ -6991,7 +6991,7 @@ namespace Chummer
                         frmPickItem.MyForm.SetDropdownItemsMode(lstActions);
 
                         // Make sure the dialogue window was not canceled.
-                        if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                        if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -7101,7 +7101,7 @@ namespace Chummer
             ForcedValue = strForcedValue;
             Skill objSkill = _objCharacter.SkillsSection.GetActiveSkill(strSkill) ?? throw new AbortedException();
             // Select the actual specialization to add as an expertise
-            using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(() => new SelectItem()))
+            using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest()))
             {
                 string strLimitToSpecialization = bonusNode.Attributes?["limittospecialization"]?.InnerTextViaPool();
                 if (!string.IsNullOrEmpty(strLimitToSpecialization))
@@ -7116,7 +7116,7 @@ namespace Chummer
 
                 // Make sure the dialogue window was not canceled.
                 string strSelected = frmPickItem.MyForm.SelectedName;
-                if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel || string.IsNullOrEmpty(strSelected))
+                if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel || string.IsNullOrEmpty(strSelected))
                 {
                     throw new AbortedException();
                 }

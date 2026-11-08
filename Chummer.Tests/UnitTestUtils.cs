@@ -36,6 +36,9 @@ namespace Chummer.Tests
         [AssemblyInitialize]
         public static void Initialize(TestContext context)
         {
+            // The legacy WinForms host's services, so engine behaviour in these net48 tests matches the original
+            // (e.g. dialogs are real forms that auto-close in unit test mode). Must precede anything touching GlobalSettings.
+            WinFormsServices.Register();
             Utils.IsUnitTest = true;
             Utils.IsUnitTestForUI = false;
             Utils.CreateSynchronizationContext();

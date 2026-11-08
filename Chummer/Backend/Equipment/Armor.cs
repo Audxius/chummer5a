@@ -442,9 +442,9 @@ namespace Chummer.Backend.Equipment
                             string strDescription = StringExtensions.FastFormat(
                                            LanguageManager.GetString("String_SelectVariableCost", token: token),
                                            CurrentDisplayNameShort);
-                            using (ThreadSafeForm<SelectNumber> frmPickNumber
+                            using (ThreadSafeDialog<SelectNumberRequest> frmPickNumber
                                    // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                                   = ThreadSafeForm<SelectNumber>.Get(() => new SelectNumber(_objCharacter.Settings.MaxNuyenDecimals)
+                                   = ThreadSafeDialog<SelectNumberRequest>.Get(() => new SelectNumberRequest(_objCharacter.Settings.MaxNuyenDecimals)
                                    {
                                        Minimum = decMin,
                                        Maximum = decMax,
@@ -453,7 +453,7 @@ namespace Chummer.Backend.Equipment
                                    }))
                             {
                                 // ReSharper disable once MethodHasAsyncOverload
-                                if (frmPickNumber.ShowDialogSafe(_objCharacter, token) == DialogResult.Cancel)
+                                if (frmPickNumber.ShowDialogSafe(_objCharacter, token) == DialogOutcome.Cancel)
                                 {
                                     _guiID = Guid.Empty;
                                     return;
@@ -467,8 +467,8 @@ namespace Chummer.Backend.Equipment
                                 await LanguageManager.GetStringAsync("String_SelectVariableCost", token: token).ConfigureAwait(false),
                                 await GetCurrentDisplayNameShortAsync(token).ConfigureAwait(false));
                             int intDecimalPlaces = await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).GetMaxNuyenDecimalsAsync(token).ConfigureAwait(false);
-                            using (ThreadSafeForm<SelectNumber> frmPickNumber
-                                   = await ThreadSafeForm<SelectNumber>.GetAsync(() => new SelectNumber(intDecimalPlaces)
+                            using (ThreadSafeDialog<SelectNumberRequest> frmPickNumber
+                                   = await ThreadSafeDialog<SelectNumberRequest>.GetAsync(() => new SelectNumberRequest(intDecimalPlaces)
                                    {
                                        Minimum = decMin,
                                        Maximum = decMax,
@@ -476,7 +476,7 @@ namespace Chummer.Backend.Equipment
                                        AllowCancel = false
                                    }, token).ConfigureAwait(false))
                             {
-                                if (await frmPickNumber.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                                if (await frmPickNumber.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                                 {
                                     _guiID = Guid.Empty;
                                     return;
@@ -534,16 +534,16 @@ namespace Chummer.Backend.Equipment
                     foreach (XmlNode objXmlCategoryNode in xmlSelectModesFromCategory)
                     {
                         string strAllowedCategories = objXmlCategoryNode.InnerTextViaPool(token);
-                        using (ThreadSafeForm<SelectArmorMod> frmPickArmorMod = blnSync
+                        using (ThreadSafeDialog<SelectArmorModRequest> frmPickArmorMod = blnSync
                                    // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                                   ? ThreadSafeForm<SelectArmorMod>.Get(
-                                       () => new SelectArmorMod(_objCharacter, this)
+                                   ? ThreadSafeDialog<SelectArmorModRequest>.Get(
+                                       () => new SelectArmorModRequest(_objCharacter, this)
                                        {
                                            AllowedCategories = strAllowedCategories,
                                            ExcludeGeneralCategory = true
                                        })
-                                   : await ThreadSafeForm<SelectArmorMod>.GetAsync(
-                                       () => new SelectArmorMod(_objCharacter, this)
+                                   : await ThreadSafeDialog<SelectArmorModRequest>.GetAsync(
+                                       () => new SelectArmorModRequest(_objCharacter, this)
                                        {
                                            AllowedCategories = strAllowedCategories,
                                            ExcludeGeneralCategory = true
@@ -552,7 +552,7 @@ namespace Chummer.Backend.Equipment
                             if ((blnSync
                                     // ReSharper disable once MethodHasAsyncOverload
                                     ? frmPickArmorMod.ShowDialogSafe(_objCharacter, token)
-                                    : await frmPickArmorMod.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false)) == DialogResult.Cancel)
+                                    : await frmPickArmorMod.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false)) == DialogOutcome.Cancel)
                             {
                                 _guiID = Guid.Empty;
                                 return;

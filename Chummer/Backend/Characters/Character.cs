@@ -3232,13 +3232,13 @@ namespace Chummer
                         string strDescription = StringExtensions.FastFormat(
                                        LanguageManager.GetString("String_Improvement_SelectText", token: token),
                                        xmlAIProgramData["translate"]?.InnerTextViaPool(token) ?? xmlAIProgramData["name"]?.InnerTextViaPool(token));
-                        using (ThreadSafeForm<SelectText> frmPickText = ThreadSafeForm<SelectText>.Get(() => new SelectText
+                        using (ThreadSafeDialog<SelectTextRequest> frmPickText = ThreadSafeDialog<SelectTextRequest>.Get(() => new SelectTextRequest
                         {
                             Description = strDescription
                         }))
                         {
                             // Make sure the dialogue window was not canceled.
-                            if (frmPickText.ShowDialogSafe(this, token) == DialogResult.Cancel)
+                            if (frmPickText.ShowDialogSafe(this, token) == DialogOutcome.Cancel)
                                 continue;
                             strExtra = frmPickText.MyForm.SelectedValue;
                         }
@@ -4053,15 +4053,15 @@ namespace Chummer
                                 .ConfigureAwait(false),
                             xmlAIProgramData["translate"]?.InnerTextViaPool(token) ??
                             xmlAIProgramData["name"]?.InnerTextViaPool(token));
-                        using (ThreadSafeForm<SelectText> frmPickText = await ThreadSafeForm<SelectText>.GetAsync(() =>
-                                   new SelectText
+                        using (ThreadSafeDialog<SelectTextRequest> frmPickText = await ThreadSafeDialog<SelectTextRequest>.GetAsync(() =>
+                                   new SelectTextRequest
                                    {
                                        Description = strDescription
                                    }, token).ConfigureAwait(false))
                         {
                             // Make sure the dialogue window was not canceled.
                             if (await frmPickText.ShowDialogSafeAsync(this, token).ConfigureAwait(false) ==
-                                DialogResult.Cancel)
+                                DialogOutcome.Cancel)
                                 continue;
                             strExtra = frmPickText.MyForm.SelectedValue;
                         }
@@ -7198,12 +7198,12 @@ namespace Chummer
                                         LoadAsDirty = true;
                                         // ReSharper disable once MethodHasAsyncOverload
                                         // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                                        using (ThreadSafeForm<SelectBuildMethod> frmPickBP
-                                               = ThreadSafeForm<SelectBuildMethod>.Get(
-                                                   () => new SelectBuildMethod(this, true)))
+                                        using (ThreadSafeDialog<SelectBuildMethodRequest> frmPickBP
+                                               = ThreadSafeDialog<SelectBuildMethodRequest>.Get(
+                                                   () => new SelectBuildMethodRequest(this, true)))
                                         {
                                             // ReSharper disable once MethodHasAsyncOverload
-                                            if (frmPickBP.ShowDialogSafe(this, token) != DialogResult.OK)
+                                            if (frmPickBP.ShowDialogSafe(this, token) != DialogOutcome.OK)
                                             {
                                                 return false;
                                             }
@@ -7212,13 +7212,13 @@ namespace Chummer
                                     else
                                     {
                                         await SetLoadAsDirtyAsync(true, token).ConfigureAwait(false);
-                                        using (ThreadSafeForm<SelectBuildMethod> frmPickBP
-                                               = await ThreadSafeForm<SelectBuildMethod>
-                                                       .GetAsync(() => new SelectBuildMethod(this, true), token)
+                                        using (ThreadSafeDialog<SelectBuildMethodRequest> frmPickBP
+                                               = await ThreadSafeDialog<SelectBuildMethodRequest>
+                                                       .GetAsync(() => new SelectBuildMethodRequest(this, true), token)
                                                        .ConfigureAwait(false))
                                         {
                                             if (await frmPickBP.ShowDialogSafeAsync(this, token).ConfigureAwait(false)
-                                                != DialogResult.OK)
+                                                != DialogOutcome.OK)
                                             {
                                                 return false;
                                             }
@@ -8110,15 +8110,15 @@ namespace Chummer
                                                                 {
                                                                     // ReSharper disable once MethodHasAsyncOverload
                                                                     // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                                                                    using (ThreadSafeForm<SelectItem> frmPickItem
-                                                                           = ThreadSafeForm<SelectItem>.Get(
-                                                                               () => new SelectItem()))
+                                                                    using (ThreadSafeDialog<SelectItemRequest> frmPickItem
+                                                                           = ThreadSafeDialog<SelectItemRequest>.Get(
+                                                                               () => new SelectItemRequest()))
                                                                     {
                                                                         frmPickItem.MyForm
                                                                             .SetDropdownItemsMode(lstContacts);
                                                                         // ReSharper disable once MethodHasAsyncOverload
                                                                         if (frmPickItem.ShowDialogSafe(this, token)
-                                                                            != DialogResult.OK)
+                                                                            != DialogOutcome.OK)
                                                                         {
                                                                             return false;
                                                                         }
@@ -8129,9 +8129,9 @@ namespace Chummer
                                                                 }
                                                                 else
                                                                 {
-                                                                    using (ThreadSafeForm<SelectItem> frmPickItem
-                                                                           = await ThreadSafeForm<SelectItem>
-                                                                               .GetAsync(() => new SelectItem(), token)
+                                                                    using (ThreadSafeDialog<SelectItemRequest> frmPickItem
+                                                                           = await ThreadSafeDialog<SelectItemRequest>
+                                                                               .GetAsync(() => new SelectItemRequest(), token)
                                                                                .ConfigureAwait(false))
                                                                     {
                                                                         frmPickItem.MyForm
@@ -8139,7 +8139,7 @@ namespace Chummer
                                                                         if (await frmPickItem
                                                                                 .ShowDialogSafeAsync(this, token)
                                                                                 .ConfigureAwait(false)
-                                                                            != DialogResult.OK)
+                                                                            != DialogOutcome.OK)
                                                                         {
                                                                             return false;
                                                                         }
@@ -16956,17 +16956,17 @@ namespace Chummer
             token.ThrowIfCancellationRequested();
             if (await GetCreatedAsync(token).ConfigureAwait(false))
                 return true;
-            DialogResult eResult;
+            DialogOutcome eResult;
             if (eNewBuildMethod.UsesPriorityTables())
             {
-                using (ThreadSafeForm<SelectMetatypePriority> frmSelectMetatype = await ThreadSafeForm<SelectMetatypePriority>.GetAsync(() => new SelectMetatypePriority(this), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectMetatypePriorityRequest> frmSelectMetatype = await ThreadSafeDialog<SelectMetatypePriorityRequest>.GetAsync(() => new SelectMetatypePriorityRequest(this), token).ConfigureAwait(false))
                 {
                     eResult = await frmSelectMetatype.ShowDialogSafeAsync(this, token).ConfigureAwait(false);
                 }
             }
             else
             {
-                using (ThreadSafeForm<SelectMetatypeKarma> frmSelectMetatype = await ThreadSafeForm<SelectMetatypeKarma>.GetAsync(() => new SelectMetatypeKarma(this), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectMetatypeKarmaRequest> frmSelectMetatype = await ThreadSafeDialog<SelectMetatypeKarmaRequest>.GetAsync(() => new SelectMetatypeKarmaRequest(this), token).ConfigureAwait(false))
                 {
                     eResult = await frmSelectMetatype.ShowDialogSafeAsync(this, token).ConfigureAwait(false);
                 }
@@ -16976,7 +16976,7 @@ namespace Chummer
             try
             {
                 token.ThrowIfCancellationRequested();
-                if (eResult != DialogResult.OK)
+                if (eResult != DialogOutcome.OK)
                 {
                     await SetSettingsKeyAsync(strOldSettingsKey, token).ConfigureAwait(false);
                     return false;
@@ -50869,11 +50869,11 @@ namespace Chummer
                                                 MessageButtons.OKCancel, MessageIcon.Error)
                                             == MessageResult.OK)
                                         {
-                                            using (ThreadSafeForm<SelectBuildMethod> frmPickBP
-                                                   = ThreadSafeForm<SelectBuildMethod>.Get(
-                                                       () => new SelectBuildMethod(this, true)))
+                                            using (ThreadSafeDialog<SelectBuildMethodRequest> frmPickBP
+                                                   = ThreadSafeDialog<SelectBuildMethodRequest>.Get(
+                                                       () => new SelectBuildMethodRequest(this, true)))
                                             {
-                                                if (frmPickBP.ShowDialogSafe(this, token) != DialogResult.OK)
+                                                if (frmPickBP.ShowDialogSafe(this, token) != DialogOutcome.OK)
                                                     return false;
                                             }
                                         }
@@ -50895,13 +50895,13 @@ namespace Chummer
                                                  MessageButtons.OKCancel, MessageIcon.Error, token: token).ConfigureAwait(false)
                                              == MessageResult.OK)
                                     {
-                                        using (ThreadSafeForm<SelectBuildMethod> frmPickBP =
-                                               await ThreadSafeForm<SelectBuildMethod>.GetAsync(
-                                                       () => new SelectBuildMethod(this, true), token)
+                                        using (ThreadSafeDialog<SelectBuildMethodRequest> frmPickBP =
+                                               await ThreadSafeDialog<SelectBuildMethodRequest>.GetAsync(
+                                                       () => new SelectBuildMethodRequest(this, true), token)
                                                    .ConfigureAwait(false))
                                         {
                                             if (await frmPickBP.ShowDialogSafeAsync(this, token)
-                                                    .ConfigureAwait(false) != DialogResult.OK)
+                                                    .ConfigureAwait(false) != DialogOutcome.OK)
                                                 return false;
                                         }
                                     }
@@ -50980,11 +50980,11 @@ namespace Chummer
                                     {
                                         // ReSharper disable MethodHasAsyncOverload
                                         // ReSharper disable MethodHasAsyncOverloadWithCancellation
-                                        using (ThreadSafeForm<SelectMetatypePriority> frmSelectMetatype =
-                                               ThreadSafeForm<SelectMetatypePriority>.Get(
-                                                   () => new SelectMetatypePriority(this)))
+                                        using (ThreadSafeDialog<SelectMetatypePriorityRequest> frmSelectMetatype =
+                                               ThreadSafeDialog<SelectMetatypePriorityRequest>.Get(
+                                                   () => new SelectMetatypePriorityRequest(this)))
                                         {
-                                            if (frmSelectMetatype.ShowDialogSafe(this, token) != DialogResult.OK)
+                                            if (frmSelectMetatype.ShowDialogSafe(this, token) != DialogOutcome.OK)
                                                 return false;
                                         }
                                         // ReSharper restore MethodHasAsyncOverloadWithCancellation
@@ -50992,11 +50992,11 @@ namespace Chummer
                                     }
                                     else
                                     {
-                                        using (ThreadSafeForm<SelectMetatypePriority> frmSelectMetatype =
-                                               await ThreadSafeForm<SelectMetatypePriority>.GetAsync(
-                                                   () => new SelectMetatypePriority(this), token).ConfigureAwait(false))
+                                        using (ThreadSafeDialog<SelectMetatypePriorityRequest> frmSelectMetatype =
+                                               await ThreadSafeDialog<SelectMetatypePriorityRequest>.GetAsync(
+                                                   () => new SelectMetatypePriorityRequest(this), token).ConfigureAwait(false))
                                         {
-                                            if (await frmSelectMetatype.ShowDialogSafeAsync(this, token).ConfigureAwait(false) != DialogResult.OK)
+                                            if (await frmSelectMetatype.ShowDialogSafeAsync(this, token).ConfigureAwait(false) != DialogOutcome.OK)
                                                 return false;
                                         }
                                     }
@@ -51007,11 +51007,11 @@ namespace Chummer
                                     {
                                         // ReSharper disable MethodHasAsyncOverload
                                         // ReSharper disable MethodHasAsyncOverloadWithCancellation
-                                        using (ThreadSafeForm<SelectMetatypeKarma> frmSelectMetatype =
-                                               ThreadSafeForm<SelectMetatypeKarma>.Get(
-                                                   () => new SelectMetatypeKarma(this)))
+                                        using (ThreadSafeDialog<SelectMetatypeKarmaRequest> frmSelectMetatype =
+                                               ThreadSafeDialog<SelectMetatypeKarmaRequest>.Get(
+                                                   () => new SelectMetatypeKarmaRequest(this)))
                                         {
-                                            if (frmSelectMetatype.ShowDialogSafe(this, token) != DialogResult.OK)
+                                            if (frmSelectMetatype.ShowDialogSafe(this, token) != DialogOutcome.OK)
                                                 return false;
                                         }
                                         // ReSharper restore MethodHasAsyncOverloadWithCancellation
@@ -51019,11 +51019,11 @@ namespace Chummer
                                     }
                                     else
                                     {
-                                        using (ThreadSafeForm<SelectMetatypeKarma> frmSelectMetatype =
-                                               await ThreadSafeForm<SelectMetatypeKarma>.GetAsync(
-                                                   () => new SelectMetatypeKarma(this), token).ConfigureAwait(false))
+                                        using (ThreadSafeDialog<SelectMetatypeKarmaRequest> frmSelectMetatype =
+                                               await ThreadSafeDialog<SelectMetatypeKarmaRequest>.GetAsync(
+                                                   () => new SelectMetatypeKarmaRequest(this), token).ConfigureAwait(false))
                                         {
-                                            if (await frmSelectMetatype.ShowDialogSafeAsync(this, token: token).ConfigureAwait(false) != DialogResult.OK)
+                                            if (await frmSelectMetatype.ShowDialogSafeAsync(this, token: token).ConfigureAwait(false) != DialogOutcome.OK)
                                                 return false;
                                         }
                                     }
@@ -54627,15 +54627,15 @@ namespace Chummer
                     .GetStringAsync("String_CyberzombieWILDescription", token: token).ConfigureAwait(false);
                 int intDice = await WIL.GetTotalValueAsync(token).ConfigureAwait(false);
                 // Get the player to roll Dice to make a WIL Test and record the result.
-                using (ThreadSafeForm<SelectDiceHits> frmWILHits = await ThreadSafeForm<SelectDiceHits>.GetAsync(() =>
-                           new SelectDiceHits
+                using (ThreadSafeDialog<SelectDiceHitsRequest> frmWILHits = await ThreadSafeDialog<SelectDiceHitsRequest>.GetAsync(() =>
+                           new SelectDiceHitsRequest
                            {
                                Text = strText,
                                Description = strDescription
                            }, token).ConfigureAwait(false))
                 {
                     await frmWILHits.MyForm.SetDiceAsync(intDice, token).ConfigureAwait(false);
-                    if (await frmWILHits.ShowDialogSafeAsync(this, token).ConfigureAwait(false) != DialogResult.OK)
+                    if (await frmWILHits.ShowDialogSafeAsync(this, token).ConfigureAwait(false) != DialogOutcome.OK)
                         return false;
 
                     intWILResult = frmWILHits.MyForm.Result;
@@ -55255,15 +55255,15 @@ namespace Chummer
                             if (lstInstances.Count > 1)
                             {
                                 // Multiple instances available - prompt user to choose
-                                using (ThreadSafeForm<SelectItem> frmSelectItem = blnSync
-                                    ? ThreadSafeForm<SelectItem>.Get(() => new SelectItem())
-                                    : await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                                using (ThreadSafeDialog<SelectItemRequest> frmSelectItem = blnSync
+                                    ? ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest())
+                                    : await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                                 {
                                     frmSelectItem.MyForm.SetGeneralItemsMode(lstInstances.Select(x => new ListItem(x, x)));
-                                    DialogResult eResult = blnSync
+                                    DialogOutcome eResult = blnSync
                                         ? frmSelectItem.ShowDialogSafe(this, token)
                                         : await frmSelectItem.ShowDialogSafeAsync(this, token).ConfigureAwait(false);
-                                    if (eResult == DialogResult.OK)
+                                    if (eResult == DialogOutcome.OK)
                                     {
                                         string strSelectedText = frmSelectItem.MyForm.SelectedItem;
                                         if (!string.IsNullOrEmpty(strSelectedText))

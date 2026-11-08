@@ -490,7 +490,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             }
             else
             {
-                using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                 {
                     frmPickItem.MyForm.SetRestrictedMode(_objCharacter);
                     if (!string.IsNullOrEmpty(ForcedValue))
@@ -499,7 +499,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     frmPickItem.MyForm.AllowAutoSelect = !string.IsNullOrEmpty(ForcedValue);
 
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -550,7 +550,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         lstTraditions.Sort(CompareListItems.CompareNames);
                     }
 
-                    using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem
+                    using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest
                            {
                                AllowAutoSelect = false
                            }, token).ConfigureAwait(false))
@@ -559,7 +559,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         frmPickItem.MyForm.SelectedItem = await (await _objCharacter.GetMagicTraditionAsync(token).ConfigureAwait(false)).GetSourceIDStringAsync(token).ConfigureAwait(false);
 
                         // Make sure the dialogue window was not canceled.
-                        if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                        if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -645,8 +645,8 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         await LanguageManager.GetStringAsync("String_Improvement_SelectSkillGroupName", token: token).ConfigureAwait(false),
                         _strFriendlyName)
                     : await LanguageManager.GetStringAsync("String_Improvement_SelectSkillGroup", token: token).ConfigureAwait(false);
-                using (ThreadSafeForm<SelectSkillGroup> frmPickSkillGroup = await ThreadSafeForm<SelectSkillGroup>.GetAsync(
-                           () => new SelectSkillGroup(_objCharacter)
+                using (ThreadSafeDialog<SelectSkillGroupRequest> frmPickSkillGroup = await ThreadSafeDialog<SelectSkillGroupRequest>.GetAsync(
+                           () => new SelectSkillGroupRequest(_objCharacter)
                            {
                                Description = strDescription
                            }, token).ConfigureAwait(false))
@@ -661,7 +661,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         frmPickSkillGroup.MyForm.ExcludeCategory = strExclude;
 
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickSkillGroup.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickSkillGroup.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -886,7 +886,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 ? StringExtensions.FastFormat(
                     await LanguageManager.GetStringAsync("String_Improvement_SelectSkillGroupName", token: token).ConfigureAwait(false), _strFriendlyName)
                 : await LanguageManager.GetStringAsync("String_Improvement_SelectSkillGroup", token: token).ConfigureAwait(false);
-            using (ThreadSafeForm<SelectSkillGroup> frmPickSkillGroup = await ThreadSafeForm<SelectSkillGroup>.GetAsync(() => new SelectSkillGroup(_objCharacter)
+            using (ThreadSafeDialog<SelectSkillGroupRequest> frmPickSkillGroup = await ThreadSafeDialog<SelectSkillGroupRequest>.GetAsync(() => new SelectSkillGroupRequest(_objCharacter)
                    {
                        Description = strDescription
                    }, token).ConfigureAwait(false))
@@ -901,7 +901,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     frmPickSkillGroup.MyForm.ExcludeCategory = strExclude;
 
                 // Make sure the dialogue window was not canceled.
-                if (await frmPickSkillGroup.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                if (await frmPickSkillGroup.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -1002,16 +1002,16 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                                         _strFriendlyName)
                                     : await LanguageManager.GetStringAsync("String_Improvement_SelectAttribute",
                                         token: token).ConfigureAwait(false);
-                                using (ThreadSafeForm<SelectAttribute> frmPickAttribute
-                                       = await ThreadSafeForm<SelectAttribute>.GetAsync(
-                                           () => new SelectAttribute(lstAbbrevs.ToArray())
+                                using (ThreadSafeDialog<SelectAttributeRequest> frmPickAttribute
+                                       = await ThreadSafeDialog<SelectAttributeRequest>.GetAsync(
+                                           () => new SelectAttributeRequest(lstAbbrevs.ToArray())
                                            {
                                                Description = strDescription
                                            }, token).ConfigureAwait(false))
                                 {
                                     // Make sure the dialogue window was not canceled.
                                     if (await frmPickAttribute.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) ==
-                                        DialogResult.Cancel)
+                                        DialogOutcome.Cancel)
                                     {
                                         throw new AbortedException();
                                     }
@@ -1165,15 +1165,15 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                             _strFriendlyName)
                         : await LanguageManager.GetStringAsync("String_Improvement_SelectAttribute", token: token).ConfigureAwait(false);
                     // Display the Select Attribute window and record which Skill was selected.
-                    using (ThreadSafeForm<SelectAttribute> frmPickAttribute =
-                           await ThreadSafeForm<SelectAttribute>.GetAsync(
-                               () => new SelectAttribute(lstAbbrevs.ToArray())
+                    using (ThreadSafeDialog<SelectAttributeRequest> frmPickAttribute =
+                           await ThreadSafeDialog<SelectAttributeRequest>.GetAsync(
+                               () => new SelectAttributeRequest(lstAbbrevs.ToArray())
                                {
                                    Description = strDescription
                                }, token).ConfigureAwait(false))
                     {
                         // Make sure the dialogue window was not canceled.
-                        if (await frmPickAttribute.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                        if (await frmPickAttribute.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -1267,13 +1267,13 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         token: token).ConfigureAwait(false),
                     _strFriendlyName)
                 : await LanguageManager.GetStringAsync("String_Improvement_SelectLimit", token: token).ConfigureAwait(false);
-            using (ThreadSafeForm<SelectLimit> frmPickLimit = await ThreadSafeForm<SelectLimit>.GetAsync(() => new SelectLimit(strLimits.ToArray())
+            using (ThreadSafeDialog<SelectLimitRequest> frmPickLimit = await ThreadSafeDialog<SelectLimitRequest>.GetAsync(() => new SelectLimitRequest(strLimits.ToArray())
                    {
                        Description = strDescription
                    }, token).ConfigureAwait(false))
             {
                 // Make sure the dialogue window was not canceled.
-                if (await frmPickLimit.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                if (await frmPickLimit.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -1397,13 +1397,13 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                             token: token).ConfigureAwait(false),
                         _strFriendlyName)
                     : await LanguageManager.GetStringAsync("String_Improvement_SelectAttribute", token: token).ConfigureAwait(false);
-                using (ThreadSafeForm<SelectAttribute> frmPickAttribute = await ThreadSafeForm<SelectAttribute>.GetAsync(() => new SelectAttribute(lstAbbrevs.ToArray())
+                using (ThreadSafeDialog<SelectAttributeRequest> frmPickAttribute = await ThreadSafeDialog<SelectAttributeRequest>.GetAsync(() => new SelectAttributeRequest(lstAbbrevs.ToArray())
                        {
                            Description = strDescription
                        }, token).ConfigureAwait(false))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickAttribute.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickAttribute.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -1426,8 +1426,8 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                             token: token).ConfigureAwait(false),
                         _strFriendlyName)
                     : await LanguageManager.GetStringAsync("String_Improvement_SelectSkill", token: token).ConfigureAwait(false);
-                using (ThreadSafeForm<SelectSkill> frmPickSkill = await ThreadSafeForm<SelectSkill>.GetAsync(() =>
-                           new SelectSkill(_objCharacter), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectSkillRequest> frmPickSkill = await ThreadSafeDialog<SelectSkillRequest>.GetAsync(() =>
+                           new SelectSkillRequest(_objCharacter), token).ConfigureAwait(false))
                 {
                     await frmPickSkill.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
                     string strTemp = bonusNode["skillgroup"]?.InnerTextViaPool(token);
@@ -1459,7 +1459,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     }
 
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickSkill.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickSkill.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -1535,14 +1535,14 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                             token: token).ConfigureAwait(false),
                         _strFriendlyName)
                     : await LanguageManager.GetStringAsync("String_Improvement_SelectAttribute", token: token).ConfigureAwait(false);
-                using (ThreadSafeForm<SelectAttribute> frmPickAttribute = await ThreadSafeForm<SelectAttribute>.GetAsync(() =>
-                           new SelectAttribute(lstAbbrevs.ToArray())
+                using (ThreadSafeDialog<SelectAttributeRequest> frmPickAttribute = await ThreadSafeDialog<SelectAttributeRequest>.GetAsync(() =>
+                           new SelectAttributeRequest(lstAbbrevs.ToArray())
                            {
                                Description = strDescription
                            }, token).ConfigureAwait(false))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickAttribute.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickAttribute.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -1565,8 +1565,8 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                             token: token).ConfigureAwait(false),
                         _strFriendlyName)
                     : await LanguageManager.GetStringAsync("String_Improvement_SelectSkill", token: token).ConfigureAwait(false);
-                using (ThreadSafeForm<SelectSkill> frmPickSkill = await ThreadSafeForm<SelectSkill>.GetAsync(() =>
-                           new SelectSkill(_objCharacter), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectSkillRequest> frmPickSkill = await ThreadSafeDialog<SelectSkillRequest>.GetAsync(() =>
+                           new SelectSkillRequest(_objCharacter), token).ConfigureAwait(false))
                 {
                     await frmPickSkill.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
                     string strTemp = bonusNode["skillgroup"]?.InnerTextViaPool(token);
@@ -1598,7 +1598,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     }
 
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickSkill.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickSkill.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -1622,7 +1622,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
 
             XmlNode node;
             // Display the Select Spell window.
-            using (ThreadSafeForm<SelectSpell> frmPickSpell = await ThreadSafeForm<SelectSpell>.GetAsync(() => new SelectSpell(_objCharacter), token).ConfigureAwait(false))
+            using (ThreadSafeDialog<SelectSpellRequest> frmPickSpell = await ThreadSafeDialog<SelectSpellRequest>.GetAsync(() => new SelectSpellRequest(_objCharacter), token).ConfigureAwait(false))
             {
                 string strCategory = bonusNode.Attributes?["category"]?.InnerTextViaPool(token);
                 if (!string.IsNullOrEmpty(strCategory))
@@ -1637,7 +1637,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 frmPickSpell.MyForm.IgnoreRequirements = bonusNode.Attributes?["ignorerequirements"]?.InnerTextIsTrueString() == true;
 
                 // Make sure the dialogue window was not canceled.
-                if (await frmPickSpell.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                if (await frmPickSpell.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -1662,13 +1662,13 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 string strDescription = StringExtensions.FastFormat(
                     await LanguageManager.GetStringAsync("String_Improvement_SelectText", token: token).ConfigureAwait(false),
                     node["translate"]?.InnerTextViaPool(token) ?? node["name"]?.InnerTextViaPool(token));
-                using (ThreadSafeForm<SelectText> frmPickText = await ThreadSafeForm<SelectText>.GetAsync(() => new SelectText
+                using (ThreadSafeDialog<SelectTextRequest> frmPickText = await ThreadSafeDialog<SelectTextRequest>.GetAsync(() => new SelectTextRequest
                        {
                            Description = strDescription
                        }, token).ConfigureAwait(false))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickText.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickText.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                         throw new AbortedException();
 
                     strExtra = frmPickText.MyForm.SelectedValue;
@@ -1713,13 +1713,13 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 string strDescription = StringExtensions.FastFormat(
                     await LanguageManager.GetStringAsync("String_Improvement_SelectText", token: token).ConfigureAwait(false),
                     node["translate"]?.InnerTextViaPool(token) ?? node["name"]?.InnerTextViaPool(token));
-                using (ThreadSafeForm<SelectText> frmPickText = await ThreadSafeForm<SelectText>.GetAsync(() => new SelectText
+                using (ThreadSafeDialog<SelectTextRequest> frmPickText = await ThreadSafeDialog<SelectTextRequest>.GetAsync(() => new SelectTextRequest
                        {
                            Description = strDescription
                        }, token).ConfigureAwait(false))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickText.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickText.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -1764,10 +1764,10 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             if (string.IsNullOrEmpty(strSelectedComplexForm))
             {
                 // Display the Select ComplexForm window.
-                using (ThreadSafeForm<SelectComplexForm> frmPickComplexForm = await ThreadSafeForm<SelectComplexForm>.GetAsync(() => new SelectComplexForm(_objCharacter), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectComplexFormRequest> frmPickComplexForm = await ThreadSafeDialog<SelectComplexFormRequest>.GetAsync(() => new SelectComplexFormRequest(_objCharacter), token).ConfigureAwait(false))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickComplexForm.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickComplexForm.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -2041,10 +2041,10 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             if (xmlProgram == null)
             {
                 // Display the Select Program window.
-                using (ThreadSafeForm<SelectAIProgram> frmPickProgram = await ThreadSafeForm<SelectAIProgram>.GetAsync(() => new SelectAIProgram(_objCharacter), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectAIProgramRequest> frmPickProgram = await ThreadSafeDialog<SelectAIProgramRequest>.GetAsync(() => new SelectAIProgramRequest(_objCharacter), token).ConfigureAwait(false))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickProgram.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickProgram.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -2062,13 +2062,13 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 string strDescription = StringExtensions.FastFormat(
                     await LanguageManager.GetStringAsync("String_Improvement_SelectText", token: token).ConfigureAwait(false),
                     xmlProgram["translate"]?.InnerTextViaPool(token) ?? xmlProgram["name"]?.InnerTextViaPool(token));
-                using (ThreadSafeForm<SelectText> frmPickText = await ThreadSafeForm<SelectText>.GetAsync(() => new SelectText
+                using (ThreadSafeDialog<SelectTextRequest> frmPickText = await ThreadSafeDialog<SelectTextRequest>.GetAsync(() => new SelectTextRequest
                        {
                            Description = strDescription
                        }, token).ConfigureAwait(false))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickText.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickText.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -2109,10 +2109,10 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             if (xmlProgram == null)
             {
                 // Display the Select Spell window.
-                using (ThreadSafeForm<SelectAIProgram> frmPickProgram = await ThreadSafeForm<SelectAIProgram>.GetAsync(() => new SelectAIProgram(_objCharacter, false, true), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectAIProgramRequest> frmPickProgram = await ThreadSafeDialog<SelectAIProgramRequest>.GetAsync(() => new SelectAIProgramRequest(_objCharacter, false, true), token).ConfigureAwait(false))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickProgram.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickProgram.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -2130,13 +2130,13 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 string strDescription = StringExtensions.FastFormat(
                     await LanguageManager.GetStringAsync("String_Improvement_SelectText", token: token).ConfigureAwait(false),
                     xmlProgram["translate"]?.InnerTextViaPool(token) ?? xmlProgram["name"]?.InnerTextViaPool(token));
-                using (ThreadSafeForm<SelectText> frmPickText = await ThreadSafeForm<SelectText>.GetAsync(() => new SelectText
+                using (ThreadSafeDialog<SelectTextRequest> frmPickText = await ThreadSafeDialog<SelectTextRequest>.GetAsync(() => new SelectTextRequest
                        {
                            Description = strDescription
                        }, token).ConfigureAwait(false))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickText.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickText.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -2197,13 +2197,13 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 throw new AbortedException();
             }
 
-            using (ThreadSafeForm<SelectItem> frmSelect = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+            using (ThreadSafeDialog<SelectItemRequest> frmSelect = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
             {
                 int count = 0;
                 //Black magic LINQ to cast content of list to another type
                 frmSelect.MyForm.SetGeneralItemsMode(lstSelectedContacts.Select(x => new ListItem(count++.ToString(GlobalSettings.InvariantCultureInfo), x.Name)));
 
-                if (await frmSelect.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                if (await frmSelect.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     throw new AbortedException();
 
                 Contact objSelectedContact = int.TryParse(await frmSelect.MyForm.DoThreadSafeFuncAsync(x => x.SelectedItem, token).ConfigureAwait(false), out int intIndex)
@@ -2403,15 +2403,15 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                                         "String_Improvement_SelectAttributeNamed", token: token).ConfigureAwait(false),
                                     _strFriendlyName)
                                 : await LanguageManager.GetStringAsync("String_Improvement_SelectAttribute", token: token).ConfigureAwait(false);
-                            using (ThreadSafeForm<SelectAttribute> frmPickAttribute = await ThreadSafeForm<SelectAttribute>.GetAsync(
+                            using (ThreadSafeDialog<SelectAttributeRequest> frmPickAttribute = await ThreadSafeDialog<SelectAttributeRequest>.GetAsync(
                                        () =>
-                                           new SelectAttribute(lstAbbrevs.ToArray())
+                                           new SelectAttributeRequest(lstAbbrevs.ToArray())
                                            {
                                                Description = strDescription
                                            }, token).ConfigureAwait(false))
                             {
                                 // Make sure the dialogue window was not canceled.
-                                if (await frmPickAttribute.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                                if (await frmPickAttribute.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                                 {
                                     throw new AbortedException();
                                 }
@@ -3742,8 +3742,8 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         ? StringExtensions.FastFormat(
                             await LanguageManager.GetStringAsync("String_Improvement_SelectSkillNamed", token: token).ConfigureAwait(false), _strFriendlyName)
                         : await LanguageManager.GetStringAsync("Title_SelectWeaponCategory", token: token).ConfigureAwait(false);
-                    using (ThreadSafeForm<SelectItem> frmPickCategory = await ThreadSafeForm<SelectItem>.GetAsync(() =>
-                               new SelectItem(), token).ConfigureAwait(false))
+                    using (ThreadSafeDialog<SelectItemRequest> frmPickCategory = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() =>
+                               new SelectItemRequest(), token).ConfigureAwait(false))
                     {
                         await frmPickCategory.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
                         frmPickCategory.MyForm.SetGeneralItemsMode(lstGeneralItems);
@@ -3759,7 +3759,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         }
 
                         // Make sure the dialogue window was not canceled.
-                        if (await frmPickCategory.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                        if (await frmPickCategory.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -3845,7 +3845,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                             "String_Improvement_SelectSkillNamed", token: token).ConfigureAwait(false),
                         _strFriendlyName)
                     : await LanguageManager.GetStringAsync("Title_SelectWeapon", token: token).ConfigureAwait(false);
-                using (ThreadSafeForm<SelectItem> frmPickWeapon = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectItemRequest> frmPickWeapon = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                 {
                     await frmPickWeapon.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
                     frmPickWeapon.MyForm.SetGeneralItemsMode(lstGeneralItems);
@@ -3857,7 +3857,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     frmPickWeapon.MyForm.ForceItem(ForcedValue);
 
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickWeapon.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickWeapon.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -3881,13 +3881,13 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             token.ThrowIfCancellationRequested();
             if (bonusNode == null)
                 throw new ArgumentNullException(nameof(bonusNode));
-            using (ThreadSafeForm<SelectMentorSpirit> frmPickMentorSpirit = await ThreadSafeForm<SelectMentorSpirit>.GetAsync(() => new SelectMentorSpirit(_objCharacter)
+            using (ThreadSafeDialog<SelectMentorSpiritRequest> frmPickMentorSpirit = await ThreadSafeDialog<SelectMentorSpiritRequest>.GetAsync(() => new SelectMentorSpiritRequest(_objCharacter)
                    {
                        ForcedMentor = ForcedValue
                    }, token).ConfigureAwait(false))
             {
                 // Make sure the dialogue window was not canceled.
-                if (await frmPickMentorSpirit.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                if (await frmPickMentorSpirit.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -3928,13 +3928,13 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             token.ThrowIfCancellationRequested();
             if (bonusNode == null)
                 throw new ArgumentNullException(nameof(bonusNode));
-            using (ThreadSafeForm<SelectMentorSpirit> frmPickMentorSpirit = await ThreadSafeForm<SelectMentorSpirit>.GetAsync(() => new SelectMentorSpirit(_objCharacter, "paragons.xml")
+            using (ThreadSafeDialog<SelectMentorSpiritRequest> frmPickMentorSpirit = await ThreadSafeDialog<SelectMentorSpiritRequest>.GetAsync(() => new SelectMentorSpiritRequest(_objCharacter, "paragons.xml")
                    {
                        ForcedMentor = ForcedValue
                    }, token).ConfigureAwait(false))
             {
                 // Make sure the dialogue window was not canceled.
-                if (await frmPickMentorSpirit.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                if (await frmPickMentorSpirit.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -4155,7 +4155,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             if (bonusNode == null)
                 throw new ArgumentNullException(nameof(bonusNode));
             string strDescription = StringExtensions.FastFormat(await LanguageManager.GetStringAsync("Label_SelectSide", token: token).ConfigureAwait(false), _strFriendlyName);
-            using (ThreadSafeForm<SelectSide> frmPickSide = await ThreadSafeForm<SelectSide>.GetAsync(() => new SelectSide
+            using (ThreadSafeDialog<SelectSideRequest> frmPickSide = await ThreadSafeDialog<SelectSideRequest>.GetAsync(() => new SelectSideRequest
                    {
                        Description = strDescription
                    }, token).ConfigureAwait(false))
@@ -4163,7 +4163,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 if (!string.IsNullOrEmpty(ForcedValue))
                     frmPickSide.MyForm.ForceValue(ForcedValue);
                 // Make sure the dialogue window was not canceled.
-                else if (await frmPickSide.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                else if (await frmPickSide.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -4271,7 +4271,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                             int intLevels = await ImprovementManager.ValueToIntAsync(_objCharacter, objNode["val"]?.InnerTextViaPool(token), _intRating, token).ConfigureAwait(false);
                             string strPointsPerLevel = objNode["pointsperlevel"]?.InnerTextViaPool(token);
                             // Display the Select Power window and record which Power was selected.
-                            using (ThreadSafeForm<SelectPower> frmPickPower = await ThreadSafeForm<SelectPower>.GetAsync(() => new SelectPower(_objCharacter), token).ConfigureAwait(false))
+                            using (ThreadSafeDialog<SelectPowerRequest> frmPickPower = await ThreadSafeDialog<SelectPowerRequest>.GetAsync(() => new SelectPowerRequest(_objCharacter), token).ConfigureAwait(false))
                             {
                                 frmPickPower.MyForm.ForBonus = true;
                                 frmPickPower.MyForm.IgnoreLimits = objNode["ignorerating"]?.InnerTextIsTrueString() == true;
@@ -4286,7 +4286,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                                     frmPickPower.MyForm.LimitToPowers = strLimitToPowers;
 
                                 // Make sure the dialogue window was not canceled.
-                                if (await frmPickPower.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                                if (await frmPickPower.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                                 {
                                     throw new AbortedException();
                                 }
@@ -4409,11 +4409,11 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                             throw new AbortedException();
                         }
 
-                        using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                        using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                         {
                             frmPickItem.MyForm.SetGeneralItemsMode(lstArts);
                             // Don't do anything else if the form was canceled.
-                            if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                            if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                                 throw new AbortedException();
 
                             objXmlSelectedArt = objXmlDocument.TryGetNodeByNameOrId("/chummer/powers/power", await frmPickItem.MyForm.DoThreadSafeFuncAsync(x => x.SelectedItem, token).ConfigureAwait(false))
@@ -4427,10 +4427,10 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 }
                 else
                 {
-                    using (ThreadSafeForm<SelectArt> frmPickArt = await ThreadSafeForm<SelectArt>.GetAsync(() => new SelectArt(_objCharacter, SelectArt.Mode.Art), token).ConfigureAwait(false))
+                    using (ThreadSafeDialog<SelectArtRequest> frmPickArt = await ThreadSafeDialog<SelectArtRequest>.GetAsync(() => new SelectArtRequest(_objCharacter, SelectArtMode.Art), token).ConfigureAwait(false))
                     {
                         // Don't do anything else if the form was canceled.
-                        if (await frmPickArt.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                        if (await frmPickArt.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                             throw new AbortedException();
 
                         objXmlSelectedArt = objXmlDocument.TryGetNodeByNameOrId("/chummer/powers/power", frmPickArt.MyForm.SelectedItem)
@@ -4516,11 +4516,11 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                             throw new AbortedException();
                         }
 
-                        using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                        using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                         {
                             frmPickItem.MyForm.SetGeneralItemsMode(lstMetamagics);
                             // Don't do anything else if the form was canceled.
-                            if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                            if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                                 throw new AbortedException();
 
                             objXmlSelectedMetamagic = objXmlDocument.TryGetNodeByNameOrId("/chummer/metamagics/metamagic", await frmPickItem.MyForm.DoThreadSafeFuncAsync(x => x.SelectedItem, token).ConfigureAwait(false))
@@ -4543,10 +4543,10 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 else
                 {
                     InitiationGrade objGrade = new InitiationGrade(_objCharacter) { Grade = -1 };
-                    using (ThreadSafeForm<SelectMetamagic> frmPickMetamagic = await ThreadSafeForm<SelectMetamagic>.GetAsync(() => new SelectMetamagic(_objCharacter, objGrade), token).ConfigureAwait(false))
+                    using (ThreadSafeDialog<SelectMetamagicRequest> frmPickMetamagic = await ThreadSafeDialog<SelectMetamagicRequest>.GetAsync(() => new SelectMetamagicRequest(_objCharacter, objGrade), token).ConfigureAwait(false))
                     {
                         // Don't do anything else if the form was canceled.
-                        if (await frmPickMetamagic.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                        if (await frmPickMetamagic.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                             throw new AbortedException();
 
                         objXmlSelectedMetamagic = objXmlDocument.TryGetNodeByNameOrId("/chummer/metamagics/metamagic", frmPickMetamagic.MyForm.SelectedMetamagic)
@@ -4632,11 +4632,11 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                             throw new AbortedException();
                         }
 
-                        using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                        using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                         {
                             frmPickItem.MyForm.SetGeneralItemsMode(lstEchoes);
                             // Don't do anything else if the form was canceled.
-                            if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                            if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                                 throw new AbortedException();
 
                             xmlSelectedEcho = objXmlDocument.TryGetNodeByNameOrId("/chummer/echoes/echo", await frmPickItem.MyForm.DoThreadSafeFuncAsync(x => x.SelectedItem, token).ConfigureAwait(false))
@@ -4659,10 +4659,10 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 else
                 {
                     InitiationGrade objGrade = new InitiationGrade(_objCharacter) { Grade = -1, Technomancer = true };
-                    using (ThreadSafeForm<SelectMetamagic> frmPickMetamagic = await ThreadSafeForm<SelectMetamagic>.GetAsync(() => new SelectMetamagic(_objCharacter, objGrade), token).ConfigureAwait(false))
+                    using (ThreadSafeDialog<SelectMetamagicRequest> frmPickMetamagic = await ThreadSafeDialog<SelectMetamagicRequest>.GetAsync(() => new SelectMetamagicRequest(_objCharacter, objGrade), token).ConfigureAwait(false))
                     {
                         // Don't do anything else if the form was canceled.
-                        if (await frmPickMetamagic.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                        if (await frmPickMetamagic.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                             throw new AbortedException();
 
                         xmlSelectedEcho = objXmlDocument.TryGetNodeByNameOrId("/chummer/echoes/echo", frmPickMetamagic.MyForm.SelectedMetamagic)
@@ -5477,11 +5477,11 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     }
                 }
 
-                using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                 {
                     frmPickItem.MyForm.SetGeneralItemsMode(lstCritters);
 
-                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -5506,7 +5506,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             if (nodeList.Count > 0)
             {
                 string strDescription = StringExtensions.FastFormat(await LanguageManager.GetStringAsync("String_Improvement_SelectText", token: token).ConfigureAwait(false), _strFriendlyName);
-                using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                 {
                     await frmPickItem.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
                     List<ListItem> lstItems = new List<ListItem>();
@@ -5523,7 +5523,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     }
 
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -5583,7 +5583,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 if (lstArmors.Count > 0)
                 {
                     string strDescription = StringExtensions.FastFormat(await LanguageManager.GetStringAsync("String_Improvement_SelectText", token: token).ConfigureAwait(false), _strFriendlyName);
-                    using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                    using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                     {
                         await frmPickItem.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
                         frmPickItem.MyForm.SetGeneralItemsMode(lstArmors);
@@ -5595,7 +5595,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         }
 
                         // Make sure the dialogue window was not canceled.
-                        if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                        if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -5644,7 +5644,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 string strDescription = StringExtensions.FastFormat(
                     await LanguageManager.GetStringAsync("String_Improvement_SelectText", token: token).ConfigureAwait(false),
                     _strFriendlyName);
-                using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                 {
                     await frmPickItem.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
                     frmPickItem.MyForm.SetGeneralItemsMode(list);
@@ -5656,7 +5656,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     }
 
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -5685,7 +5685,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 string strDescription = StringExtensions.FastFormat(
                     await LanguageManager.GetStringAsync("String_Improvement_SelectText", token: token).ConfigureAwait(false),
                     _strFriendlyName);
-                using (ThreadSafeForm<SelectText> frmPickText = await ThreadSafeForm<SelectText>.GetAsync(() => new SelectText
+                using (ThreadSafeDialog<SelectTextRequest> frmPickText = await ThreadSafeDialog<SelectTextRequest>.GetAsync(() => new SelectTextRequest
                        {
                            Description = strDescription
                        }, token).ConfigureAwait(false))
@@ -5697,7 +5697,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     }
 
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickText.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickText.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -5740,7 +5740,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         string strDescription = StringExtensions.FastFormat(
                             await LanguageManager.GetStringAsync("String_Improvement_SelectText", token: token).ConfigureAwait(false),
                             _strFriendlyName);
-                        using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                        using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                         {
                             await frmPickItem.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
                             frmPickItem.MyForm.SetGeneralItemsMode(lstWeapons);
@@ -5752,7 +5752,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                             }
 
                             // Make sure the dialogue window was not canceled.
-                            if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                            if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                             {
                                 throw new AbortedException();
                             }
@@ -5820,13 +5820,13 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                 // Display the Select Critter Power window and record which power was selected.
                 string strDescription =
                     await LanguageManager.GetStringAsync("String_Improvement_SelectOptionalPower", token: token).ConfigureAwait(false);
-                using (ThreadSafeForm<SelectOptionalPower> frmPickPower = await ThreadSafeForm<SelectOptionalPower>.GetAsync(() => new SelectOptionalPower(_objCharacter, lstPowerExtraPairs.ToArray())
+                using (ThreadSafeDialog<SelectOptionalPowerRequest> frmPickPower = await ThreadSafeDialog<SelectOptionalPowerRequest>.GetAsync(() => new SelectOptionalPowerRequest(_objCharacter, lstPowerExtraPairs.ToArray())
                        {
                            Description = strDescription
                        }, token).ConfigureAwait(false))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickPower.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickPower.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -5945,14 +5945,14 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     throw new AbortedException();
                 }
 
-                using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest
                        {
                            AllowAutoSelect = false
                        }, token).ConfigureAwait(false))
                 {
                     frmPickItem.MyForm.SetGeneralItemsMode(lstItems);
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -5984,7 +5984,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
 
                 default:
                     {
-                        using (ThreadSafeForm<SelectItem> frmSelect = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem
+                        using (ThreadSafeDialog<SelectItemRequest> frmSelect = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest
                                {
                                    AllowAutoSelect = true
                                }, token).ConfigureAwait(false))
@@ -5996,7 +5996,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                                 frmSelect.MyForm.ForceItem(strText);
                             }
 
-                            if (await frmSelect.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                            if (await frmSelect.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                             {
                                 throw new AbortedException();
                             }
@@ -6090,12 +6090,12 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
 
                 XmlNode objXmlSelectedQuality;
                 XmlNode objXmlBonusQuality;
-                using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                 {
                     frmPickItem.MyForm.SetGeneralItemsMode(lstQualities);
 
                     // Don't do anything else if the form was canceled.
-                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                         throw new AbortedException();
                     string strSelected = await frmPickItem.MyForm.DoThreadSafeFuncAsync(x => x.SelectedItem, token).ConfigureAwait(false);
                     objXmlSelectedQuality = objXmlDocument.TryGetNodeByNameOrId(
@@ -6145,13 +6145,13 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         throw new AbortedException();
                     }
 
-                    using (ThreadSafeForm<SelectItem> frmPickItem
-                           = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                    using (ThreadSafeDialog<SelectItemRequest> frmPickItem
+                           = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                     {
                         frmPickItem.MyForm.SetGeneralItemsMode(lstQualities);
 
                         // Don't do anything else if the form was canceled.
-                        if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                        if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                             throw new AbortedException();
                         string strSelected = await frmPickItem.MyForm.DoThreadSafeFuncAsync(x => x.SelectedItem, token).ConfigureAwait(false);
                         if (strSelected != "None")
@@ -6296,13 +6296,13 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             {
                 // Display the Select Spell window.
                 string strDescription = await LanguageManager.GetStringAsync("Title_SelectSpellCategory", token: token).ConfigureAwait(false);
-                using (ThreadSafeForm<SelectSpellCategory> frmPickSpellCategory = await ThreadSafeForm<SelectSpellCategory>.GetAsync(() => new SelectSpellCategory(_objCharacter)
+                using (ThreadSafeDialog<SelectSpellCategoryRequest> frmPickSpellCategory = await ThreadSafeDialog<SelectSpellCategoryRequest>.GetAsync(() => new SelectSpellCategoryRequest(_objCharacter)
                        {
                            Description = strDescription
                        }, token).ConfigureAwait(false))
                 {
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickSpellCategory.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickSpellCategory.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -6334,7 +6334,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             {
                 // Display the Select Spell window.
                 string strDescription = await LanguageManager.GetStringAsync("Title_SelectSpellCategory", token: token).ConfigureAwait(false);
-                using (ThreadSafeForm<SelectSpellCategory> frmPickSpellCategory = await ThreadSafeForm<SelectSpellCategory>.GetAsync(() => new SelectSpellCategory(_objCharacter)
+                using (ThreadSafeDialog<SelectSpellCategoryRequest> frmPickSpellCategory = await ThreadSafeDialog<SelectSpellCategoryRequest>.GetAsync(() => new SelectSpellCategoryRequest(_objCharacter)
                        {
                            Description = strDescription
                        }, token).ConfigureAwait(false))
@@ -6342,7 +6342,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     frmPickSpellCategory.MyForm.SetExcludeCategories(bonusNode.Attributes?["exclude"]?.InnerTextViaPool(token).SplitNoAlloc(',', StringSplitOptions.RemoveEmptyEntries));
 
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickSpellCategory.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickSpellCategory.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -6366,11 +6366,11 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             else
             {
                 string strDescription = await LanguageManager.GetStringAsync("Title_SelectSpellDescriptor", token: token).ConfigureAwait(false);
-                using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                 {
                     await frmPickItem.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -6395,11 +6395,11 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             else
             {
                 string strDescription = await LanguageManager.GetStringAsync("Title_SelectSpellDescriptor", token: token).ConfigureAwait(false);
-                using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                 {
                     await frmPickItem.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
                     // Make sure the dialogue window was not canceled.
-                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                     {
                         throw new AbortedException();
                     }
@@ -6542,7 +6542,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         }
                     }
 
-                    using (ThreadSafeForm<SelectItem> frmSelect = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                    using (ThreadSafeDialog<SelectItemRequest> frmSelect = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                     {
                         frmSelect.MyForm.SetGeneralItemsMode(lstSpirits);
                         frmSelect.MyForm.ForceItem(TakeNextForcedValue());
@@ -6552,7 +6552,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                                 _strFriendlyName)
                             : await LanguageManager.GetStringAsync("String_Improvement_SelectSpiritTypeGeneric", token: token).ConfigureAwait(false);
                         await frmSelect.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
-                        if (await frmSelect.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                        if (await frmSelect.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -6770,7 +6770,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     }
 
                     string strDescription = await LanguageManager.GetStringAsync("String_DisableSkillGroupPrompt", token: token).ConfigureAwait(false);
-                    using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem
+                    using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest
                            {
                                AllowAutoSelect = false
                            }, token).ConfigureAwait(false))
@@ -6779,7 +6779,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         frmPickItem.MyForm.SetGeneralItemsMode(lstSkills);
 
                         // Make sure the dialogue window was not canceled.
-                        if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                        if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -7426,7 +7426,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         lstActions.Sort(CompareListItems.CompareNames);
                     }
 
-                    using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem
+                    using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest
                            {
                                AllowAutoSelect = false
                            }, token).ConfigureAwait(false))
@@ -7434,7 +7434,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                         frmPickItem.MyForm.SetDropdownItemsMode(lstActions);
 
                         // Make sure the dialogue window was not canceled.
-                        if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                        if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -7562,7 +7562,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
             ForcedValue = strForcedValue;
             Skill objSkill = await (await _objCharacter.GetSkillsSectionAsync(token).ConfigureAwait(false)).GetActiveSkillAsync(strSkill, token).ConfigureAwait(false) ?? throw new AbortedException();
             // Select the actual specialization to add as an expertise
-            using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+            using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
             {
                 string strLimitToSpecialization = bonusNode.Attributes?["limittospecialization"]?.InnerTextViaPool(token);
                 if (!string.IsNullOrEmpty(strLimitToSpecialization))
@@ -7586,7 +7586,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
 
                 // Make sure the dialogue window was not canceled.
                 string strSelected = await frmPickItem.MyForm.DoThreadSafeFuncAsync(x => x.SelectedName, token).ConfigureAwait(false);
-                if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel || string.IsNullOrEmpty(strSelected))
+                if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel || string.IsNullOrEmpty(strSelected))
                 {
                     throw new AbortedException();
                 }

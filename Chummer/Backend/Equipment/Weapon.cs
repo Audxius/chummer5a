@@ -610,10 +610,10 @@ namespace Chummer.Backend.Equipment
                             string strDescription = StringExtensions.FastFormat(
                                                LanguageManager.GetString("String_SelectVariableCost", token: token),
                                                CurrentDisplayNameShort);
-                            using (ThreadSafeForm<SelectNumber> frmPickNumber
+                            using (ThreadSafeDialog<SelectNumberRequest> frmPickNumber
                                    // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                                   = ThreadSafeForm<SelectNumber>.Get(() =>
-                                       new SelectNumber(_objCharacter.Settings.MaxNuyenDecimals)
+                                   = ThreadSafeDialog<SelectNumberRequest>.Get(() =>
+                                       new SelectNumberRequest(_objCharacter.Settings.MaxNuyenDecimals)
                                        {
                                            Minimum = decMin,
                                            Maximum = decMax,
@@ -622,7 +622,7 @@ namespace Chummer.Backend.Equipment
                                        }))
                             {
                                 // ReSharper disable once MethodHasAsyncOverload
-                                if (frmPickNumber.ShowDialogSafe(_objCharacter, token) == DialogResult.Cancel)
+                                if (frmPickNumber.ShowDialogSafe(_objCharacter, token) == DialogOutcome.Cancel)
                                 {
                                     _guiID = Guid.Empty;
                                     return;
@@ -639,9 +639,9 @@ namespace Chummer.Backend.Equipment
                                     .ConfigureAwait(false),
                                 await GetCurrentDisplayNameShortAsync(token).ConfigureAwait(false));
                             int intDecimalPlaces = await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).GetMaxNuyenDecimalsAsync(token).ConfigureAwait(false);
-                            using (ThreadSafeForm<SelectNumber> frmPickNumber
-                                   = await ThreadSafeForm<SelectNumber>.GetAsync(() =>
-                                       new SelectNumber(intDecimalPlaces)
+                            using (ThreadSafeDialog<SelectNumberRequest> frmPickNumber
+                                   = await ThreadSafeDialog<SelectNumberRequest>.GetAsync(() =>
+                                       new SelectNumberRequest(intDecimalPlaces)
                                        {
                                            Minimum = decMin,
                                            Maximum = decMax,
@@ -650,7 +650,7 @@ namespace Chummer.Backend.Equipment
                                        }, token).ConfigureAwait(false))
                             {
                                 if (await frmPickNumber.ShowDialogSafeAsync(_objCharacter, token)
-                                        .ConfigureAwait(false) == DialogResult.Cancel)
+                                        .ConfigureAwait(false) == DialogOutcome.Cancel)
                                 {
                                     _guiID = Guid.Empty;
                                     return;

@@ -316,8 +316,8 @@ namespace Chummer.Backend.Equipment
                     {
                         string strDescription = LanguageManager.GetString("String_CustomItem_SelectText", token: token);
                         // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                        using (ThreadSafeForm<SelectText> frmPickText = ThreadSafeForm<SelectText>.Get(() =>
-                                   new SelectText
+                        using (ThreadSafeDialog<SelectTextRequest> frmPickText = ThreadSafeDialog<SelectTextRequest>.Get(() =>
+                                   new SelectTextRequest
                                    {
                                        PreventXPathErrors = true,
                                        Description = strDescription
@@ -325,7 +325,7 @@ namespace Chummer.Backend.Equipment
                         {
                             // Make sure the dialogue window was not canceled.
                             // ReSharper disable once MethodHasAsyncOverload
-                            if (frmPickText.ShowDialogSafe(_objCharacter, token) == DialogResult.Cancel)
+                            if (frmPickText.ShowDialogSafe(_objCharacter, token) == DialogOutcome.Cancel)
                             {
                                 _guiID = Guid.Empty;
                                 return;
@@ -346,15 +346,15 @@ namespace Chummer.Backend.Equipment
                     else
                     {
                         string strDescription = await LanguageManager.GetStringAsync("String_CustomItem_SelectText", token: token).ConfigureAwait(false);
-                        using (ThreadSafeForm<SelectText> frmPickText = await ThreadSafeForm<SelectText>.GetAsync(() =>
-                                   new SelectText
+                        using (ThreadSafeDialog<SelectTextRequest> frmPickText = await ThreadSafeDialog<SelectTextRequest>.GetAsync(() =>
+                                   new SelectTextRequest
                                    {
                                        PreventXPathErrors = true,
                                        Description = strDescription
                                    }, token).ConfigureAwait(false))
                         {
                             // Make sure the dialogue window was not canceled.
-                            if (await frmPickText.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                            if (await frmPickText.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                             {
                                 _guiID = Guid.Empty;
                                 return;
@@ -408,9 +408,9 @@ namespace Chummer.Backend.Equipment
                             string strDescription = StringExtensions.FastFormat(
                                            LanguageManager.GetString("String_SelectVariableCost", token: token),
                                            CurrentDisplayNameShort);
-                            using (ThreadSafeForm<SelectNumber> frmPickNumber
+                            using (ThreadSafeDialog<SelectNumberRequest> frmPickNumber
                                    // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                                   = ThreadSafeForm<SelectNumber>.Get(() => new SelectNumber(_objCharacter.Settings.MaxNuyenDecimals)
+                                   = ThreadSafeDialog<SelectNumberRequest>.Get(() => new SelectNumberRequest(_objCharacter.Settings.MaxNuyenDecimals)
                                    {
                                        Minimum = decMin,
                                        Maximum = decMax,
@@ -419,7 +419,7 @@ namespace Chummer.Backend.Equipment
                                    }))
                             {
                                 // ReSharper disable once MethodHasAsyncOverload
-                                if (frmPickNumber.ShowDialogSafe(_objCharacter, token) == DialogResult.Cancel)
+                                if (frmPickNumber.ShowDialogSafe(_objCharacter, token) == DialogOutcome.Cancel)
                                 {
                                     _guiID = Guid.Empty;
                                     return;
@@ -433,8 +433,8 @@ namespace Chummer.Backend.Equipment
                                 await LanguageManager.GetStringAsync("String_SelectVariableCost", token: token).ConfigureAwait(false),
                                 await GetCurrentDisplayNameShortAsync(token).ConfigureAwait(false));
                             int intDecimalPlaces = await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).GetMaxNuyenDecimalsAsync(token).ConfigureAwait(false);
-                            using (ThreadSafeForm<SelectNumber> frmPickNumber
-                                   = await ThreadSafeForm<SelectNumber>.GetAsync(() => new SelectNumber(intDecimalPlaces)
+                            using (ThreadSafeDialog<SelectNumberRequest> frmPickNumber
+                                   = await ThreadSafeDialog<SelectNumberRequest>.GetAsync(() => new SelectNumberRequest(intDecimalPlaces)
                                    {
                                        Minimum = decMin,
                                        Maximum = decMax,
@@ -442,7 +442,7 @@ namespace Chummer.Backend.Equipment
                                        AllowCancel = false
                                    }, token).ConfigureAwait(false))
                             {
-                                if (await frmPickNumber.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                                if (await frmPickNumber.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                                 {
                                     _guiID = Guid.Empty;
                                     return;
@@ -470,9 +470,9 @@ namespace Chummer.Backend.Equipment
                     if (blnSync)
                     {
                         string strDescription = LanguageManager.GetString("String_SelectWeaponCategoryAmmo", token: token);
-                        using (ThreadSafeForm<SelectWeaponCategory> frmPickWeaponCategory
+                        using (ThreadSafeDialog<SelectWeaponCategoryRequest> frmPickWeaponCategory
                                // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                               = ThreadSafeForm<SelectWeaponCategory>.Get(() => new SelectWeaponCategory(_objCharacter)
+                               = ThreadSafeDialog<SelectWeaponCategoryRequest>.Get(() => new SelectWeaponCategoryRequest(_objCharacter)
                                {
                                    Description = strDescription,
                                    WeaponType = strAmmoWeaponType
@@ -484,7 +484,7 @@ namespace Chummer.Backend.Equipment
 
                             // ReSharper disable once MethodHasAsyncOverload
                             if (frmPickWeaponCategory.ShowDialogSafe(_objCharacter, token)
-                                != DialogResult.OK)
+                                != DialogOutcome.OK)
                             {
                                 _guiID = Guid.Empty;
                                 return;
@@ -497,8 +497,8 @@ namespace Chummer.Backend.Equipment
                     else
                     {
                         string strDescription = await LanguageManager.GetStringAsync("String_SelectWeaponCategoryAmmo", token: token).ConfigureAwait(false);
-                        using (ThreadSafeForm<SelectWeaponCategory> frmPickWeaponCategory
-                               = await ThreadSafeForm<SelectWeaponCategory>.GetAsync(() => new SelectWeaponCategory(_objCharacter)
+                        using (ThreadSafeDialog<SelectWeaponCategoryRequest> frmPickWeaponCategory
+                               = await ThreadSafeDialog<SelectWeaponCategoryRequest>.GetAsync(() => new SelectWeaponCategoryRequest(_objCharacter)
                                {
                                    Description = strDescription,
                                    WeaponType = strAmmoWeaponType
@@ -509,7 +509,7 @@ namespace Chummer.Backend.Equipment
                                 frmPickWeaponCategory.MyForm.OnlyCategory = _strForcedValue;
 
                             if (await frmPickWeaponCategory.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false)
-                                != DialogResult.OK)
+                                != DialogOutcome.OK)
                             {
                                 _guiID = Guid.Empty;
                                 return;
@@ -809,8 +809,8 @@ namespace Chummer.Backend.Equipment
                                 string strFriendlyName = LanguageManager.GetString(strChooseGearNodeName, false);
                                 if (string.IsNullOrEmpty(strFriendlyName))
                                     strFriendlyName = _objCharacter.TranslateExtra(strChooseGearNodeName);
-                                using (ThreadSafeForm<SelectItem> frmPickItem = ThreadSafeForm<SelectItem>.Get(
-                                           () => new SelectItem
+                                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = ThreadSafeDialog<SelectItemRequest>.Get(
+                                           () => new SelectItemRequest
                                            {
                                                Description = StringExtensions.FastFormat(
                                                                            LanguageManager.GetString(
@@ -821,7 +821,7 @@ namespace Chummer.Backend.Equipment
                                     frmPickItem.MyForm.SetGeneralItemsMode(lstGears);
 
                                     // Make sure the dialogue window was not canceled.
-                                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                                    if (frmPickItem.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                                     {
                                         if (objXmlChooseGearNode["required"]?.InnerTextIsTrueString() == true)
                                         {
@@ -1030,14 +1030,14 @@ namespace Chummer.Backend.Equipment
                                     await LanguageManager.GetStringAsync(
                                         "String_Improvement_SelectText", token: token).ConfigureAwait(false),
                                     strFriendlyName);
-                                using (ThreadSafeForm<SelectItem> frmPickItem = await ThreadSafeForm<SelectItem>.GetAsync(
-                                           () => new SelectItem(), token).ConfigureAwait(false))
+                                using (ThreadSafeDialog<SelectItemRequest> frmPickItem = await ThreadSafeDialog<SelectItemRequest>.GetAsync(
+                                           () => new SelectItemRequest(), token).ConfigureAwait(false))
                                 {
                                     await frmPickItem.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
                                     frmPickItem.MyForm.SetGeneralItemsMode(lstGears);
 
                                     // Make sure the dialogue window was not canceled.
-                                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                                    if (await frmPickItem.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                                     {
                                         if (objXmlChooseGearNode["required"]?.InnerTextIsTrueString() == true)
                                         {

@@ -2216,13 +2216,13 @@ namespace Chummer
                 IAsyncDisposable objCursorWait = await HostServices.Busy.BeginAsync(HostServices.MainWindow, token).ConfigureAwait(false);
                 try
                 {
-                    using (ThreadSafeForm<EditGlobalSettings> frmOptions
-                           = await ThreadSafeForm<EditGlobalSettings>.GetAsync(() => new EditGlobalSettings(), token).ConfigureAwait(false))
+                    using (ThreadSafeDialog<EditGlobalSettingsRequest> frmOptions
+                           = await ThreadSafeDialog<EditGlobalSettingsRequest>.GetAsync(() => new EditGlobalSettingsRequest(), token).ConfigureAwait(false))
                     {
                         if (string.IsNullOrWhiteSpace(strPdfAppPath) || !File.Exists(strPdfAppPath))
                             // ReSharper disable once AccessToDisposedClosure
                             await frmOptions.MyForm.DoLinkPdfReader(token).ConfigureAwait(false);
-                        if (await frmOptions.ShowDialogSafeAsync(Program.MainForm, token).ConfigureAwait(false) != DialogResult.OK)
+                        if (await frmOptions.ShowDialogSafeAsync(Program.MainForm, token).ConfigureAwait(false) != DialogOutcome.OK)
                             return;
                         strPdfParameters = GlobalSettings.PdfParameters;
                         strPdfAppPath = GlobalSettings.PdfAppPath;
@@ -2262,12 +2262,12 @@ namespace Chummer
                 IAsyncDisposable objCursorWait = await HostServices.Busy.BeginAsync(HostServices.MainWindow, token).ConfigureAwait(false);
                 try
                 {
-                    using (ThreadSafeForm<EditGlobalSettings> frmOptions
-                           = await ThreadSafeForm<EditGlobalSettings>.GetAsync(() => new EditGlobalSettings(), token).ConfigureAwait(false))
+                    using (ThreadSafeDialog<EditGlobalSettingsRequest> frmOptions
+                           = await ThreadSafeDialog<EditGlobalSettingsRequest>.GetAsync(() => new EditGlobalSettingsRequest(), token).ConfigureAwait(false))
                     {
                         // ReSharper disable once AccessToDisposedClosure
                         await frmOptions.MyForm.DoLinkPdf(objBookInfo.Code, token).ConfigureAwait(false);
-                        if (await frmOptions.ShowDialogSafeAsync(Program.MainForm, token).ConfigureAwait(false) != DialogResult.OK)
+                        if (await frmOptions.ShowDialogSafeAsync(Program.MainForm, token).ConfigureAwait(false) != DialogOutcome.OK)
                             return;
                         uriPath = null;
                         try

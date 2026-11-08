@@ -634,15 +634,15 @@ namespace Chummer.Backend.Equipment
                                 // ReSharper disable once MethodHasAsyncOverload
                                 ? LanguageManager.GetString("String_CannotFindLifestyle", token: token)
                                 : await LanguageManager.GetStringAsync("String_CannotFindLifestyle", token: token).ConfigureAwait(false), _strName);
-                            using (ThreadSafeForm<SelectItem> frmSelect = blnSync
+                            using (ThreadSafeDialog<SelectItemRequest> frmSelect = blnSync
                                 // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                                ? ThreadSafeForm<SelectItem>.Get(
-                                       () => new SelectItem
+                                ? ThreadSafeDialog<SelectItemRequest>.Get(
+                                       () => new SelectItemRequest
                                        {
                                            Description = strDescription
                                        })
-                                : await ThreadSafeForm<SelectItem>.GetAsync(
-                                       () => new SelectItem
+                                : await ThreadSafeDialog<SelectItemRequest>.GetAsync(
+                                       () => new SelectItemRequest
                                        {
                                            Description = strDescription
                                        }, token).ConfigureAwait(false))
@@ -650,7 +650,7 @@ namespace Chummer.Backend.Equipment
                                 frmSelect.MyForm.SetGeneralItemsMode(lstQualities);
                                 // ReSharper disable once MethodHasAsyncOverload
                                 if ((blnSync ? frmSelect.ShowDialogSafe(_objCharacter, token) : await frmSelect.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false))
-                                    == DialogResult.Cancel)
+                                    == DialogOutcome.Cancel)
                                 {
                                     _guiID = Guid.Empty;
                                     return;

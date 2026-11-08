@@ -1044,12 +1044,12 @@ namespace Chummer
                 bool blnAddAgain;
                 do
                 {
-                    using (ThreadSafeForm<SelectMartialArt> frmPickMartialArt
-                           = await ThreadSafeForm<SelectMartialArt>.GetAsync(
-                               () => new SelectMartialArt(objCharacter), token).ConfigureAwait(false))
+                    using (ThreadSafeDialog<SelectMartialArtRequest> frmPickMartialArt
+                           = await ThreadSafeDialog<SelectMartialArtRequest>.GetAsync(
+                               () => new SelectMartialArtRequest(objCharacter), token).ConfigureAwait(false))
                     {
                         if (await frmPickMartialArt.ShowDialogSafeAsync(objCharacter, token).ConfigureAwait(false) ==
-                            DialogResult.Cancel)
+                            DialogOutcome.Cancel)
                             return blnReturn;
 
                         blnAddAgain = frmPickMartialArt.MyForm.AddAgain;

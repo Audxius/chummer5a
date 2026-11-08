@@ -42,6 +42,8 @@ namespace Chummer
 
         private static IThemeService s_objTheme = new HeadlessThemeService();
 
+        private static IDialogService s_objDialogs = new HeadlessDialogService();
+
         public static IMessageService Messages
         {
             get => s_objMessages;
@@ -71,6 +73,15 @@ namespace Chummer
         {
             get => s_objTheme;
             set => s_objTheme = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Prompts the engine needs answered mid-operation (pick an item, a number...).
+        /// </summary>
+        public static IDialogService Dialogs
+        {
+            get => s_objDialogs;
+            set => s_objDialogs = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }

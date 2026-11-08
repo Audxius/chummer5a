@@ -2020,15 +2020,15 @@ namespace Chummer
                                             ? LanguageManager.GetString("Title_SelectSkill", token: token)
                                             : await LanguageManager.GetStringAsync("Title_SelectSkill", token: token).ConfigureAwait(false);
                                         bool blnAllowAutoSelect = string.IsNullOrWhiteSpace(strPrompt);
-                                        using (ThreadSafeForm<SelectItem> frmPickSkill
+                                        using (ThreadSafeDialog<SelectItemRequest> frmPickSkill
                                                = blnSync
                                                    // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                                                   ? ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                                                   ? ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                                                    {
                                                        Description = strDescription,
                                                        AllowAutoSelect = blnAllowAutoSelect
                                                    })
-                                                   : await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem
+                                                   : await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest
                                                    {
                                                        AllowAutoSelect = blnAllowAutoSelect
                                                    }, token).ConfigureAwait(false))
@@ -2044,7 +2044,7 @@ namespace Chummer
                                                     // ReSharper disable once MethodHasAsyncOverload
                                                     ? frmPickSkill.ShowDialogSafe(objCharacter, token)
                                                     : await frmPickSkill.ShowDialogSafeAsync(objCharacter, token).ConfigureAwait(false)) ==
-                                                DialogResult.Cancel)
+                                                DialogOutcome.Cancel)
                                             {
                                                 throw new AbortedException();
                                             }
@@ -2259,14 +2259,14 @@ namespace Chummer
                             : await LanguageManager.GetStringAsync("String_Improvement_SelectSkill", token: token)
                                 .ConfigureAwait(false);
                     // Display the Select Skill window and record which Skill was selected.
-                    using (ThreadSafeForm<SelectSkill> frmPickSkill
+                    using (ThreadSafeDialog<SelectSkillRequest> frmPickSkill
                            = blnSync
                                // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                               ? ThreadSafeForm<SelectSkill>.Get(() => new SelectSkill(objCharacter, strFriendlyName)
+                               ? ThreadSafeDialog<SelectSkillRequest>.Get(() => new SelectSkillRequest(objCharacter, strFriendlyName)
                                {
                                    Description = strDescription
                                })
-                               : await ThreadSafeForm<SelectSkill>.GetAsync(() => new SelectSkill(objCharacter, strFriendlyName), token).ConfigureAwait(false))
+                               : await ThreadSafeDialog<SelectSkillRequest>.GetAsync(() => new SelectSkillRequest(objCharacter, strFriendlyName), token).ConfigureAwait(false))
                     {
                         if (!blnSync)
                             await frmPickSkill.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
@@ -2325,7 +2325,7 @@ namespace Chummer
                                 // ReSharper disable once MethodHasAsyncOverload
                                 ? frmPickSkill.ShowDialogSafe(objCharacter, token)
                                 : await frmPickSkill.ShowDialogSafeAsync(objCharacter, token).ConfigureAwait(false)) ==
-                            DialogResult.Cancel)
+                            DialogOutcome.Cancel)
                         {
                             throw new AbortedException();
                         }
@@ -2371,9 +2371,9 @@ namespace Chummer
                 : (blnSync
                     ? LanguageManager.GetString("String_Improvement_SelectSkillGroup", token: token)
                     : await LanguageManager.GetStringAsync("String_Improvement_SelectSkillGroup", token: token).ConfigureAwait(false));
-            using (ThreadSafeForm<SelectSkillGroup> frmPickSkillGroup = blnSync
-                       ? ThreadSafeForm<SelectSkillGroup>.Get(() => new SelectSkillGroup(objCharacter) { Description = strDescription })
-                       : await ThreadSafeForm<SelectSkillGroup>.GetAsync(() => new SelectSkillGroup(objCharacter), token).ConfigureAwait(false))
+            using (ThreadSafeDialog<SelectSkillGroupRequest> frmPickSkillGroup = blnSync
+                       ? ThreadSafeDialog<SelectSkillGroupRequest>.Get(() => new SelectSkillGroupRequest(objCharacter) { Description = strDescription })
+                       : await ThreadSafeDialog<SelectSkillGroupRequest>.GetAsync(() => new SelectSkillGroupRequest(objCharacter), token).ConfigureAwait(false))
             {
                 if (!blnSync)
                     await frmPickSkillGroup.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
@@ -2403,7 +2403,7 @@ namespace Chummer
                 if ((blnSync
                         ? frmPickSkillGroup.ShowDialogSafe(objCharacter, token)
                         : await frmPickSkillGroup.ShowDialogSafeAsync(objCharacter, token).ConfigureAwait(false)) ==
-                    DialogResult.Cancel)
+                    DialogOutcome.Cancel)
                 {
                     throw new AbortedException();
                 }
@@ -2559,16 +2559,16 @@ namespace Chummer
                                             : await LanguageManager
                                                 .GetStringAsync("String_Improvement_SelectText", token: token)
                                                 .ConfigureAwait(false);
-                                        using (ThreadSafeForm<SelectText> frmPickText
+                                        using (ThreadSafeDialog<SelectTextRequest> frmPickText
                                                = blnSync
                                                    // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                                                   ? ThreadSafeForm<SelectText>.Get(() => new SelectText
+                                                   ? ThreadSafeDialog<SelectTextRequest>.Get(() => new SelectTextRequest
                                                    {
                                                        Description = StringExtensions.FastFormat(
                                                            strSelectText,
                                                            strFriendlyName)
                                                    })
-                                                   : await ThreadSafeForm<SelectText>.GetAsync(() => new SelectText
+                                                   : await ThreadSafeDialog<SelectTextRequest>.GetAsync(() => new SelectTextRequest
                                                    {
                                                        Description = StringExtensions.FastFormat(
                                                            strSelectText,
@@ -2580,7 +2580,7 @@ namespace Chummer
                                                     ? frmPickText.ShowDialogSafe(objCharacter, token)
                                                     : await frmPickText.ShowDialogSafeAsync(objCharacter, token)
                                                         .ConfigureAwait(false))
-                                                == DialogResult.Cancel)
+                                                == DialogOutcome.Cancel)
                                             {
                                                 if (blnSync)
                                                     // ReSharper disable once MethodHasAsyncOverload
@@ -2720,16 +2720,16 @@ namespace Chummer
                                                     .GetStringAsync("String_Improvement_SelectText", token: token)
                                                     .ConfigureAwait(false);
 
-                                            using (ThreadSafeForm<SelectItem> frmSelect
+                                            using (ThreadSafeDialog<SelectItemRequest> frmSelect
                                                    = blnSync
                                                        // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                                                       ? ThreadSafeForm<SelectItem>.Get(() => new SelectItem
+                                                       ? ThreadSafeDialog<SelectItemRequest>.Get(() => new SelectItemRequest
                                                        {
                                                            Description = StringExtensions.FastFormat(
                                                                strSelectText,
                                                                strFriendlyName)
                                                        })
-                                                       : await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                                                       : await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                                             {
                                                 if (!blnSync)
                                                     await frmSelect.MyForm.DoThreadSafeAsync(x => x.Description = StringExtensions.FastFormat(
@@ -2748,12 +2748,12 @@ namespace Chummer
                                                     frmSelect.MyForm.SetGeneralItemsMode(lstItems);
                                                 }
 
-                                                DialogResult eReturn = blnSync
+                                                DialogOutcome eReturn = blnSync
                                                     // ReSharper disable once MethodHasAsyncOverload
                                                     ? frmSelect.ShowDialogSafe(objCharacter, token)
                                                     : await frmSelect.ShowDialogSafeAsync(objCharacter, token)
                                                         .ConfigureAwait(false);
-                                                if (eReturn == DialogResult.Cancel)
+                                                if (eReturn == DialogOutcome.Cancel)
                                                 {
                                                     if (blnSync)
                                                         // ReSharper disable once MethodHasAsyncOverload
@@ -6974,8 +6974,8 @@ namespace Chummer
                         xmlSpirit.SelectSingleNodeAndCacheExpression("translate", token)?.Value ?? strSpiritName));
                 }
 
-                using (ThreadSafeForm<SelectItem> frmSelect =
-                       await ThreadSafeForm<SelectItem>.GetAsync(() => new SelectItem(), token).ConfigureAwait(false))
+                using (ThreadSafeDialog<SelectItemRequest> frmSelect =
+                       await ThreadSafeDialog<SelectItemRequest>.GetAsync(() => new SelectItemRequest(), token).ConfigureAwait(false))
                 {
                     frmSelect.MyForm.SetGeneralItemsMode(lstSpirits);
                     string strDescription = !string.IsNullOrEmpty(strFriendlyName)
@@ -6986,7 +6986,7 @@ namespace Chummer
                         : await LanguageManager.GetStringAsync("String_Improvement_SelectSpiritTypeGeneric", token: token)
                             .ConfigureAwait(false);
                     await frmSelect.MyForm.DoThreadSafeAsync(x => x.Description = strDescription, token).ConfigureAwait(false);
-                    if (await frmSelect.ShowDialogSafeAsync(objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                    if (await frmSelect.ShowDialogSafeAsync(objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                         return string.Empty;
                     return await frmSelect.MyForm.DoThreadSafeFuncAsync(x => x.SelectedItem, token).ConfigureAwait(false);
                 }

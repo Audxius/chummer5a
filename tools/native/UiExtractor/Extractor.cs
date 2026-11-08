@@ -59,6 +59,12 @@ internal static class Extractor
             return 1;
         }
 
+        if (args.Contains("--analyze-dialogs"))
+        {
+            DialogAnalyzer.Run(objCompilation, s_strBackendDir, s_strFormsDir);
+            return 0;
+        }
+
         // ---------- Phase A: analysis ----------
         Dictionary<IMethodSymbol, MethodDeclarationSyntax> dicCandidates = new Dictionary<IMethodSymbol, MethodDeclarationSyntax>(SymbolEqualityComparer.Default);
         List<string> lstSkipped = new List<string>();

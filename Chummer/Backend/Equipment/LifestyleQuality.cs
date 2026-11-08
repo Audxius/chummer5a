@@ -605,8 +605,8 @@ namespace Chummer.Backend.Equipment
                                                                     ?.Value));
                         }
 
-                        using (ThreadSafeForm<SelectItem> frmSelect = ThreadSafeForm<SelectItem>.Get(
-                                   () => new SelectItem
+                        using (ThreadSafeDialog<SelectItemRequest> frmSelect = ThreadSafeDialog<SelectItemRequest>.Get(
+                                   () => new SelectItemRequest
                                    {
                                        Description = StringExtensions.FastFormat(
                                                                    LanguageManager.GetString(
@@ -615,7 +615,7 @@ namespace Chummer.Backend.Equipment
                                    }))
                         {
                             frmSelect.MyForm.SetGeneralItemsMode(lstQualities);
-                            if (frmSelect.ShowDialogSafe(_objCharacter) == DialogResult.Cancel)
+                            if (frmSelect.ShowDialogSafe(_objCharacter) == DialogOutcome.Cancel)
                             {
                                 _guiID = Guid.Empty;
                                 return;
@@ -691,14 +691,14 @@ namespace Chummer.Backend.Equipment
                                                                    await LanguageManager.GetStringAsync(
                                                                        "String_intCannotFindLifestyleQuality", token: token).ConfigureAwait(false),
                                                                    _strName);
-                        using (ThreadSafeForm<SelectItem> frmSelect = await ThreadSafeForm<SelectItem>.GetAsync(
-                                   () => new SelectItem
+                        using (ThreadSafeDialog<SelectItemRequest> frmSelect = await ThreadSafeDialog<SelectItemRequest>.GetAsync(
+                                   () => new SelectItemRequest
                                    {
                                        Description = strDescription
                                    }, token).ConfigureAwait(false))
                         {
                             frmSelect.MyForm.SetGeneralItemsMode(lstQualities);
-                            if (await frmSelect.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogResult.Cancel)
+                            if (await frmSelect.ShowDialogSafeAsync(_objCharacter, token).ConfigureAwait(false) == DialogOutcome.Cancel)
                             {
                                 _guiID = Guid.Empty;
                                 return;
