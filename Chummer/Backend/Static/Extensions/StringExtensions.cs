@@ -7914,9 +7914,30 @@ namespace Chummer
         /// </summary>
         public static string CleanOfXmlInvalidUnicodeChars(this string strInput)
         {
-            return string.IsNullOrEmpty(strInput)
-                ? string.Empty
-                : strInput.FastEscape(s_achrXmlInvalidUnicodeChars);
+            if (string.IsNullOrEmpty(strInput))
+                return string.Empty;
+            int intFirstInvalid = IndexOfFirstXmlInvalidChar(strInput);
+            if (intFirstInvalid < 0)
+                return strInput;
+            // Covers the full XML 1.0 rule, not just C0 controls: U+FFFE/U+FFFF and unpaired surrogates
+            // (e.g. from text pasted out of PDFs) used to slip through and crash saving (issue #5270).
+            StringBuilder sbdReturn = new StringBuilder(strInput.Length);
+            sbdReturn.Append(strInput, 0, intFirstInvalid);
+            for (int i = intFirstInvalid; i < strInput.Length; ++i)
+            {
+                char chrLoop = strInput[i];
+                if (char.IsHighSurrogate(chrLoop))
+                {
+                    if (i + 1 < strInput.Length && char.IsLowSurrogate(strInput[i + 1]))
+                    {
+                        sbdReturn.Append(chrLoop).Append(strInput[i + 1]);
+                        ++i;
+                    }
+                }
+                else if (System.Xml.XmlConvert.IsXmlChar(chrLoop))
+                    sbdReturn.Append(chrLoop);
+            }
+            return sbdReturn.ToString();
         }
 
         /// <summary>
@@ -7924,7 +7945,27 @@ namespace Chummer
         /// </summary>
         public static bool HasAnyXmlInvalidUnicodeChars(this string strInput)
         {
-            return !string.IsNullOrEmpty(strInput) && strInput.IndexOfAny(s_achrXmlInvalidUnicodeChars) >= 0;
+            return !string.IsNullOrEmpty(strInput) && IndexOfFirstXmlInvalidChar(strInput) >= 0;
+        }
+
+        private static int IndexOfFirstXmlInvalidChar(string strInput)
+        {
+            for (int i = 0; i < strInput.Length; ++i)
+            {
+                char chrLoop = strInput[i];
+                if (char.IsHighSurrogate(chrLoop))
+                {
+                    if (i + 1 < strInput.Length && char.IsLowSurrogate(strInput[i + 1]))
+                    {
+                        ++i;
+                        continue;
+                    }
+                    return i;
+                }
+                if (!System.Xml.XmlConvert.IsXmlChar(chrLoop))
+                    return i;
+            }
+            return -1;
         }
 
         /// <summary>
@@ -8557,38 +8598,6 @@ namespace Chummer
         private static readonly char[] s_achrParentheses = new[] { '(', ')' };
         private static readonly char[] s_achrOpenParenthesesComma = new[] { '(', ',' };
         private static readonly char[] s_achrClosedParenthesesComma = new[] { ')', ',' };
-        private static readonly char[] s_achrXmlInvalidUnicodeChars = new[]
-        {
-            '\u0000',
-            '\u0001',
-            '\u0002',
-            '\u0003',
-            '\u0004',
-            '\u0005',
-            '\u0006',
-            '\u0007',
-            '\u0008',
-            '\u000B',
-            '\u000C',
-            '\u000E',
-            '\u000F',
-            '\u0010',
-            '\u0011',
-            '\u0012',
-            '\u0013',
-            '\u0014',
-            '\u0015',
-            '\u0016',
-            '\u0017',
-            '\u0018',
-            '\u0019',
-            '\u001A',
-            '\u001B',
-            '\u001C',
-            '\u001D',
-            '\u001E',
-            '\u001F'
-        };
 
         // Order is important so that we replace composites before chars
         private static readonly string[] s_astrLineEndingStrings = new[] { "\r\n", "\n\r", "\n", "\r" };

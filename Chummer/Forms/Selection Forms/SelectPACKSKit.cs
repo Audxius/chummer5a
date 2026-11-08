@@ -272,7 +272,7 @@ namespace Chummer
                                 continue;
                             string strName = objXmlSkill.SelectSingleNodeAndCacheExpression("name").Value;
                             XPathNavigator objNode = _xmlSkillsBaseChummerNode.TryGetNodeByNameOrId("skills/skill", strName);
-                            if (objNode.SelectSingleNodeAndCacheExpression("hide") != null)
+                            if (objNode == null || objNode.SelectSingleNodeAndCacheExpression("hide") != null)
                                 continue;
                             string strText = (objNode.SelectSingleNodeAndCacheExpression("translate")?.Value ?? strName)
                                              + strSpace + (objXmlSkill.SelectSingleNodeAndCacheExpression("rating")
@@ -292,7 +292,7 @@ namespace Chummer
                                 continue;
                             string strName = objXmlSkill.SelectSingleNodeAndCacheExpression("name").Value;
                             XPathNavigator objNode = _xmlSkillsBaseChummerNode.SelectSingleNode("skillgroups/name[. = " + strName.CleanXPath() + "]");
-                            if (objNode.SelectSingleNodeAndCacheExpression("hide") != null)
+                            if (objNode == null || objNode.SelectSingleNodeAndCacheExpression("hide") != null)
                                 continue;
                             string strText = (objNode.SelectSingleNodeAndCacheExpression("@translate")?.Value
                                               ?? strName) + strSpace
@@ -498,8 +498,8 @@ namespace Chummer
                             TreeNode objChild = new TreeNode
                             {
                                 Text = objXmlSpirit.SelectSingleNodeAndCacheExpression("name").Value + strSpace + await LanguageManager.GetStringAsync("String_LeftPar").ConfigureAwait(false) +
-                                       await LanguageManager.GetStringAsync("Label_Spirit_Force").ConfigureAwait(false) + strSpace + objXmlSpirit.SelectSingleNodeAndCacheExpression("force").Value + await LanguageManager.GetStringAsync("String_Comma").ConfigureAwait(false) + strSpace +
-                                       await LanguageManager.GetStringAsync("Label_Spirit_ServicesOwed").ConfigureAwait(false) + strSpace + objXmlSpirit.SelectSingleNodeAndCacheExpression("services").Value + await LanguageManager.GetStringAsync("String_RightPar").ConfigureAwait(false)
+                                       await LanguageManager.GetStringAsync("Label_Spirit_Force").ConfigureAwait(false) + strSpace + objXmlSpirit.SelectSingleNodeAndCacheExpression("force")?.Value + await LanguageManager.GetStringAsync("String_Comma").ConfigureAwait(false) + strSpace +
+                                       await LanguageManager.GetStringAsync("Label_Spirit_ServicesOwed").ConfigureAwait(false) + strSpace + objXmlSpirit.SelectSingleNodeAndCacheExpression("services")?.Value + await LanguageManager.GetStringAsync("String_RightPar").ConfigureAwait(false)
                             };
                             objParent.Nodes.Add(objChild);
                         }
@@ -535,8 +535,8 @@ namespace Chummer
                             }
                             TreeNode objChild = new TreeNode
                             {
-                                Text = (objXmlLifestyle.SelectSingleNodeAndCacheExpression("translate") ?? objXmlLifestyle.SelectSingleNodeAndCacheExpression("baselifestyle")).Value
-                                       + strSpace + objXmlLifestyle.SelectSingleNodeAndCacheExpression("months").Value
+                                Text = (objXmlLifestyle.SelectSingleNodeAndCacheExpression("translate") ?? objXmlLifestyle.SelectSingleNodeAndCacheExpression("baselifestyle") ?? objXmlLifestyle.SelectSingleNodeAndCacheExpression("name"))?.Value
+                                       + strSpace + (objXmlLifestyle.SelectSingleNodeAndCacheExpression("months")?.Value ?? "1")
                                        + strSpace + strIncrementString + StringExtensions.FastFormat(GlobalSettings.CultureInfo, await LanguageManager.GetStringAsync("Label_LifestylePermanent").ConfigureAwait(false), intPermanentAmount)
                             };
                             // Check for Qualities.
@@ -568,7 +568,7 @@ namespace Chummer
                             string strRating = objXmlCyberware.SelectSingleNodeAndCacheExpression("rating")?.Value;
                             if (!string.IsNullOrEmpty(strRating))
                                 strText += strSpace + await LanguageManager.GetStringAsync("String_Rating").ConfigureAwait(false) + strSpace + strRating;
-                            strText += strSpace + await LanguageManager.GetStringAsync("String_LeftPar").ConfigureAwait(false) + objXmlCyberware.SelectSingleNodeAndCacheExpression("grade").Value + await LanguageManager.GetStringAsync("String_RightPar").ConfigureAwait(false);
+                            strText += strSpace + await LanguageManager.GetStringAsync("String_LeftPar").ConfigureAwait(false) + objXmlCyberware.SelectSingleNodeAndCacheExpression("grade")?.Value + await LanguageManager.GetStringAsync("String_RightPar").ConfigureAwait(false);
                             TreeNode objChild = new TreeNode
                             {
                                 Text = strText
@@ -616,7 +616,7 @@ namespace Chummer
                             string strRating = objXmlBioware.SelectSingleNodeAndCacheExpression("rating")?.Value;
                             if (!string.IsNullOrEmpty(strRating))
                                 strText += strSpace + await LanguageManager.GetStringAsync("String_Rating").ConfigureAwait(false) + strSpace + strRating;
-                            strText += strSpace + await LanguageManager.GetStringAsync("String_LeftPar").ConfigureAwait(false) + objXmlBioware.SelectSingleNodeAndCacheExpression("grade").Value + await LanguageManager.GetStringAsync("String_RightPar").ConfigureAwait(false);
+                            strText += strSpace + await LanguageManager.GetStringAsync("String_LeftPar").ConfigureAwait(false) + objXmlBioware.SelectSingleNodeAndCacheExpression("grade")?.Value + await LanguageManager.GetStringAsync("String_RightPar").ConfigureAwait(false);
                             TreeNode objChild = new TreeNode
                             {
                                 Text = strText

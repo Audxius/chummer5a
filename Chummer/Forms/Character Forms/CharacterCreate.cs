@@ -24176,8 +24176,12 @@ namespace Chummer
                         foreach (XmlNode objXmlLifestyle in xmlLifestyles.SelectNodes("lifestyle"))
                         {
                             // Create the Lifestyle.
+                            // Custom kits saved without an advanced lifestyle have no <baselifestyle>, so fall back to <name>.
+                            string strBaseLifestyle = (objXmlLifestyle["baselifestyle"] ?? objXmlLifestyle["name"])?.InnerTextViaPool(token);
+                            if (string.IsNullOrEmpty(strBaseLifestyle))
+                                continue;
                             XmlNode objXmlLifestyleNode = objXmlLifestyleDocument.TryGetNodeByNameOrId(
-                                "/chummer/lifestyles/lifestyle", objXmlLifestyle["baselifestyle"].InnerTextViaPool(token));
+                                "/chummer/lifestyles/lifestyle", strBaseLifestyle);
                             if (objXmlLifestyleNode == null)
                                 continue;
                             Lifestyle objLifestyle = new Lifestyle(CharacterObject);

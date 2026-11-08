@@ -25,7 +25,6 @@ namespace Chummer
     public partial class SelectCalendarStart : Form
     {
         private readonly string _strCachedDateSpanFormat;
-        private bool _blnCachedSelectedYearIsLeapYear;
         private int _intSelectedYear = DateTime.UtcNow.Year + 62;
         private int _intSelectedWeek = 1;
 
@@ -41,7 +40,7 @@ namespace Chummer
             _strCachedDateSpanFormat = LanguageManager.GetString("String_DateSpan");
             nudYear.Value = _intSelectedYear;
             nudWeek.Value = _intSelectedWeek;
-            nudWeek.Maximum = _intSelectedYear.IsYearLongYear(out _blnCachedSelectedYearIsLeapYear) ? 53 : 52;
+            nudWeek.Maximum = _intSelectedYear.IsYearLongYear() ? 53 : 52;
 
             nudYear.ValueChanged += nudYear_ValueChanged;
             nudWeek.ValueChanged += UpdateDateSpan;
@@ -93,7 +92,7 @@ namespace Chummer
 
         private void nudYear_ValueChanged(object sender, EventArgs e)
         {
-            nudWeek.Maximum = nudYear.ValueAsInt.IsYearLongYear(out _blnCachedSelectedYearIsLeapYear) ? 53 : 52;
+            nudWeek.Maximum = nudYear.ValueAsInt.IsYearLongYear() ? 53 : 52;
             UpdateDateSpan(sender, e);
         }
 
@@ -102,18 +101,17 @@ namespace Chummer
         {
             string strFormat = _strCachedDateSpanFormat;
             int intYear = nudYear.ValueAsInt;
-            int intOrdinalDaySpanStart = nudWeek.ValueAsInt * 7 - 2 - intYear.GetWeekOfTheDayForJan4();
-            DateTime datStart;
-            if (intOrdinalDaySpanStart > 0)
+            int intWeek = nudWeek.ValueAsInt;
+            // ISO 8601: week 1 is the week (Monday to Sunday) that contains January 4th.
+            // The previous hand-rolled month/day arithmetic could produce invalid dates and crash (issue #5259).
+            if (intYear < 2 || intYear > 9998 || intWeek < 1)
             {
-                int intMonth = 1 + intOrdinalDaySpanStart.DivRem(30, out int intDay);
-                intDay += (_blnCachedSelectedYearIsLeapYear ? 2 : 3) - (3 * (intMonth + 1)) / 5;
-                datStart = new DateTime(intYear, intMonth, intDay);
+                lblDateSpan.Text = string.Empty;
+                return;
             }
-            else
-            {
-                datStart = new DateTime(intYear - 1, 12, 31 + intOrdinalDaySpanStart);
-            }
+            DateTime datJan4 = new DateTime(intYear, 1, 4);
+            int intDaysSinceMonday = ((int)datJan4.DayOfWeek + 6) % 7;
+            DateTime datStart = datJan4.AddDays(-intDaysSinceMonday + (intWeek - 1) * 7);
             DateTime datEnd = datStart.AddDays(6);
             lblDateSpan.Text = StringExtensions.FastFormat(strFormat,
                 datStart.ToString("D", GlobalSettings.CultureInfo), datEnd.ToString("D", GlobalSettings.CultureInfo));
