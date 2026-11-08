@@ -1320,7 +1320,7 @@ namespace Chummer
             }
 
             if (blnDoRestart)
-                await Utils.RestartApplication(token: token).ConfigureAwait(false);
+                await UtilsUiExtensions.RestartApplication(token: token).ConfigureAwait(false);
         }
 
         private async Task DownloadUpdates(CancellationToken token = default)

@@ -65,6 +65,9 @@ internal static class Extractor
             return 0;
         }
 
+        // --move=Namespace.Type.Method (repeatable): also move methods without UI signatures that only the UI uses.
+        HashSet<string> lstForcedMoves = new HashSet<string>(args.Where(x => x.StartsWith("--move=", StringComparison.Ordinal)).Select(x => x.Substring("--move=".Length)), StringComparer.Ordinal);
+
         // ---------- Phase A: analysis ----------
         Dictionary<IMethodSymbol, MethodDeclarationSyntax> dicCandidates = new Dictionary<IMethodSymbol, MethodDeclarationSyntax>(SymbolEqualityComparer.Default);
         List<string> lstSkipped = new List<string>();
@@ -78,7 +81,7 @@ internal static class Extractor
             {
                 if (!(objModel.GetDeclaredSymbol(objDecl) is IMethodSymbol objMethod))
                     continue;
-                if (!HasUiSignature(objMethod))
+                if (!HasUiSignature(objMethod) && !lstForcedMoves.Contains(objMethod.ContainingType.ToDisplayString() + "." + objMethod.Name))
                     continue;
                 string strSkipReason = GetSkipReason(objMethod, objDecl, objModel);
                 if (strSkipReason != null)

@@ -164,7 +164,7 @@ namespace Chummer
 
             if (_blnDirtyRestartNeeded)
             {
-                await Utils.RestartApplication(_strSelectedLanguage, "Message_Options_CloseForms")
+                await UtilsUiExtensions.RestartApplication(_strSelectedLanguage, "Message_Options_CloseForms")
                            .ConfigureAwait(false);
             }
 

@@ -5038,7 +5038,7 @@ namespace Chummer
         {
             try
             {
-                await Utils.RestartApplication(strText: "Message_Options_Restart", token: _objGenericToken).ConfigureAwait(false);
+                await UtilsUiExtensions.RestartApplication(strText: "Message_Options_Restart", token: _objGenericToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
