@@ -115,6 +115,8 @@ namespace Chummer
         [STAThread]
         private static void Main()
         {
+            // Register UI services first: anything below (e.g. GlobalSettings' static initializer) may already need them.
+            UiServices.Messages = new WinFormsMessageService();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);

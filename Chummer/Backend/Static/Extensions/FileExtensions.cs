@@ -87,22 +87,22 @@ namespace Chummer
                             if (blnSync)
                             {
                                 // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                                if (Program.ShowScrollableMessageBox(
+                                if (MessageBoxes.Show(
                                         StringExtensions.FastFormat(
                                             // ReSharper disable once MethodHasAsyncOverload
                                             LanguageManager.GetString("Message_Prompt_Delete_Existing_File",
                                                 token: token), strPath),
-                                        buttons: MessageBoxButtons.YesNo, icon: MessageBoxIcon.Warning) !=
-                                    DialogResult.Yes)
+                                        buttons: MessageButtons.YesNo, icon: MessageIcon.Warning) !=
+                                    MessageResult.Yes)
                                     return false;
                             }
-                            else if (await Program.ShowScrollableMessageBoxAsync(
+                            else if (await MessageBoxes.ShowAsync(
                                          StringExtensions.FastFormat(
                                              await LanguageManager.GetStringAsync(
                                                      "Message_Prompt_Delete_Existing_File", token: token)
                                                  .ConfigureAwait(false), strPath),
-                                         buttons: MessageBoxButtons.YesNo, icon: MessageBoxIcon.Warning, token: token).ConfigureAwait(false) !=
-                                     DialogResult.Yes)
+                                         buttons: MessageButtons.YesNo, icon: MessageIcon.Warning, token: token).ConfigureAwait(false) !=
+                                     MessageResult.Yes)
                                 return false;
                         }
                         else
@@ -130,11 +130,11 @@ namespace Chummer
                     {
                         if (blnSync)
                             // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                            Program.ShowScrollableMessageBox(
+                            MessageBoxes.Show(
                                 // ReSharper disable once MethodHasAsyncOverload
                                 LanguageManager.GetString("Message_Insufficient_Permissions_Warning", token: token));
                         else
-                            await Program.ShowScrollableMessageBoxAsync(
+                            await MessageBoxes.ShowAsync(
                                 await LanguageManager
                                     .GetStringAsync("Message_Insufficient_Permissions_Warning", token: token)
                                     .ConfigureAwait(false), token: token).ConfigureAwait(false);

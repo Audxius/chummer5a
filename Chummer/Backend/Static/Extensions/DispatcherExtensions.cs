@@ -72,7 +72,7 @@ namespace Chummer
                 e = e.Demystify();
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 throw;
             }
@@ -117,7 +117,7 @@ namespace Chummer
                 e = e.Demystify();
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 throw;
             }
@@ -162,7 +162,7 @@ namespace Chummer
                 e = e.Demystify();
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 throw;
             }
@@ -207,7 +207,7 @@ namespace Chummer
                 e = e.Demystify();
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 throw;
             }
@@ -255,7 +255,7 @@ namespace Chummer
             {
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 return Task.FromException(e);
             }
@@ -304,7 +304,7 @@ namespace Chummer
             {
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 return Task.FromException(e);
             }
@@ -353,7 +353,7 @@ namespace Chummer
             {
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 return Task.FromException(e);
             }
@@ -402,7 +402,7 @@ namespace Chummer
             {
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 return Task.FromException(e);
             }
@@ -445,7 +445,7 @@ namespace Chummer
                 e = e.Demystify();
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 throw;
             }
@@ -491,7 +491,7 @@ namespace Chummer
                 e = e.Demystify();
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 throw;
             }
@@ -535,7 +535,7 @@ namespace Chummer
                 e = e.Demystify();
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 throw;
             }
@@ -581,7 +581,7 @@ namespace Chummer
                 e = e.Demystify();
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 throw;
             }
@@ -631,7 +631,7 @@ namespace Chummer
             {
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 return Task.FromException<T2>(e);
             }
@@ -681,7 +681,7 @@ namespace Chummer
             {
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 return Task.FromException<T2>(e);
             }
@@ -731,7 +731,7 @@ namespace Chummer
             {
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 return Task.FromException<T2>(e);
             }
@@ -781,7 +781,7 @@ namespace Chummer
             {
                 Log.Error(e);
 #if DEBUG
-                Program.ShowScrollableMessageBox(e.ToString());
+                MessageBoxes.Show(e.ToString());
 #endif
                 return Task.FromException<T2>(e);
             }

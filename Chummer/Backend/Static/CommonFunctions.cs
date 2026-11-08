@@ -1955,8 +1955,8 @@ namespace Chummer
         public static bool ConfirmDelete(string strMessage, CancellationToken token = default)
         {
             return !GlobalSettings.ConfirmDelete ||
-                   Program.ShowScrollableMessageBox(strMessage, LanguageManager.GetString("MessageTitle_Delete", token: token),
-                       MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+                   MessageBoxes.Show(strMessage, LanguageManager.GetString("MessageTitle_Delete", token: token),
+                       MessageButtons.YesNo, MessageIcon.Question) == MessageResult.Yes;
         }
 
         /// <summary>
@@ -1966,8 +1966,8 @@ namespace Chummer
         {
             token.ThrowIfCancellationRequested();
             return !GlobalSettings.ConfirmDelete ||
-                   await Program.ShowScrollableMessageBoxAsync(strMessage, await LanguageManager.GetStringAsync("MessageTitle_Delete", token: token).ConfigureAwait(false),
-                       MessageBoxButtons.YesNo, MessageBoxIcon.Question, token: token).ConfigureAwait(false) == DialogResult.Yes;
+                   await MessageBoxes.ShowAsync(strMessage, await LanguageManager.GetStringAsync("MessageTitle_Delete", token: token).ConfigureAwait(false),
+                       MessageButtons.YesNo, MessageIcon.Question, token: token).ConfigureAwait(false) == MessageResult.Yes;
         }
 
         /// <summary>
@@ -1976,8 +1976,8 @@ namespace Chummer
         public static bool ConfirmKarmaExpense(string strMessage, CancellationToken token = default)
         {
             return !GlobalSettings.ConfirmKarmaExpense ||
-                   Program.ShowScrollableMessageBox(strMessage, LanguageManager.GetString("MessageTitle_ConfirmKarmaExpense", token: token),
-                       MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+                   MessageBoxes.Show(strMessage, LanguageManager.GetString("MessageTitle_ConfirmKarmaExpense", token: token),
+                       MessageButtons.YesNo, MessageIcon.Question) == MessageResult.Yes;
         }
 
         /// <summary>
@@ -1987,8 +1987,8 @@ namespace Chummer
         {
             token.ThrowIfCancellationRequested();
             return !GlobalSettings.ConfirmKarmaExpense ||
-                   await Program.ShowScrollableMessageBoxAsync(strMessage, await LanguageManager.GetStringAsync("MessageTitle_ConfirmKarmaExpense", token: token).ConfigureAwait(false),
-                       MessageBoxButtons.YesNo, MessageBoxIcon.Question, token: token).ConfigureAwait(false) == DialogResult.Yes;
+                   await MessageBoxes.ShowAsync(strMessage, await LanguageManager.GetStringAsync("MessageTitle_ConfirmKarmaExpense", token: token).ConfigureAwait(false),
+                       MessageButtons.YesNo, MessageIcon.Question, token: token).ConfigureAwait(false) == MessageResult.Yes;
         }
 
         public static Task<XmlDocument> GenerateCharactersExportXml(CultureInfo objCultureInfo, string strLanguage, Character objCharacter)
@@ -2220,8 +2220,8 @@ namespace Chummer
             // The user must have specified the arguments of their PDF application in order to use this functionality.
             while (string.IsNullOrWhiteSpace(strPdfParameters) || string.IsNullOrWhiteSpace(strPdfAppPath) || !File.Exists(strPdfAppPath))
             {
-                if (!blnOpenOptions || await Program.ShowScrollableMessageBoxAsync(await LanguageManager.GetStringAsync("Message_NoPDFProgramSet", token: token).ConfigureAwait(false),
-                        await LanguageManager.GetStringAsync("MessageTitle_NoPDFProgramSet", token: token).ConfigureAwait(false), MessageBoxButtons.YesNo, MessageBoxIcon.Question, token: token).ConfigureAwait(false) != DialogResult.Yes)
+                if (!blnOpenOptions || await MessageBoxes.ShowAsync(await LanguageManager.GetStringAsync("Message_NoPDFProgramSet", token: token).ConfigureAwait(false),
+                        await LanguageManager.GetStringAsync("MessageTitle_NoPDFProgramSet", token: token).ConfigureAwait(false), MessageButtons.YesNo, MessageIcon.Question, token: token).ConfigureAwait(false) != MessageResult.Yes)
                     return;
                 CursorWait objCursorWait = await CursorWait.NewAsync(Program.MainForm, token: token).ConfigureAwait(false);
                 try
@@ -2266,8 +2266,8 @@ namespace Chummer
             {
                 if (!blnOpenOptions)
                     return;
-                if (await Program.ShowScrollableMessageBoxAsync(StringExtensions.FastFormat(await LanguageManager.GetStringAsync("Message_NoLinkedPDF", token: token).ConfigureAwait(false), await LanguageBookLongAsync(strBook, token: token).ConfigureAwait(false)),
-                        await LanguageManager.GetStringAsync("MessageTitle_NoLinkedPDF", token: token).ConfigureAwait(false), MessageBoxButtons.YesNo, MessageBoxIcon.Question, token: token).ConfigureAwait(false) != DialogResult.Yes)
+                if (await MessageBoxes.ShowAsync(StringExtensions.FastFormat(await LanguageManager.GetStringAsync("Message_NoLinkedPDF", token: token).ConfigureAwait(false), await LanguageBookLongAsync(strBook, token: token).ConfigureAwait(false)),
+                        await LanguageManager.GetStringAsync("MessageTitle_NoLinkedPDF", token: token).ConfigureAwait(false), MessageButtons.YesNo, MessageIcon.Question, token: token).ConfigureAwait(false) != MessageResult.Yes)
                     return;
                 CursorWait objCursorWait = await CursorWait.NewAsync(Program.MainForm, token: token).ConfigureAwait(false);
                 try

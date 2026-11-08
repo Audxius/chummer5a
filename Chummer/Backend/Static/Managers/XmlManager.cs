@@ -1194,7 +1194,7 @@ namespace Chummer
                             sbdDuplicatesNames.AppendJoin(Environment.NewLine, lstDuplicateNames);
                         }
 
-                        Program.ShowScrollableMessageBox(StringExtensions.FastFormat(GlobalSettings.CultureInfo,
+                        MessageBoxes.Show(StringExtensions.FastFormat(GlobalSettings.CultureInfo,
                                                                        LanguageManager.GetString(
                                                                            "Message_DuplicateGuidWarning",
                                                                            token: token),
@@ -1207,7 +1207,7 @@ namespace Chummer
 
             if (lstItemsWithMalformedIDs.Count > 0)
             {
-                Program.ShowScrollableMessageBox(StringExtensions.FastFormat(GlobalSettings.CultureInfo,
+                MessageBoxes.Show(StringExtensions.FastFormat(GlobalSettings.CultureInfo,
                                                                LanguageManager.GetString(
                                                                    "Message_NonGuidIdWarning", token: token),
                                                                lstItemsWithMalformedIDs.Count,
@@ -2439,7 +2439,7 @@ namespace Chummer
                         }
                         catch (ArgumentException ex)
                         {
-                            Program.ShowScrollableMessageBox(ex.ToString());
+                            MessageBoxes.Show(ex.ToString());
                             return false;
                         }
 
@@ -2648,7 +2648,7 @@ namespace Chummer
                                                             }
                                                             catch (ArgumentException ex)
                                                             {
-                                                                Program.ShowScrollableMessageBox(ex.ToString());
+                                                                MessageBoxes.Show(ex.ToString());
                                                                 // If we get a RegEx parse error for the first node, we'll get it for all nodes being modified by this amend
                                                                 // So just exit out early instead of spamming the user with a bunch of error messages
                                                                 if (!blnReturn)
@@ -2677,7 +2677,7 @@ namespace Chummer
                                                     }
                                                     catch (ArgumentException ex)
                                                     {
-                                                        Program.ShowScrollableMessageBox(ex.ToString());
+                                                        MessageBoxes.Show(ex.ToString());
                                                         // If we get a RegEx parse error for the first node, we'll get it for all nodes being modified by this amend
                                                         // So just exit out early instead of spamming the user with a bunch of error messages
                                                         if (!blnReturn)
@@ -3204,12 +3204,12 @@ namespace Chummer
             }
             catch (IOException ex)
             {
-                await Program.ShowScrollableMessageBoxAsync(ex.ToString(), token: token).ConfigureAwait(false);
+                await MessageBoxes.ShowAsync(ex.ToString(), token: token).ConfigureAwait(false);
                 return;
             }
             catch (XmlException ex)
             {
-                await Program.ShowScrollableMessageBoxAsync(ex.ToString(), token: token).ConfigureAwait(false);
+                await MessageBoxes.ShowAsync(ex.ToString(), token: token).ConfigureAwait(false);
                 return;
             }
 

@@ -517,11 +517,11 @@ namespace Chummer
                 }
                 catch (System.Security.SecurityException)
                 {
-                    Program.ShowScrollableMessageBox(LanguageManager.GetString("Message_Insufficient_Permissions_Warning_Registry"));
+                    MessageBoxes.Show(LanguageManager.GetString("Message_Insufficient_Permissions_Warning_Registry"));
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    Program.ShowScrollableMessageBox(LanguageManager.GetString("Message_Insufficient_Permissions_Warning_Registry"));
+                    MessageBoxes.Show(LanguageManager.GetString("Message_Insufficient_Permissions_Warning_Registry"));
                 }
             }
 
@@ -675,7 +675,7 @@ namespace Chummer
                 *#else
                 *                string msg = "Error while loading PluginOptions from registry: " + Environment.NewLine;
                 *                msg += e.Message;
-                *                Program.ShowScrollableMessageBox(msg);
+                *                MessageBoxes.Show(msg);
                 */
 #endif
             }
@@ -727,13 +727,13 @@ namespace Chummer
                                 = new CustomDataDirectoryInfo(strDirectoryName, strPath);
                             if (objCustomDataDirectory.XmlException != default)
                             {
-                                Program.ShowScrollableMessageBox(
+                                MessageBoxes.Show(
                                     StringExtensions.FastFormat(LanguageManager.GetString("Message_FailedLoad"),
                                         objCustomDataDirectory.XmlException.Message),
                                     LanguageManager.GetString("MessageTitle_FailedLoad").ConcatFast(
                                         LanguageManager.GetString("String_Space"), objCustomDataDirectory.Name,
-                                        Path.DirectorySeparatorChar.ToString(), "manifest.xml"), MessageBoxButtons.OK,
-                                    MessageBoxIcon.Error);
+                                        Path.DirectorySeparatorChar.ToString(), "manifest.xml"), MessageButtons.OK,
+                                    MessageIcon.Error);
                             }
 
                             if (s_SetCustomDataDirectoryInfos.Contains(objCustomDataDirectory))
@@ -746,12 +746,12 @@ namespace Chummer
                                     {
                                         if (objExistingInfo.HasManifest)
                                         {
-                                            Program.ShowScrollableMessageBox(
+                                            MessageBoxes.Show(
                                                 StringExtensions.FastFormat(
                                                     LanguageManager.GetString("Message_Duplicate_CustomDataDirectory"),
                                                     objExistingInfo.Name, objCustomDataDirectory.Name),
                                                 LanguageManager.GetString("MessageTitle_Duplicate_CustomDataDirectory"),
-                                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                                MessageButtons.OK, MessageIcon.Error);
                                             continue;
                                         }
 
@@ -793,13 +793,13 @@ namespace Chummer
                         = new CustomDataDirectoryInfo(Path.GetFileName(strLoopDirectoryPath), strLoopDirectoryPath);
                     if (objCustomDataDirectory.XmlException != default)
                     {
-                        Program.ShowScrollableMessageBox(
+                        MessageBoxes.Show(
                             StringExtensions.FastFormat(LanguageManager.GetString("Message_FailedLoad"),
                                 objCustomDataDirectory.XmlException.Message),
                             LanguageManager.GetString("MessageTitle_FailedLoad").ConcatFast(
                                 LanguageManager.GetString("String_Space"), objCustomDataDirectory.Name,
-                                Path.DirectorySeparatorChar.ToString(), "manifest.xml"), MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
+                                Path.DirectorySeparatorChar.ToString(), "manifest.xml"), MessageButtons.OK,
+                            MessageIcon.Error);
                     }
 
                     if (s_SetCustomDataDirectoryInfos.Contains(objCustomDataDirectory))
@@ -812,12 +812,12 @@ namespace Chummer
                             {
                                 if (objExistingInfo.HasManifest)
                                 {
-                                    Program.ShowScrollableMessageBox(
+                                    MessageBoxes.Show(
                                         StringExtensions.FastFormat(
                                             LanguageManager.GetString("Message_Duplicate_CustomDataDirectory"),
                                             objExistingInfo.Name, objCustomDataDirectory.Name),
                                         LanguageManager.GetString("MessageTitle_Duplicate_CustomDataDirectory"),
-                                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        MessageButtons.OK, MessageIcon.Error);
                                     continue;
                                 }
 
@@ -1014,17 +1014,17 @@ namespace Chummer
             }
             catch (System.Security.SecurityException)
             {
-                await Program.ShowScrollableMessageBoxAsync(
+                await MessageBoxes.ShowAsync(
                     await LanguageManager.GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token).ConfigureAwait(false), token: token).ConfigureAwait(false);
             }
             catch (UnauthorizedAccessException)
             {
-                await Program.ShowScrollableMessageBoxAsync(
+                await MessageBoxes.ShowAsync(
                     await LanguageManager.GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token).ConfigureAwait(false), token: token).ConfigureAwait(false);
             }
             catch (ArgumentNullException e) when (e.ParamName == nameof(Registry))
             {
-                await Program.ShowScrollableMessageBoxAsync(
+                await MessageBoxes.ShowAsync(
                     await LanguageManager.GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token).ConfigureAwait(false), token: token).ConfigureAwait(false);
             }
         }
@@ -2579,21 +2579,21 @@ namespace Chummer
             }
             catch (System.Security.SecurityException)
             {
-                await Program.ShowScrollableMessageBoxAsync(
+                await MessageBoxes.ShowAsync(
                     await LanguageManager
                         .GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token)
                         .ConfigureAwait(false), token: token).ConfigureAwait(false);
             }
             catch (UnauthorizedAccessException)
             {
-                await Program.ShowScrollableMessageBoxAsync(
+                await MessageBoxes.ShowAsync(
                     await LanguageManager
                         .GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token)
                         .ConfigureAwait(false), token: token).ConfigureAwait(false);
             }
             catch (ArgumentNullException ex) when (ex.ParamName == nameof(Registry))
             {
-                await Program.ShowScrollableMessageBoxAsync(
+                await MessageBoxes.ShowAsync(
                     await LanguageManager
                         .GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token)
                         .ConfigureAwait(false), token: token).ConfigureAwait(false);
@@ -2710,21 +2710,21 @@ namespace Chummer
             }
             catch (System.Security.SecurityException)
             {
-                await Program.ShowScrollableMessageBoxAsync(
+                await MessageBoxes.ShowAsync(
                     await LanguageManager
                         .GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token)
                         .ConfigureAwait(false), token: token).ConfigureAwait(false);
             }
             catch (UnauthorizedAccessException)
             {
-                await Program.ShowScrollableMessageBoxAsync(
+                await MessageBoxes.ShowAsync(
                     await LanguageManager
                         .GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token)
                         .ConfigureAwait(false), token: token).ConfigureAwait(false);
             }
             catch (ArgumentNullException ex) when (ex.ParamName == nameof(Registry))
             {
-                await Program.ShowScrollableMessageBoxAsync(
+                await MessageBoxes.ShowAsync(
                     await LanguageManager
                         .GetStringAsync("Message_Insufficient_Permissions_Warning_Registry", token: token)
                         .ConfigureAwait(false), token: token).ConfigureAwait(false);

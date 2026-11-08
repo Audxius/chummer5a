@@ -1109,14 +1109,14 @@ namespace Chummer
                                 int intKarmaCost = objMartialArt.Cost;
                                 if (intKarmaCost > await objCharacter.GetKarmaAsync(token).ConfigureAwait(false))
                                 {
-                                    await Program.ShowScrollableMessageBoxAsync(
+                                    await MessageBoxes.ShowAsync(
                                         await LanguageManager.GetStringAsync("Message_NotEnoughKarma", token: token)
                                             .ConfigureAwait(false),
                                         await LanguageManager
                                             .GetStringAsync("MessageTitle_NotEnoughKarma", token: token)
                                             .ConfigureAwait(false),
-                                        MessageBoxButtons.OK,
-                                        MessageBoxIcon.Information, token: token).ConfigureAwait(false);
+                                        MessageButtons.OK,
+                                        MessageIcon.Information, token: token).ConfigureAwait(false);
                                     await ImprovementManager.RemoveImprovementsAsync(
                                         objCharacter, Improvement.ImprovementSource.MartialArt,
                                         objMartialArt.InternalId,

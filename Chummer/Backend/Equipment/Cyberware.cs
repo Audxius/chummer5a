@@ -14508,10 +14508,10 @@ namespace Chummer.Backend.Equipment
             {
                 if (Capacity == "[*]" && Parent != null && (!_objCharacter.IgnoreRules || _objCharacter.Created))
                 {
-                    Program.ShowScrollableMessageBox(
+                    MessageBoxes.Show(
                         LanguageManager.GetString("Message_CannotRemoveCyberware"),
                         LanguageManager.GetString("MessageTitle_CannotRemoveCyberware"),
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageButtons.OK, MessageIcon.Information);
                     return false;
                 }
 
@@ -14539,12 +14539,12 @@ namespace Chummer.Backend.Equipment
                     (!await _objCharacter.GetIgnoreRulesAsync(token).ConfigureAwait(false) ||
                      await _objCharacter.GetCreatedAsync(token).ConfigureAwait(false)))
                 {
-                    await Program.ShowScrollableMessageBoxAsync(
+                    await MessageBoxes.ShowAsync(
                         await LanguageManager.GetStringAsync("Message_CannotRemoveCyberware", token: token)
                             .ConfigureAwait(false),
                         await LanguageManager.GetStringAsync("MessageTitle_CannotRemoveCyberware", token: token)
                             .ConfigureAwait(false),
-                        MessageBoxButtons.OK, MessageBoxIcon.Information, token: token).ConfigureAwait(false);
+                        MessageButtons.OK, MessageIcon.Information, token: token).ConfigureAwait(false);
                     return false;
                 }
 
@@ -14576,10 +14576,10 @@ namespace Chummer.Backend.Equipment
             {
                 if (Capacity == "[*]" && Parent != null && (!_objCharacter.IgnoreRules || _objCharacter.Created))
                 {
-                    Program.ShowScrollableMessageBox(
+                    MessageBoxes.Show(
                         LanguageManager.GetString("Message_CannotRemoveCyberware"),
                         LanguageManager.GetString("MessageTitle_CannotRemoveCyberware"),
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageButtons.OK, MessageIcon.Information);
                     return false;
                 }
 
@@ -14644,12 +14644,12 @@ namespace Chummer.Backend.Equipment
                     (!await _objCharacter.GetIgnoreRulesAsync(token).ConfigureAwait(false) ||
                      await _objCharacter.GetCreatedAsync(token).ConfigureAwait(false)))
                 {
-                    await Program.ShowScrollableMessageBoxAsync(
+                    await MessageBoxes.ShowAsync(
                         await LanguageManager.GetStringAsync("Message_CannotRemoveCyberware", token: token)
                             .ConfigureAwait(false),
                         await LanguageManager.GetStringAsync("MessageTitle_CannotRemoveCyberware", token: token)
                             .ConfigureAwait(false),
-                        MessageBoxButtons.OK, MessageBoxIcon.Information, token: token).ConfigureAwait(false);
+                        MessageButtons.OK, MessageIcon.Information, token: token).ConfigureAwait(false);
                     return false;
                 }
 
@@ -14784,11 +14784,11 @@ namespace Chummer.Backend.Equipment
 
                             if (decCost > await _objCharacter.GetNuyenAsync(token).ConfigureAwait(false))
                             {
-                                await Program.ShowScrollableMessageBoxAsync(
+                                await MessageBoxes.ShowAsync(
                                     await LanguageManager.GetStringAsync("Message_NotEnoughNuyen", token: token).ConfigureAwait(false),
                                     await LanguageManager.GetStringAsync("MessageTitle_NotEnoughNuyen", token: token).ConfigureAwait(false),
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Information, token: token).ConfigureAwait(false);
+                                    MessageButtons.OK,
+                                    MessageIcon.Information, token: token).ConfigureAwait(false);
                                 return false;
                             }
                         }
@@ -14899,12 +14899,12 @@ namespace Chummer.Backend.Equipment
                     : await CalculatedTotalCostAsync(() => Task.FromResult(intRating), objGrade, token).ConfigureAwait(false) - decSaleCost;
                 if (decNewCost > await _objCharacter.GetNuyenAsync(token).ConfigureAwait(false))
                 {
-                    await Program.ShowScrollableMessageBoxAsync(
+                    await MessageBoxes.ShowAsync(
                         await LanguageManager.GetStringAsync("Message_NotEnoughNuyen", token: token)
                             .ConfigureAwait(false),
                         await LanguageManager.GetStringAsync("MessageTitle_NotEnoughNuyen", token: token)
                             .ConfigureAwait(false),
-                        MessageBoxButtons.OK, MessageBoxIcon.Information, token: token).ConfigureAwait(false);
+                        MessageButtons.OK, MessageIcon.Information, token: token).ConfigureAwait(false);
                     return;
                 }
 

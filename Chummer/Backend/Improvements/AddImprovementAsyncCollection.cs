@@ -2190,10 +2190,10 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
 
             if (lstSelectedContacts.Count == 0)
             {
-                await Program.ShowScrollableMessageBoxAsync(
+                await MessageBoxes.ShowAsync(
                     await LanguageManager.GetStringAsync("Message_NoContactFound", token: token).ConfigureAwait(false),
                     await LanguageManager.GetStringAsync("MessageTitle_NoContactFound", token: token).ConfigureAwait(false),
-                    MessageBoxButtons.OK, MessageBoxIcon.Error, token: token).ConfigureAwait(false);
+                    MessageButtons.OK, MessageIcon.Error, token: token).ConfigureAwait(false);
                 throw new AbortedException();
             }
 
@@ -4402,7 +4402,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
 
                         if (lstArts.Count == 0)
                         {
-                            await Program.ShowScrollableMessageBoxAsync(StringExtensions.FastFormat(
+                            await MessageBoxes.ShowAsync(StringExtensions.FastFormat(
                                 await LanguageManager.GetStringAsync(
                                     "Message_Improvement_EmptySelectionListNamed", token: token).ConfigureAwait(false),
                                 SourceName), token: token).ConfigureAwait(false);
@@ -4509,7 +4509,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
 
                         if (lstMetamagics.Count == 0)
                         {
-                            await Program.ShowScrollableMessageBoxAsync(StringExtensions.FastFormat(
+                            await MessageBoxes.ShowAsync(StringExtensions.FastFormat(
                                 await LanguageManager.GetStringAsync(
                                     "Message_Improvement_EmptySelectionListNamed", token: token).ConfigureAwait(false),
                                 SourceName), token: token).ConfigureAwait(false);
@@ -4625,7 +4625,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
 
                         if (lstEchoes.Count == 0)
                         {
-                            await Program.ShowScrollableMessageBoxAsync(StringExtensions.FastFormat(
+                            await MessageBoxes.ShowAsync(StringExtensions.FastFormat(
                                 await LanguageManager.GetStringAsync(
                                     "Message_Improvement_EmptySelectionListNamed", token: token).ConfigureAwait(false),
                                 SourceName), token: token).ConfigureAwait(false);
@@ -5730,7 +5730,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
                     {
                         if (lstWeapons.Count == 0)
                         {
-                            await Program.ShowScrollableMessageBoxAsync(StringExtensions.FastFormat(
+                            await MessageBoxes.ShowAsync(StringExtensions.FastFormat(
                                 await LanguageManager.GetStringAsync(
                                     "Message_Improvement_EmptySelectionListNamed", token: token).ConfigureAwait(false),
                                 SourceName), token: token).ConfigureAwait(false);
@@ -5938,7 +5938,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
 
                 if (lstItems.Count == 0)
                 {
-                    await Program.ShowScrollableMessageBoxAsync(StringExtensions.FastFormat(
+                    await MessageBoxes.ShowAsync(StringExtensions.FastFormat(
                         await LanguageManager.GetStringAsync(
                             "Message_Improvement_EmptySelectionListNamed", token: token).ConfigureAwait(false),
                         SourceName), token: token).ConfigureAwait(false);
@@ -6081,7 +6081,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
 
                 if (lstQualities.Count == 0)
                 {
-                    await Program.ShowScrollableMessageBoxAsync(StringExtensions.FastFormat(
+                    await MessageBoxes.ShowAsync(StringExtensions.FastFormat(
                         await LanguageManager.GetStringAsync(
                             "Message_Improvement_EmptySelectionListNamed", token: token).ConfigureAwait(false),
                         SourceName), token: token).ConfigureAwait(false);
@@ -6138,7 +6138,7 @@ public async Task qualitylevel(XmlNode bonusNode, CancellationToken token = defa
 
                     if (lstQualities.Count == 0)
                     {
-                        await Program.ShowScrollableMessageBoxAsync(StringExtensions.FastFormat(
+                        await MessageBoxes.ShowAsync(StringExtensions.FastFormat(
                             await LanguageManager.GetStringAsync(
                                 "Message_Improvement_EmptySelectionListNamed", token: token).ConfigureAwait(false),
                             SourceName), token: token).ConfigureAwait(false);

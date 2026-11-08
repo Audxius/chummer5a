@@ -509,9 +509,9 @@ namespace Chummer
 
             // No character-created limits found, which means it comes from an improvement.
             // TODO: ImprovementSource exists for a reason.
-            Program.ShowScrollableMessageBox(LanguageManager.GetString("Message_CannotDeleteLimitModifier"),
+            MessageBoxes.Show(LanguageManager.GetString("Message_CannotDeleteLimitModifier"),
                                              LanguageManager.GetString("MessageTitle_CannotDeleteLimitModifier"),
-                                             MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                             MessageButtons.OK, MessageIcon.Information);
             return false;
         }
 
@@ -527,10 +527,10 @@ namespace Chummer
 
             // No character-created limits found, which means it comes from an improvement.
             // TODO: ImprovementSource exists for a reason.
-            await Program.ShowScrollableMessageBoxAsync(
+            await MessageBoxes.ShowAsync(
                 await LanguageManager.GetStringAsync("Message_CannotDeleteLimitModifier", token: token).ConfigureAwait(false),
                 await LanguageManager.GetStringAsync("MessageTitle_CannotDeleteLimitModifier", token: token).ConfigureAwait(false),
-                MessageBoxButtons.OK, MessageBoxIcon.Information, token: token).ConfigureAwait(false);
+                MessageButtons.OK, MessageIcon.Information, token: token).ConfigureAwait(false);
             return false;
         }
     }

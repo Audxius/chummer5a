@@ -2825,13 +2825,13 @@ namespace Chummer
 
                             if (intKarmaCost > await _objCharacter.GetKarmaAsync(token).ConfigureAwait(false))
                             {
-                                await Program.ShowScrollableMessageBoxAsync(
+                                await MessageBoxes.ShowAsync(
                                     await LanguageManager.GetStringAsync("Message_NotEnoughKarma", token: token)
                                         .ConfigureAwait(false),
                                     await LanguageManager.GetStringAsync(
                                         "MessageTitle_NotEnoughKarma", token: token).ConfigureAwait(false),
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Information, token: token).ConfigureAwait(false);
+                                    MessageButtons.OK,
+                                    MessageIcon.Information, token: token).ConfigureAwait(false);
                                 blnAddItem = false;
                             }
 
@@ -2861,13 +2861,13 @@ namespace Chummer
                             {
                                 if (intKarmaCost > await _objCharacter.GetKarmaAsync(token).ConfigureAwait(false))
                                 {
-                                    await Program.ShowScrollableMessageBoxAsync(
+                                    await MessageBoxes.ShowAsync(
                                         await LanguageManager.GetStringAsync("Message_NotEnoughKarma", token: token)
                                             .ConfigureAwait(false),
                                         await LanguageManager
                                             .GetStringAsync("MessageTitle_NotEnoughKarma", token: token)
                                             .ConfigureAwait(false),
-                                        MessageBoxButtons.OK, MessageBoxIcon.Information, token: token).ConfigureAwait(false);
+                                        MessageButtons.OK, MessageIcon.Information, token: token).ConfigureAwait(false);
                                     blnAddItem = false;
                                 }
 

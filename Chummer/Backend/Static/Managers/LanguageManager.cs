@@ -262,9 +262,9 @@ namespace Chummer
                                         Utils.DoubleNewLine + objNewLanguage.ErrorMessage;
                     if (blnSync)
                         // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                        Program.ShowScrollableMessageBox(strMessage, "Cannot Load Language", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBoxes.Show(strMessage, "Cannot Load Language", MessageButtons.OK, MessageIcon.Error);
                     else
-                        await Program.ShowScrollableMessageBoxAsync(strMessage, "Cannot Load Language", MessageBoxButtons.OK, MessageBoxIcon.Error, token: token).ConfigureAwait(false);
+                        await MessageBoxes.ShowAsync(strMessage, "Cannot Load Language", MessageButtons.OK, MessageIcon.Error, token: token).ConfigureAwait(false);
                     objNewLanguage.ErrorAlreadyShown = true;
                 }
 
@@ -1245,10 +1245,10 @@ namespace Chummer
             }
 
             // Display the message.
-            await Program.ShowScrollableMessageBoxAsync(
+            await MessageBoxes.ShowAsync(
                 !string.IsNullOrEmpty(strMessage) ? strMessage : "Language file is OK.",
-                "Language File Contents", MessageBoxButtons.OK,
-                MessageBoxIcon.Information, token: token).ConfigureAwait(false);
+                "Language File Contents", MessageButtons.OK,
+                MessageIcon.Information, token: token).ConfigureAwait(false);
         }
 
         // List of arrays for XPaths to search for extras. Item1 is Document, Item2 is XPath, Item3 is the Name getter, Item4 is the Translate getter.

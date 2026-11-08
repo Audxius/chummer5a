@@ -247,36 +247,36 @@ namespace Chummer.Backend
                         prcCrashHandler.WaitForExit();
                         if (prcCrashHandler.ExitCode != 0)
                         {
-                            Program.ShowScrollableMessageBox(
+                            MessageBoxes.Show(
                                 "Failed to create crash report because of an issue with the crash handler."
                                 + Environment.NewLine + "Chummer crashed with version: " + Utils.CurrentChummerVersion.ToString()
                                 + Environment.NewLine + "Crash Handler crashed with exit code: " + prcCrashHandler.ExitCode.ToString(CultureInfo.InvariantCulture)
                                 + Environment.NewLine + "Crash information:"
                                 + Environment.NewLine + ex.ToString().AnonymizePath(),
-                                "Failed to Create Crash Report", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                "Failed to Create Crash Report", MessageButtons.OK, MessageIcon.Error);
                         }
                     }
                 }
                 else
                 {
-                    Program.ShowScrollableMessageBox(
+                    MessageBoxes.Show(
                                 "Failed to create crash report because the crash handler was not found."
                                 + Environment.NewLine + "Chummer crashed with version: " + Utils.CurrentChummerVersion.ToString()
                                 + Environment.NewLine + "Crash information:"
                                 + Environment.NewLine + ex.ToString().AnonymizePath(),
-                                "Failed to Create Crash Report", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                "Failed to Create Crash Report", MessageButtons.OK, MessageIcon.Error);
                 }
             }
             catch (Exception nex)
             {
-                Program.ShowScrollableMessageBox(
+                MessageBoxes.Show(
                     "Failed to create crash report."
                     + Environment.NewLine + "Chummer crashed with version: " + Utils.CurrentChummerVersion.ToString()
                     + Environment.NewLine + "Here is some information to help the developers figure out why:"
                     + Environment.NewLine + nex.Demystify().ToString().AnonymizePath()
                     + Environment.NewLine + "Crash information:" + Environment.NewLine
                     + ex.ToString().AnonymizePath(),
-                    "Failed to Create Crash Report", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Failed to Create Crash Report", MessageButtons.OK, MessageIcon.Error);
             }
         }
     }

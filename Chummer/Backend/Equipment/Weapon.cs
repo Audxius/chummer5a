@@ -12988,14 +12988,14 @@ namespace Chummer.Backend.Equipment
                 // Make sure the character has some form of Ammunition for this Weapon.
                 if (lstAmmo.Count == 0)
                 {
-                    await Program.ShowScrollableMessageBoxAsync(StringExtensions.FastFormat(
+                    await MessageBoxes.ShowAsync(StringExtensions.FastFormat(
                             await LanguageManager
                                 .GetStringAsync("Message_OutOfAmmoType", token: token)
                                 .ConfigureAwait(false),
                             await GetCurrentDisplayNameAsync(token).ConfigureAwait(false)),
                         await LanguageManager.GetStringAsync("Message_OutOfAmmo", token: token)
                             .ConfigureAwait(false),
-                        icon: MessageBoxIcon.Warning, token: token).ConfigureAwait(false);
+                        icon: MessageIcon.Warning, token: token).ConfigureAwait(false);
                     return;
                 }
             }
@@ -14542,29 +14542,29 @@ namespace Chummer.Backend.Equipment
                 // Cyberweapons cannot be removed through here and must be done by removing the piece of Cyberware.
                 if (Cyberware)
                 {
-                    Program.ShowScrollableMessageBox(
+                    MessageBoxes.Show(
                         LanguageManager.GetString("Message_CannotRemoveCyberweapon"),
                         LanguageManager.GetString("MessageTitle_CannotRemoveCyberweapon"),
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageButtons.OK, MessageIcon.Information);
                     return false;
                 }
 
                 // Qualities cannot be removed through here and must be done by removing the piece of Cyberware.
                 if (Category.StartsWith("Quality", StringComparison.Ordinal))
                 {
-                    Program.ShowScrollableMessageBox(
+                    MessageBoxes.Show(
                         LanguageManager.GetString("Message_CannotRemoveQualityWeapon"),
                         LanguageManager.GetString("MessageTitle_CannotRemoveQualityWeapon"),
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageButtons.OK, MessageIcon.Information);
                     return false;
                 }
 
                 if (Category == "Gear")
                 {
-                    Program.ShowScrollableMessageBox(
+                    MessageBoxes.Show(
                         LanguageManager.GetString(ParentVehicle != null ? "Message_CannotRemoveGearWeaponVehicle" : "Message_CannotRemoveGearWeapon"),
                         LanguageManager.GetString("MessageTitle_CannotRemoveGearWeapon"),
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageButtons.OK, MessageIcon.Information);
                     return false;
                 }
 

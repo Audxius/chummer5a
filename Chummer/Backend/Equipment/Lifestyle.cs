@@ -4572,10 +4572,10 @@ namespace Chummer.Backend.Equipment
                 decimal decAmount = await GetTotalMonthlyCostAsync(token: token).ConfigureAwait(false);
                 if (decAmount > await _objCharacter.GetNuyenAsync(token).ConfigureAwait(false))
                 {
-                    await Program.ShowScrollableMessageBoxAsync(
+                    await MessageBoxes.ShowAsync(
                         await LanguageManager.GetStringAsync("Message_NotEnoughNuyen", token: token).ConfigureAwait(false),
                         await LanguageManager.GetStringAsync("MessageTitle_NotEnoughNuyen", token: token).ConfigureAwait(false),
-                        MessageBoxButtons.OK, MessageBoxIcon.Information, token: token).ConfigureAwait(false);
+                        MessageButtons.OK, MessageIcon.Information, token: token).ConfigureAwait(false);
                     return;
                 }
 

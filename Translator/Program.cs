@@ -31,6 +31,7 @@ namespace Translator
         [STAThread]
         private static void Main()
         {
+            Chummer.UiServices.Messages = new Chummer.WinFormsMessageService();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Utils.CreateSynchronizationContext();
