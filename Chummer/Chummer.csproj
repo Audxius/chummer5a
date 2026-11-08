@@ -97,6 +97,12 @@
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The engine lives in Chummer.Core (shared with the native app); this project is the legacy WinForms UI. -->
+    <Compile Remove="Backend\**" />
+    <Compile Remove="7zip\**" />
+    <ProjectReference Include="..\Chummer.Core\Chummer.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="Backend\Improvements\ImprovementMethods.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

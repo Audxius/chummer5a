@@ -37,6 +37,7 @@ namespace Chummer
             HostServices.Dispatcher = new WinFormsUiDispatcher();
             HostServices.TextDisplay = new WinFormsTextDisplayService();
             HostServices.ImageCodec = new WinFormsImageCodec();
+            HostServices.AppVersion = typeof(Program).Assembly.GetName().Version;
         }
     }
 }

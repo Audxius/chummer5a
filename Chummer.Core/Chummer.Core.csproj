@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The Chummer engine: rules, data loading, characters, saving/printing. No UI toolkit dependency.
+       Hosts (the legacy WinForms app, the native Avalonia app, tests) register UI/platform services in HostServices.
+       net48 keeps the legacy app and the parity baselines working; net8.0 is the native app. -->
+  <PropertyGroup>
+    <TargetFrameworks>net48;net8.0</TargetFrameworks>
+    <OutputType>Library</OutputType>
+    <AssemblyName>Chummer.Core</AssemblyName>
+    <RootNamespace>Chummer</RootNamespace>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <NoWarn>$(NoWarn);VSTHRD003;VSTHRD100;VSTHRD103;VSTHRD200;CA1068;IDE1006;IDE0130;CS1591</NoWarn>
+    <AssemblyVersion>5.226.0.0</AssemblyVersion>
+    <FileVersion>5.226.0.0</FileVersion>
+    <Company>Chummer5a</Company>
+    <Product>Chummer5a</Product>
+    <Copyright>Licensed GNU GPLv3</Copyright>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <!-- System.Drawing.Color etc. are cross-platform; the Windows-only parts of System.Drawing are not used. -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../Chummer/Backend/**/*.cs" />
+    <Compile Include="../Chummer/7zip/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Members widened from private by the UI extraction are used by the legacy WinForms layer. -->
+    <InternalsVisibleTo Include="Chummer5" />
+    <InternalsVisibleTo Include="Chummer.Tests" />
+    <InternalsVisibleTo Include="Chummer.Core.Tests" />
+    <InternalsVisibleTo Include="Chummer.Desktop" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ben.Demystifier" Version="0.4.1" />
+    <PackageReference Include="HtmlRenderer.Core" Version="1.5.2" />
+    <PackageReference Include="itext" Version="9.8.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.NLogTarget" Version="2.23.0" />
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="10.0.14" />
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="4.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading" Version="18.12.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="NLog" Version="6.2.2" />
+    <PackageReference Include="RtfPipe" Version="2.0.7677.4303" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.14" />
+    <PackageReference Include="XoshiroPRNG.Net" Version="1.6.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+</Project>

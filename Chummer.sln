@@ -41,6 +41,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chummer.Benchmarks", "Chumm
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{8F9EEA5C-4856-4D5C-A46E-8971CE847880}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chummer.Core", "Chummer.Core\Chummer.Core.csproj", "{14EFA870-B85B-4510-A6F6-CAFCEAF11169}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug with ChummerHub|Any CPU = Debug with ChummerHub|Any CPU
@@ -236,6 +238,26 @@ Global
 		{8F9EEA5C-4856-4D5C-A46E-8971CE847880}.Debuggable Release|x86.ActiveCfg = Debuggable Release|Any CPU
 		{8F9EEA5C-4856-4D5C-A46E-8971CE847880}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F9EEA5C-4856-4D5C-A46E-8971CE847880}.Release|x86.ActiveCfg = Release|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debug with ChummerHub|Any CPU.ActiveCfg = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debug with ChummerHub|Any CPU.Build.0 = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debug with ChummerHub|x86.ActiveCfg = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debug with ChummerHub|x86.Build.0 = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debug|x86.Build.0 = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debuggable Release with ChummerHub|Any CPU.ActiveCfg = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debuggable Release with ChummerHub|Any CPU.Build.0 = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debuggable Release with ChummerHub|x86.ActiveCfg = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debuggable Release with ChummerHub|x86.Build.0 = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debuggable Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debuggable Release|Any CPU.Build.0 = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debuggable Release|x86.ActiveCfg = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Debuggable Release|x86.Build.0 = Debug|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Release|x86.ActiveCfg = Release|Any CPU
+		{14EFA870-B85B-4510-A6F6-CAFCEAF11169}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

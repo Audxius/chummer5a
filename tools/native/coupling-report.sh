@@ -1,29 +1,17 @@
 #!/usr/bin/env bash
-# Counts how much of the engine (Chummer/Backend) still depends on WinForms / Windows.
-# Phase 1 of the native port is done when every row reaches 0 (the engine can then move to Chummer.Core).
-# UI helper files that will move out of Backend wholesale are reported separately.
+# Guard: the engine (Chummer.Core, sources in Chummer/Backend) must stay free of UI toolkits.
+# Phase 1 of the native port finished with the engine compiling as a net8.0 library without WinForms/WPF or
+# System.Drawing.Common; this fails if any such dependency creeps back in.
 set -eu
 cd "$(dirname "$0")/../../Chummer/Backend"
-
-ui_helpers='^$'  # all known UI helper files have been moved to Chummer/Forms
-
-count() { # $1 = label, $2 = regex
-    local sites files
-    sites=$(grep -rE --include=*.cs "$2" . | grep -vE "^[^:]+:\s*//" | wc -l)
-    files=$(grep -rE --include=*.cs "$2" . | grep -vE "^[^:]+:\s*//" | cut -d: -f1 | sort -u | wc -l)
-    printf '%-46s %6s sites %5s files\n' "$1" "$sites" "$files"
-}
-
-echo "Engine coupling report ($(git rev-parse --short HEAD 2>/dev/null || echo '?'))"
-count 'using System.Windows.Forms'                  '^using System\.Windows\.Forms'
-count 'Program.* (WinForms host)'                   '\bProgram\.[A-Z]'
-count 'Message boxes (Program.ShowScrollable...)'   'ShowScrollableMessageBox'
-count 'WinForms dialogs (ThreadSafeForm<...>)'       'ThreadSafeForm<'
-count 'UI thread (RunOnMainThread / DoThreadSafe)'  'RunOnMainThread|DoThreadSafe'
-count 'Message pump (DoEvents)'                     'DoEvents'
-count 'Tree/menu building (TreeNode, ContextMenu)'  '\bTreeNode\b|ContextMenuStrip|\bTreeView\b'
-count 'Cursor (CursorWait / UseWaitCursor)'         'CursorWait\.|UseWaitCursor'
-count 'Images (System.Drawing.Image/Bitmap)'        '\bImage\b|\bBitmap\b'
-count 'Registry'                                    'Microsoft\.Win32|RegistryKey|Registry\.(CurrentUser|LocalMachine)'
-count 'P/Invoke (NativeMethods)'                    'NativeMethods\.|DllImport'
-echo
+status=0
+for pattern in 'System\.Windows\.Forms' 'System\.Windows\.Threading' 'System\.Drawing\.(Image|Bitmap|Graphics|Icon)\b' 'Microsoft\.Win32' '\bProgram\.[A-Z]'; do
+    hits=$(grep -rnE --include=*.cs "$pattern" . | grep -vE '^[^:]+:[0-9]+:\s*//' || true)
+    if [ -n "$hits" ]; then
+        echo "Engine references UI/platform API ($pattern):"
+        echo "$hits" | head -20
+        status=1
+    fi
+done
+[ $status -eq 0 ] && echo "Engine is UI-toolkit free."
+exit $status

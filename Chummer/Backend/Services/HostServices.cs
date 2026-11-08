@@ -56,6 +56,8 @@ namespace Chummer
 
         private static IImageCodec s_objImageCodec = new PassThroughImageCodec();
 
+        private static Version s_objAppVersion;
+
         public static IMessageService Messages
         {
             get => s_objMessages;
@@ -148,6 +150,16 @@ namespace Chummer
         {
             get => s_objImageCodec;
             set => s_objImageCodec = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// The application version written into saved files (defaults to the engine assembly version).
+        /// Must be set before Utils.CurrentChummerVersion is first read.
+        /// </summary>
+        public static Version AppVersion
+        {
+            get => s_objAppVersion ?? typeof(HostServices).Assembly.GetName().Version;
+            set => s_objAppVersion = value;
         }
     }
 }

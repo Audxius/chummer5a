@@ -397,7 +397,7 @@ namespace Chummer
             }
         }
 
-        private static readonly Lazy<Version> s_ObjCurrentChummerVersion = new Lazy<Version>(() => typeof(Utils).Assembly.GetName().Version);
+        private static readonly Lazy<Version> s_ObjCurrentChummerVersion = new Lazy<Version>(() => HostServices.AppVersion);
 
         public static Version CurrentChummerVersion => s_ObjCurrentChummerVersion.Value;
 
