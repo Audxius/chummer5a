@@ -48,12 +48,12 @@ namespace Chummer
     {
         public static bool StartTrackingTreeNodeForUpdates(this Chummer.Spirit objThis, TreeNode objNode)
         {
-            return objThis._setNodesToTrackForUpdates.TryAdd(objNode);
+            return WinFormsTrackedNodes.Get(objThis).TryAdd(objNode);
         }
 
         public static bool StopTrackingTreeNodeForUpdates(this Chummer.Spirit objThis, TreeNode objNode)
         {
-            return objThis._setNodesToTrackForUpdates.Remove(objNode);
+            return WinFormsTrackedNodes.Get(objThis).Remove(objNode);
         }
 
         /// <summary>
@@ -105,6 +105,213 @@ namespace Chummer
         public static async Task SetSourceDetailAsync(this Chummer.Spirit objThis, Control sourceControl, CancellationToken token = default)
         {
             await (await objThis.GetSourceDetailAsync(token).ConfigureAwait(false)).SetControlAsync(sourceControl, token).ConfigureAwait(false);
+        }
+
+        public static void RefreshTrackedTreeNodes_Text(this Chummer.Spirit objThis,CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            if (WinFormsTrackedNodes.Get(objThis).IsEmpty)
+                return;
+            string strText = objThis.CurrentDisplayName;
+            if (string.IsNullOrEmpty(strText))
+                strText = LanguageManager.GetString("String_Unknown", token: token);
+            Utils.RunOnMainThread(t =>
+            {
+                foreach (TreeNode objNode in WinFormsTrackedNodes.Get(objThis))
+                {
+                    t.ThrowIfCancellationRequested();
+                    if (objNode.Tag != objThis) // Sanity check
+                        continue;
+                    objNode.Text = strText;
+                }
+            }, token: token);
+        }
+
+        public static void RefreshTrackedTreeNodes_Color(this Chummer.Spirit objThis,CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            if (WinFormsTrackedNodes.Get(objThis).IsEmpty)
+                return;
+            Color objColor = objThis.PreferredColor;
+            Utils.RunOnMainThread(t =>
+            {
+                foreach (TreeNode objNode in WinFormsTrackedNodes.Get(objThis))
+                {
+                    t.ThrowIfCancellationRequested();
+                    if (objNode.Tag != objThis) // Sanity check
+                        continue;
+                    objNode.ForeColor = objColor;
+                }
+            }, token: token);
+        }
+
+        public static void RefreshTrackedTreeNodes_ToolTipText(this Chummer.Spirit objThis,CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            if (WinFormsTrackedNodes.Get(objThis).IsEmpty)
+                return;
+            string strToolTipText = objThis.Notes.WordWrap();
+            Utils.RunOnMainThread(t =>
+            {
+                foreach (TreeNode objNode in WinFormsTrackedNodes.Get(objThis))
+                {
+                    t.ThrowIfCancellationRequested();
+                    if (objNode.Tag != objThis) // Sanity check
+                        continue;
+                    objNode.ToolTipText = strToolTipText;
+                }
+            }, token: token);
+        }
+
+        public static void RefreshTrackedTreeNodes_TypeData(this Chummer.Spirit objThis,CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            if (WinFormsTrackedNodes.Get(objThis).IsEmpty)
+                return;
+            string strSpace = LanguageManager.GetString("String_Space", token: token);
+            string strText = objThis.Name;
+            if (string.IsNullOrEmpty(strText))
+                strText = LanguageManager.GetString(objThis.RatingLabel, token: token)
+                    + strSpace + objThis.Force.ToString(GlobalSettings.CultureInfo);
+            else
+                strText += LanguageManager.GetString("String_Comma", token: token) + strSpace
+                    + LanguageManager.GetString(objThis.RatingLabel, token: token)
+                    + strSpace + objThis.Force.ToString(GlobalSettings.CultureInfo);
+            Utils.RunOnMainThread(t =>
+            {
+                foreach (TreeNode objNode in WinFormsTrackedNodes.Get(objThis))
+                {
+                    t.ThrowIfCancellationRequested();
+                    if (objNode.Tag != objThis) // Sanity check
+                        continue;
+                    foreach (TreeNode objInnerNode in objNode.Nodes.Find("TypeData", true))
+                        objInnerNode.Text = strText;
+                }
+            }, token: token);
+        }
+
+        public static void RefreshTrackedTreeNodes_ServicesOwed(this Chummer.Spirit objThis,CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            if (WinFormsTrackedNodes.Get(objThis).IsEmpty)
+                return;
+            string strText = LanguageManager.GetString("Label_Spirit_ServicesOwed", token: token)
+                + LanguageManager.GetString("String_Space", token: token)
+                + objThis.ServicesOwed.ToString(GlobalSettings.CultureInfo);
+            Utils.RunOnMainThread(t =>
+            {
+                foreach (TreeNode objNode in WinFormsTrackedNodes.Get(objThis))
+                {
+                    t.ThrowIfCancellationRequested();
+                    if (objNode.Tag != objThis) // Sanity check
+                        continue;
+                    foreach (TreeNode objInnerNode in objNode.Nodes.Find("Services", true))
+                        objInnerNode.Text = strText;
+                }
+            }, token: token);
+        }
+
+        public static async Task RefreshTrackedTreeNodes_TextAsync(this Chummer.Spirit objThis,CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            if (WinFormsTrackedNodes.Get(objThis).IsEmpty)
+                return;
+            string strText = await objThis.GetCurrentDisplayNameAsync(token).ConfigureAwait(false);
+            if (string.IsNullOrEmpty(strText))
+                strText = await LanguageManager.GetStringAsync("String_Unknown", token: token).ConfigureAwait(false);
+            await Utils.RunOnMainThreadAsync(t =>
+            {
+                foreach (TreeNode objNode in WinFormsTrackedNodes.Get(objThis))
+                {
+                    t.ThrowIfCancellationRequested();
+                    if (objNode.Tag != objThis) // Sanity check
+                        continue;
+                    objNode.Text = strText;
+                }
+            }, token: token).ConfigureAwait(false);
+        }
+
+        public static async Task RefreshTrackedTreeNodes_ColorAsync(this Chummer.Spirit objThis,CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            if (WinFormsTrackedNodes.Get(objThis).IsEmpty)
+                return;
+            Color objColor = await objThis.GetPreferredColorAsync(token).ConfigureAwait(false);
+            await Utils.RunOnMainThreadAsync(t =>
+            {
+                foreach (TreeNode objNode in WinFormsTrackedNodes.Get(objThis))
+                {
+                    t.ThrowIfCancellationRequested();
+                    if (objNode.Tag != objThis) // Sanity check
+                        continue;
+                    objNode.ForeColor = objColor;
+                }
+            }, token: token).ConfigureAwait(false);
+        }
+
+        public static async Task RefreshTrackedTreeNodes_ToolTipTextAsync(this Chummer.Spirit objThis,CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            if (WinFormsTrackedNodes.Get(objThis).IsEmpty)
+                return;
+            string strToolTipText = (await objThis.GetNotesAsync(token).ConfigureAwait(false)).WordWrap();
+            await Utils.RunOnMainThreadAsync(t =>
+            {
+                foreach (TreeNode objNode in WinFormsTrackedNodes.Get(objThis))
+                {
+                    t.ThrowIfCancellationRequested();
+                    if (objNode.Tag != objThis) // Sanity check
+                        continue;
+                    objNode.ToolTipText = strToolTipText;
+                }
+            }, token: token).ConfigureAwait(false);
+        }
+
+        public static async Task RefreshTrackedTreeNodes_TypeDataAsync(this Chummer.Spirit objThis,CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            if (WinFormsTrackedNodes.Get(objThis).IsEmpty)
+                return;
+            string strSpace = await LanguageManager.GetStringAsync("String_Space", token: token).ConfigureAwait(false);
+            string strText = await objThis.GetNameAsync(token).ConfigureAwait(false);
+            if (string.IsNullOrEmpty(strText))
+                strText = await LanguageManager.GetStringAsync(await objThis.GetRatingLabelAsync(token).ConfigureAwait(false), token: token).ConfigureAwait(false)
+                    + strSpace + (await objThis.GetForceAsync(token).ConfigureAwait(false)).ToString(GlobalSettings.CultureInfo);
+            else
+                strText += await LanguageManager.GetStringAsync("String_Comma", token: token).ConfigureAwait(false) + strSpace + await LanguageManager.GetStringAsync(await objThis.GetRatingLabelAsync(token).ConfigureAwait(false), token: token).ConfigureAwait(false)
+                    + strSpace + (await objThis.GetForceAsync(token).ConfigureAwait(false)).ToString(GlobalSettings.CultureInfo);
+            await Utils.RunOnMainThreadAsync(t =>
+            {
+                foreach (TreeNode objNode in WinFormsTrackedNodes.Get(objThis))
+                {
+                    t.ThrowIfCancellationRequested();
+                    if (objNode.Tag != objThis) // Sanity check
+                        continue;
+                    foreach (TreeNode objInnerNode in objNode.Nodes.Find("TypeData", true))
+                        objInnerNode.Text = strText;
+                }
+            }, token: token).ConfigureAwait(false);
+        }
+
+        public static async Task RefreshTrackedTreeNodes_ServicesOwedAsync(this Chummer.Spirit objThis,CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            if (WinFormsTrackedNodes.Get(objThis).IsEmpty)
+                return;
+            string strText = await LanguageManager.GetStringAsync("Label_Spirit_ServicesOwed", token: token).ConfigureAwait(false)
+                + await LanguageManager.GetStringAsync("String_Space", token: token).ConfigureAwait(false)
+                + (await objThis.GetServicesOwedAsync(token).ConfigureAwait(false)).ToString(GlobalSettings.CultureInfo);
+            await Utils.RunOnMainThreadAsync(t =>
+            {
+                foreach (TreeNode objNode in WinFormsTrackedNodes.Get(objThis))
+                {
+                    t.ThrowIfCancellationRequested();
+                    if (objNode.Tag != objThis) // Sanity check
+                        continue;
+                    foreach (TreeNode objInnerNode in objNode.Nodes.Find("Services", true))
+                        objInnerNode.Text = strText;
+                }
+            }, token: token).ConfigureAwait(false);
         }
     }
 }

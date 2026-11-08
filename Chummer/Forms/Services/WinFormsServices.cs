@@ -33,6 +33,7 @@ namespace Chummer
             HostServices.Dialogs = new WinFormsDialogService();
             HostServices.Shell = new WinFormsAppShell();
             HostServices.Plugins = new WinFormsPluginHost();
+            HostServices.DisplayChanges = new WinFormsDisplayChangeNotifier();
         }
     }
 }

@@ -48,6 +48,8 @@ namespace Chummer
 
         private static IPluginHost s_objPlugins = new HeadlessPluginHost();
 
+        private static IDisplayChangeNotifier s_objDisplayChanges = new HeadlessDisplayChangeNotifier();
+
         public static IMessageService Messages
         {
             get => s_objMessages;
@@ -104,6 +106,15 @@ namespace Chummer
         {
             get => s_objPlugins;
             set => s_objPlugins = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Displayed aspects of engine objects changed (lets UI elements showing them refresh).
+        /// </summary>
+        public static IDisplayChangeNotifier DisplayChanges
+        {
+            get => s_objDisplayChanges;
+            set => s_objDisplayChanges = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }

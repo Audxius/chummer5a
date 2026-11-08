@@ -2389,213 +2389,27 @@ namespace Chummer
             }
         }
 
-        internal readonly ConcurrentHashSet<TreeNode> _setNodesToTrackForUpdates = new ConcurrentHashSet<TreeNode>();
+        // Displayed aspects changed: the host refreshes whatever shows this spirit.
+        public void UpdateTrackedNodes_Text(CancellationToken token = default) => HostServices.DisplayChanges.OnDisplayChanged(this, DisplayAspect.Text, token);
 
-        public void UpdateTrackedNodes_Text(CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (_setNodesToTrackForUpdates.IsEmpty)
-                return;
-            string strText = CurrentDisplayName;
-            if (string.IsNullOrEmpty(strText))
-                strText = LanguageManager.GetString("String_Unknown", token: token);
-            Utils.RunOnMainThread(t =>
-            {
-                foreach (TreeNode objNode in _setNodesToTrackForUpdates)
-                {
-                    t.ThrowIfCancellationRequested();
-                    if (objNode.Tag != this) // Sanity check
-                        continue;
-                    objNode.Text = strText;
-                }
-            }, token: token);
-        }
+        public Task UpdateTrackedNodes_TextAsync(CancellationToken token = default) => HostServices.DisplayChanges.OnDisplayChangedAsync(this, DisplayAspect.Text, token);
 
-        public void UpdateTrackedNodes_Color(CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (_setNodesToTrackForUpdates.IsEmpty)
-                return;
-            Color objColor = PreferredColor;
-            Utils.RunOnMainThread(t =>
-            {
-                foreach (TreeNode objNode in _setNodesToTrackForUpdates)
-                {
-                    t.ThrowIfCancellationRequested();
-                    if (objNode.Tag != this) // Sanity check
-                        continue;
-                    objNode.ForeColor = objColor;
-                }
-            }, token: token);
-        }
+        public void UpdateTrackedNodes_Color(CancellationToken token = default) => HostServices.DisplayChanges.OnDisplayChanged(this, DisplayAspect.Color, token);
 
-        public void UpdateTrackedNodes_ToolTipText(CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (_setNodesToTrackForUpdates.IsEmpty)
-                return;
-            string strToolTipText = Notes.WordWrap();
-            Utils.RunOnMainThread(t =>
-            {
-                foreach (TreeNode objNode in _setNodesToTrackForUpdates)
-                {
-                    t.ThrowIfCancellationRequested();
-                    if (objNode.Tag != this) // Sanity check
-                        continue;
-                    objNode.ToolTipText = strToolTipText;
-                }
-            }, token: token);
-        }
+        public Task UpdateTrackedNodes_ColorAsync(CancellationToken token = default) => HostServices.DisplayChanges.OnDisplayChangedAsync(this, DisplayAspect.Color, token);
 
-        public void UpdateTrackedNodes_TypeData(CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (_setNodesToTrackForUpdates.IsEmpty)
-                return;
-            string strSpace = LanguageManager.GetString("String_Space", token: token);
-            string strText = Name;
-            if (string.IsNullOrEmpty(strText))
-                strText = LanguageManager.GetString(RatingLabel, token: token)
-                    + strSpace + Force.ToString(GlobalSettings.CultureInfo);
-            else
-                strText += LanguageManager.GetString("String_Comma", token: token) + strSpace
-                    + LanguageManager.GetString(RatingLabel, token: token)
-                    + strSpace + Force.ToString(GlobalSettings.CultureInfo);
-            Utils.RunOnMainThread(t =>
-            {
-                foreach (TreeNode objNode in _setNodesToTrackForUpdates)
-                {
-                    t.ThrowIfCancellationRequested();
-                    if (objNode.Tag != this) // Sanity check
-                        continue;
-                    foreach (TreeNode objInnerNode in objNode.Nodes.Find("TypeData", true))
-                        objInnerNode.Text = strText;
-                }
-            }, token: token);
-        }
+        public void UpdateTrackedNodes_ToolTipText(CancellationToken token = default) => HostServices.DisplayChanges.OnDisplayChanged(this, DisplayAspect.ToolTipText, token);
 
-        public void UpdateTrackedNodes_ServicesOwed(CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (_setNodesToTrackForUpdates.IsEmpty)
-                return;
-            string strText = LanguageManager.GetString("Label_Spirit_ServicesOwed", token: token)
-                + LanguageManager.GetString("String_Space", token: token)
-                + ServicesOwed.ToString(GlobalSettings.CultureInfo);
-            Utils.RunOnMainThread(t =>
-            {
-                foreach (TreeNode objNode in _setNodesToTrackForUpdates)
-                {
-                    t.ThrowIfCancellationRequested();
-                    if (objNode.Tag != this) // Sanity check
-                        continue;
-                    foreach (TreeNode objInnerNode in objNode.Nodes.Find("Services", true))
-                        objInnerNode.Text = strText;
-                }
-            }, token: token);
-        }
-        public async Task UpdateTrackedNodes_TextAsync(CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (_setNodesToTrackForUpdates.IsEmpty)
-                return;
-            string strText = await GetCurrentDisplayNameAsync(token).ConfigureAwait(false);
-            if (string.IsNullOrEmpty(strText))
-                strText = await LanguageManager.GetStringAsync("String_Unknown", token: token).ConfigureAwait(false);
-            await Utils.RunOnMainThreadAsync(t =>
-            {
-                foreach (TreeNode objNode in _setNodesToTrackForUpdates)
-                {
-                    t.ThrowIfCancellationRequested();
-                    if (objNode.Tag != this) // Sanity check
-                        continue;
-                    objNode.Text = strText;
-                }
-            }, token: token).ConfigureAwait(false);
-        }
+        public Task UpdateTrackedNodes_ToolTipTextAsync(CancellationToken token = default) => HostServices.DisplayChanges.OnDisplayChangedAsync(this, DisplayAspect.ToolTipText, token);
 
-        public async Task UpdateTrackedNodes_ColorAsync(CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (_setNodesToTrackForUpdates.IsEmpty)
-                return;
-            Color objColor = await GetPreferredColorAsync(token).ConfigureAwait(false);
-            await Utils.RunOnMainThreadAsync(t =>
-            {
-                foreach (TreeNode objNode in _setNodesToTrackForUpdates)
-                {
-                    t.ThrowIfCancellationRequested();
-                    if (objNode.Tag != this) // Sanity check
-                        continue;
-                    objNode.ForeColor = objColor;
-                }
-            }, token: token).ConfigureAwait(false);
-        }
+        public void UpdateTrackedNodes_TypeData(CancellationToken token = default) => HostServices.DisplayChanges.OnDisplayChanged(this, DisplayAspect.TypeData, token);
 
-        public async Task UpdateTrackedNodes_ToolTipTextAsync(CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (_setNodesToTrackForUpdates.IsEmpty)
-                return;
-            string strToolTipText = (await GetNotesAsync(token).ConfigureAwait(false)).WordWrap();
-            await Utils.RunOnMainThreadAsync(t =>
-            {
-                foreach (TreeNode objNode in _setNodesToTrackForUpdates)
-                {
-                    t.ThrowIfCancellationRequested();
-                    if (objNode.Tag != this) // Sanity check
-                        continue;
-                    objNode.ToolTipText = strToolTipText;
-                }
-            }, token: token).ConfigureAwait(false);
-        }
+        public Task UpdateTrackedNodes_TypeDataAsync(CancellationToken token = default) => HostServices.DisplayChanges.OnDisplayChangedAsync(this, DisplayAspect.TypeData, token);
 
-        public async Task UpdateTrackedNodes_TypeDataAsync(CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (_setNodesToTrackForUpdates.IsEmpty)
-                return;
-            string strSpace = await LanguageManager.GetStringAsync("String_Space", token: token).ConfigureAwait(false);
-            string strText = await GetNameAsync(token).ConfigureAwait(false);
-            if (string.IsNullOrEmpty(strText))
-                strText = await LanguageManager.GetStringAsync(await GetRatingLabelAsync(token).ConfigureAwait(false), token: token).ConfigureAwait(false)
-                    + strSpace + (await GetForceAsync(token).ConfigureAwait(false)).ToString(GlobalSettings.CultureInfo);
-            else
-                strText += await LanguageManager.GetStringAsync("String_Comma", token: token).ConfigureAwait(false) + strSpace + await LanguageManager.GetStringAsync(await GetRatingLabelAsync(token).ConfigureAwait(false), token: token).ConfigureAwait(false)
-                    + strSpace + (await GetForceAsync(token).ConfigureAwait(false)).ToString(GlobalSettings.CultureInfo);
-            await Utils.RunOnMainThreadAsync(t =>
-            {
-                foreach (TreeNode objNode in _setNodesToTrackForUpdates)
-                {
-                    t.ThrowIfCancellationRequested();
-                    if (objNode.Tag != this) // Sanity check
-                        continue;
-                    foreach (TreeNode objInnerNode in objNode.Nodes.Find("TypeData", true))
-                        objInnerNode.Text = strText;
-                }
-            }, token: token).ConfigureAwait(false);
-        }
+        public void UpdateTrackedNodes_ServicesOwed(CancellationToken token = default) => HostServices.DisplayChanges.OnDisplayChanged(this, DisplayAspect.ServicesOwed, token);
 
-        public async Task UpdateTrackedNodes_ServicesOwedAsync(CancellationToken token = default)
-        {
-            token.ThrowIfCancellationRequested();
-            if (_setNodesToTrackForUpdates.IsEmpty)
-                return;
-            string strText = await LanguageManager.GetStringAsync("Label_Spirit_ServicesOwed", token: token).ConfigureAwait(false)
-                + await LanguageManager.GetStringAsync("String_Space", token: token).ConfigureAwait(false)
-                + (await GetServicesOwedAsync(token).ConfigureAwait(false)).ToString(GlobalSettings.CultureInfo);
-            await Utils.RunOnMainThreadAsync(t =>
-            {
-                foreach (TreeNode objNode in _setNodesToTrackForUpdates)
-                {
-                    t.ThrowIfCancellationRequested();
-                    if (objNode.Tag != this) // Sanity check
-                        continue;
-                    foreach (TreeNode objInnerNode in objNode.Nodes.Find("Services", true))
-                        objInnerNode.Text = strText;
-                }
-            }, token: token).ConfigureAwait(false);
-        }
+        public Task UpdateTrackedNodes_ServicesOwedAsync(CancellationToken token = default) => HostServices.DisplayChanges.OnDisplayChangedAsync(this, DisplayAspect.ServicesOwed, token);
+
 
         /// <summary>
         /// Color used by the Spirit's control in UI.
@@ -2703,17 +2517,17 @@ namespace Chummer
                         return;
 
                     if (setNamesOfChangedProperties.Contains(nameof(CurrentDisplayName)))
-                        UpdateTrackedNodes_Text();
+                        this.UpdateTrackedNodes_Text();
                     if (setNamesOfChangedProperties.Contains(nameof(PreferredColor)))
-                        UpdateTrackedNodes_Color();
+                        this.UpdateTrackedNodes_Color();
                     if (setNamesOfChangedProperties.Contains(nameof(Notes)))
-                        UpdateTrackedNodes_ToolTipText();
+                        this.UpdateTrackedNodes_ToolTipText();
                     if (setNamesOfChangedProperties.Contains(nameof(Name))
                         || setNamesOfChangedProperties.Contains(nameof(RatingLabel))
                         || setNamesOfChangedProperties.Contains(nameof(Force)))
-                        UpdateTrackedNodes_TypeData();
+                        this.UpdateTrackedNodes_TypeData();
                     if (setNamesOfChangedProperties.Contains(nameof(ServicesOwed)))
-                        UpdateTrackedNodes_ServicesOwed();
+                        this.UpdateTrackedNodes_ServicesOwed();
 
                     if (!_setMultiplePropertiesChangedAsync.IsEmpty)
                     {
@@ -2823,17 +2637,17 @@ namespace Chummer
                         return;
 
                     if (setNamesOfChangedProperties.Contains(nameof(CurrentDisplayName)))
-                        await UpdateTrackedNodes_TextAsync(token).ConfigureAwait(false);
+                        await this.UpdateTrackedNodes_TextAsync(token).ConfigureAwait(false);
                     if (setNamesOfChangedProperties.Contains(nameof(PreferredColor)))
-                        await UpdateTrackedNodes_ColorAsync(token).ConfigureAwait(false);
+                        await this.UpdateTrackedNodes_ColorAsync(token).ConfigureAwait(false);
                     if (setNamesOfChangedProperties.Contains(nameof(Notes)))
-                        await UpdateTrackedNodes_ToolTipTextAsync(token).ConfigureAwait(false);
+                        await this.UpdateTrackedNodes_ToolTipTextAsync(token).ConfigureAwait(false);
                     if (setNamesOfChangedProperties.Contains(nameof(Name))
                         || setNamesOfChangedProperties.Contains(nameof(RatingLabel))
                         || setNamesOfChangedProperties.Contains(nameof(Force)))
-                        await UpdateTrackedNodes_TypeDataAsync(token).ConfigureAwait(false);
+                        await this.UpdateTrackedNodes_TypeDataAsync(token).ConfigureAwait(false);
                     if (setNamesOfChangedProperties.Contains(nameof(ServicesOwed)))
-                        await UpdateTrackedNodes_ServicesOwedAsync(token).ConfigureAwait(false);
+                        await this.UpdateTrackedNodes_ServicesOwedAsync(token).ConfigureAwait(false);
 
                     if (!_setMultiplePropertiesChangedAsync.IsEmpty)
                     {
