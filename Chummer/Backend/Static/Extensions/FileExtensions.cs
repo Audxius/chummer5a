@@ -22,7 +22,6 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Windows.Forms;
 using System.Buffers;
 
 namespace Chummer

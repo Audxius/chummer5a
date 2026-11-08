@@ -23,7 +23,6 @@ using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Chummer.UI.Skills;
 using Chummer.UI.Table;
 using Microsoft.Win32;

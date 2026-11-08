@@ -21,7 +21,6 @@ using System;
 using System.Collections.Specialized;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Chummer.Annotations;
 using Chummer.Backend.Equipment;
 
