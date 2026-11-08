@@ -26774,7 +26774,7 @@ namespace Chummer
         {
             try
             {
-                await CommonFunctions.OpenPdfFromControl(sender, GenericToken).ConfigureAwait(false);
+                await CommonFunctionsUiExtensions.OpenPdfFromControl(sender, GenericToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {

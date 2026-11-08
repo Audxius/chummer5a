@@ -613,7 +613,7 @@ namespace Chummer
 
         private async void OpenSourceFromLabel(object sender, EventArgs e)
         {
-            await CommonFunctions.OpenPdfFromControl(sender).ConfigureAwait(false);
+            await CommonFunctionsUiExtensions.OpenPdfFromControl(sender).ConfigureAwait(false);
         }
 
         private readonly Microsoft.VisualStudio.Threading.AsyncLazy<string> _strCachedParentRating;

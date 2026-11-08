@@ -56,5 +56,54 @@ namespace Chummer
                 tabControl.SelectedIndex = (tabControl.SelectedIndex + e.Delta) % tabControl.TabCount;
             }
         }
+
+        /// <summary>
+        /// Opens a PDF file using the provided source information.
+        /// </summary>
+        /// <param name="sender">Control from which this method was called.</param>
+        /// <param name="token">Cancellation token to listen to.</param>
+        public static async Task OpenPdfFromControl(object sender, CancellationToken token = default)
+        {
+            if (!(sender is Control objControl))
+                return;
+            Control objLoopControl = objControl;
+            CharacterSettings objSettings = null;
+            for (; objLoopControl != null; objLoopControl = await objLoopControl.DoThreadSafeFuncAsync(x => x.Parent, token: token).ConfigureAwait(false))
+            {
+                if (objLoopControl is IHasCharacterObject objShared)
+                {
+                    Character objCharacter = objShared.CharacterObject;
+                    if (objCharacter != null)
+                    {
+                        objSettings = await objCharacter.GetSettingsAsync(token).ConfigureAwait(false);
+                        break;
+                    }
+                }
+            }
+            await OpenPdfFromControl(sender, objSettings, token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Opens a PDF file using the provided source information.
+        /// </summary>
+        /// <param name="sender">Control from which this method was called.</param>
+        /// <param name="objSettings">Settings to use for custom data. If null, no custom data will be used.</param>
+        /// <param name="token">Cancellation token to listen to.</param>
+        public static async Task OpenPdfFromControl(object sender, CharacterSettings objSettings, CancellationToken token = default)
+        {
+            if (!(sender is Control objControl))
+                return;
+            CursorWait objCursorWait
+                = await CursorWait.NewAsync(await objControl.DoThreadSafeFuncAsync(x => x.FindForm(), token: token).ConfigureAwait(false) ?? objControl, token: token).ConfigureAwait(false);
+            try
+            {
+                await CommonFunctions.OpenPdf(await objControl.DoThreadSafeFuncAsync(x => x.Text, token: token).ConfigureAwait(false), objSettings, string.Empty,
+                              string.Empty, true, token).ConfigureAwait(false);
+            }
+            finally
+            {
+                await objCursorWait.DisposeAsync().ConfigureAwait(false);
+            }
+        }
     }
 }

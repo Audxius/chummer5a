@@ -243,8 +243,21 @@ internal static class Extractor
         {
             Directory.CreateDirectory(Path.GetDirectoryName(strOutPath));
             if (File.Exists(strOutPath))
-                throw new InvalidOperationException(strOutPath + " already exists; run the tool on a clean tree.");
-            File.WriteAllText(strOutPath, sbdFile.ToString(), new UTF8Encoding(false));
+            {
+                // Append to the extension class from an earlier run: insert before the class's closing brace
+                // (the second-to-last closing brace in the file when there is a namespace, the last otherwise).
+                string strExisting = File.ReadAllText(strOutPath);
+                int intInsertAt = strExisting.LastIndexOf('}');
+                if (strNamespace != null)
+                    intInsertAt = strExisting.LastIndexOf('}', intInsertAt - 1);
+                int intLineStart = strExisting.LastIndexOf('\n', intInsertAt) + 1;
+                StringBuilder sbdMethods = new StringBuilder();
+                foreach (MethodDeclarationSyntax objMethod in lstMethods)
+                    sbdMethods.Append(strNewline).Append(Reindent(objMethod.ToFullString(), strIndent + "    ", strNewline).TrimEnd()).Append(strNewline);
+                File.WriteAllText(strOutPath, strExisting.Insert(intLineStart, sbdMethods.ToString().TrimStart('\r', '\n').Insert(0, strNewline)), new UTF8Encoding(false));
+            }
+            else
+                File.WriteAllText(strOutPath, sbdFile.ToString(), new UTF8Encoding(false));
         }
         return strOutPath;
     }

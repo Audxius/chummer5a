@@ -1001,7 +1001,7 @@ namespace Chummer
 
         private async void OpenSourceFromLabel(object sender, EventArgs e)
         {
-            await CommonFunctions.OpenPdfFromControl(sender).ConfigureAwait(false);
+            await CommonFunctionsUiExtensions.OpenPdfFromControl(sender).ConfigureAwait(false);
         }
 
         private async Task<ValueTuple<decimal, bool>> ProcessInvariantXPathExpression(string strExpression, int intRating, int intExtraSlots = 0, CancellationToken token = default)

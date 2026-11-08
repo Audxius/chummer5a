@@ -30474,7 +30474,7 @@ namespace Chummer
 
         private async void OpenSourceFromLabel(object sender, EventArgs e)
         {
-            await CommonFunctions.OpenPdfFromControl(sender, GenericToken).ConfigureAwait(false);
+            await CommonFunctionsUiExtensions.OpenPdfFromControl(sender, GenericToken).ConfigureAwait(false);
         }
 
         private async void btnCreateCustomDrug_Click(object sender, EventArgs e)
