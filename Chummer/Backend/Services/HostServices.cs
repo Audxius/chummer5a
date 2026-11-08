@@ -50,6 +50,8 @@ namespace Chummer
 
         private static IDisplayChangeNotifier s_objDisplayChanges = new HeadlessDisplayChangeNotifier();
 
+        private static IUiDispatcher s_objDispatcher = new HeadlessUiDispatcher();
+
         public static IMessageService Messages
         {
             get => s_objMessages;
@@ -115,6 +117,15 @@ namespace Chummer
         {
             get => s_objDisplayChanges;
             set => s_objDisplayChanges = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// The host UI thread message loop. Must be registered before Utils.CreateSynchronizationContext is called.
+        /// </summary>
+        public static IUiDispatcher Dispatcher
+        {
+            get => s_objDispatcher;
+            set => s_objDispatcher = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }

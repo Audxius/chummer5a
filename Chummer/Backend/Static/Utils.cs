@@ -100,9 +100,6 @@ namespace Chummer
         {
             if (!Utils.IsMainThread)
                 throw new InvalidOperationException("Cannot call CreateSynchronizationContext outside of the main thread.");
-            if (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
-                throw new InvalidOperationException("Should not call CreateSynchronizationContext on a non-STA thread.");
-
             if (s_objJoinableTaskFactory.IsValueCreated)
             {
                 JoinableTaskContext objNewContext = new JoinableTaskContext();
@@ -114,7 +111,7 @@ namespace Chummer
                 }
             }
 
-            using (new Forms.DummyForm()) // New Form needs to be created (or Application.Run() called) before Synchronization.Current is set
+            using (HostServices.Dispatcher.InstallSynchronizationContext()) // the host makes SynchronizationContext.Current its UI context
             {
                 JoinableTaskContext objNewContext = new JoinableTaskContext();
                 JoinableTaskContext objReturn = Interlocked.CompareExchange(ref s_objJoinableTaskContext, objNewContext, default);
@@ -240,7 +237,7 @@ namespace Chummer
         public static int DefaultPoolSize { get; } = Math.Max(MaxParallelBatchSize, byte.MaxValue + 1);
 
         private static readonly Lazy<string> s_strGetStartupPath = new Lazy<string>(
-            () => IsUnitTest ? AppDomain.CurrentDomain.SetupInformation.ApplicationBase : Application.StartupPath);
+            () => IsUnitTest ? AppDomain.CurrentDomain.SetupInformation.ApplicationBase : AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
 
         private static readonly Lazy<string> s_strGetEscapedStartupPath = new Lazy<string>(
             () => GetStartupPath.Replace("\\", "\\\\").Replace("\\\\\\\\", "\\\\"));
@@ -1489,7 +1486,7 @@ namespace Chummer
                 int intIsOkToRunDoEvents = Interlocked.Decrement(ref _intIsOkToRunDoEvents);
                 if (blnForceDoEvents || intIsOkToRunDoEvents == 0)
                 {
-                    RunInEmptyExecutionContext(Application.DoEvents);
+                    RunInEmptyExecutionContext(HostServices.Dispatcher.PumpPendingMessages);
                 }
             }
             finally

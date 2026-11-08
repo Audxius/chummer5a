@@ -34,6 +34,7 @@ namespace Chummer
             HostServices.Shell = new WinFormsAppShell();
             HostServices.Plugins = new WinFormsPluginHost();
             HostServices.DisplayChanges = new WinFormsDisplayChangeNotifier();
+            HostServices.Dispatcher = new WinFormsUiDispatcher();
         }
     }
 }
