@@ -58,6 +58,63 @@ internal static class Program
                             await Settle();
                             Save(objWindow, strOut, "03-" + eSection.ToString().ToLowerInvariant());
                         }
+                        // ===== Inventory: slot grid, detail panel and session actions =====
+                        objCharacter.ShowSectionCommand.Execute(CharacterSection.Inventory);
+                        await Settle();
+                        System.Collections.Generic.List<InventoryItemViewModel> lstAllSlots()
+                            => objCharacter.InventoryGroups.SelectMany(x => x.Items).SelectMany(x => x.SelfAndDescendants()).ToList();
+                        int intInventoryShot = 0;
+                        foreach (string strPick in new[] { "Katana", "Armor Jacket", "Meta Link", "Harley", "Roadmaster" })
+                        {
+                            InventoryItemViewModel objPick = lstAllSlots().FirstOrDefault(x => x.Name.Contains(strPick, StringComparison.OrdinalIgnoreCase));
+                            if (objPick == null)
+                                continue;
+                            objCharacter.SelectInventoryItemCommand.Execute(objPick);
+                            await Settle();
+                            Save(objWindow, strOut, "08-inventory-" + (++intInventoryShot).ToString(System.Globalization.CultureInfo.InvariantCulture) + "-" + strPick.Replace(' ', '-').ToLowerInvariant());
+                        }
+                        InventoryItemViewModel objGun = lstAllSlots().FirstOrDefault(x => x.UsesAmmo && x.AmmoRemaining > 0);
+                        if (objGun != null)
+                        {
+                            objCharacter.SelectInventoryItemCommand.Execute(objGun);
+                            await Settle();
+                            Save(objWindow, strOut, "08-inventory-gun");
+                            int intBefore = objGun.AmmoRemaining;
+                            await objCharacter.FireWeaponCommand.ExecuteAsync(null);
+                            await Settle();
+                            await Settle();
+                            Console.WriteLine("fire " + objGun.Name + ": " + intBefore + " -> " + objCharacter.SelectedInventoryItem?.AmmoRemaining + " dirty=" + objCharacter.IsDirty);
+                            Save(objWindow, strOut, "08-inventory-gun-fired");
+                        }
+                        InventoryItemViewModel objEquip = lstAllSlots().FirstOrDefault(x => x.CanEquip && x.Kind == InventoryKind.Weapon);
+                        if (objEquip != null)
+                        {
+                            objCharacter.SelectInventoryItemCommand.Execute(objEquip);
+                            await Settle();
+                            bool blnBefore = objEquip.IsEquipped;
+                            await objCharacter.ToggleEquippedCommand.ExecuteAsync(null);
+                            await Settle();
+                            await Settle();
+                            Console.WriteLine("equip " + objEquip.Name + ": " + blnBefore + " -> " + objCharacter.SelectedInventoryItem?.IsEquipped + ", loadout " + objCharacter.LoadoutSlots.Count);
+                            Save(objWindow, strOut, "08-inventory-equip-toggled");
+                        }
+                        InventoryItemViewModel objUse = lstAllSlots().FirstOrDefault(x => x.IsConsumable && x.Quantity > 1);
+                        if (objUse != null)
+                        {
+                            objCharacter.SelectInventoryItemCommand.Execute(objUse);
+                            await Settle();
+                            decimal decBefore = objUse.Quantity;
+                            await objCharacter.UseOneCommand.ExecuteAsync(null);
+                            await Settle();
+                            await Settle();
+                            Console.WriteLine("use one " + objUse.Name + ": " + decBefore + " -> " + objCharacter.SelectedInventoryItem?.Quantity);
+                        }
+                        objCharacter.InventoryKind = InventoryKind.Armor;
+                        await Settle();
+                        Save(objWindow, strOut, "08-inventory-armor-tab");
+                        objCharacter.InventoryKind = null;
+                        await Settle();
+                        // ===== end inventory =====
                         // Editing: raise the first attribute that can be raised and report the karma spent.
                         objCharacter.ShowSectionCommand.Execute(CharacterSection.Attributes);
                         await Settle();

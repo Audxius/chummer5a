@@ -163,4 +163,127 @@
       <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
       <Setter Property="Background" Value="#33FF3355" />
     </Style>
+
+    <!-- ===== Inventory: game-style slots, badges and the detail panel ===== -->
+    <Style Selector="Button.slot">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="0,0,10,10" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="VerticalAlignment" Value="Top" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="Button.slot:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BoxShadow" Value="none" />
+    </Style>
+    <Style Selector="Border.well">
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+    <Style Selector="Border.ring">
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="IsHitTestVisible" Value="False" />
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="Button.slot:pointerover Border.ring">
+      <Setter Property="Opacity" Value="0.6" />
+    </Style>
+    <Style Selector="Border.ring.selected">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="Button.slot:pointerover Border.ring.selected">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="Border.badge">
+      <Setter Property="CornerRadius" Value="2" />
+      <Setter Property="Padding" Value="4,0" />
+      <Setter Property="Background" Value="#E607090D" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="#33FFFFFF" />
+      <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+    <Style Selector="Border.badge > TextBlock">
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="Border.addslot">
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="Background" Value="#0AFFFFFF" />
+    </Style>
+    <Style Selector="Button.slot:pointerover Border.addslot">
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+      <Setter Property="Background" Value="#1400E5FF" />
+    </Style>
+    <Style Selector="Border.detail">
+      <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="4" />
+    </Style>
+    <Style Selector="Border.loadout">
+      <Setter Property="Background" Value="#0DFFFFFF" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="4" />
+    </Style>
+    <Style Selector="Button.act">
+      <Setter Property="Padding" Value="10,5" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="LetterSpacing" Value="1.2" />
+      <Setter Property="Margin" Value="0,0,6,6" />
+      <Setter Property="MinWidth" Value="34" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.act.on">
+      <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+    <Style Selector="Button.act.fire">
+      <Setter Property="Background" Value="#FFFF4D5E" />
+      <Setter Property="BorderBrush" Value="#FFFF4D5E" />
+      <Setter Property="Foreground" Value="{StaticResource BaseBrush}" />
+      <Setter Property="FontWeight" Value="Black" />
+    </Style>
+    <Style Selector="Button.act.fire:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#FFFF7A87" />
+      <Setter Property="BorderBrush" Value="#FFFF7A87" />
+      <Setter Property="Foreground" Value="{StaticResource BaseBrush}" />
+      <Setter Property="BoxShadow" Value="0 0 14 0 #88FF4D5E" />
+    </Style>
+    <Style Selector="Button.act.danger">
+      <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
+      <Setter Property="BorderBrush" Value="#88FF3B4E" />
+    </Style>
+    <Style Selector="Button.act.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#33FF3B4E" />
+      <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+      <Setter Property="BoxShadow" Value="0 0 12 0 #66FF3B4E" />
+    </Style>
+    <Style Selector="Button.act.money">
+      <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+      <Setter Property="BorderBrush" Value="#88F3E600" />
+    </Style>
+    <Style Selector="Button.act.money:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#33F3E600" />
+      <Setter Property="BorderBrush" Value="{StaticResource YellowBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+      <Setter Property="BoxShadow" Value="0 0 12 0 #55F3E600" />
+    </Style>
+    <Style Selector="TextBlock.section">
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="LetterSpacing" Value="2" />
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+      <Setter Property="Margin" Value="0,14,0,6" />
+    </Style>
 </Styles>
