@@ -265,6 +265,56 @@ namespace Chummer.Desktop.Services
                     objMentor.SetResult(nameof(SelectMentorSpiritRequest.Choice2), strChoice2);
                     return DialogOutcome.OK;
                 }
+                case SelectPowerRequest objPower:
+                {
+                    Character objCharacter = objPower.ConstructorArguments.FirstOrDefault() as Character;
+                    if (objCharacter == null)
+                        return DialogOutcome.Cancel;
+                    string strId = await BrowseIdAsync(owner, DataBrowser.Power(objCharacter, objPower.ForBonus, objPower.IgnoreLimits, objPower.LimitToPowers,
+                                                                                objPower.LimitToRating, objPower.PointsPerLevel)).ConfigureAwait(true);
+                    if (strId == null)
+                        return DialogOutcome.Cancel;
+                    objPower.SetResult(nameof(SelectPowerRequest.SelectedPower), strId);
+                    return DialogOutcome.OK;
+                }
+                case SelectComplexFormRequest objForm:
+                {
+                    Character objCharacter = objForm.ConstructorArguments.FirstOrDefault() as Character;
+                    if (objCharacter == null)
+                        return DialogOutcome.Cancel;
+                    string strId = await BrowseIdAsync(owner, DataBrowser.ComplexForm(objCharacter)).ConfigureAwait(true);
+                    if (strId == null)
+                        return DialogOutcome.Cancel;
+                    objForm.SetResult(nameof(SelectComplexFormRequest.SelectedComplexForm), strId);
+                    return DialogOutcome.OK;
+                }
+                case SelectAIProgramRequest objProgram:
+                {
+                    Character objCharacter = objProgram.ConstructorArguments.FirstOrDefault() as Character;
+                    if (objCharacter == null)
+                        return DialogOutcome.Cancel;
+                    bool blnAdvanced = objProgram.ConstructorArguments.Count <= 1 || !(objProgram.ConstructorArguments[1] is bool blnA) || blnA;
+                    bool blnInherent = objProgram.ConstructorArguments.Count > 2 && objProgram.ConstructorArguments[2] is bool blnI && blnI;
+                    string strId = await BrowseIdAsync(owner, DataBrowser.AIProgram(objCharacter, blnAdvanced, blnInherent)).ConfigureAwait(true);
+                    if (strId == null)
+                        return DialogOutcome.Cancel;
+                    objProgram.SetResult(nameof(SelectAIProgramRequest.SelectedProgram), strId);
+                    return DialogOutcome.OK;
+                }
+                case SelectSpellRequest objSpell:
+                {
+                    Character objCharacter = objSpell.ConstructorArguments.FirstOrDefault() as Character;
+                    if (objCharacter == null)
+                        return DialogOutcome.Cancel;
+                    // A forced spell is accepted without asking, like the original.
+                    string strId = !string.IsNullOrEmpty(objSpell.ForceSpellName)
+                        ? objSpell.ForceSpellName
+                        : await BrowseIdAsync(owner, DataBrowser.Spell(objCharacter, objSpell.LimitCategory, objSpell.IgnoreRequirements)).ConfigureAwait(true);
+                    if (strId == null)
+                        return DialogOutcome.Cancel;
+                    objSpell.SetResult(nameof(SelectSpellRequest.SelectedSpell), strId);
+                    return DialogOutcome.OK;
+                }
                 case SelectSkillRequest objSkill:
                     return await ChooseSkillAsync(objSkill, owner).ConfigureAwait(true);
                 case SelectSkillGroupRequest objGroup:

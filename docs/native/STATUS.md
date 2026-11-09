@@ -23,8 +23,8 @@ It builds on first run and whenever the sources change. It uses native Wayland w
 | **Contacts** | ✅ Contacts, enemies, pets, spirits and sprites. View only. |
 | **Global search (Ctrl+K)** | ✅ Searches every open runner's items, abilities, skills, contacts and qualities, plus every roll, and jumps straight to it. |
 | **Dice Terminal (Ctrl+R)** | ✅ Details below. |
-| Engine prompts (choose item / number / text / attribute / limit / side / build method) | ✅ Native prompt window. |
-| Other prompts (metatype priority, spell / power / art pickers…) | ⏳ Show "not available yet" and cancel the operation. |
+| Engine prompts | ✅ Native for item, number, text, attribute, limit, side, build method, skill (including exotic specifics), skill group, spell / weapon category, optional power, dice hits, metamagic / echo, art / enhancement / enchantment / ritual, martial art, mentor spirit / paragon, adept power, complex form, AI program and spell. Option lists are lifted from the original forms into `Chummer/Backend/Selection`. |
+| Remaining prompts | ⏳ Metatype (priority / karma) belongs to the creation wizard, and armor mods arrive with editing. Until then these say "not available yet" and cancel. |
 | Creating and editing characters (buy gear, raise skills, karma) | ⏳ Not yet. Phases 2, 6–10 in the plan. Use legacy Chummer for these for now. |
 | Settings, print / sheets / PDF export | ⏳ Phases 11–12 |
 
