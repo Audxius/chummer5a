@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Engine tests on .NET 8 with headless host services (runs on Linux). Shares the parity harness with
+       Chummer.Tests (net48), so the same golden files verify both the original and the ported engine. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <Nullable>disable</Nullable>
+    <RootNamespace>Chummer.Tests</RootNamespace>
+    <NoWarn>$(NoWarn);CA1416;MSTEST0001</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Chummer.Core/Chummer.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MSTest" Version="4.5.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../Chummer.Tests/Parity/*.cs" Link="Parity/%(Filename)%(Extension)" />
+    <Compile Include="../Chummer.Tests/Services/*.cs" Link="Services/%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Game data next to the test assembly, where Utils.GetStartupPath points under unit tests. -->
+    <None Include="../Chummer/data/**/*" Link="data/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../Chummer/lang/**/*" Link="lang/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../Chummer/sheets/**/*" Link="sheets/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../Chummer/export/**/*" Link="export/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../Chummer/customdata/**/*" Link="customdata/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../Chummer.Tests/TestFiles/*.chum5" Link="TestFiles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
