@@ -148,6 +148,11 @@ namespace Chummer.Desktop.ViewModels
             OnPropertyChanged(nameof(ContactCountText));
         }
 
+        private CharacterInfoViewModel _objInfo;
+
+        /// <summary>Editable identity / looks / notes (created on first use).</summary>
+        public CharacterInfoViewModel Info => _objInfo ??= new CharacterInfoViewModel(this);
+
         /// <summary>Flags unsaved changes made through objects that do not raise Character.PropertyChanged (contacts...).</summary>
         internal void MarkDirty() => OnUi(() => IsDirty = true);
 

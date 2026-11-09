@@ -94,7 +94,7 @@
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Abilities}" />
           <ToggleButton Classes="section" Content="CONTACTS" IsChecked="{Binding IsNetwork, Mode=OneWay}"
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Network}" />
-          <ToggleButton Classes="section" Content="{loc:Tr Tab_Notes, Case=upper}" IsChecked="{Binding IsNotes, Mode=OneWay}"
+          <ToggleButton Classes="section" Content="INFO &amp; NOTES" IsChecked="{Binding IsNotes, Mode=OneWay}"
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Notes}" />
         </StackPanel>
       </StackPanel>

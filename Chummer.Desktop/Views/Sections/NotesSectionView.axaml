@@ -5,32 +5,111 @@
              xmlns:conv="using:Chummer.Desktop.Converters"
              x:Class="Chummer.Desktop.Views.Sections.NotesSectionView"
              x:DataType="vm:CharacterViewModel">
+  <UserControl.Styles>
+    <Style Selector="TextBox.note">
+      <Setter Property="AcceptsReturn" Value="True" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="MinHeight" Value="110" />
+      <Setter Property="VerticalContentAlignment" Value="Top" />
+    </Style>
+    <Style Selector="TextBlock.fieldlabel">
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="LetterSpacing" Value="1" />
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+      <Setter Property="Margin" Value="0,0,0,3" />
+    </Style>
+  </UserControl.Styles>
   <ScrollViewer>
-    <StackPanel Margin="28,22" Spacing="14" MaxWidth="900" HorizontalAlignment="Left">
-      <Border Classes="panel lit">
-        <StackPanel Spacing="6">
-          <TextBlock Text="{loc:Tr Label_Concept, Case=upper}" Classes="h2" />
-          <SelectableTextBlock Text="{Binding Concept}" TextWrapping="Wrap" />
-        </StackPanel>
-      </Border>
-      <Border Classes="panel lit">
-        <StackPanel Spacing="6">
-          <TextBlock Text="{loc:Tr Label_Description, Case=upper}" Classes="h2" />
-          <SelectableTextBlock Text="{Binding Description}" TextWrapping="Wrap" />
-        </StackPanel>
-      </Border>
-      <Border Classes="panel lit">
-        <StackPanel Spacing="6">
-          <TextBlock Text="{loc:Tr Label_Background, Case=upper}" Classes="h2" />
-          <SelectableTextBlock Text="{Binding Background}" TextWrapping="Wrap" />
-        </StackPanel>
-      </Border>
-      <Border Classes="panel hot">
-        <StackPanel Spacing="6">
-          <TextBlock Text="{loc:Tr Tab_Notes, Case=upper}" Classes="h2" Foreground="{StaticResource MagentaBrush}" />
-          <SelectableTextBlock Text="{Binding Notes}" TextWrapping="Wrap" />
-        </StackPanel>
-      </Border>
-    </StackPanel>
+    <Grid Margin="28,22" ColumnDefinitions="380,24,*" MaxWidth="1500" HorizontalAlignment="Left">
+      <!-- Identity and looks -->
+      <StackPanel Spacing="16">
+        <Border Classes="panel lit">
+          <StackPanel Spacing="10" DataContext="{Binding Info}" x:DataType="vm:CharacterInfoViewModel">
+            <TextBlock Text="IDENTITY" Classes="h2" />
+            <StackPanel>
+              <TextBlock Text="STREET NAME / ALIAS" Classes="fieldlabel" />
+              <TextBox Text="{Binding Alias, UpdateSourceTrigger=LostFocus}" FontSize="16" FontWeight="Bold" />
+            </StackPanel>
+            <StackPanel>
+              <TextBlock Text="REAL NAME" Classes="fieldlabel" />
+              <TextBox Text="{Binding CharacterName, UpdateSourceTrigger=LostFocus}" />
+            </StackPanel>
+            <StackPanel>
+              <TextBlock Text="PLAYER" Classes="fieldlabel" />
+              <TextBox Text="{Binding PlayerName, UpdateSourceTrigger=LostFocus}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+        <Border Classes="panel lit">
+          <Grid ColumnDefinitions="*,12,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10" DataContext="{Binding Info}" x:DataType="vm:CharacterInfoViewModel">
+            <TextBlock Grid.ColumnSpan="3" Text="LOOKS" Classes="h2" />
+            <StackPanel Grid.Row="1">
+              <TextBlock Text="SEX" Classes="fieldlabel" />
+              <TextBox Text="{Binding Gender, UpdateSourceTrigger=LostFocus}" />
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="2">
+              <TextBlock Text="AGE" Classes="fieldlabel" />
+              <TextBox Text="{Binding Age, UpdateSourceTrigger=LostFocus}" />
+            </StackPanel>
+            <StackPanel Grid.Row="2">
+              <TextBlock Text="HEIGHT" Classes="fieldlabel" />
+              <TextBox Text="{Binding Height, UpdateSourceTrigger=LostFocus}" />
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="2">
+              <TextBlock Text="WEIGHT" Classes="fieldlabel" />
+              <TextBox Text="{Binding Weight, UpdateSourceTrigger=LostFocus}" />
+            </StackPanel>
+            <StackPanel Grid.Row="3">
+              <TextBlock Text="EYES" Classes="fieldlabel" />
+              <TextBox Text="{Binding Eyes, UpdateSourceTrigger=LostFocus}" />
+            </StackPanel>
+            <StackPanel Grid.Row="3" Grid.Column="2">
+              <TextBlock Text="HAIR" Classes="fieldlabel" />
+              <TextBox Text="{Binding Hair, UpdateSourceTrigger=LostFocus}" />
+            </StackPanel>
+          </Grid>
+        </Border>
+        <Border Classes="panel lit">
+          <StackPanel DataContext="{Binding Info}" x:DataType="vm:CharacterInfoViewModel">
+            <TextBlock Text="SKIN" Classes="fieldlabel" />
+            <TextBox Text="{Binding Skin, UpdateSourceTrigger=LostFocus}" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+
+      <!-- Long texts -->
+      <StackPanel Grid.Column="2" Spacing="16" DataContext="{Binding Info}" x:DataType="vm:CharacterInfoViewModel">
+        <Border Classes="panel lit">
+          <StackPanel Spacing="6">
+            <TextBlock Text="{loc:Tr Label_Concept, Case=upper}" Classes="h2" />
+            <TextBox Classes="note" MinHeight="60" Text="{Binding Concept, UpdateSourceTrigger=LostFocus}" />
+          </StackPanel>
+        </Border>
+        <Border Classes="panel lit">
+          <StackPanel Spacing="6">
+            <TextBlock Text="{loc:Tr Label_Background, Case=upper}" Classes="h2" />
+            <TextBox Classes="note" MinHeight="160" Text="{Binding Background, UpdateSourceTrigger=LostFocus}" />
+          </StackPanel>
+        </Border>
+        <Border Classes="panel lit">
+          <StackPanel Spacing="6">
+            <TextBlock Text="{loc:Tr Label_Description, Case=upper}" Classes="h2" />
+            <TextBox Classes="note" Text="{Binding Description, UpdateSourceTrigger=LostFocus}" />
+          </StackPanel>
+        </Border>
+        <Border Classes="panel hot">
+          <StackPanel Spacing="6">
+            <TextBlock Text="{loc:Tr Tab_Notes, Case=upper}" Classes="h2" Foreground="{StaticResource MagentaBrush}" />
+            <TextBox Classes="note" MinHeight="160" Text="{Binding Notes, UpdateSourceTrigger=LostFocus}" />
+          </StackPanel>
+        </Border>
+        <Border Classes="panel hot">
+          <StackPanel Spacing="6">
+            <TextBlock Text="GM NOTES" Classes="h2" Foreground="{StaticResource MagentaBrush}" />
+            <TextBox Classes="note" Text="{Binding GameNotes, UpdateSourceTrigger=LostFocus}" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </Grid>
   </ScrollViewer>
 </UserControl>
