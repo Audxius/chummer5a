@@ -48,6 +48,15 @@ namespace Chummer.Rolls
         /// <summary>Extra search terms (aliases, section headings).</summary>
         public string Keywords { get; set; } = string.Empty;
 
+        /// <summary>For sum rolls such as initiative: expression for the number of d6 added to the value (instead of counting hits).</summary>
+        public string SumDice { get; set; } = string.Empty;
+
+        /// <summary>The wound modifier is already part of the expression (or does not apply).</summary>
+        public bool ExcludeWounds { get; set; }
+
+        /// <summary>Generated from the character itself (skills, initiative, derived tests) rather than read from a file.</summary>
+        public bool IsGenerated { get; set; }
+
         public bool IsRollable => !string.IsNullOrWhiteSpace(Dice) && !Dice.Trim().Equals("None", StringComparison.OrdinalIgnoreCase);
         public bool IsHouseRule => Book.Length > 0;
 
@@ -130,6 +139,115 @@ namespace Chummer.Rolls
             yield return Path.Combine(strConfig, "chummer5", "houserules");
         }
 
+        /// <summary>Name of the generated roll for one skill (optionally with its specialization).</summary>
+        public static string SkillRollName(string strSkill, string strSpecialization = null)
+            => string.IsNullOrEmpty(strSpecialization) ? strSkill : strSkill + " (" + strSpecialization + ")";
+
+        public const string InitiativeRoll = "Initiative";
+        public const string AstralInitiativeRoll = "Astral Initiative";
+        public const string MatrixColdRoll = "Matrix Initiative (Cold Sim)";
+        public const string MatrixHotRoll = "Matrix Initiative (Hot Sim)";
+        public const string DamageResistanceRoll = "Damage Resistance";
+        public const string ComposureRoll = "Composure";
+        public const string JudgeIntentionsRoll = "Judge Intentions";
+        public const string MemoryRoll = "Memory";
+        public const string LiftCarryRoll = "Lift / Carry";
+
+        /// <summary>
+        /// Replaces the rolls generated from the character (every skill and specialization, initiatives, derived attribute tests).
+        /// Call again whenever skills change; values themselves are always evaluated live.
+        /// </summary>
+        public void RefreshCharacterRolls(Character objCharacter)
+        {
+            foreach (RollAction objOld in _lstActions.Where(x => x.IsGenerated).ToList())
+            {
+                _lstActions.Remove(objOld);
+                if (_dicByName.TryGetValue(objOld.Name, out RollAction objMapped) && ReferenceEquals(objMapped, objOld))
+                    _dicByName.Remove(objOld.Name);
+            }
+            if (objCharacter == null)
+                return;
+
+            void AddGenerated(string strName, string strCategory, string strDice, string strLimit = "", string strSum = "", bool blnNoWounds = false, string strKeywords = "", string strDescription = "")
+            {
+                RollAction objAction = new RollAction
+                {
+                    Id = "generated:" + strName,
+                    Name = strName,
+                    DisplayName = strName,
+                    Dice = strDice,
+                    Limit = strLimit,
+                    SumDice = strSum,
+                    ExcludeWounds = blnNoWounds,
+                    Category = strCategory,
+                    Keywords = strKeywords,
+                    Description = strDescription,
+                    IsGenerated = true,
+                };
+                _lstActions.Add(objAction);
+                // Generated rolls never shadow a file action of the same name.
+                if (!_dicByName.ContainsKey(strName))
+                    _dicByName[strName] = objAction;
+            }
+
+            AddGenerated(InitiativeRoll, "Initiative", "{Initiative}", strSum: "{Initiative Dice}", strKeywords: "init meatspace");
+            if (objCharacter.MAGEnabled)
+                AddGenerated(AstralInitiativeRoll, "Initiative", "{Astral Initiative}", strSum: "{Astral Initiative Dice}", strKeywords: "init astral projection");
+            AddGenerated(MatrixColdRoll, "Initiative", "{Matrix Initiative Cold}", strSum: "{Matrix Initiative Cold Dice}", strKeywords: "init vr cold sim");
+            AddGenerated(MatrixHotRoll, "Initiative", "{Matrix Initiative Hot}", strSum: "{Matrix Initiative Hot Dice}", strKeywords: "init vr hot sim");
+            AddGenerated(DamageResistanceRoll, "Attribute Test", "{BOD} + {Armor}", blnNoWounds: true, strKeywords: "soak resist damage armor body",
+                         strDescription: "Body + armor (modified by the attack's AP). Wound modifiers do not apply.");
+            AddGenerated(ComposureRoll, "Attribute Test", "{CHA} + {WIL}", strKeywords: "fear intimidation", strDescription: "Charisma + Willpower.");
+            AddGenerated(JudgeIntentionsRoll, "Attribute Test", "{CHA} + {INT}", strKeywords: "lie read person", strDescription: "Charisma + Intuition.");
+            AddGenerated(MemoryRoll, "Attribute Test", "{LOG} + {WIL}", strKeywords: "remember recall", strDescription: "Logic + Willpower.");
+            AddGenerated(LiftCarryRoll, "Attribute Test", "{BOD} + {STR}", strKeywords: "lift carry strength", strDescription: "Body + Strength.");
+
+            foreach (Backend.Skills.Skill objSkill in objCharacter.SkillsSection.Skills.ToList()
+                                                                  .Concat(objCharacter.SkillsSection.KnowledgeSkills.ToList()))
+            {
+                if (objSkill.Rating <= 0 && !objSkill.Default)
+                    continue;
+                string strName = objSkill.CurrentDisplayName;
+                if (string.IsNullOrWhiteSpace(strName))
+                    continue;
+                string strLimit = SkillLimit(objSkill);
+                string strCategory = objSkill.IsKnowledgeSkill ? "Knowledge Skill" : "Skill";
+                string strDice = "{Skill Pool: " + strName + "}";
+                AddGenerated(SkillRollName(strName), strCategory, strDice, strLimit, strKeywords: objSkill.SkillCategory,
+                             strDescription: strName + " + " + objSkill.Attribute + (objSkill.Rating > 0 ? string.Empty : " (untrained: defaulting)"));
+                foreach (Backend.Skills.SkillSpecialization objSpec in objSkill.Specializations.ToList())
+                {
+                    string strSpec = objSpec.CurrentDisplayName;
+                    if (string.IsNullOrWhiteSpace(strSpec))
+                        continue;
+                    AddGenerated(SkillRollName(strName, strSpec), strCategory, strDice + " + {Skill Spec: " + strName + "}", strLimit,
+                                 strKeywords: objSkill.SkillCategory + " specialization", strDescription: strName + " + " + objSkill.Attribute + " + specialization (" + strSpec + ")");
+                }
+            }
+        }
+
+        private static string SkillLimit(Backend.Skills.Skill objSkill)
+        {
+            if (objSkill.SkillCategory == "Combat Active")
+                return string.Empty; // the weapon's accuracy, which depends on the weapon used
+            switch (objSkill.Attribute)
+            {
+                case "BOD":
+                case "AGI":
+                case "REA":
+                case "STR":
+                    return "{Physical}";
+                case "CHA":
+                    return "{Social}";
+                case "MAG":
+                case "MAGAdept":
+                case "RES":
+                    return string.Empty; // Force or Level of what is being cast, threaded or summoned
+                default:
+                    return "{Mental}";
+            }
+        }
+
         public static RollCatalog Load(Character objCharacter)
         {
             RollCatalog objReturn = new RollCatalog();
@@ -155,6 +273,7 @@ namespace Chummer.Rolls
                     }
                 }
             }
+            objReturn.RefreshCharacterRolls(objCharacter);
             return objReturn;
         }
 
@@ -256,6 +375,13 @@ namespace Chummer.Rolls
             int intPool = Math.Max(0, objEvaluation.Pool.Value + intModifier + (blnEdge ? intEdge : 0));
             string strLimit = objEvaluation.Limit?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
             string strThreshold = objEvaluation.Threshold?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+            if (objEvaluation.IsSum)
+            {
+                // Initiative: score + Nd6 (Edge = Blitz: 5d6).
+                int intDice = blnEdge ? 5 : objEvaluation.SumDice;
+                return "&{template:default} {{name=" + Sanitize(strCharacterName) + ": " + Sanitize(objAction.DisplayName) + (blnEdge ? " (Blitz)" : string.Empty)
+                       + "}} {{Initiative=[[" + Math.Max(0, objEvaluation.Pool.Value + intModifier).ToString(CultureInfo.InvariantCulture) + "+" + intDice.ToString(CultureInfo.InvariantCulture) + "d6]]}}";
+            }
             string strTemplate = blnEdge ? EdgeTemplate : Template;
             return strTemplate
                    .Replace("{limitrow}", strLimit.Length > 0 ? " {{Limit=" + strLimit + "}}" : string.Empty)

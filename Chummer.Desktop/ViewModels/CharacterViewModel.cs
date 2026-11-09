@@ -31,6 +31,7 @@ using CommunityToolkit.Mvvm.Input;
 using Chummer.Backend.Attributes;
 using Chummer.Backend.Skills;
 using Chummer.Desktop.Localization;
+using Chummer.Rolls;
 
 namespace Chummer.Desktop.ViewModels
 {
@@ -94,6 +95,10 @@ namespace Chummer.Desktop.ViewModels
         [ObservableProperty] private string _abilityFilter = string.Empty;
         [ObservableProperty] private string _networkFilter = string.Empty;
 
+        /// <summary>Opens the Dice Terminal on a roll for this runner and copies its Roll20 formula.</summary>
+        [RelayCommand]
+        private Task Roll(string strRollName) => MainWindowViewModel.Current?.Dice.RollForAsync(this, strRollName) ?? Task.CompletedTask;
+
         public string TabTitle => (IsDirty ? "● " : string.Empty) + Name;
 
         partial void OnNameChanged(string value) => OnPropertyChanged(nameof(TabTitle));
@@ -110,7 +115,36 @@ namespace Chummer.Desktop.ViewModels
 
         partial void OnAbilityFilterChanged(string value) => FilterCards(_lstAllAbilities, AbilityGroups, value);
 
-        partial void OnNetworkFilterChanged(string value) => FilterCards(_lstAllNetwork, NetworkGroups, value);
+        partial void OnNetworkFilterChanged(string value)
+        {
+            FilterCards(_lstAllNetwork, NetworkGroups, value);
+            ApplyContactFilter();
+        }
+
+        public ObservableCollection<ContactCardViewModel> ContactCards { get; } = new ObservableCollection<ContactCardViewModel>();
+        public ObservableCollection<ContactCardViewModel> EnemyCards { get; } = new ObservableCollection<ContactCardViewModel>();
+        public ObservableCollection<ContactCardViewModel> PetCards { get; } = new ObservableCollection<ContactCardViewModel>();
+        public bool HasContactCards => ContactCards.Count > 0;
+        public bool HasEnemyCards => EnemyCards.Count > 0;
+        public bool HasPetCards => PetCards.Count > 0;
+        public string ContactCountText => ContactCards.Count.ToString(GlobalSettings.CultureInfo);
+        private List<ContactCardViewModel> _lstAllContacts = new List<ContactCardViewModel>();
+
+        private void ApplyContactFilter()
+        {
+            string strFilter = NetworkFilter?.Trim() ?? string.Empty;
+            List<ContactCardViewModel> lstMatches = _lstAllContacts.Where(x => strFilter.Length == 0 || x.SearchText.IndexOf(strFilter, StringComparison.CurrentCultureIgnoreCase) >= 0).ToList();
+            Reset(ContactCards, lstMatches.Where(x => !x.IsEnemy && !x.IsPet));
+            Reset(EnemyCards, lstMatches.Where(x => x.IsEnemy));
+            Reset(PetCards, lstMatches.Where(x => x.IsPet));
+            OnPropertyChanged(nameof(HasContactCards));
+            OnPropertyChanged(nameof(HasEnemyCards));
+            OnPropertyChanged(nameof(HasPetCards));
+            OnPropertyChanged(nameof(ContactCountText));
+        }
+
+        /// <summary>Flags unsaved changes made through objects that do not raise Character.PropertyChanged (contacts...).</summary>
+        internal void MarkDirty() => OnUi(() => IsDirty = true);
 
         public bool IsOverview => Section == CharacterSection.Overview;
         public bool IsAttributes => Section == CharacterSection.Attributes;
@@ -157,11 +191,21 @@ namespace Chummer.Desktop.ViewModels
         private List<InventoryGroupViewModel> _lstAllAbilities = new List<InventoryGroupViewModel>();
         private List<InventoryGroupViewModel> _lstAllNetwork = new List<InventoryGroupViewModel>();
 
+        /// <summary>Re-reads every section from the engine (after an edit).</summary>
+        internal void Reload() => _ = Task.Run(LoadSnapshot);
+
         private void LoadSnapshot()
         {
             RefreshSummary();
-            List<AttributeViewModel> lstAttributes = Character.AttributeSection.AttributeList.ToList().Select(x => new AttributeViewModel(x)).ToList();
-            List<AttributeViewModel> lstSpecial = Character.AttributeSection.SpecialAttributeList.ToList().Select(x => new AttributeViewModel(x)).ToList();
+            List<AttributeViewModel> lstAttributes = Character.AttributeSection.AttributeList.ToList().Select(x => new AttributeViewModel(this, x)).ToList();
+            bool blnMag = Character.MAGEnabled;
+            bool blnMysAd = blnMag && Character.IsMysticAdept;
+            bool blnRes = Character.RESEnabled;
+            bool blnDep = Character.DEPEnabled;
+            // Like the legacy sheet: only the special attributes the runner actually has (essence is in the header).
+            List<AttributeViewModel> lstSpecial = Character.AttributeSection.SpecialAttributeList.ToList()
+                .Where(x => x.Abbrev == "EDG" || (x.Abbrev == "MAG" && blnMag) || (x.Abbrev == "MAGAdept" && blnMysAd) || (x.Abbrev == "RES" && blnRes) || (x.Abbrev == "DEP" && blnDep))
+                .Select(x => new AttributeViewModel(this, x)).ToList();
             List<SkillCategoryViewModel> lstCategories = Character.SkillsSection.Skills.ToList()
                                                                   .GroupBy(x => x.SkillCategory)
                                                                   .Select(x => new SkillCategoryViewModel(x.Key, x))
@@ -178,6 +222,8 @@ namespace Chummer.Desktop.ViewModels
             List<InventoryItemViewModel> lstInventory = InventoryItemViewModel.FromCharacter(Character).ToList();
             List<InventoryGroupViewModel> lstAbilities = AbilityCards.Abilities(Character);
             List<InventoryGroupViewModel> lstNetwork = AbilityCards.Network(Character);
+            List<ContactCardViewModel> lstContacts = Character.Contacts.ToList().Select(x => new ContactCardViewModel(this, x))
+                                                              .OrderByDescending(x => x.Connection + x.Loyalty).ThenBy(x => x.Name, StringComparer.CurrentCulture).ToList();
             OnUi(() =>
             {
                 Reset(Attributes, lstAttributes);
@@ -195,6 +241,8 @@ namespace Chummer.Desktop.ViewModels
                 ApplyInventoryFilter();
                 _lstAllAbilities = lstAbilities;
                 _lstAllNetwork = lstNetwork;
+                _lstAllContacts = lstContacts;
+                ApplyContactFilter();
                 OnPropertyChanged(nameof(HasAbilities));
                 FilterCards(_lstAllAbilities, AbilityGroups, AbilityFilter);
                 FilterCards(_lstAllNetwork, NetworkGroups, NetworkFilter);
@@ -226,24 +274,25 @@ namespace Chummer.Desktop.ViewModels
             System.Globalization.CultureInfo objCulture = GlobalSettings.CultureInfo;
             List<ItemStat> lstCombat = new List<ItemStat>
             {
-                new ItemStat("Initiative", Character.Initiative),
-                new ItemStat("Matrix init. (cold / hot)", Character.MatrixInitiativeCold + "  /  " + Character.MatrixInitiativeHot),
-                new ItemStat("Armor", Character.TotalArmorRating.ToString(objCulture)),
+                new ItemStat("Initiative", Character.Initiative, RollCatalog.InitiativeRoll),
+                new ItemStat("Matrix init. (cold sim)", Character.MatrixInitiativeCold, RollCatalog.MatrixColdRoll),
+                new ItemStat("Matrix init. (hot sim)", Character.MatrixInitiativeHot, RollCatalog.MatrixHotRoll),
+                new ItemStat("Armor (damage resistance)", Character.TotalArmorRating.ToString(objCulture), RollCatalog.DamageResistanceRoll),
                 new ItemStat("Wound modifier", Character.WoundModifier.ToString(objCulture)),
                 new ItemStat("Edge", Character.EdgeRemaining.ToString(objCulture) + " / " + (Character.GetAttribute("EDG")?.TotalValue ?? 0).ToString(objCulture)),
                 new ItemStat("Movement", Character.DisplayMovement),
             };
             if (Character.MAGEnabled)
-                lstCombat.Insert(1, new ItemStat("Astral initiative", Character.AstralInitiative));
+                lstCombat.Insert(1, new ItemStat("Astral initiative", Character.AstralInitiative, RollCatalog.AstralInitiativeRoll));
             List<ItemStat> lstDerived = new List<ItemStat>
             {
                 new ItemStat("PHYSICAL", Character.LimitPhysical.ToString(objCulture)),
                 new ItemStat("MENTAL", Character.LimitMental.ToString(objCulture)),
                 new ItemStat("SOCIAL", Character.LimitSocial.ToString(objCulture)),
-                new ItemStat("COMPOSURE", Character.Composure.ToString(objCulture)),
-                new ItemStat("JUDGE INTENT", Character.JudgeIntentions.ToString(objCulture)),
-                new ItemStat("MEMORY", Character.Memory.ToString(objCulture)),
-                new ItemStat("LIFT / CARRY", Character.LiftAndCarry.ToString(objCulture)),
+                new ItemStat("COMPOSURE", Character.Composure.ToString(objCulture), RollCatalog.ComposureRoll),
+                new ItemStat("JUDGE INTENT", Character.JudgeIntentions.ToString(objCulture), RollCatalog.JudgeIntentionsRoll),
+                new ItemStat("MEMORY", Character.Memory.ToString(objCulture), RollCatalog.MemoryRoll),
+                new ItemStat("LIFT / CARRY", Character.LiftAndCarry.ToString(objCulture), RollCatalog.LiftCarryRoll),
             };
             if (Character.MAGEnabled)
                 lstDerived.Insert(3, new ItemStat("ASTRAL", Character.LimitAstral.ToString(objCulture)));
@@ -302,6 +351,8 @@ namespace Chummer.Desktop.ViewModels
                 yield return new PaletteEntry(objItem.Name, Name + "  //  " + objItem.Category, objItem.IconKey, () => Navigate(CharacterSection.Abilities, objItem.Name));
             foreach (InventoryItemViewModel objItem in _lstAllNetwork.SelectMany(x => x.Items))
                 yield return new PaletteEntry(objItem.Name, Name + "  //  " + objItem.Category, objItem.IconKey, () => Navigate(CharacterSection.Network, objItem.Name));
+            foreach (ContactCardViewModel objContact in _lstAllContacts)
+                yield return new PaletteEntry(objContact.Name, Name + "  //  " + (objContact.IsEnemy ? "enemy" : objContact.IsPet ? "pet" : "contact") + (objContact.HasSubtitle ? "  " + objContact.Subtitle : string.Empty), "Icon.Contact", () => Navigate(CharacterSection.Network, objContact.Name));
             foreach (QualityViewModel objQuality in PositiveQualities.Concat(NegativeQualities))
                 yield return new PaletteEntry(objQuality.Name, Name + "  //  quality " + objQuality.KarmaText, "Icon.Quality", () => Navigate(CharacterSection.Qualities, null));
         }
@@ -425,8 +476,34 @@ namespace Chummer.Desktop.ViewModels
 
     public sealed class AttributeViewModel
     {
-        public AttributeViewModel(CharacterAttrib objAttribute)
+        private readonly CharacterViewModel _objOwner;
+        private readonly CharacterAttrib _objAttribute;
+
+        public AttributeViewModel(CharacterViewModel objOwner, CharacterAttrib objAttribute)
         {
+            _objOwner = objOwner;
+            _objAttribute = objAttribute;
+            IsCareer = objOwner.Character.Created;
+            IsEdge = objAttribute.Abbrev == "EDG";
+            if (IsCareer)
+            {
+                CanImprove = objAttribute.CanUpgradeCareer;
+                ImproveCost = objAttribute.UpgradeKarmaCost;
+                ImproveTip = objAttribute.UpgradeToolTip;
+                IsAtMaximum = objAttribute.TotalMaximum <= objAttribute.Value;
+                KarmaAvailable = objOwner.Character.Karma;
+            }
+            else
+            {
+                BasePoints = objAttribute.Base;
+                KarmaPoints = objAttribute.Karma;
+                BaseUnlocked = objAttribute.BaseUnlocked;
+            }
+            ImproveCommand = new AsyncRelayCommand(() => RunAsync(t => Chummer.Rules.AttributeRules.ImproveCareerAsync(_objOwner.Character, _objAttribute, t)));
+            BurnEdgeCommand = new AsyncRelayCommand(() => RunAsync(t => Chummer.Rules.AttributeRules.BurnEdgeAsync(_objAttribute, t)));
+            RaiseCommand = new AsyncRelayCommand(() => RunAsync(t => Chummer.Rules.AttributeRules.RaiseCreateAsync(_objOwner.Character, _objAttribute, t)));
+            LowerCommand = new AsyncRelayCommand(() => RunAsync(t => Chummer.Rules.AttributeRules.LowerCreateAsync(_objOwner.Character, _objAttribute, t)));
+
             Abbrev = objAttribute.Abbrev;
             Name = objAttribute.DisplayNameShort(GlobalSettings.Language);
             Value = objAttribute.Value;
@@ -449,6 +526,53 @@ namespace Chummer.Desktop.ViewModels
         public double Fill { get; }
 
         public string MaximumText => "/ " + Maximum.ToString(GlobalSettings.CultureInfo);
+
+        // ---------- editing ----------
+
+        public bool IsCareer { get; }
+        public bool IsCreate => !IsCareer;
+        public bool IsEdge { get; }
+        public bool CanBurnEdge => IsCareer && IsEdge;
+        public bool CanImprove { get; }
+        public int ImproveCost { get; }
+        public bool IsAtMaximum { get; }
+        public int KarmaAvailable { get; }
+        public string ImproveBlockedText => IsAtMaximum ? "AT MAXIMUM" : "NEED " + ImproveCost.ToString(GlobalSettings.CultureInfo) + " KARMA";
+        public string ImproveButtonText => CanImprove ? ImproveText : ImproveBlockedText;
+        public string ImproveText => "+1  //  " + ImproveCost.ToString(GlobalSettings.CultureInfo) + " karma";
+        public string ImproveTip { get; } = string.Empty;
+        public int BasePoints { get; }
+        public int KarmaPoints { get; }
+        public bool BaseUnlocked { get; }
+        public string PointsText => (BaseUnlocked ? "priority " + BasePoints.ToString(GlobalSettings.CultureInfo) + "  //  " : string.Empty) + "karma " + KarmaPoints.ToString(GlobalSettings.CultureInfo);
+        public IAsyncRelayCommand ImproveCommand { get; }
+        public IAsyncRelayCommand BurnEdgeCommand { get; }
+        public IAsyncRelayCommand RaiseCommand { get; }
+        public IAsyncRelayCommand LowerCommand { get; }
+        public IAsyncRelayCommand QuickRaiseCommand => IsCareer ? ImproveCommand : RaiseCommand;
+        public bool CanQuickRaise => !IsCareer || CanImprove;
+        public string QuickRaiseTip => IsCareer
+            ? CanImprove
+                ? "Raise to " + (Value + 1).ToString(GlobalSettings.CultureInfo) + " for " + ImproveCost.ToString(GlobalSettings.CultureInfo) + " karma"
+                : IsAtMaximum
+                    ? "Already at maximum"
+                    : "Raising to " + (Value + 1).ToString(GlobalSettings.CultureInfo) + " costs " + ImproveCost.ToString(GlobalSettings.CultureInfo) + " karma (you have " + KarmaAvailable.ToString(GlobalSettings.CultureInfo) + ")"
+            : "Raise by 1";
+
+        private async Task RunAsync(Func<System.Threading.CancellationToken, Task<Chummer.Rules.RuleResult>> funcRule)
+        {
+            Chummer.Rules.RuleResult eResult;
+            try
+            {
+                eResult = await Task.Run(() => funcRule(System.Threading.CancellationToken.None)).ConfigureAwait(true);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            if (eResult == Chummer.Rules.RuleResult.Changed)
+                _objOwner.Reload();
+        }
     }
 
     public sealed class SkillCategoryViewModel
@@ -511,9 +635,18 @@ namespace Chummer.Desktop.ViewModels
             Name = objSkill.CurrentDisplayName;
             DisplayCategory = objSkill.DisplayCategory(GlobalSettings.Language);
             Rating = objSkill.Rating;
-            Pool = objSkill.DisplayPool;
+            int intPool = objSkill.Pool;
+            Pool = intPool.ToString(GlobalSettings.CultureInfo);
             Attribute = objSkill.Attribute;
             Specialization = objSkill.CurrentDisplaySpecialization;
+            RollName = RollCatalog.SkillRollName(Name);
+            Backend.Skills.SkillSpecialization objSpec = objSkill.Specializations.FirstOrDefault();
+            if (objSpec != null)
+            {
+                SpecRollName = RollCatalog.SkillRollName(Name, objSpec.CurrentDisplayName);
+                SpecPool = (intPool + objSkill.GetSpecializationBonus()).ToString(GlobalSettings.CultureInfo);
+            }
+            IsRollable = intPool > 0;
             IsDefaulting = Rating == 0;
         }
 
@@ -524,6 +657,12 @@ namespace Chummer.Desktop.ViewModels
         public string Attribute { get; }
         public string Specialization { get; }
         public bool HasSpecialization => !string.IsNullOrEmpty(Specialization);
+        public string RollName { get; }
+        public string SpecRollName { get; } = string.Empty;
+        public string SpecPool { get; } = string.Empty;
+        public bool HasSpecPool => SpecPool.Length > 0;
+        public bool IsRollable { get; }
+        public string RollTip => IsRollable ? "Click to roll " + Name + " (" + Attribute + ")" + (HasSpecPool ? "  //  " + SpecPool + " dice with " + Specialization : string.Empty) : Name + ": no dice (untrained, no defaulting)";
         public bool IsDefaulting { get; }
 
         /// <summary>Rating pips 1..12 (filled up to the rating).</summary>

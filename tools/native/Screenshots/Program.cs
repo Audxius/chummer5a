@@ -47,8 +47,7 @@ internal static class Program
                         await Settle();
                         Save(objWindow, strOut, "02b-damage");
                         Console.WriteLine("damage: " + objDamaged.PhysicalLabel + " dirty=" + objDamaged.IsDirty);
-                        objDamaged.PhysicalBoxes[3].ToggleCommand.Execute(null);
-                        objDamaged.PhysicalBoxes[3].ToggleCommand.Execute(null);
+                        objDamaged.Character.PhysicalCMFilled = 0;
                         await Settle();
                     }
                     if (objViewModel.CurrentPage is CharacterViewModel objCharacter)
@@ -59,6 +58,37 @@ internal static class Program
                             await Settle();
                             Save(objWindow, strOut, "03-" + eSection.ToString().ToLowerInvariant());
                         }
+                        // Editing: raise the first attribute that can be raised and report the karma spent.
+                        objCharacter.ShowSectionCommand.Execute(CharacterSection.Attributes);
+                        await Settle();
+                        AttributeViewModel objRaise = objCharacter.Attributes.Concat(objCharacter.SpecialAttributes).FirstOrDefault(x => x.CanQuickRaise);
+                        if (objRaise != null)
+                        {
+                            string strKarmaBefore = objCharacter.Karma;
+                            await objRaise.QuickRaiseCommand.ExecuteAsync(null);
+                            await Settle();
+                            await Settle();
+                            AttributeViewModel objAfter = objCharacter.Attributes.Concat(objCharacter.SpecialAttributes).First(x => x.Abbrev == objRaise.Abbrev);
+                            Console.WriteLine("raise " + objRaise.Abbrev + ": " + objRaise.Display + " -> " + objAfter.Display + ", karma " + strKarmaBefore + " -> " + objCharacter.Karma);
+                            Save(objWindow, strOut, "03b-attribute-raised");
+                        }
+                        // Clicking a skill opens its roll in the Dice Terminal.
+                        SkillViewModel objSkill = objCharacter.SkillCategories.SelectMany(x => x.AllSkills).FirstOrDefault(x => x.HasSpecPool)
+                                                  ?? objCharacter.SkillCategories.SelectMany(x => x.AllSkills).FirstOrDefault(x => x.IsRollable);
+                        if (objSkill != null)
+                        {
+                            await objCharacter.RollCommand.ExecuteAsync(objSkill.HasSpecPool ? objSkill.SpecRollName : objSkill.RollName);
+                            await Settle();
+                            Save(objWindow, strOut, "04a-skill-roll");
+                            Console.WriteLine("skill roll " + objSkill.Name + " pool " + objSkill.Pool + "/" + objSkill.SpecPool + ": " + objViewModel.Dice.Formula);
+                        }
+                        await objCharacter.RollCommand.ExecuteAsync(Chummer.Rolls.RollCatalog.InitiativeRoll);
+                        await Settle();
+                        Save(objWindow, strOut, "04b-initiative");
+                        Console.WriteLine("initiative: " + objViewModel.Dice.Formula);
+                        await objCharacter.RollCommand.ExecuteAsync(Chummer.Rolls.RollCatalog.DamageResistanceRoll);
+                        await Settle();
+                        Console.WriteLine("soak: " + objViewModel.Dice.Formula);
                         objViewModel.ShowDiceCommand.Execute(null);
                         await Settle();
                         Save(objWindow, strOut, "04-dice");

@@ -16,11 +16,13 @@ It builds on first run and whenever the sources change. Custom character setting
 | Engine on Linux (net8, no WinForms, no Wine) | ✅ All 34 test characters load and save. |
 | Native Wayland window | ✅ Checked on niri: libwayland, EGL, xkbcommon. |
 | Roster, open file, MRU, save / dirty prompt | ✅ |
-| **Overview** | ✅ Condition monitors you can click (mark or heal damage), initiative, armor, Edge, movement, limits, derived stats, attributes, qualities. |
-| Attributes, Skills (grouped, icons, search), Qualities, Notes | ✅ View only |
+| **Overview** | ✅ Condition monitors you can click (mark or heal damage), initiative (click initiative, soak, composure, judge intentions, memory or lift/carry to roll them), armor, Edge, movement, limits, derived stats, attributes, qualities. |
+| **Attributes** | ✅ Raise with karma in career mode (same cost, confirmation and expense-log entry as legacy), burn Edge; priority/karma +/- in create mode. |
+| **Skills** | ✅ Grouped, icons, search. Click a skill (or its magenta specialization pool) to roll it in the Dice Terminal. Raising skills: not yet. |
+| Qualities, Notes | ✅ View only |
 | **Inventory** | ✅ Icon grid for weapons, armor, cyber/bioware, gear, vehicles, drugs and lifestyles. Category chips, search, and hover cards with stats, contents, cost, availability and source. View only. |
 | **Abilities** | ✅ Spells, adept powers, complex forms, AI programs, martial arts, critter powers, initiation and metamagic. View only. |
-| **Contacts** | ✅ Contacts, enemies, pets, spirits and sprites. View only. |
+| **Contacts** | ✅ Dossier cards: role, location, connection/loyalty bars with +/-, type, metatype, payment, vice, personal life, family/blackmail/group tags, notes. Enemies and pets separate; spirits and sprites below. |
 | **Global search (Ctrl+K)** | ✅ Searches every open runner's items, abilities, skills, contacts and qualities, plus every roll, and jumps straight to it. |
 | **Dice Terminal (Ctrl+R)** | ✅ Details below. |
 | Engine prompts | ✅ Native for item, number, text, attribute, limit, side, build method, skill (including exotic specifics), skill group, spell / weapon category, optional power, dice hits, metamagic / echo, art / enhancement / enchantment / ritual, martial art, mentor spirit / paragon, adept power, complex form, AI program and spell. Option lists are lifted from the original forms into `Chummer/Backend/Selection`. |

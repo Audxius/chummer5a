@@ -185,7 +185,7 @@
                 <StackPanel Spacing="8">
                   <Grid ColumnDefinitions="Auto,*,Auto">
                     <TextBlock Text="{Binding Pool}" FontSize="48" FontWeight="Black" Foreground="{StaticResource CyanBrush}" />
-                    <TextBlock Grid.Column="1" Text="d6" FontSize="20" Margin="6,0,0,10" VerticalAlignment="Bottom" Classes="muted" />
+                    <TextBlock Grid.Column="1" Text="{Binding DiceSuffix}" FontSize="20" Margin="6,0,0,10" VerticalAlignment="Bottom" Classes="muted" />
                     <StackPanel Grid.Column="2" Spacing="6" VerticalAlignment="Center">
                       <Border Classes="chip" IsVisible="{Binding HasLimit}">
                         <StackPanel Orientation="Horizontal" Spacing="6">

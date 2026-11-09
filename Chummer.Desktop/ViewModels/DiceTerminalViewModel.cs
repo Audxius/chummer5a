@@ -62,6 +62,36 @@ namespace Chummer.Desktop.ViewModels
 
         public RollCatalog Catalog => _objCatalog;
 
+        private Task _objLoadTask = Task.CompletedTask;
+
+        /// <summary>
+        /// Opens the terminal on a roll by name for one runner (clicked on a skill or stat of the character sheet) and copies its formula.
+        /// </summary>
+        public async Task RollForAsync(CharacterViewModel objViewModel, string strRollName)
+        {
+            if (objViewModel == null || string.IsNullOrEmpty(strRollName))
+                return;
+            _objShell.CurrentPage = this;
+            if (!ReferenceEquals(SelectedCharacter, objViewModel))
+                SelectedCharacter = objViewModel;
+            await _objLoadTask.ConfigureAwait(true);
+            RollCatalog objCatalog = _objCatalog;
+            if (objCatalog == null || !ReferenceEquals(SelectedCharacter, objViewModel))
+                return;
+            objCatalog.RefreshCharacterRolls(objViewModel.Character);
+            RollAction objAction = objCatalog.Find(strRollName);
+            if (objAction == null)
+            {
+                Query = strRollName;
+                return;
+            }
+            Query = objAction.DisplayName;
+            await SearchAsync().ConfigureAwait(true);
+            SelectedRoll = Results.FirstOrDefault(x => ReferenceEquals(x.Action, objAction))
+                           ?? new RollItemViewModel(objAction, _setFavorites.Contains(objAction.Name));
+            await CopyAsync().ConfigureAwait(true);
+        }
+
         /// <summary>Opens the terminal on one roll (from global search).</summary>
         public void ShowRoll(RollAction objAction)
         {
@@ -106,6 +136,11 @@ namespace Chummer.Desktop.ViewModels
         [ObservableProperty] private string _formula = string.Empty;
         [ObservableProperty] private string _toast = string.Empty;
         [ObservableProperty] private string _resultCount = string.Empty;
+        [ObservableProperty] private string _sumSuffix = string.Empty;
+
+        public string DiceSuffix => SumSuffix.Length > 0 ? SumSuffix : "d6";
+
+        partial void OnSumSuffixChanged(string value) => OnPropertyChanged(nameof(DiceSuffix));
 
         public bool HasCharacter => SelectedCharacter != null;
         public bool HasNoCharacter => SelectedCharacter == null;
@@ -131,6 +166,7 @@ namespace Chummer.Desktop.ViewModels
             else
             {
                 // Stats may have changed (damage taken, gear bought) since the last visit.
+                _objCatalog?.RefreshCharacterRolls(SelectedCharacter.Character);
                 _ = SearchAsync();
                 Evaluate();
             }
@@ -151,7 +187,7 @@ namespace Chummer.Desktop.ViewModels
         {
             OnPropertyChanged(nameof(HasCharacter));
             OnPropertyChanged(nameof(HasNoCharacter));
-            _ = LoadCharacterAsync(value);
+            _objLoadTask = LoadCharacterAsync(value);
         }
 
         private async Task LoadCharacterAsync(CharacterViewModel objViewModel)
@@ -371,6 +407,22 @@ namespace Chummer.Desktop.ViewModels
                 : objEvaluation.Pool.Value.ToString(CultureInfo.CurrentCulture);
             if (Modifier != 0)
                 strBreakdown += "  +  modifier " + ((int)Modifier).ToString("+0;-0", CultureInfo.CurrentCulture);
+            if (objEvaluation.IsSum)
+            {
+                // Initiative: the pool is the score; Edge means Blitz (5d6) rather than extra dice.
+                Pool = Math.Max(0, objEvaluation.Pool.Value + (int)Modifier);
+                if (Modifier != 0)
+                    strBreakdown += "  +  modifier " + ((int)Modifier).ToString("+0;-0", CultureInfo.CurrentCulture);
+                strBreakdown += "  +  " + (UseEdge ? 5 : objEvaluation.SumDice).ToString(CultureInfo.CurrentCulture) + "d6" + (UseEdge ? " (Blitz)" : string.Empty);
+                Breakdown = strBreakdown;
+                SumSuffix = "+" + (UseEdge ? 5 : objEvaluation.SumDice).ToString(CultureInfo.CurrentCulture) + "d6";
+                LimitText = string.Empty;
+                ThresholdText = string.Empty;
+                OpposedText = string.Empty;
+                Formula = Formatter.Format(objItem.Action, objEvaluation, SelectedCharacter.Name, UseEdge, intEdge, (int)Modifier);
+                return;
+            }
+            SumSuffix = string.Empty;
             if (UseEdge)
                 strBreakdown += "  +  Edge " + intEdge.ToString(CultureInfo.CurrentCulture);
             Breakdown = strBreakdown;
@@ -404,7 +456,7 @@ namespace Chummer.Desktop.ViewModels
             if (objClipboard != null)
                 await objClipboard.SetTextAsync(Formula).ConfigureAwait(true);
             AddRecent(SelectedRoll.Action);
-            string strToast = "COPIED  //  " + SelectedRoll.Name.ToUpper(CultureInfo.CurrentCulture) + "  //  " + Pool.ToString(CultureInfo.CurrentCulture) + "d6";
+            string strToast = "COPIED  //  " + SelectedRoll.Name.ToUpper(CultureInfo.CurrentCulture) + "  //  " + Pool.ToString(CultureInfo.CurrentCulture) + (SumSuffix.Length > 0 ? SumSuffix : "d6");
             Toast = strToast;
             await Task.Delay(2500).ConfigureAwait(true);
             if (Toast == strToast)
@@ -514,7 +566,7 @@ namespace Chummer.Desktop.ViewModels
         public string Description => Action.Description;
         public string Notes => Action.Notes;
         public bool HasNotes => Action.Notes.Length > 0;
-        public string Dice => DiceExpressionEvaluator.Describe(Action.Dice);
+        public string Dice => Action.IsGenerated && !string.IsNullOrEmpty(Action.Description) ? Action.Description : DiceExpressionEvaluator.Describe(Action.Dice);
         public string IconKey => Action.Needs.HasFlag(RollNeeds.Weapon) ? "Icon.Weapon"
             : Action.Needs.HasFlag(RollNeeds.Vehicle) ? "Icon.Vehicle"
             : Action.Needs.HasFlag(RollNeeds.Spell) ? "Icon.Spell"
@@ -533,7 +585,9 @@ namespace Chummer.Desktop.ViewModels
             try
             {
                 RollEvaluation objEvaluation = DiceExpressionEvaluator.EvaluateTest(Action, objContext);
-                PoolPreview = Math.Max(0, objEvaluation.Pool.Value).ToString(CultureInfo.InvariantCulture) + "d6";
+                PoolPreview = objEvaluation.IsSum
+                    ? objEvaluation.Pool.Value.ToString(CultureInfo.InvariantCulture) + "+" + objEvaluation.SumDice.ToString(CultureInfo.InvariantCulture) + "d6"
+                    : Math.Max(0, objEvaluation.Pool.Value).ToString(CultureInfo.InvariantCulture) + "d6";
                 IsIncomplete = objEvaluation.Pool.Unknowns.Count > 0;
             }
             catch (Exception)

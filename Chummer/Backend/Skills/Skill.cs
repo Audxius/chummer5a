@@ -7451,7 +7451,7 @@ namespace Chummer.Backend.Skills
                     // Have to do it this way because some conditional bonuses apply specifically to specializations
                     LanguageManager.GetString("String_LeftPar", token: token),
                     Math.Max(intPool + intSpecBonus, intConditionalBonus).ToString(GlobalSettings.CultureInfo),
-                    LanguageManager.GetString("String_RigthPar", token: token));
+                    LanguageManager.GetString("String_RightPar", token: token));
             }
         }
 

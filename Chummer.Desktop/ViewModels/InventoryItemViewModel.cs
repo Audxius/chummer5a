@@ -39,14 +39,21 @@ namespace Chummer.Desktop.ViewModels
     /// <summary>One stat line on an item's hover card.</summary>
     public sealed class ItemStat
     {
-        public ItemStat(string strLabel, string strValue)
+        public ItemStat(string strLabel, string strValue, string strRollName = null)
         {
             Label = strLabel;
             Value = strValue;
+            RollName = strRollName ?? string.Empty;
         }
 
         public string Label { get; }
         public string Value { get; }
+
+        /// <summary>Dice Terminal roll opened when the stat is clicked; empty when the stat is not rollable.</summary>
+        public string RollName { get; }
+
+        public bool IsRollable => RollName.Length > 0;
+        public bool IsPlain => RollName.Length == 0;
     }
 
     /// <summary>

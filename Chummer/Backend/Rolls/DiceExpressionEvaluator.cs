@@ -102,6 +102,11 @@ namespace Chummer.Rolls
         public string OpposedBy { get; internal set; } = string.Empty;
 
         public bool IsOpposed => OpposedBy.Length > 0;
+
+        /// <summary>For sum rolls (initiative): number of d6 added to the pool value instead of counting hits.</summary>
+        public int SumDice { get; internal set; }
+
+        public bool IsSum => SumDice > 0;
     }
 
     /// <summary>
@@ -137,7 +142,10 @@ namespace Chummer.Rolls
             string strActor = intSplit >= 0 ? strDice.Substring(0, intSplit) : strDice;
             string strOpposition = intSplit >= 0 ? strDice.Substring(intSplit + 4).Trim() : string.Empty;
             objReturn.Pool = Evaluate(strActor, objContext);
-            if (objContext.IncludeWoundModifier && !IsDamageResistance(objAction))
+            if (!string.IsNullOrWhiteSpace(objAction.SumDice))
+                objReturn.SumDice = Math.Max(0, Evaluate(objAction.SumDice, objContext).Value);
+            // Initiative scores already include the wound modifier.
+            if (objContext.IncludeWoundModifier && !IsDamageResistance(objAction) && string.IsNullOrWhiteSpace(objAction.SumDice) && !objAction.ExcludeWounds)
             {
                 int intWounds = objContext.Character.WoundModifier;
                 if (intWounds != 0)
@@ -401,6 +409,18 @@ namespace Chummer.Rolls
                     }
                     switch (strToken.ToUpperInvariant())
                     {
+                        case "INITIATIVE": return Record("Initiative", objCharacter.InitiativeValue);
+                        case "INITIATIVE DICE": return Record("Initiative dice", objCharacter.InitiativeDice);
+                        case "ASTRAL INITIATIVE": return Record("Astral initiative", objCharacter.AstralInitiativeValue);
+                        case "ASTRAL INITIATIVE DICE": return Record("Astral initiative dice", objCharacter.AstralInitiativeDice);
+                        case "MATRIX INITIATIVE COLD": return Record("Matrix initiative (cold)", objCharacter.MatrixInitiativeColdValue);
+                        case "MATRIX INITIATIVE COLD DICE": return Record("Matrix initiative dice (cold)", objCharacter.MatrixInitiativeColdDice);
+                        case "MATRIX INITIATIVE HOT": return Record("Matrix initiative (hot)", objCharacter.MatrixInitiativeHotValue);
+                        case "MATRIX INITIATIVE HOT DICE": return Record("Matrix initiative dice (hot)", objCharacter.MatrixInitiativeHotDice);
+                        case "ARMOR": return Record("Armor", objCharacter.TotalArmorRating);
+                    }
+                    switch (strToken.ToUpperInvariant())
+                    {
                         case "PHYSICAL": return Record("Physical limit", objCharacter.LimitPhysical);
                         case "MENTAL": return Record("Mental limit", objCharacter.LimitMental);
                         case "SOCIAL": return Record("Social limit", objCharacter.LimitSocial);
@@ -479,6 +499,19 @@ namespace Chummer.Rolls
                         return _objContext.Spirit != null && strArgument.Equals("Force", StringComparison.OrdinalIgnoreCase)
                             ? Record("Spirit Force", _objContext.Spirit.Force)
                             : Unknown(strToken);
+                    case "SKILL POOL":
+                    {
+                        // The engine's full skill pool (rating + attribute + every improvement); wounds are added separately.
+                        Skill objSkill = FindSkill(strArgument);
+                        if (objSkill == null)
+                            return Unknown(strToken);
+                        return Record(objSkill.CurrentDisplayName + " + " + objSkill.Attribute, objSkill.Pool - objCharacter.WoundModifier);
+                    }
+                    case "SKILL SPEC":
+                    {
+                        Skill objSkill = FindSkill(strArgument);
+                        return objSkill == null ? Unknown(strToken) : Record("Specialization", objSkill.GetSpecializationBonus());
+                    }
                     case "SKILL":
                         return ResolveSkill(strArgument);
                     default:
@@ -510,13 +543,18 @@ namespace Chummer.Rolls
                 return SubQuiet(strCondition) != 0;
             }
 
-            private double ResolveSkill(string strName)
+            private Skill FindSkill(string strName)
             {
                 Character objCharacter = _objContext.Character;
-                Skill objSkill = objCharacter.SkillsSection.GetActiveSkill(strName)
-                                 ?? objCharacter.SkillsSection.Skills.FirstOrDefault(x => x.CurrentDisplayName.Equals(strName, StringComparison.OrdinalIgnoreCase))
-                                 ?? objCharacter.SkillsSection.KnowledgeSkills.FirstOrDefault(x => x.Name.Equals(strName, StringComparison.OrdinalIgnoreCase)
-                                                                                                   || x.CurrentDisplayName.Equals(strName, StringComparison.OrdinalIgnoreCase));
+                return objCharacter.SkillsSection.GetActiveSkill(strName)
+                       ?? objCharacter.SkillsSection.Skills.FirstOrDefault(x => x.CurrentDisplayName.Equals(strName, StringComparison.OrdinalIgnoreCase))
+                       ?? objCharacter.SkillsSection.KnowledgeSkills.FirstOrDefault(x => x.Name.Equals(strName, StringComparison.OrdinalIgnoreCase)
+                                                                                         || x.CurrentDisplayName.Equals(strName, StringComparison.OrdinalIgnoreCase));
+            }
+
+            private double ResolveSkill(string strName)
+            {
+                Skill objSkill = FindSkill(strName);
                 if (objSkill == null)
                 {
                     // A real SR5 skill the character simply lacks (e.g. Spellcasting on a mundane): untrained, no default.

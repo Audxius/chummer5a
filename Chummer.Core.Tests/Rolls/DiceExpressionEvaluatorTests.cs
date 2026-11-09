@@ -52,6 +52,36 @@ namespace Chummer.Tests.Rolls
         }
 
         [TestMethod]
+        public void GeneratedSkillRollsMatchEnginePool()
+        {
+            foreach (Chummer.Backend.Skills.Skill objSkill in s_objCharacter.SkillsSection.Skills.Where(x => x.Rating > 0))
+            {
+                RollAction objAction = s_objCatalog.Find(RollCatalog.SkillRollName(objSkill.CurrentDisplayName));
+                Assert.IsNotNull(objAction, objSkill.CurrentDisplayName);
+                RollEvaluation objEvaluation = DiceExpressionEvaluator.EvaluateTest(objAction, NewContext());
+                Assert.AreEqual(objSkill.Pool, objEvaluation.Pool.Value, objSkill.CurrentDisplayName);
+            }
+        }
+
+        [TestMethod]
+        public void InitiativeIsASumRoll()
+        {
+            RollAction objAction = s_objCatalog.Find(RollCatalog.InitiativeRoll);
+            RollEvaluation objEvaluation = DiceExpressionEvaluator.EvaluateTest(objAction, NewContext());
+            Assert.AreEqual(s_objCharacter.InitiativeValue, objEvaluation.Pool.Value);
+            Assert.AreEqual(s_objCharacter.InitiativeDice, objEvaluation.SumDice);
+            string strFormula = new Roll20Formatter().Format(objAction, objEvaluation, "Barrett");
+            StringAssert.Contains(strFormula, "[[" + s_objCharacter.InitiativeValue + "+" + s_objCharacter.InitiativeDice + "d6]]");
+        }
+
+        [TestMethod]
+        public void DamageResistanceIgnoresWounds()
+        {
+            RollEvaluation objEvaluation = DiceExpressionEvaluator.EvaluateTest(s_objCatalog.Find(RollCatalog.DamageResistanceRoll), NewContext());
+            Assert.AreEqual(s_objCharacter.GetAttribute("BOD").TotalValue + s_objCharacter.TotalArmorRating, objEvaluation.Pool.Value);
+        }
+
+        [TestMethod]
         [DataRow("2 * 3 + 4", 10)]
         [DataRow("(1 + 2) * 3", 9)]
         [DataRow("7 / 2", 3)]

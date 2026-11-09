@@ -97,20 +97,7 @@ namespace Chummer.Desktop.ViewModels
         public static List<InventoryGroupViewModel> Network(Character objCharacter)
         {
             List<InventoryGroupViewModel> lstReturn = new List<InventoryGroupViewModel>();
-            List<Contact> lstAll = objCharacter.Contacts.ToList();
-            foreach (IGrouping<string, Contact> objGroup in lstAll.GroupBy(x => x.EntityType == ContactType.Enemy ? "ENEMIES" : x.EntityType == ContactType.Pet ? "PETS" : "CONTACTS")
-                                                                   .OrderBy(x => x.Key == "CONTACTS" ? 0 : x.Key == "PETS" ? 1 : 2))
-            {
-                lstReturn.Add(new InventoryGroupViewModel(objGroup.Key, objGroup.Select(x => InventoryItemViewModel.Card(
-                    string.IsNullOrWhiteSpace(x.Name) ? "(unnamed)" : x.Name, x.DisplayRole, "Icon.Contact",
-                    "C" + x.Connection.ToString(C) + "  L" + x.Loyalty.ToString(C) + (x.IsGroup ? "  group" : string.Empty),
-                    x.Connection.ToString(C) + "/" + x.Loyalty.ToString(C),
-                    new[]
-                    {
-                        new ItemStat("Connection", x.Connection.ToString(C)), new ItemStat("Loyalty", x.Loyalty.ToString(C)),
-                        new ItemStat("Role", x.DisplayRole), new ItemStat("Location", x.Location), new ItemStat("Metatype", x.DisplayMetatype),
-                    }, x.Notes)).OrderBy(x => x.Name, System.StringComparer.CurrentCulture)));
-            }
+            // Contacts, enemies and pets have their own dossier cards (ContactCardViewModel).
             List<InventoryItemViewModel> lstSpirits = objCharacter.Spirits.ToList().Select(x => InventoryItemViewModel.Card(
                 string.IsNullOrWhiteSpace(x.CritterName) ? x.CurrentDisplayName : x.CritterName + " (" + x.CurrentDisplayName + ")",
                 x.EntityType == SpiritType.Sprite ? "Sprite" : "Spirit", x.EntityType == SpiritType.Sprite ? "Icon.Sprite" : "Icon.Spirit",
