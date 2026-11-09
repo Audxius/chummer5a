@@ -79,6 +79,12 @@ namespace Chummer.Desktop.ViewModels
         [ObservableProperty] private string _essence = string.Empty;
         [ObservableProperty] private Bitmap _portrait;
         [ObservableProperty] private bool _isDirty;
+        [ObservableProperty] private IReadOnlyList<bool> _physicalBoxes = Array.Empty<bool>();
+        [ObservableProperty] private IReadOnlyList<bool> _stunBoxes = Array.Empty<bool>();
+        [ObservableProperty] private string _physicalLabel = string.Empty;
+        [ObservableProperty] private string _stunLabel = string.Empty;
+        [ObservableProperty] private IReadOnlyList<ItemStat> _combatStats = Array.Empty<ItemStat>();
+        [ObservableProperty] private IReadOnlyList<ItemStat> _derivedStats = Array.Empty<ItemStat>();
         [ObservableProperty] private CharacterSection _section = CharacterSection.Overview;
         [ObservableProperty] private string _skillFilter = string.Empty;
         [ObservableProperty] private bool _showUntrainedSkills;
@@ -213,6 +219,34 @@ namespace Chummer.Desktop.ViewModels
             string strKarma = Character.DisplayKarma;
             string strNuyen = Character.DisplayNuyen;
             string strEssence = Character.DisplayEssence;
+            int intPhysical = Character.PhysicalCM;
+            int intPhysicalFilled = Character.PhysicalCMFilled;
+            int intStun = Character.StunCM;
+            int intStunFilled = Character.StunCMFilled;
+            System.Globalization.CultureInfo objCulture = GlobalSettings.CultureInfo;
+            List<ItemStat> lstCombat = new List<ItemStat>
+            {
+                new ItemStat("Initiative", Character.Initiative),
+                new ItemStat("Matrix init. (cold / hot)", Character.MatrixInitiativeCold + "  /  " + Character.MatrixInitiativeHot),
+                new ItemStat("Armor", Character.TotalArmorRating.ToString(objCulture)),
+                new ItemStat("Wound modifier", Character.WoundModifier.ToString(objCulture)),
+                new ItemStat("Edge", Character.EdgeRemaining.ToString(objCulture) + " / " + (Character.GetAttribute("EDG")?.TotalValue ?? 0).ToString(objCulture)),
+                new ItemStat("Movement", Character.DisplayMovement),
+            };
+            if (Character.MAGEnabled)
+                lstCombat.Insert(1, new ItemStat("Astral initiative", Character.AstralInitiative));
+            List<ItemStat> lstDerived = new List<ItemStat>
+            {
+                new ItemStat("PHYSICAL", Character.LimitPhysical.ToString(objCulture)),
+                new ItemStat("MENTAL", Character.LimitMental.ToString(objCulture)),
+                new ItemStat("SOCIAL", Character.LimitSocial.ToString(objCulture)),
+                new ItemStat("COMPOSURE", Character.Composure.ToString(objCulture)),
+                new ItemStat("JUDGE INTENT", Character.JudgeIntentions.ToString(objCulture)),
+                new ItemStat("MEMORY", Character.Memory.ToString(objCulture)),
+                new ItemStat("LIFT / CARRY", Character.LiftAndCarry.ToString(objCulture)),
+            };
+            if (Character.MAGEnabled)
+                lstDerived.Insert(3, new ItemStat("ASTRAL", Character.LimitAstral.ToString(objCulture)));
             Bitmap objPortrait = null;
             MugshotImage objMugshot = Character.MainMugshot;
             if (objMugshot != null)
@@ -236,6 +270,12 @@ namespace Chummer.Desktop.ViewModels
                 Karma = strKarma;
                 Nuyen = strNuyen;
                 Essence = strEssence;
+                PhysicalBoxes = Enumerable.Range(1, intPhysical).Select(x => x <= intPhysicalFilled).ToList();
+                StunBoxes = Enumerable.Range(1, intStun).Select(x => x <= intStunFilled).ToList();
+                PhysicalLabel = "PHYSICAL  " + intPhysicalFilled.ToString(objCulture) + " / " + intPhysical.ToString(objCulture);
+                StunLabel = "STUN  " + intStunFilled.ToString(objCulture) + " / " + intStun.ToString(objCulture);
+                CombatStats = lstCombat;
+                DerivedStats = lstDerived;
                 Portrait = objPortrait;
             });
         }
