@@ -1,0 +1,323 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Chummer.Desktop.ViewModels"
+             xmlns:loc="using:Chummer.Desktop.Localization"
+             xmlns:sections="using:Chummer.Desktop.Views.Sections"
+             x:Class="Chummer.Desktop.Views.Sections.LedgerSectionView"
+             x:DataType="vm:CharacterViewModel">
+  <UserControl.Resources>
+    <!-- Small UI glyphs (24x24 grid) for the ledger's row actions. -->
+    <StreamGeometry x:Key="Ledger.Edit">M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z</StreamGeometry>
+    <StreamGeometry x:Key="Ledger.Undo">M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z</StreamGeometry>
+    <StreamGeometry x:Key="Ledger.Delete">M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z</StreamGeometry>
+    <StreamGeometry x:Key="Ledger.Calendar">M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM7 12h5v5H7z</StreamGeometry>
+    <StreamGeometry x:Key="Ledger.Plus">M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z</StreamGeometry>
+    <StreamGeometry x:Key="Ledger.Minus">M19 13H5v-2h14v2z</StreamGeometry>
+
+    <DataTemplate x:Key="ExpenseRow" x:DataType="vm:ExpenseRowViewModel">
+      <Border Classes="ledgerrow">
+        <Grid ColumnDefinitions="104,*,78,80,Auto">
+          <TextBlock Text="{Binding DateText}" Classes="muted" FontSize="11" VerticalAlignment="Center" />
+          <StackPanel Grid.Column="1" Spacing="3" Margin="8,0" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Reason}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Reason}" />
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <Border Classes="kind" IsVisible="{Binding HasKind}">
+                <TextBlock Text="{Binding Kind}" />
+              </Border>
+              <Border Classes="kind refund" IsVisible="{Binding IsRefund}">
+                <TextBlock Text="REFUND" />
+              </Border>
+            </StackPanel>
+          </StackPanel>
+          <TextBlock Grid.Column="2" Text="{Binding AmountText}" Classes="amount" Classes.gain="{Binding IsGain}" Classes.loss="{Binding IsLoss}"
+                     HorizontalAlignment="Right" VerticalAlignment="Center" />
+          <TextBlock Grid.Column="3" Text="{Binding BalanceText}" Classes="muted" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"
+                     ToolTip.Tip="Running total after this entry" />
+          <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="2" Margin="10,0,0,0" VerticalAlignment="Center">
+            <Button Classes="rowaction" Command="{Binding EditCommand}" ToolTip.Tip="{Binding EditTip}">
+              <PathIcon Data="{StaticResource Ledger.Edit}" Width="14" Height="14" />
+            </Button>
+            <Button Classes="rowaction undo" Command="{Binding UndoCommand}" ToolTip.Tip="{Binding UndoTip}" ToolTip.ShowOnDisabled="True">
+              <PathIcon Data="{StaticResource Ledger.Undo}" Width="15" Height="15" />
+            </Button>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+    <Style Selector="Border.ledgerrow">
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="Padding" Value="6,7" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Border.ledgerrow:pointerover">
+      <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
+    </Style>
+    <Style Selector="Border.kind">
+      <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />
+      <Setter Property="CornerRadius" Value="2" />
+      <Setter Property="Padding" Value="5,1" />
+    </Style>
+    <Style Selector="Border.kind TextBlock">
+      <Setter Property="FontSize" Value="9" />
+      <Setter Property="LetterSpacing" Value="1" />
+      <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
+    </Style>
+    <Style Selector="Border.kind.refund">
+      <Setter Property="Background" Value="#33F3E600" />
+    </Style>
+    <Style Selector="Border.kind.refund TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
+    </Style>
+    <Style Selector="TextBlock.amount">
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    </Style>
+    <Style Selector="TextBlock.amount.gain">
+      <Setter Property="Foreground" Value="{StaticResource GreenBrush}" />
+    </Style>
+    <Style Selector="TextBlock.amount.loss">
+      <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
+    </Style>
+    <Style Selector="Button.rowaction">
+      <Setter Property="Width" Value="28" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    </Style>
+    <Style Selector="Button.rowaction:pointerover PathIcon">
+      <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
+    </Style>
+    <Style Selector="Button.rowaction.undo:pointerover PathIcon">
+      <Setter Property="Foreground" Value="{StaticResource MagentaBrush}" />
+    </Style>
+    <Style Selector="Button.rowaction:disabled PathIcon">
+      <Setter Property="Opacity" Value="0.25" />
+    </Style>
+    <Style Selector="Button.rowaction PathIcon">
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    </Style>
+    <Style Selector="TextBlock.colhead">
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="LetterSpacing" Value="1.5" />
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    </Style>
+    <Style Selector="TextBlock.big">
+      <Setter Property="FontSize" Value="40" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+    <Style Selector="Button.money">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="Padding" Value="10,9" />
+    </Style>
+  </UserControl.Styles>
+
+  <Border DataContext="{Binding Ledger}">
+    <DockPanel x:DataType="vm:LedgerViewModel" Margin="28,14,28,18">
+      <!-- Page switch: log / calendar -->
+      <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,Auto,*" Margin="0,0,0,12">
+        <ToggleButton Classes="section" IsChecked="{Binding ShowLog, Mode=OneWay}" Command="{Binding ShowLogPageCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <PathIcon Data="{StaticResource Icon.Karma}" Width="13" Height="13" />
+            <TextBlock Text="{loc:Tr Tab_Karma, Case=upper}" />
+          </StackPanel>
+        </ToggleButton>
+        <ToggleButton Grid.Column="1" Classes="section" IsChecked="{Binding ShowCalendar, Mode=OneWay}" Command="{Binding ShowCalendarPageCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <PathIcon Data="{StaticResource Ledger.Calendar}" Width="13" Height="13" />
+            <TextBlock Text="{loc:Tr Tab_Calendar, Case=upper}" />
+          </StackPanel>
+        </ToggleButton>
+      </Grid>
+
+      <!-- ===== Karma & nuyen ===== -->
+      <Grid IsVisible="{Binding ShowLog}" ColumnDefinitions="*,20,*">
+        <!-- Karma column -->
+        <DockPanel>
+          <Border DockPanel.Dock="Top" Classes="panel hot" Margin="0,0,0,14">
+            <Grid ColumnDefinitions="210,*" RowDefinitions="*,Auto">
+              <StackPanel Spacing="2">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <PathIcon Data="{StaticResource Icon.Karma}" Width="16" Height="16" Classes="hot" />
+                  <TextBlock Text="{loc:Tr Label_Karma, Case=upper}" Classes="h2" Foreground="{StaticResource MagentaBrush}" />
+                </StackPanel>
+                <TextBlock Text="{Binding KarmaText}" Classes="big" />
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                  <StackPanel>
+                    <TextBlock Text="CAREER" Classes="label" />
+                    <TextBlock Text="{Binding CareerKarmaText}" FontWeight="SemiBold" ToolTip.Tip="Total karma earned (refunds excluded)" />
+                  </StackPanel>
+                  <StackPanel>
+                    <TextBlock Text="SPENT" Classes="label" />
+                    <TextBlock Text="{Binding SpentKarmaText}" FontWeight="SemiBold" ToolTip.Tip="Career karma minus what is left" />
+                  </StackPanel>
+                </StackPanel>
+              </StackPanel>
+              <sections:LedgerChart Grid.Column="1" Points="{Binding KarmaChart}" Stroke="{StaticResource MagentaBrush}" Height="118" Margin="8,0,0,0" />
+              <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="*,10,*" Margin="0,12,0,0">
+                <Button Classes="primary money" Command="{Binding GainKarmaCommand}" ToolTip.Tip="Karma gained: mission reward, refund...">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <PathIcon Data="{StaticResource Ledger.Plus}" Width="14" Height="14" Foreground="{StaticResource BaseBrush}" />
+                    <TextBlock Text="KARMA" />
+                  </StackPanel>
+                </Button>
+                <Button Grid.Column="2" Classes="hot money" Command="{Binding SpendKarmaCommand}" ToolTip.Tip="Karma spent on something the sheet does not track">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <PathIcon Data="{StaticResource Ledger.Minus}" Width="14" Height="14" Classes="hot" />
+                    <TextBlock Text="KARMA" />
+                  </StackPanel>
+                </Button>
+              </Grid>
+            </Grid>
+          </Border>
+          <Border Classes="panel">
+            <DockPanel>
+              <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8">
+                <TextBlock Text="KARMA LOG" Classes="h2" Foreground="{StaticResource MagentaBrush}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="{Binding KarmaCountText}" Classes="label" Margin="12,0,0,0" VerticalAlignment="Center" />
+                <CheckBox Grid.Column="2" Content="{loc:Tr Checkbox_ShowFreeEntries}" IsChecked="{Binding ShowFreeKarma}" FontSize="12" />
+              </Grid>
+              <Grid DockPanel.Dock="Top" ColumnDefinitions="104,*,78,80,68" Margin="6,0,6,4">
+                <TextBlock Text="DATE" Classes="colhead" />
+                <TextBlock Grid.Column="1" Text="REASON" Classes="colhead" Margin="8,0" />
+                <TextBlock Grid.Column="2" Text="AMOUNT" Classes="colhead" HorizontalAlignment="Right" />
+                <TextBlock Grid.Column="3" Text="TOTAL" Classes="colhead" HorizontalAlignment="Right" />
+              </Grid>
+              <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource BorderBrush}" />
+              <Grid>
+                <TextBlock Text="No karma entries yet." Classes="muted" Margin="6,12" IsVisible="{Binding !HasKarmaRows}" />
+                <ScrollViewer>
+                  <ItemsControl ItemsSource="{Binding KarmaRows}" ItemTemplate="{StaticResource ExpenseRow}" />
+                </ScrollViewer>
+              </Grid>
+            </DockPanel>
+          </Border>
+        </DockPanel>
+
+        <!-- Nuyen column -->
+        <DockPanel Grid.Column="2">
+          <Border DockPanel.Dock="Top" Classes="panel" BorderBrush="{StaticResource YellowBrush}" BorderThickness="3,1,1,1" BoxShadow="0 0 18 0 #22F3E600" Margin="0,0,0,14">
+            <Grid ColumnDefinitions="210,*" RowDefinitions="*,Auto">
+              <StackPanel Spacing="2">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <PathIcon Data="{StaticResource Icon.Nuyen}" Width="16" Height="16" Foreground="{StaticResource YellowBrush}" />
+                  <TextBlock Text="{loc:Tr Label_Nuyen, Case=upper}" Classes="h2" Foreground="{StaticResource YellowBrush}" />
+                </StackPanel>
+                <TextBlock Text="{Binding NuyenText}" Classes="big" FontSize="34" Margin="0,4,0,3" />
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                  <StackPanel>
+                    <TextBlock Text="CAREER" Classes="label" />
+                    <TextBlock Text="{Binding CareerNuyenText}" FontWeight="SemiBold" ToolTip.Tip="Total nuyen earned (refunds excluded)" />
+                  </StackPanel>
+                  <StackPanel>
+                    <TextBlock Text="SPENT" Classes="label" />
+                    <TextBlock Text="{Binding SpentNuyenText}" FontWeight="SemiBold" ToolTip.Tip="Career nuyen minus what is left" />
+                  </StackPanel>
+                </StackPanel>
+              </StackPanel>
+              <sections:LedgerChart Grid.Column="1" Points="{Binding NuyenChart}" Stroke="{StaticResource YellowBrush}" ValueSuffix="¥" Height="118" Margin="8,0,0,0" />
+              <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="*,10,*" Margin="0,12,0,0">
+                <Button Classes="primary money" Command="{Binding GainNuyenCommand}" ToolTip.Tip="Nuyen gained: run payout, sold loot...">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <PathIcon Data="{StaticResource Ledger.Plus}" Width="14" Height="14" Foreground="{StaticResource BaseBrush}" />
+                    <TextBlock Text="NUYEN" />
+                  </StackPanel>
+                </Button>
+                <Button Grid.Column="2" Classes="hot money" Command="{Binding SpendNuyenCommand}" ToolTip.Tip="Nuyen spent on something the sheet does not track">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <PathIcon Data="{StaticResource Ledger.Minus}" Width="14" Height="14" Classes="hot" />
+                    <TextBlock Text="NUYEN" />
+                  </StackPanel>
+                </Button>
+              </Grid>
+            </Grid>
+          </Border>
+          <Border Classes="panel">
+            <DockPanel>
+              <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8">
+                <TextBlock Text="NUYEN LOG" Classes="h2" Foreground="{StaticResource YellowBrush}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="{Binding NuyenCountText}" Classes="label" Margin="12,0,0,0" VerticalAlignment="Center" />
+                <CheckBox Grid.Column="2" Content="{loc:Tr Checkbox_ShowFreeEntries}" IsChecked="{Binding ShowFreeNuyen}" FontSize="12" />
+              </Grid>
+              <Grid DockPanel.Dock="Top" ColumnDefinitions="104,*,78,80,68" Margin="6,0,6,4">
+                <TextBlock Text="DATE" Classes="colhead" />
+                <TextBlock Grid.Column="1" Text="REASON" Classes="colhead" Margin="8,0" />
+                <TextBlock Grid.Column="2" Text="AMOUNT" Classes="colhead" HorizontalAlignment="Right" />
+                <TextBlock Grid.Column="3" Text="TOTAL" Classes="colhead" HorizontalAlignment="Right" />
+              </Grid>
+              <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource BorderBrush}" />
+              <Grid>
+                <TextBlock Text="No nuyen entries yet." Classes="muted" Margin="6,12" IsVisible="{Binding !HasNuyenRows}" />
+                <ScrollViewer>
+                  <ItemsControl ItemsSource="{Binding NuyenRows}" ItemTemplate="{StaticResource ExpenseRow}" />
+                </ScrollViewer>
+              </Grid>
+            </DockPanel>
+          </Border>
+        </DockPanel>
+      </Grid>
+
+      <!-- ===== Calendar ===== -->
+      <Border IsVisible="{Binding ShowCalendar}" Classes="panel lit" MaxWidth="1100" HorizontalAlignment="Left" VerticalAlignment="Stretch">
+        <DockPanel>
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+              <PathIcon Data="{StaticResource Ledger.Calendar}" Width="16" Height="16" />
+              <TextBlock Text="{loc:Tr Tab_Calendar, Case=upper}" Classes="h2" />
+              <TextBlock Text="{Binding CalendarSummary}" Classes="label" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+              <Button Content="{loc:Tr Button_ChangeStartWeek, Case=upper}" Command="{Binding ChangeStartCommand}" IsVisible="{Binding HasWeeks}"
+                      ToolTip.Tip="Move the first week to another date; every week shifts with it" />
+              <Button Classes="primary" Content="{Binding AddWeekText}" Command="{Binding AddWeekCommand}" ToolTip.Tip="Add the week after the newest one" />
+            </StackPanel>
+          </Grid>
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="110,230,*,68" Margin="6,0,6,4">
+            <TextBlock Text="WEEK" Classes="colhead" />
+            <TextBlock Grid.Column="1" Text="DATES" Classes="colhead" />
+            <TextBlock Grid.Column="2" Text="NOTES" Classes="colhead" />
+          </Grid>
+          <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource BorderBrush}" />
+          <Grid>
+            <TextBlock Classes="muted" Margin="6,14" TextWrapping="Wrap" IsVisible="{Binding HasNoWeeks}"
+                       Text="Track in-game time week by week. Start the calendar at the week your campaign begins, then add a week after each session and jot down what happened." />
+            <ScrollViewer>
+              <ItemsControl ItemsSource="{Binding Weeks}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:CalendarWeekRowViewModel">
+                    <Border Classes="ledgerrow">
+                      <Grid ColumnDefinitions="110,230,*,Auto">
+                        <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{StaticResource CyanBrush}" VerticalAlignment="Top" />
+                        <TextBlock Grid.Column="1" Text="{Binding DateSpan}" ToolTip.Tip="{Binding DateSpanLong}" Classes="muted" FontSize="12" VerticalAlignment="Top" Margin="0,2,0,0" />
+                        <TextBlock Grid.Column="2" Text="{Binding Notes}" Foreground="{Binding NotesBrush}" TextWrapping="Wrap" MaxHeight="80"
+                                   TextTrimming="CharacterEllipsis" IsVisible="{Binding HasNotes}" Margin="0,0,8,0" />
+                        <TextBlock Grid.Column="2" Text="no notes" Classes="muted" FontStyle="Italic" IsVisible="{Binding HasNoNotes}" />
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="2" VerticalAlignment="Top">
+                          <Button Classes="rowaction" Command="{Binding EditCommand}" ToolTip.Tip="Edit this week's notes">
+                            <PathIcon Data="{StaticResource Ledger.Edit}" Width="14" Height="14" />
+                          </Button>
+                          <Button Classes="rowaction undo" Command="{Binding DeleteCommand}" ToolTip.Tip="Delete this week">
+                            <PathIcon Data="{StaticResource Ledger.Delete}" Width="14" Height="14" />
+                          </Button>
+                        </StackPanel>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </Grid>
+        </DockPanel>
+      </Border>
+    </DockPanel>
+  </Border>
+</UserControl>

@@ -72,6 +72,10 @@ internal static class Program
                             Console.WriteLine("raise " + objRaise.Abbrev + ": " + objRaise.Display + " -> " + objAfter.Display + ", karma " + strKarmaBefore + " -> " + objCharacter.Karma);
                             Save(objWindow, strOut, "03b-attribute-raised");
                         }
+                        // ---- LEDGER (career karma/nuyen log, undo, calendar) ----
+                        if (objCharacter.Character.Created)
+                            await LedgerScript.RunAsync(objWindow, objCharacter, strOut);
+                        // ---- end LEDGER ----
                         // Clicking a skill opens its roll in the Dice Terminal.
                         SkillViewModel objSkill = objCharacter.SkillCategories.SelectMany(x => x.AllSkills).FirstOrDefault(x => x.HasSpecPool)
                                                   ?? objCharacter.SkillCategories.SelectMany(x => x.AllSkills).FirstOrDefault(x => x.IsRollable);
