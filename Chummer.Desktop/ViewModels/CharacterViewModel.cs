@@ -186,7 +186,6 @@ namespace Chummer.Desktop.ViewModels
         public ObservableCollection<AttributeViewModel> SpecialAttributes { get; } = new ObservableCollection<AttributeViewModel>();
         public IReadOnlyList<AttributeViewModel> PhysicalAttributes => Attributes.Where(x => x.IsPhysical).ToList();
         public IReadOnlyList<AttributeViewModel> MentalAttributes => Attributes.Where(x => !x.IsPhysical).ToList();
-        public ObservableCollection<SkillCategoryViewModel> SkillCategories { get; } = new ObservableCollection<SkillCategoryViewModel>();
         public ObservableCollection<QualityViewModel> PositiveQualities { get; } = new ObservableCollection<QualityViewModel>();
         public ObservableCollection<QualityViewModel> NegativeQualities { get; } = new ObservableCollection<QualityViewModel>();
 
@@ -195,7 +194,6 @@ namespace Chummer.Desktop.ViewModels
         [ObservableProperty] private string _background = string.Empty;
         [ObservableProperty] private string _notes = string.Empty;
 
-        private List<SkillCategoryViewModel> _lstAllSkillCategories = new List<SkillCategoryViewModel>();
         private List<InventoryItemViewModel> _lstAllInventory = new List<InventoryItemViewModel>();
 
         public ObservableCollection<InventoryGroupViewModel> InventoryGroups { get; } = new ObservableCollection<InventoryGroupViewModel>();
@@ -220,14 +218,7 @@ namespace Chummer.Desktop.ViewModels
             List<AttributeViewModel> lstSpecial = Character.AttributeSection.SpecialAttributeList.ToList()
                 .Where(x => x.Abbrev == "EDG" || (x.Abbrev == "MAG" && blnMag) || (x.Abbrev == "MAGAdept" && blnMysAd) || (x.Abbrev == "RES" && blnRes) || (x.Abbrev == "DEP" && blnDep))
                 .Select(x => new AttributeViewModel(this, x)).ToList();
-            List<SkillCategoryViewModel> lstCategories = Character.SkillsSection.Skills.ToList()
-                                                                  .GroupBy(x => x.SkillCategory)
-                                                                  .Select(x => new SkillCategoryViewModel(x.Key, x))
-                                                                  .OrderBy(x => x.SortOrder).ThenBy(x => x.Name, StringComparer.CurrentCulture)
-                                                                  .ToList();
-            List<KnowledgeSkill> lstKnowledge = Character.SkillsSection.KnowledgeSkills.ToList();
-            if (lstKnowledge.Count > 0)
-                lstCategories.Add(new SkillCategoryViewModel("Knowledge", lstKnowledge));
+            SkillsSnapshot objSkills = BuildSkillsSnapshot();
             List<QualityViewModel> lstQualities = Character.Qualities.ToList().Select(x => new QualityViewModel(x)).ToList();
             string strConcept = Character.Concept.RtfToPlainText();
             string strDescription = Character.Description.RtfToPlainText();
@@ -243,8 +234,7 @@ namespace Chummer.Desktop.ViewModels
             {
                 Reset(Attributes, lstAttributes);
                 Reset(SpecialAttributes, lstSpecial);
-                _lstAllSkillCategories = lstCategories;
-                ApplySkillFilter();
+                ApplySkillsSnapshot(objSkills);
                 Reset(PositiveQualities, lstQualities.Where(x => x.IsPositive));
                 Reset(NegativeQualities, lstQualities.Where(x => !x.IsPositive));
                 Concept = strConcept;
@@ -344,21 +334,10 @@ namespace Chummer.Desktop.ViewModels
             RefreshEdge();
         }
 
-        private void ApplySkillFilter()
-        {
-            string strFilter = SkillFilter?.Trim() ?? string.Empty;
-            SkillCategories.Clear();
-            foreach (SkillCategoryViewModel objCategory in _lstAllSkillCategories)
-            {
-                if (objCategory.ApplyFilter(strFilter, ShowUntrainedSkills))
-                    SkillCategories.Add(objCategory);
-            }
-        }
-
         /// <summary>Entries for the global search palette (Ctrl+K).</summary>
         public IEnumerable<PaletteEntry> PaletteEntries()
         {
-            foreach (SkillViewModel objSkill in _lstAllSkillCategories.SelectMany(x => x.AllSkills).Where(x => x.Rating > 0))
+            foreach (SkillViewModel objSkill in _lstAllSkills.Where(x => x.Rating > 0))
                 yield return new PaletteEntry(objSkill.Name, Name + "  //  skill " + objSkill.Pool, "Icon.Skills", () => Navigate(CharacterSection.Skills, objSkill.Name));
             foreach (InventoryItemViewModel objItem in _lstAllInventory)
                 yield return new PaletteEntry(objItem.Name, Name + "  //  " + objItem.KindLabel.ToLowerInvariant() + "  " + objItem.Headline, objItem.IconKey, () => Navigate(CharacterSection.Inventory, objItem.Name));
@@ -604,100 +583,6 @@ namespace Chummer.Desktop.ViewModels
             if (eResult == Chummer.Rules.RuleResult.Changed)
                 _objOwner.Reload();
         }
-    }
-
-    public sealed class SkillCategoryViewModel
-    {
-        private readonly List<SkillViewModel> _lstAll;
-
-        public SkillCategoryViewModel(string strCategory, IEnumerable<Skill> lstSkills)
-        {
-            Category = strCategory ?? string.Empty;
-            _lstAll = lstSkills.Select(x => new SkillViewModel(x)).OrderBy(x => x.Name, StringComparer.CurrentCulture).ToList();
-            Name = Category == "Knowledge"
-                ? Tr.Get("Label_KnowledgeSkills")
-                : _lstAll.FirstOrDefault()?.DisplayCategory ?? Category;
-            (IconKey, SortOrder) = MapCategory(Category);
-        }
-
-        public string Category { get; }
-        public string Name { get; }
-        public string IconKey { get; }
-        public int SortOrder { get; }
-        public ObservableCollection<SkillViewModel> Skills { get; } = new ObservableCollection<SkillViewModel>();
-        public IReadOnlyList<SkillViewModel> AllSkills => _lstAll;
-
-        public bool ApplyFilter(string strFilter, bool blnShowUntrained)
-        {
-            Skills.Clear();
-            foreach (SkillViewModel objSkill in _lstAll)
-            {
-                if (!blnShowUntrained && objSkill.Rating == 0 && strFilter.Length == 0)
-                    continue;
-                if (strFilter.Length > 0 && objSkill.Name.IndexOf(strFilter, StringComparison.CurrentCultureIgnoreCase) < 0)
-                    continue;
-                Skills.Add(objSkill);
-            }
-            return Skills.Count > 0;
-        }
-
-        private static (string, int) MapCategory(string strCategory)
-        {
-            switch (strCategory)
-            {
-                case "Combat Active": return ("Icon.SkillCombat", 0);
-                case "Physical Active": return ("Icon.SkillPhysical", 1);
-                case "Social Active": return ("Icon.SkillSocial", 2);
-                case "Magical Active":
-                case "Pseudo-Magical Active": return ("Icon.SkillMagical", 3);
-                case "Resonance Active": return ("Icon.SkillResonance", 4);
-                case "Technical Active": return ("Icon.SkillTechnical", 5);
-                case "Vehicle Active": return ("Icon.SkillVehicle", 6);
-                case "Knowledge": return ("Icon.SkillKnowledge", 9);
-                default: return ("Icon.Skills", 8);
-            }
-        }
-    }
-
-    public sealed class SkillViewModel
-    {
-        public SkillViewModel(Skill objSkill)
-        {
-            Name = objSkill.CurrentDisplayName;
-            DisplayCategory = objSkill.DisplayCategory(GlobalSettings.Language);
-            Rating = objSkill.Rating;
-            int intPool = objSkill.Pool;
-            Pool = intPool.ToString(GlobalSettings.CultureInfo);
-            Attribute = objSkill.Attribute;
-            Specialization = objSkill.CurrentDisplaySpecialization;
-            RollName = RollCatalog.SkillRollName(Name);
-            Backend.Skills.SkillSpecialization objSpec = objSkill.Specializations.FirstOrDefault();
-            if (objSpec != null)
-            {
-                SpecRollName = RollCatalog.SkillRollName(Name, objSpec.CurrentDisplayName);
-                SpecPool = (intPool + objSkill.GetSpecializationBonus()).ToString(GlobalSettings.CultureInfo);
-            }
-            IsRollable = intPool > 0;
-            IsDefaulting = Rating == 0;
-        }
-
-        public string Name { get; }
-        public string DisplayCategory { get; }
-        public int Rating { get; }
-        public string Pool { get; }
-        public string Attribute { get; }
-        public string Specialization { get; }
-        public bool HasSpecialization => !string.IsNullOrEmpty(Specialization);
-        public string RollName { get; }
-        public string SpecRollName { get; } = string.Empty;
-        public string SpecPool { get; } = string.Empty;
-        public bool HasSpecPool => SpecPool.Length > 0;
-        public bool IsRollable { get; }
-        public string RollTip => IsRollable ? "Click to roll " + Name + " (" + Attribute + ")" + (HasSpecPool ? "  //  " + SpecPool + " dice with " + Specialization : string.Empty) : Name + ": no dice (untrained, no defaulting)";
-        public bool IsDefaulting { get; }
-
-        /// <summary>Rating pips 1..12 (filled up to the rating).</summary>
-        public IReadOnlyList<bool> Pips => Enumerable.Range(1, Math.Max(6, Rating)).Select(x => x <= Rating).ToList();
     }
 
     public sealed class QualityViewModel

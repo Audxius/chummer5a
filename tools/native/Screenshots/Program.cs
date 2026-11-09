@@ -76,9 +76,12 @@ internal static class Program
                         if (objCharacter.Character.Created)
                             await LedgerScript.RunAsync(objWindow, objCharacter, strOut);
                         // ---- end LEDGER ----
+                        // ===== Skills section: sorting, grouping and karma edits (SkillRules) =====
+                        await SkillsSteps(objWindow, objViewModel, objCharacter, strOut);
+                        // ===== end skills =====
                         // Clicking a skill opens its roll in the Dice Terminal.
-                        SkillViewModel objSkill = objCharacter.SkillCategories.SelectMany(x => x.AllSkills).FirstOrDefault(x => x.HasSpecPool)
-                                                  ?? objCharacter.SkillCategories.SelectMany(x => x.AllSkills).FirstOrDefault(x => x.IsRollable);
+                        SkillViewModel objSkill = objCharacter.AllSkills.FirstOrDefault(x => x.HasSpecPool)
+                                                  ?? objCharacter.AllSkills.FirstOrDefault(x => x.IsRollable);
                         if (objSkill != null)
                         {
                             await objCharacter.RollCommand.ExecuteAsync(objSkill.HasSpecPool ? objSkill.SpecRollName : objSkill.RollName);
@@ -116,12 +119,80 @@ internal static class Program
                         Save(objWindow, strOut, "07-search-jump");
                     }
                 }
+                if (args.Length > 2)
+                {
+                    // ===== Skills section on a create-mode character =====
+                    objViewModel.Palette.CloseCommand.Execute(null);
+                    await objViewModel.OpenCharacterFileAsync(Path.GetFullPath(args[2]));
+                    await Settle();
+                    if (objViewModel.CurrentPage is CharacterViewModel objCreate)
+                    {
+                        objCreate.ShowSectionCommand.Execute(CharacterSection.Skills);
+                        await Settle();
+                        Save(objWindow, strOut, "09a-skills-create");
+                        SkillViewModel objRaise = objCreate.AllSkills.FirstOrDefault(x => x.CanKarmaUp && x.Rating > 0);
+                        if (objRaise != null)
+                        {
+                            int intBefore = objRaise.KarmaPoints;
+                            await objRaise.KarmaUpCommand.ExecuteAsync(null);
+                            await Settle();
+                            await Settle();
+                            Console.WriteLine("create karma+1 " + objRaise.Name + ": " + intBefore + " -> " + objCreate.AllSkills.First(x => x.Skill == objRaise.Skill).KarmaPoints);
+                            Save(objWindow, strOut, "09b-skills-create-raised");
+                        }
+                    }
+                    // ===== end skills create =====
+                }
                 return 0;
             }, CancellationToken.None).GetAwaiter().GetResult();
         }
         Console.WriteLine("screenshots in " + strOut);
         return 0;
     }
+
+    // ===== Skills section steps =====
+    private static async Task SkillsSteps(MainWindow objWindow, MainWindowViewModel objViewModel, CharacterViewModel objCharacter, string strOut)
+    {
+        objCharacter.ShowSectionCommand.Execute(CharacterSection.Skills);
+        await Settle();
+        Save(objWindow, strOut, "08a-skills-by-pool");
+        Console.WriteLine("skills by pool: " + string.Join(", ", objCharacter.SkillRows.OfType<SkillViewModel>().Take(8).Select(x => x.Name + " " + x.PoolText)));
+        objCharacter.SortSkillsCommand.Execute(SkillSortMode.Name);
+        await Settle();
+        Save(objWindow, strOut, "08b-skills-by-name");
+        objCharacter.SortSkillsCommand.Execute(SkillSortMode.DicePool);
+        objCharacter.GroupSkillsByCategory = true;
+        await Settle();
+        Save(objWindow, strOut, "08c-skills-grouped");
+        objCharacter.GroupSkillsByCategory = false;
+        await Settle();
+        // Career edits: improve the cheapest knowledge skill, then buy a specialization if karma allows.
+        SkillViewModel objKnow = objCharacter.AllSkills.Where(x => x.IsKnowledge && x.CanImprove).OrderBy(x => x.ImproveCost).FirstOrDefault();
+        if (objKnow != null)
+        {
+            string strBefore = objCharacter.Karma;
+            await objKnow.ImproveCommand.ExecuteAsync(null);
+            await Settle();
+            await Settle();
+            SkillViewModel objAfter = objCharacter.AllSkills.First(x => x.Skill == objKnow.Skill);
+            Console.WriteLine("improve knowledge " + objKnow.Name + ": " + objKnow.Rating + " -> " + objAfter.Rating + ", karma " + strBefore + " -> " + objCharacter.Karma
+                              + " // expense: " + objCharacter.Character.ExpenseEntries.ToList().OrderByDescending(x => x.Date).First().Reason);
+        }
+        SkillViewModel objSpec = objCharacter.AllSkills.FirstOrDefault(x => x.IsCareer && x.ShowAddSpec && x.CanAddSpec && x.Rating > 0);
+        if (objSpec != null)
+        {
+            string strBefore = objCharacter.Karma;
+            await objCharacter.RunSkillRuleAsync(t => Chummer.Rules.SkillRules.AddSpecializationCareerAsync(objCharacter.Character, objSpec.Skill,
+                (x, _) => Task.FromResult(x.Count > 0 ? x[0].Value.ToString() : "Harness"), t));
+            await Settle();
+            await Settle();
+            Console.WriteLine("add spec to " + objSpec.Name + ": " + objCharacter.AllSkills.First(x => x.Skill == objSpec.Skill).Specialization + ", karma " + strBefore + " -> " + objCharacter.Karma);
+        }
+        else
+            Console.WriteLine("add spec: no affordable specialization at karma " + objCharacter.Karma);
+        Save(objWindow, strOut, "08d-skills-after-edit");
+    }
+    // ===== end skills steps =====
 
     private static async Task Settle()
     {

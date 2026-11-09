@@ -1,84 +1,356 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Chummer.Desktop.ViewModels"
-             xmlns:loc="using:Chummer.Desktop.Localization"
-             xmlns:conv="using:Chummer.Desktop.Converters"
              x:Class="Chummer.Desktop.Views.Sections.SkillsSectionView"
              x:DataType="vm:CharacterViewModel">
-  <DockPanel Margin="28,22,28,0">
-    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="16" Margin="0,0,0,14">
-      <TextBox Width="320" Text="{Binding SkillFilter}" PlaceholderText="Search skills...">
-        <TextBox.InnerLeftContent>
-          <PathIcon Data="{StaticResource Icon.Search}" Width="14" Height="14" Margin="8,0,0,0" Classes="muted" />
-        </TextBox.InnerLeftContent>
-      </TextBox>
-      <CheckBox Content="Show untrained" IsChecked="{Binding ShowUntrainedSkills}" />
+  <!-- One aligned table: icon | skill + specializations | attribute | rating | pool | spec pool | edit.
+       Every row rolls on click; the spec chips and the spec-pool cell roll with that specialization. -->
+  <UserControl.Styles>
+    <Style Selector="Button.seg">
+      <Setter Property="Padding" Value="12,5" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="LetterSpacing" Value="1.5" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Margin" Value="0,0,-1,0" />
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+    </Style>
+    <Style Selector="Button.seg.on">
+      <Setter Property="Foreground" Value="{StaticResource BaseBrush}" />
+      <Setter Property="Background" Value="{StaticResource CyanBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    </Style>
+    <Style Selector="Button.seg.on:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#FF5CF0FF" />
+      <Setter Property="Foreground" Value="{StaticResource BaseBrush}" />
+    </Style>
+    <Style Selector="Button.add">
+      <Setter Property="Padding" Value="12,5" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="LetterSpacing" Value="1.5" />
+    </Style>
+    <Style Selector="TextBlock.colhead">
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="LetterSpacing" Value="1.5" />
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBlock.colhead.on">
+      <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
+    </Style>
+    <!-- Row background button: hover lights the whole row. -->
+    <Style Selector="Button.row">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="BorderBrush" Value="#141F2C" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.row:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#1400E5FF" />
+      <Setter Property="BorderBrush" Value="#5500E5FF" />
+      <Setter Property="BoxShadow" Value="none" />
+    </Style>
+    <Style Selector="Button.row:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#3300E5FF" />
+    </Style>
+    <Style Selector="Button.row:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="#141F2C" />
+    </Style>
+    <!-- Small chip-buttons inside a row. -->
+    <Style Selector="Button.chipbtn">
+      <Setter Property="Padding" Value="6,1" />
+      <Setter Property="Margin" Value="0,0,4,0" />
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="LetterSpacing" Value="0.5" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.spec">
+      <Setter Property="Foreground" Value="{StaticResource MagentaBrush}" />
+      <Setter Property="BorderBrush" Value="#88FF2E88" />
+      <Setter Property="Background" Value="#1AFF2E88" />
+    </Style>
+    <Style Selector="Button.spec:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource MagentaDimBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource MagentaBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+      <Setter Property="BoxShadow" Value="0 0 10 0 #55FF2E88" />
+    </Style>
+    <Style Selector="Button.addspec">
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+          </Style>
+    <!-- "+ SPEC" only shows up on the row under the pointer: keeps the table calm. -->
+    <Style Selector="Grid.skillrow Button.hover">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="Grid.skillrow:pointerover Button.hover">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="Button.tag">
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="FontSize" Value="9" />
+      <Setter Property="LetterSpacing" Value="1" />
+    </Style>
+    <Style Selector="Button.tag:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+    </Style>
+    <!-- Karma purchase button (career). -->
+    <Style Selector="Button.buy">
+      <Setter Property="Padding" Value="8,3" />
+      <Setter Property="MinWidth" Value="58" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.buy:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="#3A4B61" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+    </Style>
+    <Style Selector="Button.del">
+      <Setter Property="Padding" Value="5,3" />
+      <Setter Property="Margin" Value="6,0,0,0" />
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.del:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+      <Setter Property="Background" Value="#22FF3B4E" />
+      <Setter Property="BoxShadow" Value="none" />
+    </Style>
+    <Style Selector="Button.step:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="#2A3A4D" />
+    </Style>
+    <Style Selector="TextBlock.pool">
+      <Setter Property="FontSize" Value="17" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBlock.pool.muted">
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    </Style>
+  </UserControl.Styles>
+
+  <DockPanel Margin="28,18,28,0">
+    <!-- Toolbar -->
+    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,12">
+      <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
+        <TextBox Width="300" Text="{Binding SkillFilter}" PlaceholderText="Search skills, specializations...">
+          <TextBox.InnerLeftContent>
+            <PathIcon Data="{StaticResource Icon.Search}" Width="14" Height="14" Margin="8,0,0,0" Classes="muted" />
+          </TextBox.InnerLeftContent>
+        </TextBox>
+        <CheckBox Grid.Column="1" Margin="18,0,0,0" Content="Show untrained" IsChecked="{Binding ShowUntrainedSkills}" />
+        <CheckBox Grid.Column="2" Margin="14,0,0,0" Content="Group by category" IsChecked="{Binding GroupSkillsByCategory}" />
+        <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8">
+          <Button Classes="add" Command="{Binding AddKnowledgeSkillCommand}" ToolTip.Tip="Add a knowledge skill or language">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <PathIcon Data="{StaticResource Icon.SkillKnowledge}" Width="13" Height="13" />
+              <TextBlock Text="+ KNOWLEDGE / LANGUAGE" />
+            </StackPanel>
+          </Button>
+          <Button Classes="add" Command="{Binding AddExoticSkillCommand}" ToolTip.Tip="Add an exotic weapon or vehicle skill">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <PathIcon Data="{StaticResource Icon.SkillCombat}" Width="13" Height="13" />
+              <TextBlock Text="+ EXOTIC SKILL" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Grid>
+      <StackPanel Orientation="Horizontal">
+        <TextBlock Text="SORT BY" Classes="label" VerticalAlignment="Center" Margin="0,0,12,0" />
+        <Button Classes="seg" Classes.on="{Binding SortIsPool}" Content="{Binding PoolSortLabel}"
+                Command="{Binding SortSkillsCommand}" CommandParameter="{x:Static vm:SkillSortMode.DicePool}" />
+        <Button Classes="seg" Classes.on="{Binding SortIsName}" Content="{Binding NameSortLabel}"
+                Command="{Binding SortSkillsCommand}" CommandParameter="{x:Static vm:SkillSortMode.Name}" />
+        <Button Classes="seg" Classes.on="{Binding SortIsRating}" Content="{Binding RatingSortLabel}"
+                Command="{Binding SortSkillsCommand}" CommandParameter="{x:Static vm:SkillSortMode.Rating}" />
+        <Button Classes="seg" Classes.on="{Binding SortIsCategory}" Content="{Binding CategorySortLabel}"
+                Command="{Binding SortSkillsCommand}" CommandParameter="{x:Static vm:SkillSortMode.Category}" />
+        <TextBlock Text="{Binding SkillCountText}" Classes="label" VerticalAlignment="Center" Margin="18,0,0,0" />
+      </StackPanel>
     </StackPanel>
-    <ScrollViewer>
-      <ItemsControl ItemsSource="{Binding SkillCategories}">
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="vm:SkillCategoryViewModel">
-            <Border Classes="panel lit" Width="420" Margin="0,0,16,16" VerticalAlignment="Top">
-              <StackPanel Spacing="6">
-                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,6">
-                  <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="20" Height="20" />
-                  <TextBlock Text="{Binding Name}" Classes="h2" VerticalAlignment="Center" />
-                </StackPanel>
-                <ItemsControl ItemsSource="{Binding Skills}">
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:SkillViewModel">
-                      <Grid ColumnDefinitions="*,Auto" Margin="-6,0">
-                        <Button Classes="roll" IsEnabled="{Binding IsRollable}" ToolTip.Tip="{Binding RollTip}"
-                                Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RollCommand}" CommandParameter="{Binding RollName}">
-                          <Grid ColumnDefinitions="*,Auto,Auto,Auto">
-                            <StackPanel VerticalAlignment="Center" Margin="0,0,8,0">
-                              <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
-                              <TextBlock Text="{Binding Specialization}" IsVisible="{Binding HasSpecialization}" FontSize="10"
-                                         Foreground="{StaticResource MagentaBrush}" TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-                            <PathIcon Grid.Column="1" Classes="rollhint" Data="{StaticResource Icon.Dice}" Margin="0,0,6,0" />
-                            <ItemsControl Grid.Column="2" ItemsSource="{Binding Pips}" VerticalAlignment="Center" Margin="0,0,8,0">
-                          <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="3" /></ItemsPanelTemplate>
-                          </ItemsControl.ItemsPanel>
-                          <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="x:Boolean">
-                              <Border Width="7" Height="12" CornerRadius="1" Classes.on="{Binding}" />
-                            </DataTemplate>
-                          </ItemsControl.ItemTemplate>
-                          <ItemsControl.Styles>
-                            <Style Selector="Border">
-                              <Setter Property="Background" Value="{StaticResource BorderBrush}" />
-                            </Style>
-                            <Style Selector="Border.on">
-                              <Setter Property="Background" Value="{StaticResource CyanBrush}" />
-                            </Style>
-                          </ItemsControl.Styles>
-                        </ItemsControl>
-                            <Border Grid.Column="3" Classes="chip" MinWidth="34" ToolTip.Tip="Dice pool">
-                              <TextBlock Text="{Binding Pool}" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{StaticResource TextBrush}" />
-                            </Border>
-                          </Grid>
-                        </Button>
-                        <Button Grid.Column="1" Classes="roll" IsVisible="{Binding HasSpecPool}" Margin="2,0,0,0" Padding="2"
-                                ToolTip.Tip="{Binding Specialization, StringFormat='Click to roll with the {0} specialization'}"
-                                Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RollCommand}" CommandParameter="{Binding SpecRollName}">
-                          <Border Classes="chip" MinWidth="34" Background="{StaticResource MagentaDimBrush}" BorderBrush="{StaticResource MagentaBrush}">
-                            <TextBlock Text="{Binding SpecPool}" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{StaticResource MagentaBrush}" />
-                          </Border>
-                        </Button>
-                      </Grid>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-              </StackPanel>
-            </Border>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </ScrollViewer>
+
+    <Grid ColumnDefinitions="*,20,330">
+      <!-- The table -->
+      <DockPanel>
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="36,*,58,62,66,66,186" Margin="0,0,14,0" Height="28">
+          <Border Grid.ColumnSpan="7" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" />
+          <TextBlock Grid.Column="1" Text="SKILL  //  SPECIALIZATIONS" Classes="colhead" Classes.on="{Binding SortIsName}" />
+          <TextBlock Grid.Column="2" Text="ATTR" Classes="colhead" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="3" Text="RATING" Classes="colhead" Classes.on="{Binding SortIsRating}" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="4" Text="POOL" Classes="colhead" Classes.on="{Binding SortIsPool}" HorizontalAlignment="Center" />
+          <TextBlock Grid.Column="5" Text="SPEC" Classes="colhead" HorizontalAlignment="Center" Foreground="{StaticResource MagentaBrush}" />
+          <TextBlock Grid.Column="6" Text="RAISE (KARMA)" Classes="colhead" HorizontalAlignment="Right" Margin="0,0,8,0" IsVisible="{Binding IsSkillsCareer}" />
+          <TextBlock Grid.Column="6" Text="POINTS        KARMA" Classes="colhead" HorizontalAlignment="Right" Margin="0,0,14,0" IsVisible="{Binding IsSkillsCreate}" />
+        </Grid>
+        <ScrollViewer Padding="0,0,14,24">
+          <ItemsControl ItemsSource="{Binding SkillRows}">
+            <ItemsControl.DataTemplates>
+              <!-- Category heading (grouped mode) -->
+              <DataTemplate DataType="vm:SkillHeaderRow">
+                <Grid ColumnDefinitions="36,Auto,Auto,*" Margin="0,16,0,2" Height="30">
+                  <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="16" Height="16" HorizontalAlignment="Left" Margin="6,0,0,0" />
+                  <TextBlock Grid.Column="1" Text="{Binding Name}" Classes="h2" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="2" Text="{Binding CountText}" Classes="label" VerticalAlignment="Center" Margin="10,0,0,0" />
+                  <Border Grid.Column="3" Height="1" Background="{StaticResource BorderBrush}" VerticalAlignment="Center" Margin="14,0,0,0" />
+                </Grid>
+              </DataTemplate>
+
+              <!-- Skill row -->
+              <DataTemplate DataType="vm:SkillViewModel">
+                <Grid Classes="skillrow" ColumnDefinitions="36,*,58,62,66,66,186" MinHeight="42">
+                  <Button Grid.ColumnSpan="7" Classes="row" IsEnabled="{Binding IsRollable}" ToolTip.Tip="{Binding RollTip}"
+                          Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RollCommand}" CommandParameter="{Binding RollName}" />
+                  <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="16" Height="16" IsHitTestVisible="False"
+                            HorizontalAlignment="Left" Margin="6,0,0,0" Classes.muted="{Binding IsDefaulting}" />
+
+                  <WrapPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,5,8,5">
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" IsHitTestVisible="False"
+                               Classes.muted="{Binding IsDefaulting}" />
+                    <Button Classes="chipbtn tag" Content="{Binding TypeText}" IsVisible="{Binding HasTypeText}" IsEnabled="{Binding CanChangeType}"
+                            Command="{Binding ChangeTypeCommand}" ToolTip.Tip="Knowledge skill type (click to change)" />
+                    <Button Classes="chipbtn tag" Content="{Binding NativeToggleText}" IsVisible="{Binding ShowNativeToggle}" IsEnabled="{Binding CanToggleNative}"
+                            Command="{Binding ToggleNativeCommand}" ToolTip.Tip="Native languages are free and have no rating (limited slots)" />
+                    <Button Classes="chipbtn tag hover" Content="RENAME" IsVisible="{Binding CanRename}" Command="{Binding RenameCommand}" ToolTip.Tip="Rename this knowledge skill" />
+                    <ItemsControl ItemsSource="{Binding Specs}" VerticalAlignment="Center">
+                      <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SkillSpecChip">
+                          <Button Classes="chipbtn spec" Content="{Binding Name}" ToolTip.Tip="{Binding Tip}"
+                                  Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RollCommand}" CommandParameter="{Binding RollName}" />
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Classes="chipbtn addspec hover" Content="{Binding AddSpecText}" IsVisible="{Binding ShowAddSpec}" IsEnabled="{Binding CanAddSpec}"
+                            Command="{Binding AddSpecCommand}" ToolTip.Tip="{Binding AddSpecTip}" />
+                  </WrapPanel>
+
+                  <TextBlock Grid.Column="2" Text="{Binding Attribute}" Classes="muted" FontSize="12" LetterSpacing="1" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+                  <TextBlock Grid.Column="3" Text="{Binding RatingText}" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"
+                             IsHitTestVisible="False" Classes.muted="{Binding IsDefaulting}" />
+                  <TextBlock Grid.Column="4" Text="{Binding PoolText}" Classes="pool" IsHitTestVisible="False" Classes.muted="{Binding !IsRollable}" />
+                  <Button Grid.Column="5" Classes="chipbtn spec" IsVisible="{Binding HasSpecPool}" HorizontalAlignment="Center" Margin="0" Padding="8,2"
+                          ToolTip.Tip="{Binding SpecPoolTip}"
+                          Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RollCommand}" CommandParameter="{Binding SpecRollName}">
+                    <TextBlock Text="{Binding SpecPoolText}" FontSize="15" FontWeight="Bold" />
+                  </Button>
+
+                  <!-- Career: buy the next rating -->
+                  <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Right" IsVisible="{Binding IsCareer}" Margin="0,0,4,0">
+                    <Button Classes="buy" IsVisible="{Binding ShowImprove}" IsEnabled="{Binding CanImprove}" Command="{Binding ImproveCommand}" ToolTip.Tip="{Binding ImproveTip}">
+                      <StackPanel Orientation="Horizontal" Spacing="5">
+                        <PathIcon Data="{StaticResource Icon.Karma}" Width="11" Height="11" Foreground="{Binding $parent[Button].Foreground}" IsVisible="{Binding !IsAtMaximum}" />
+                        <TextBlock Text="{Binding ImproveText}" />
+                      </StackPanel>
+                    </Button>
+                    <Panel Width="30"><Button Classes="del" Content="✕" IsVisible="{Binding CanDelete}" Command="{Binding DeleteCommand}" ToolTip.Tip="Delete this skill" /></Panel>
+                  </StackPanel>
+
+                  <!-- Create: skill points and karma levels, plus native / karma-spec toggles -->
+                  <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="2" IsVisible="{Binding IsCreate}" Margin="0,0,4,0">
+                    <StackPanel Orientation="Horizontal" Spacing="2" IsVisible="{Binding ShowBase}">
+                      <Button Classes="step" Content="−" Command="{Binding BaseDownCommand}" IsEnabled="{Binding CanBaseDown}" ToolTip.Tip="Remove a skill point" />
+                      <TextBlock Text="{Binding BaseText}" MinWidth="20" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" />
+                      <Button Classes="step" Content="+" Command="{Binding BaseUpCommand}" IsEnabled="{Binding CanBaseUp}" ToolTip.Tip="Spend a skill point" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="2" Margin="8,0,0,0">
+                      <Button Classes="step" Content="−" Command="{Binding KarmaDownCommand}" IsEnabled="{Binding CanKarmaDown}" ToolTip.Tip="Remove a karma-bought level" />
+                      <TextBlock Text="{Binding KarmaText}" MinWidth="20" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource MagentaBrush}" />
+                      <Button Classes="step" Content="+" Command="{Binding KarmaUpCommand}" IsEnabled="{Binding CanKarmaUp}" ToolTip.Tip="Buy a level with karma" />
+                    </StackPanel>
+                    <Panel Width="30"><Button Classes="del" Content="✕" IsVisible="{Binding CanDelete}" Command="{Binding DeleteCommand}" ToolTip.Tip="Delete this skill" /></Panel>
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.DataTemplates>
+          </ItemsControl>
+        </ScrollViewer>
+      </DockPanel>
+
+      <!-- Side: budgets (create) and skill groups -->
+      <ScrollViewer Grid.Column="2" Padding="0,0,0,24">
+        <StackPanel Spacing="14">
+          <Border Classes="panel hot" IsVisible="{Binding HasSkillBudget}">
+            <ItemsControl ItemsSource="{Binding SkillBudget}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ItemStat">
+                  <Grid ColumnDefinitions="*,Auto" Margin="0,3">
+                    <TextBlock Text="{Binding Label}" Classes="label" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="{Binding Value}" FontWeight="Bold" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Border>
+
+          <Border Classes="panel lit" Padding="14,12">
+            <StackPanel>
+              <Grid ColumnDefinitions="Auto,*" Margin="0,0,0,8">
+                <PathIcon Data="{StaticResource Icon.Skills}" Width="16" Height="16" Margin="0,0,10,0" />
+                <TextBlock Grid.Column="1" Text="SKILL GROUPS" Classes="h2" VerticalAlignment="Center" />
+              </Grid>
+              <TextBlock Text="No skill groups with a rating. Tick 'Show untrained' to see them all." Classes="muted" FontSize="12" TextWrapping="Wrap"
+                         IsVisible="{Binding !HasSkillGroups}" />
+              <ItemsControl ItemsSource="{Binding SkillGroups}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:SkillGroupViewModel">
+                    <Grid ColumnDefinitions="*,Auto,Auto" MinHeight="34" Background="Transparent" ToolTip.Tip="{Binding Tip}">
+                      <Border Grid.ColumnSpan="3" BorderBrush="#141F2C" BorderThickness="0,0,0,1" />
+                      <StackPanel VerticalAlignment="Center" Margin="0,4">
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Members}" Classes="muted" FontSize="10" TextTrimming="CharacterEllipsis" />
+                      </StackPanel>
+                      <TextBlock Grid.Column="1" Text="{Binding RatingText}" FontWeight="Bold" FontSize="15" VerticalAlignment="Center" Margin="8,0"
+                                 Foreground="{StaticResource CyanBrush}" Classes.muted="{Binding IsBroken}" />
+                      <Button Grid.Column="2" Classes="buy" IsVisible="{Binding ShowImprove}" IsEnabled="{Binding CanImprove}" Command="{Binding ImproveCommand}"
+                              ToolTip.Tip="{Binding ImproveTip}">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                          <PathIcon Data="{StaticResource Icon.Karma}" Width="11" Height="11" Foreground="{Binding $parent[Button].Foreground}" IsVisible="{Binding !IsAtMaximum}" />
+                          <TextBlock Text="{Binding ImproveText}" />
+                        </StackPanel>
+                      </Button>
+                      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" IsVisible="{Binding IsCreate}">
+                        <StackPanel Orientation="Horizontal" Spacing="2" IsVisible="{Binding ShowBase}">
+                          <Button Classes="step" Content="−" Command="{Binding BaseDownCommand}" IsEnabled="{Binding CanBaseDown}" ToolTip.Tip="Remove a group point" />
+                          <TextBlock Text="{Binding BaseText}" MinWidth="18" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" />
+                          <Button Classes="step" Content="+" Command="{Binding BaseUpCommand}" IsEnabled="{Binding CanBaseUp}" ToolTip.Tip="Spend a group point" />
+                        </StackPanel>
+                        <Button Classes="step" Content="−" Command="{Binding KarmaDownCommand}" IsEnabled="{Binding CanKarmaDown}" Margin="6,0,0,0" ToolTip.Tip="Remove a karma-bought level" />
+                        <TextBlock Text="{Binding KarmaText}" MinWidth="18" TextAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource MagentaBrush}" />
+                        <Button Classes="step" Content="+" Command="{Binding KarmaUpCommand}" IsEnabled="{Binding CanKarmaUp}" ToolTip.Tip="Buy a level with karma" />
+                      </StackPanel>
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="panel" Padding="14,12">
+            <StackPanel Spacing="6">
+              <TextBlock Text="HOW TO READ THIS" Classes="label" />
+              <TextBlock TextWrapping="Wrap" FontSize="12" Classes="muted"
+                         Text="Click a row to roll its dice pool. Magenta chips are specializations: click one (or the SPEC column) to roll with it." />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
   </DockPanel>
 </UserControl>
