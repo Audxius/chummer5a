@@ -267,7 +267,45 @@ namespace Chummer
             = new Lazy<string>(() => Path.Combine(GetStartupPath, "lang"));
 
         private static readonly Lazy<string> s_strGetSettingsFolderPath
-            = new Lazy<string>(() => Path.Combine(GetStartupPath, "settings"));
+            = new Lazy<string>(GetSettingsFolderPathCore);
+
+        /// <summary>
+        /// Custom character settings live next to the executable on Windows (as in legacy Chummer). Elsewhere the
+        /// install folder is usually read-only or rebuilt, so they live in $XDG_CONFIG_HOME/chummer5/settings instead;
+        /// any settings shipped next to the executable are copied there the first time they are missing.
+        /// </summary>
+        private static string GetSettingsFolderPathCore()
+        {
+            string strShipped = Path.Combine(GetStartupPath, "settings");
+            if (IsUnitTest || Environment.OSVersion.Platform == PlatformID.Win32NT)
+                return strShipped;
+            string strConfig = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
+            if (string.IsNullOrEmpty(strConfig))
+                strConfig = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
+            string strUser = Path.Combine(strConfig, "chummer5", "settings");
+            try
+            {
+                Directory.CreateDirectory(strUser);
+                if (Directory.Exists(strShipped))
+                {
+                    foreach (string strFile in Directory.EnumerateFiles(strShipped, "*.xml"))
+                    {
+                        string strTarget = Path.Combine(strUser, Path.GetFileName(strFile));
+                        if (!File.Exists(strTarget))
+                            File.Copy(strFile, strTarget);
+                    }
+                }
+            }
+            catch (IOException)
+            {
+                return strShipped;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return strShipped;
+            }
+            return strUser;
+        }
 
         /// <summary>
         /// Returns the actual path of the Chummer-Directory regardless of running as Unit test or not.
