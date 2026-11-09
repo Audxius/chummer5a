@@ -90,11 +90,11 @@ namespace Chummer
 #endif
                 if (blnSync)
                 {
-                    objReturn.Load(strXslFilePath);
+                    objReturn.Load(strXslFilePath, XsltSettings.Default, new System.Xml.XmlUrlResolver()); // net48 default; .NET Core otherwise forbids xsl:include
                 }
                 else
                 {
-                    await TaskExtensions.RunWithoutEC(() => objReturn.Load(strXslFilePath), token).ConfigureAwait(false);
+                    await TaskExtensions.RunWithoutEC(() => objReturn.Load(strXslFilePath, XsltSettings.Default, new System.Xml.XmlUrlResolver()), token).ConfigureAwait(false);
                 }
 
                 ValueTuple<DateTime, XslCompiledTransform> tupNewValue =

@@ -70,6 +70,12 @@
                 <TextBlock Text="{Binding Essence}" Classes="value" />
               </StackPanel>
             </Border>
+            <Button Classes="ghost" Command="{Binding PrintCommand}" VerticalAlignment="Stretch" HotKey="Ctrl+P" ToolTip.Tip="Print / export character sheet (Ctrl+P)">
+              <StackPanel Spacing="4" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource Icon.Notes}" Width="18" Height="18" />
+                <TextBlock Text="PRINT" />
+              </StackPanel>
+            </Button>
             <Button Classes="primary" Command="{Binding SaveCommand}" VerticalAlignment="Stretch" HotKey="Ctrl+S">
               <StackPanel Spacing="4" HorizontalAlignment="Center">
                 <PathIcon Data="{StaticResource Icon.Save}" Width="18" Height="18" Foreground="{StaticResource BaseBrush}" />
