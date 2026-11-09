@@ -44,7 +44,8 @@ namespace Chummer.Desktop.ViewModels
         Inventory,
         Abilities,
         Network,
-        Notes
+        Notes,
+        Ledger
     }
 
     /// <summary>
@@ -176,6 +177,7 @@ namespace Chummer.Desktop.ViewModels
             OnPropertyChanged(nameof(IsInventory));
             OnPropertyChanged(nameof(IsAbilities));
             OnPropertyChanged(nameof(IsNetwork));
+            OnPropertyChanged(nameof(IsLedger));
         }
 
         // ---------- sections ----------
@@ -236,6 +238,7 @@ namespace Chummer.Desktop.ViewModels
             List<InventoryGroupViewModel> lstNetwork = AbilityCards.Network(Character);
             List<ContactCardViewModel> lstContacts = Character.Contacts.ToList().Select(x => new ContactCardViewModel(this, x))
                                                               .OrderByDescending(x => x.Connection + x.Loyalty).ThenBy(x => x.Name, StringComparer.CurrentCulture).ToList();
+            Ledger.Load();
             OnUi(() =>
             {
                 Reset(Attributes, lstAttributes);

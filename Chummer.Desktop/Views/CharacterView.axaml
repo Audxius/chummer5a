@@ -110,6 +110,8 @@
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Network}" />
           <ToggleButton Classes="section" Content="INFO &amp; NOTES" IsChecked="{Binding IsNotes, Mode=OneWay}"
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Notes}" />
+          <ToggleButton Classes="section" Content="LEDGER" IsChecked="{Binding IsLedger, Mode=OneWay}" IsVisible="{Binding Ledger.IsCareer}"
+                        Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Ledger}" />
         </StackPanel>
       </StackPanel>
     </Border>
@@ -131,6 +133,8 @@
       <sections:ContactsSectionView IsVisible="{Binding IsNetwork}" />
 
       <sections:NotesSectionView IsVisible="{Binding IsNotes}" />
+
+      <sections:LedgerSectionView IsVisible="{Binding IsLedger}" />
     </Grid>
   </DockPanel>
 </UserControl>
