@@ -13,13 +13,25 @@
             BorderThickness="0,0,0,1" Padding="28,20,28,0">
       <StackPanel>
         <Grid ColumnDefinitions="Auto,*,Auto">
-          <Border Width="88" Height="88" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource CyanBrush}"
-                  BorderThickness="1" ClipToBounds="True" BoxShadow="0 0 16 0 #3300E5FF">
-            <Grid>
-              <PathIcon Data="{StaticResource Icon.Overview}" Width="44" Height="44" Classes="muted" />
-              <Image Source="{Binding Portrait}" Stretch="UniformToFill" />
-            </Grid>
-          </Border>
+          <Button Classes="portrait" Padding="0" BorderThickness="0" Background="Transparent" Cursor="Hand"
+                  ToolTip.Tip="Click to set or change the portrait">
+            <Button.Flyout>
+              <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                <MenuItem Header="Choose portrait image…" Command="{Binding ChangePortraitCommand}" />
+                <MenuItem Header="Remove portrait" Command="{Binding RemovePortraitCommand}" IsEnabled="{Binding HasPortrait}" />
+              </MenuFlyout>
+            </Button.Flyout>
+            <Border Width="88" Height="88" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource CyanBrush}"
+                    BorderThickness="1" ClipToBounds="True" BoxShadow="0 0 16 0 #3300E5FF">
+              <Grid>
+                <StackPanel IsVisible="{Binding !HasPortrait}" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="4">
+                  <PathIcon Data="{StaticResource Icon.Overview}" Width="36" Height="36" Classes="muted" />
+                  <TextBlock Text="+ PHOTO" FontSize="9" LetterSpacing="1" Classes="muted" HorizontalAlignment="Center" />
+                </StackPanel>
+                <Image Source="{Binding Portrait}" Stretch="UniformToFill" />
+              </Grid>
+            </Border>
+          </Button>
           <StackPanel Grid.Column="1" Margin="20,2,0,0" Spacing="4">
             <TextBlock Text="{Binding Name}" Classes="h1" />
             <StackPanel Orientation="Horizontal" Spacing="10">

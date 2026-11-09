@@ -3,79 +3,90 @@
              xmlns:vm="using:Chummer.Desktop.ViewModels"
              xmlns:loc="using:Chummer.Desktop.Localization"
              xmlns:conv="using:Chummer.Desktop.Converters"
+             xmlns:controls="using:Chummer.Desktop.Views.Controls"
              x:Class="Chummer.Desktop.Views.Sections.AttributesSectionView"
              x:DataType="vm:CharacterViewModel">
+  <UserControl.Resources>
+    <!-- One attribute as an aligned row: icon, name, rating pips, value (augmented), raise action. -->
+    <DataTemplate x:Key="AttributeRow" x:DataType="vm:AttributeViewModel">
+      <Border Classes="attrrow" ToolTip.Tip="{Binding Breakdown}">
+        <Grid ColumnDefinitions="34,*,Auto,86,Auto">
+          <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="20" Height="20" VerticalAlignment="Center" />
+          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="{Binding Abbrev}" FontWeight="Black" FontSize="15" LetterSpacing="1" />
+              <TextBlock Text="{Binding LongName}" Classes="muted" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock Text="{Binding RangeText}" Classes="muted" FontSize="10" />
+          </StackPanel>
+          <ItemsControl Grid.Column="2" ItemsSource="{Binding Pips}" VerticalAlignment="Center" Margin="12,0">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="3" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="x:Boolean"><Border Classes="attrpip" Classes.on="{Binding}" /></DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right" VerticalAlignment="Center">
+            <TextBlock Text="{Binding ValueText}" FontSize="26" FontWeight="Black" />
+            <TextBlock Text="{Binding AugmentedText}" IsVisible="{Binding IsAugmented}" FontSize="15" FontWeight="Bold"
+                       Foreground="{StaticResource CyanBrush}" VerticalAlignment="Center" ToolTip.Tip="Augmented value" />
+          </StackPanel>
+          <!-- Career: one button with the karma cost; create: -/+ -->
+          <Panel Grid.Column="4" Width="150" Margin="12,0,0,0" VerticalAlignment="Center">
+            <Button IsVisible="{Binding IsCareer}" Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                    Command="{Binding ImproveCommand}" IsEnabled="{Binding CanImprove}" ToolTip.Tip="{Binding QuickRaiseTip}" ToolTip.ShowOnDisabled="True">
+              <TextBlock Text="{Binding ImproveButtonText}" FontWeight="Bold" FontSize="11" />
+            </Button>
+            <Grid IsVisible="{Binding IsCreate}" ColumnDefinitions="Auto,*,Auto">
+              <Button Classes="step" Content="−" Command="{Binding LowerCommand}" ToolTip.Tip="Lower by 1 (karma points first)" />
+              <TextBlock Grid.Column="1" Text="{Binding PointsText}" Classes="muted" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+              <Button Grid.Column="2" Classes="step" Content="+" Command="{Binding RaiseCommand}" ToolTip.Tip="Raise by 1 (priority points first, then karma)" />
+            </Grid>
+          </Panel>
+        </Grid>
+      </Border>
+    </DataTemplate>
+  </UserControl.Resources>
+
   <ScrollViewer>
-    <StackPanel Margin="28,22" Spacing="18">
-      <ItemsControl ItemsSource="{Binding Attributes}">
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="vm:AttributeViewModel">
-            <Border Classes="panel lit" Width="200" Margin="0,0,14,14">
-              <StackPanel Spacing="6">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                  <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="22" Height="22" />
-                  <TextBlock Text="{Binding Abbrev}" Classes="h2" VerticalAlignment="Center" />
-                </StackPanel>
-                <TextBlock Text="{Binding Name}" Classes="muted" />
-                <StackPanel Orientation="Horizontal" Spacing="6">
-                  <TextBlock Text="{Binding Display}" Classes="value" FontSize="30" />
-                  <TextBlock Text="{Binding MaximumText}" Classes="muted" VerticalAlignment="Bottom" Margin="0,0,0,6" />
-                </StackPanel>
-                <ProgressBar Minimum="0" Maximum="1" Value="{Binding Fill}" Height="4"
-                             Foreground="{StaticResource CyanBrush}" Background="{StaticResource SurfaceBrush}" />
-                <StackPanel IsVisible="{Binding IsCareer}" Spacing="6">
-                  <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                          Command="{Binding ImproveCommand}" IsEnabled="{Binding CanImprove}" ToolTip.Tip="{Binding QuickRaiseTip}" ToolTip.ShowOnDisabled="True">
-                    <TextBlock Text="{Binding ImproveButtonText}" FontWeight="Bold" />
-                  </Button>
-                  <Button Classes="hot" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsVisible="{Binding CanBurnEdge}"
-                          Command="{Binding BurnEdgeCommand}" Content="BURN 1 EDGE" ToolTip.Tip="Permanently lose a point of Edge" />
-                </StackPanel>
-                <Grid IsVisible="{Binding IsCreate}" ColumnDefinitions="Auto,*,Auto">
-                  <Button Classes="ghost" Content="−" Width="30" HorizontalContentAlignment="Center" Command="{Binding LowerCommand}" ToolTip.Tip="Lower by 1 (karma points first)" />
-                  <TextBlock Grid.Column="1" Text="{Binding PointsText}" Classes="muted" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                  <Button Grid.Column="2" Classes="primary" Content="+" Width="30" HorizontalContentAlignment="Center" Command="{Binding RaiseCommand}" ToolTip.Tip="Raise by 1 (priority points first, then karma)" />
-                </Grid>
-              </StackPanel>
-            </Border>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-      <ItemsControl ItemsSource="{Binding SpecialAttributes}">
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="vm:AttributeViewModel">
-            <Border Classes="panel hot" Width="200" Margin="0,0,14,14">
-              <StackPanel Spacing="6">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                  <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="22" Height="22" Classes="hot" />
-                  <TextBlock Text="{Binding Abbrev}" Classes="h2" Foreground="{StaticResource MagentaBrush}" VerticalAlignment="Center" />
-                </StackPanel>
-                <TextBlock Text="{Binding Name}" Classes="muted" />
-                <TextBlock Text="{Binding Display}" Classes="value" FontSize="30" />
-                <StackPanel IsVisible="{Binding IsCareer}" Spacing="6">
-                  <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                          Command="{Binding ImproveCommand}" IsEnabled="{Binding CanImprove}" ToolTip.Tip="{Binding QuickRaiseTip}" ToolTip.ShowOnDisabled="True">
-                    <TextBlock Text="{Binding ImproveButtonText}" FontWeight="Bold" />
-                  </Button>
-                  <Button Classes="hot" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsVisible="{Binding CanBurnEdge}"
-                          Command="{Binding BurnEdgeCommand}" Content="BURN 1 EDGE" ToolTip.Tip="Permanently lose a point of Edge" />
-                </StackPanel>
-                <Grid IsVisible="{Binding IsCreate}" ColumnDefinitions="Auto,*,Auto">
-                  <Button Classes="ghost" Content="−" Width="30" HorizontalContentAlignment="Center" Command="{Binding LowerCommand}" ToolTip.Tip="Lower by 1 (karma points first)" />
-                  <TextBlock Grid.Column="1" Text="{Binding PointsText}" Classes="muted" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                  <Button Grid.Column="2" Classes="primary" Content="+" Width="30" HorizontalContentAlignment="Center" Command="{Binding RaiseCommand}" ToolTip.Tip="Raise by 1 (priority points first, then karma)" />
-                </Grid>
-              </StackPanel>
-            </Border>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
+    <StackPanel Margin="28,22" Spacing="20" MaxWidth="1400" HorizontalAlignment="Left">
+      <Grid ColumnDefinitions="*,24,*">
+        <Border Classes="panel lit">
+          <StackPanel Spacing="4">
+            <TextBlock Text="PHYSICAL" Classes="h2" Margin="0,0,0,6" />
+            <ItemsControl ItemsSource="{Binding PhysicalAttributes}" ItemTemplate="{StaticResource AttributeRow}" />
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="2" Classes="panel lit">
+          <StackPanel Spacing="4">
+            <TextBlock Text="MENTAL" Classes="h2" Margin="0,0,0,6" />
+            <ItemsControl ItemsSource="{Binding MentalAttributes}" ItemTemplate="{StaticResource AttributeRow}" />
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <Grid ColumnDefinitions="*,24,*">
+        <Border Classes="panel hot">
+          <StackPanel Spacing="4">
+            <TextBlock Text="SPECIAL" Classes="h2" Foreground="{StaticResource MagentaBrush}" Margin="0,0,0,6" />
+            <ItemsControl ItemsSource="{Binding SpecialAttributes}" ItemTemplate="{StaticResource AttributeRow}" />
+            <ItemsControl ItemsSource="{Binding SpecialAttributes}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:AttributeViewModel">
+                  <Button IsVisible="{Binding CanBurnEdge}" Classes="hot" HorizontalAlignment="Right" Margin="0,4,0,0"
+                          Command="{Binding BurnEdgeCommand}" Content="BURN 1 EDGE PERMANENTLY" ToolTip.Tip="Burning Edge lowers the attribute itself (to survive certain death)." />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+        <Border Grid.Column="2" Classes="panel hot">
+          <StackPanel Spacing="10">
+            <TextBlock Text="EDGE THIS SESSION" Classes="h2" Foreground="{StaticResource MagentaBrush}" />
+            <TextBlock Text="Spend points during play; refresh them when the GM says so. This doesn't change the Edge attribute." Classes="muted" TextWrapping="Wrap" />
+            <controls:EdgePoolView />
+          </StackPanel>
+        </Border>
+      </Grid>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

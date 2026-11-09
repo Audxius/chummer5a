@@ -119,6 +119,12 @@ namespace Chummer.Desktop.ViewModels
         public string SearchText => string.Join(" ", new[] { Name, Role, Location, Notes }.Concat(Facts.Select(x => x.Value)).Concat(Tags));
 
         [RelayCommand]
+        private Task Edit() => _objOwner.EditContactAsync(_objContact);
+
+        [RelayCommand]
+        private Task Delete() => _objOwner.DeleteContactAsync(_objContact);
+
+        [RelayCommand]
         private Task ConnectionUp() => ChangeAsync(Connection + 1, true);
 
         [RelayCommand]

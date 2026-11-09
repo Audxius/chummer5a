@@ -124,4 +124,43 @@
       <Setter Property="Padding" Value="16,10" />
       <Setter Property="MinWidth" Value="150" />
     </Style>
+    <Style Selector="Border.edgepip">
+      <Setter Property="Width" Value="16" />
+      <Setter Property="Height" Value="16" />
+      <Setter Property="Margin" Value="2,2,8,8" />
+      <Setter Property="RenderTransform" Value="rotate(45deg)" />
+      <Setter Property="BorderThickness" Value="1.5" />
+      <Setter Property="BorderBrush" Value="{StaticResource MagentaBrush}" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Border.edgepip.on">
+      <Setter Property="Background" Value="{StaticResource MagentaBrush}" />
+      <Setter Property="BoxShadow" Value="0 0 8 0 #66FF2E88" />
+    </Style>
+    <Style Selector="Border.attrrow">
+      <Setter Property="Padding" Value="8,8" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Border.attrrow:pointerover">
+      <Setter Property="Background" Value="#0D00E5FF" />
+    </Style>
+    <Style Selector="Border.attrpip">
+      <Setter Property="Width" Value="8" />
+      <Setter Property="Height" Value="16" />
+      <Setter Property="CornerRadius" Value="1" />
+      <Setter Property="Background" Value="{StaticResource BorderBrush}" />
+    </Style>
+    <Style Selector="Border.attrpip.on">
+      <Setter Property="Background" Value="{StaticResource CyanBrush}" />
+    </Style>
+    <Style Selector="Button.step:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+      <Setter Property="Background" Value="#1A00E5FF" />
+    </Style>
+    <Style Selector="Button.step.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+      <Setter Property="Background" Value="#33FF3355" />
+    </Style>
 </Styles>

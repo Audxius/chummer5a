@@ -321,6 +321,7 @@ namespace Chummer.Desktop.ViewModels
 
         partial void OnSelectedRollChanged(RollItemViewModel value)
         {
+            _blnEdgeSpentForSelection = false;
             OnPropertyChanged(nameof(HasSelection));
             OnPropertyChanged(nameof(NeedsWeapon));
             OnPropertyChanged(nameof(NeedsVehicle));
@@ -341,7 +342,14 @@ namespace Chummer.Desktop.ViewModels
         partial void OnSelectedDeviceChanged(ContextOption value) => Evaluate();
         partial void OnSelectedSpiritChanged(ContextOption value) => Evaluate();
         partial void OnModifierChanged(decimal value) => Evaluate();
-        partial void OnUseEdgeChanged(bool value) => Evaluate();
+        partial void OnUseEdgeChanged(bool value)
+        {
+            _blnEdgeSpentForSelection = false;
+            Evaluate();
+        }
+
+        // An Edge roll spends one Edge point the first time it is copied (not again when the same roll is re-copied).
+        private bool _blnEdgeSpentForSelection;
         partial void OnLimitTextChanged(string value) => OnPropertyChanged(nameof(HasLimit));
         partial void OnThresholdTextChanged(string value) => OnPropertyChanged(nameof(HasThreshold));
         partial void OnOpposedTextChanged(string value) => OnPropertyChanged(nameof(HasOpposed));
@@ -457,6 +465,13 @@ namespace Chummer.Desktop.ViewModels
                 await objClipboard.SetTextAsync(Formula).ConfigureAwait(true);
             AddRecent(SelectedRoll.Action);
             string strToast = "COPIED  //  " + SelectedRoll.Name.ToUpper(CultureInfo.CurrentCulture) + "  //  " + Pool.ToString(CultureInfo.CurrentCulture) + (SumSuffix.Length > 0 ? SumSuffix : "d6");
+            if (UseEdge && !_blnEdgeSpentForSelection && SelectedCharacter != null)
+            {
+                _blnEdgeSpentForSelection = true;
+                strToast += await SelectedCharacter.TrySpendEdgeQuietlyAsync().ConfigureAwait(true)
+                    ? "  //  EDGE SPENT (" + Math.Max(0, SelectedCharacter.EdgeRemainingValue - 1).ToString(CultureInfo.CurrentCulture) + " LEFT)"
+                    : "  //  NO EDGE LEFT";
+            }
             Toast = strToast;
             await Task.Delay(2500).ConfigureAwait(true);
             if (Toast == strToast)

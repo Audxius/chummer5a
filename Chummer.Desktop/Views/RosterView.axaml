@@ -44,9 +44,9 @@
             <DataTemplate x:DataType="vm:RosterEntryViewModel">
               <Button Command="{Binding OpenCommand}" Padding="0" Margin="0,0,16,16" BorderThickness="0"
                       ToolTip.Tip="{Binding FilePath}">
-                <Border Classes="panel lit" Width="300" Padding="0">
-                  <Grid ColumnDefinitions="96,*">
-                    <Border Background="{StaticResource SurfaceBrush}" Height="128">
+                <Border Classes="panel lit" Width="340" Padding="0">
+                  <Grid ColumnDefinitions="128,*">
+                    <Border Background="{StaticResource SurfaceBrush}" Width="128" Height="128" ClipToBounds="True">
                       <Grid>
                         <PathIcon Data="{StaticResource Icon.Overview}" Width="48" Height="48" Classes="muted"
                                   IsVisible="{Binding !HasPortrait}" />

@@ -55,6 +55,11 @@ namespace Chummer.Desktop.ViewModels
         private CharacterViewModel(Character objCharacter)
         {
             Character = objCharacter;
+            Attributes.CollectionChanged += (sender, args) =>
+            {
+                OnPropertyChanged(nameof(PhysicalAttributes));
+                OnPropertyChanged(nameof(MentalAttributes));
+            };
         }
 
         public static async Task<CharacterViewModel> CreateAsync(Character objCharacter)
@@ -172,6 +177,8 @@ namespace Chummer.Desktop.ViewModels
 
         public ObservableCollection<AttributeViewModel> Attributes { get; } = new ObservableCollection<AttributeViewModel>();
         public ObservableCollection<AttributeViewModel> SpecialAttributes { get; } = new ObservableCollection<AttributeViewModel>();
+        public IReadOnlyList<AttributeViewModel> PhysicalAttributes => Attributes.Where(x => x.IsPhysical).ToList();
+        public IReadOnlyList<AttributeViewModel> MentalAttributes => Attributes.Where(x => !x.IsPhysical).ToList();
         public ObservableCollection<SkillCategoryViewModel> SkillCategories { get; } = new ObservableCollection<SkillCategoryViewModel>();
         public ObservableCollection<QualityViewModel> PositiveQualities { get; } = new ObservableCollection<QualityViewModel>();
         public ObservableCollection<QualityViewModel> NegativeQualities { get; } = new ObservableCollection<QualityViewModel>();
@@ -279,7 +286,6 @@ namespace Chummer.Desktop.ViewModels
                 new ItemStat("Matrix init. (hot sim)", Character.MatrixInitiativeHot, RollCatalog.MatrixHotRoll),
                 new ItemStat("Armor (damage resistance)", Character.TotalArmorRating.ToString(objCulture), RollCatalog.DamageResistanceRoll),
                 new ItemStat("Wound modifier", Character.WoundModifier.ToString(objCulture)),
-                new ItemStat("Edge", Character.EdgeRemaining.ToString(objCulture) + " / " + (Character.GetAttribute("EDG")?.TotalValue ?? 0).ToString(objCulture)),
                 new ItemStat("Movement", Character.DisplayMovement),
             };
             if (Character.MAGEnabled)
@@ -327,6 +333,7 @@ namespace Chummer.Desktop.ViewModels
                 DerivedStats = lstDerived;
                 Portrait = objPortrait;
             });
+            RefreshEdge();
         }
 
         private void ApplySkillFilter()
@@ -510,6 +517,11 @@ namespace Chummer.Desktop.ViewModels
             Total = objAttribute.TotalValue;
             Maximum = objAttribute.TotalMaximum;
             Display = objAttribute.DisplayValue;
+            LongName = objAttribute.DisplayNameLong(GlobalSettings.Language);
+            Minimum = objAttribute.TotalMinimum;
+            AugmentedMaximum = objAttribute.TotalAugmentedMaximum;
+            IsPhysical = Abbrev == "BOD" || Abbrev == "AGI" || Abbrev == "REA" || Abbrev == "STR";
+            Breakdown = objAttribute.ToolTip;
             IconKey = "Icon." + (Abbrev == "MAGAdept" ? "MAG" : Abbrev);
             Fill = Maximum > 0 ? Math.Min(1.0, Total / (double)Maximum) : 0;
         }
@@ -526,6 +538,17 @@ namespace Chummer.Desktop.ViewModels
         public double Fill { get; }
 
         public string MaximumText => "/ " + Maximum.ToString(GlobalSettings.CultureInfo);
+        public string LongName { get; }
+        public int Minimum { get; }
+        public int AugmentedMaximum { get; }
+        public bool IsPhysical { get; }
+        public string Breakdown { get; } = string.Empty;
+        public bool IsAugmented => Total != Value;
+        public string ValueText => Value.ToString(GlobalSettings.CultureInfo);
+        public string AugmentedText => "(" + Total.ToString(GlobalSettings.CultureInfo) + ")";
+        public string RangeText => "range " + Minimum.ToString(GlobalSettings.CultureInfo) + "–" + Maximum.ToString(GlobalSettings.CultureInfo) + (AugmentedMaximum > Maximum ? "  //  aug. max " + AugmentedMaximum.ToString(GlobalSettings.CultureInfo) : string.Empty);
+        /// <summary>Rating pips from 1 to the natural maximum; filled up to the natural value.</summary>
+        public IReadOnlyList<bool> Pips => Enumerable.Range(1, Math.Max(1, Maximum)).Select(x => x <= Value).ToList();
 
         // ---------- editing ----------
 

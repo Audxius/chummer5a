@@ -3,6 +3,7 @@
              xmlns:vm="using:Chummer.Desktop.ViewModels"
              xmlns:loc="using:Chummer.Desktop.Localization"
              xmlns:conv="using:Chummer.Desktop.Converters"
+             xmlns:controls="using:Chummer.Desktop.Views.Controls"
              x:Class="Chummer.Desktop.Views.Sections.OverviewSectionView"
              x:DataType="vm:CharacterViewModel">
   <ScrollViewer>
@@ -36,6 +37,7 @@
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
             </StackPanel>
+            <controls:EdgePoolView />
           </StackPanel>
           <StackPanel Grid.Column="1" Spacing="8" Margin="20,0">
             <TextBlock Text="COMBAT" Classes="h2" />

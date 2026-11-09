@@ -7,7 +7,11 @@
     <DataTemplate x:Key="ContactCard" x:DataType="vm:ContactCardViewModel">
       <Border Classes="dossier" Classes.enemy="{Binding IsEnemy}" Width="360" Margin="0,0,12,12" Padding="14,12">
         <StackPanel Spacing="10">
-          <Grid ColumnDefinitions="Auto,*">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Top" Margin="8,0,0,0">
+              <Button Classes="step" Content="✎" Command="{Binding EditCommand}" ToolTip.Tip="Edit every detail" />
+              <Button Classes="step danger" Content="✕" Command="{Binding DeleteCommand}" ToolTip.Tip="Delete" />
+            </StackPanel>
             <Border Classes="avatar" Width="46" Height="46" CornerRadius="23" Margin="0,0,12,0" VerticalAlignment="Top">
               <TextBlock Text="{Binding Initials}" FontWeight="Black" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
