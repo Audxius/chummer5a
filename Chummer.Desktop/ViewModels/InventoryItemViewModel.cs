@@ -98,6 +98,25 @@ namespace Chummer.Desktop.ViewModels
         private static string Src(string strSource, string strPage)
             => string.IsNullOrEmpty(strSource) ? string.Empty : (strSource + " " + strPage).Trim();
 
+        /// <summary>A generic card (spell, power, contact...) using the same tile and hover card as items.</summary>
+        public static InventoryItemViewModel Card(string strName, string strCategory, string strIconKey, string strHeadline, string strBadge,
+                                                 IEnumerable<ItemStat> lstStats, string strNotes = "", string strSource = "", IEnumerable<string> lstContents = null)
+        {
+            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Gear, strName, strCategory, strIconKey)
+            {
+                Headline = strHeadline ?? string.Empty,
+                Badge = strBadge ?? string.Empty,
+                Notes = strNotes ?? string.Empty,
+                Source = strSource ?? string.Empty,
+            };
+            if (lstStats != null)
+                objReturn.Stats.AddRange(lstStats.Where(x => !string.IsNullOrEmpty(x.Value)));
+            if (lstContents != null)
+                objReturn.Contents.AddRange(lstContents);
+            objReturn.Finish();
+            return objReturn;
+        }
+
         // ---------- factories ----------
 
         public static IEnumerable<InventoryItemViewModel> FromCharacter(Character objCharacter)
@@ -370,9 +389,17 @@ namespace Chummer.Desktop.ViewModels
             Items = lstItems.ToList();
         }
 
+        public InventoryGroupViewModel(string strTitle, IEnumerable<InventoryItemViewModel> lstItems)
+        {
+            _strTitle = strTitle;
+            Items = lstItems.ToList();
+        }
+
+        private readonly string _strTitle;
+
         public InventoryKind Kind { get; }
         public List<InventoryItemViewModel> Items { get; }
-        public string Name => Title(Kind);
+        public string Name => _strTitle ?? Title(Kind);
         public string CountText => Items.Count.ToString(CultureInfo.CurrentCulture);
 
         public static string Title(InventoryKind eKind)

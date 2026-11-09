@@ -41,6 +41,8 @@ namespace Chummer.Desktop.ViewModels
         Skills,
         Qualities,
         Inventory,
+        Abilities,
+        Network,
         Notes
     }
 
@@ -83,6 +85,8 @@ namespace Chummer.Desktop.ViewModels
         [ObservableProperty] private string _inventoryFilter = string.Empty;
         [ObservableProperty] private InventoryKind? _inventoryKind;
         [ObservableProperty] private string _inventorySummary = string.Empty;
+        [ObservableProperty] private string _abilityFilter = string.Empty;
+        [ObservableProperty] private string _networkFilter = string.Empty;
 
         public string TabTitle => (IsDirty ? "● " : string.Empty) + Name;
 
@@ -98,11 +102,18 @@ namespace Chummer.Desktop.ViewModels
 
         partial void OnInventoryKindChanged(InventoryKind? value) => ApplyInventoryFilter();
 
+        partial void OnAbilityFilterChanged(string value) => FilterCards(_lstAllAbilities, AbilityGroups, value);
+
+        partial void OnNetworkFilterChanged(string value) => FilterCards(_lstAllNetwork, NetworkGroups, value);
+
         public bool IsOverview => Section == CharacterSection.Overview;
         public bool IsAttributes => Section == CharacterSection.Attributes;
         public bool IsSkills => Section == CharacterSection.Skills;
         public bool IsQualities => Section == CharacterSection.Qualities;
         public bool IsInventory => Section == CharacterSection.Inventory;
+        public bool IsAbilities => Section == CharacterSection.Abilities;
+        public bool IsNetwork => Section == CharacterSection.Network;
+        public bool HasAbilities => _lstAllAbilities.Count > 0;
         public bool IsNotes => Section == CharacterSection.Notes;
 
         partial void OnSectionChanged(CharacterSection value)
@@ -113,6 +124,8 @@ namespace Chummer.Desktop.ViewModels
             OnPropertyChanged(nameof(IsQualities));
             OnPropertyChanged(nameof(IsNotes));
             OnPropertyChanged(nameof(IsInventory));
+            OnPropertyChanged(nameof(IsAbilities));
+            OnPropertyChanged(nameof(IsNetwork));
         }
 
         // ---------- sections ----------
@@ -133,6 +146,10 @@ namespace Chummer.Desktop.ViewModels
 
         public ObservableCollection<InventoryGroupViewModel> InventoryGroups { get; } = new ObservableCollection<InventoryGroupViewModel>();
         public ObservableCollection<InventoryFilterOption> InventoryKinds { get; } = new ObservableCollection<InventoryFilterOption>();
+        public ObservableCollection<InventoryGroupViewModel> AbilityGroups { get; } = new ObservableCollection<InventoryGroupViewModel>();
+        public ObservableCollection<InventoryGroupViewModel> NetworkGroups { get; } = new ObservableCollection<InventoryGroupViewModel>();
+        private List<InventoryGroupViewModel> _lstAllAbilities = new List<InventoryGroupViewModel>();
+        private List<InventoryGroupViewModel> _lstAllNetwork = new List<InventoryGroupViewModel>();
 
         private void LoadSnapshot()
         {
@@ -153,6 +170,8 @@ namespace Chummer.Desktop.ViewModels
             string strBackground = Character.Background.RtfToPlainText();
             string strNotes = Character.Notes.RtfToPlainText();
             List<InventoryItemViewModel> lstInventory = InventoryItemViewModel.FromCharacter(Character).ToList();
+            List<InventoryGroupViewModel> lstAbilities = AbilityCards.Abilities(Character);
+            List<InventoryGroupViewModel> lstNetwork = AbilityCards.Network(Character);
             OnUi(() =>
             {
                 Reset(Attributes, lstAttributes);
@@ -168,6 +187,11 @@ namespace Chummer.Desktop.ViewModels
                 _lstAllInventory = lstInventory;
                 RefreshInventoryKinds();
                 ApplyInventoryFilter();
+                _lstAllAbilities = lstAbilities;
+                _lstAllNetwork = lstNetwork;
+                OnPropertyChanged(nameof(HasAbilities));
+                FilterCards(_lstAllAbilities, AbilityGroups, AbilityFilter);
+                FilterCards(_lstAllNetwork, NetworkGroups, NetworkFilter);
             });
         }
 
@@ -224,6 +248,23 @@ namespace Chummer.Desktop.ViewModels
             {
                 if (objCategory.ApplyFilter(strFilter, ShowUntrainedSkills))
                     SkillCategories.Add(objCategory);
+            }
+        }
+
+        private static void FilterCards(List<InventoryGroupViewModel> lstAll, ObservableCollection<InventoryGroupViewModel> lstTarget, string strFilter)
+        {
+            string[] astrWords = (strFilter ?? string.Empty).ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            lstTarget.Clear();
+            foreach (InventoryGroupViewModel objGroup in lstAll)
+            {
+                if (astrWords.Length == 0)
+                {
+                    lstTarget.Add(objGroup);
+                    continue;
+                }
+                List<InventoryItemViewModel> lstItems = objGroup.Items.Where(x => astrWords.All(w => x.SearchText.Contains(w))).ToList();
+                if (lstItems.Count > 0)
+                    lstTarget.Add(new InventoryGroupViewModel(objGroup.Name, lstItems));
             }
         }
 

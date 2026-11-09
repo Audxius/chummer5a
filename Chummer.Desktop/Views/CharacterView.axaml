@@ -7,6 +7,79 @@
              x:DataType="vm:CharacterViewModel">
   <UserControl.Resources>
     <conv:IconKeyConverter x:Key="Icon" />
+    <DataTemplate x:Key="CardGroup" x:DataType="vm:InventoryGroupViewModel">
+      <StackPanel Spacing="8" Margin="0,0,0,18">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <TextBlock Text="{Binding Name}" Classes="h2" />
+          <TextBlock Text="{Binding CountText}" Classes="label" VerticalAlignment="Center" />
+        </StackPanel>
+        <ItemsControl ItemsSource="{Binding Items}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:InventoryItemViewModel">
+              <Border Classes="tile" Opacity="{Binding Opacity}" ToolTip.Placement="Right" ToolTip.ShowDelay="250">
+                <ToolTip.Tip>
+                  <StackPanel Width="320" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="28" Height="28" />
+                      <StackPanel>
+                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="15" TextWrapping="Wrap" MaxWidth="270" />
+                        <TextBlock Text="{Binding Category}" Classes="label" />
+                      </StackPanel>
+                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding Stats}">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <WrapPanel />
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ItemStat">
+                          <StackPanel Width="100" Margin="0,0,4,6">
+                            <TextBlock Text="{Binding Label}" Classes="label" />
+                            <TextBlock Text="{Binding Value}" FontWeight="SemiBold" Foreground="{StaticResource CyanBrush}" TextTrimming="CharacterEllipsis" />
+                          </StackPanel>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{Binding ContentsText}" IsVisible="{Binding HasContents}" TextWrapping="Wrap" FontSize="12" />
+                    <TextBlock Text="{Binding Notes}" IsVisible="{Binding HasNotes}" TextWrapping="Wrap" Classes="muted" FontSize="12" MaxHeight="120" />
+                    <Grid ColumnDefinitions="*,*,*">
+                      <StackPanel>
+                        <TextBlock Text="COST" Classes="label" />
+                        <TextBlock Text="{Binding Cost}" Foreground="{StaticResource YellowBrush}" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="1">
+                        <TextBlock Text="AVAIL" Classes="label" />
+                        <TextBlock Text="{Binding Avail}" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="2">
+                        <TextBlock Text="SOURCE" Classes="label" />
+                        <TextBlock Text="{Binding Source}" />
+                      </StackPanel>
+                    </Grid>
+                  </StackPanel>
+                </ToolTip.Tip>
+                <Grid RowDefinitions="Auto,*,Auto">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="30" Height="30" HorizontalAlignment="Left" />
+                    <Border Grid.Column="1" Classes="chip" IsVisible="{Binding HasBadge}" VerticalAlignment="Top">
+                      <TextBlock Text="{Binding Badge}" FontSize="10" Foreground="{StaticResource CyanBrush}" />
+                    </Border>
+                  </Grid>
+                  <TextBlock Grid.Row="1" Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Margin="0,8,0,4" Foreground="{StaticResource TextBrush}" VerticalAlignment="Top" />
+                  <TextBlock Grid.Row="2" Text="{Binding Headline}" Classes="label" TextTrimming="CharacterEllipsis" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </DataTemplate>
   </UserControl.Resources>
   <UserControl.Styles>
     <Style Selector="ToggleButton.section">
@@ -117,6 +190,10 @@
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Qualities}" />
           <ToggleButton Classes="section" Content="INVENTORY" IsChecked="{Binding IsInventory, Mode=OneWay}"
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Inventory}" />
+          <ToggleButton Classes="section" Content="ABILITIES" IsChecked="{Binding IsAbilities, Mode=OneWay}"
+                        Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Abilities}" />
+          <ToggleButton Classes="section" Content="CONTACTS" IsChecked="{Binding IsNetwork, Mode=OneWay}"
+                        Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Network}" />
           <ToggleButton Classes="section" Content="{loc:Tr Tab_Notes, Case=upper}" IsChecked="{Binding IsNotes, Mode=OneWay}"
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Notes}" />
         </StackPanel>
@@ -363,83 +440,36 @@
           </ItemsControl>
         </StackPanel>
         <ScrollViewer>
-          <ItemsControl ItemsSource="{Binding InventoryGroups}" Margin="0,0,0,22">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="vm:InventoryGroupViewModel">
-                <StackPanel Spacing="8" Margin="0,0,0,18">
-                  <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="{Binding Name}" Classes="h2" />
-                    <TextBlock Text="{Binding CountText}" Classes="label" VerticalAlignment="Center" />
-                  </StackPanel>
-                  <ItemsControl ItemsSource="{Binding Items}">
-                    <ItemsControl.ItemsPanel>
-                      <ItemsPanelTemplate>
-                        <WrapPanel />
-                      </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate x:DataType="vm:InventoryItemViewModel">
-                        <Border Classes="tile" Opacity="{Binding Opacity}" ToolTip.Placement="Right" ToolTip.ShowDelay="250">
-                          <ToolTip.Tip>
-                            <StackPanel Width="320" Spacing="8">
-                              <StackPanel Orientation="Horizontal" Spacing="10">
-                                <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="28" Height="28" />
-                                <StackPanel>
-                                  <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="15" TextWrapping="Wrap" MaxWidth="270" />
-                                  <TextBlock Text="{Binding Category}" Classes="label" />
-                                </StackPanel>
-                              </StackPanel>
-                              <ItemsControl ItemsSource="{Binding Stats}">
-                                <ItemsControl.ItemsPanel>
-                                  <ItemsPanelTemplate>
-                                    <WrapPanel />
-                                  </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                  <DataTemplate x:DataType="vm:ItemStat">
-                                    <StackPanel Width="100" Margin="0,0,4,6">
-                                      <TextBlock Text="{Binding Label}" Classes="label" />
-                                      <TextBlock Text="{Binding Value}" FontWeight="SemiBold" Foreground="{StaticResource CyanBrush}" TextTrimming="CharacterEllipsis" />
-                                    </StackPanel>
-                                  </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                              </ItemsControl>
-                              <TextBlock Text="{Binding ContentsText}" IsVisible="{Binding HasContents}" TextWrapping="Wrap" FontSize="12" />
-                              <TextBlock Text="{Binding Notes}" IsVisible="{Binding HasNotes}" TextWrapping="Wrap" Classes="muted" FontSize="12" MaxHeight="120" />
-                              <Grid ColumnDefinitions="*,*,*">
-                                <StackPanel>
-                                  <TextBlock Text="COST" Classes="label" />
-                                  <TextBlock Text="{Binding Cost}" Foreground="{StaticResource YellowBrush}" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="1">
-                                  <TextBlock Text="AVAIL" Classes="label" />
-                                  <TextBlock Text="{Binding Avail}" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="2">
-                                  <TextBlock Text="SOURCE" Classes="label" />
-                                  <TextBlock Text="{Binding Source}" />
-                                </StackPanel>
-                              </Grid>
-                            </StackPanel>
-                          </ToolTip.Tip>
-                          <Grid RowDefinitions="Auto,*,Auto">
-                            <Grid ColumnDefinitions="*,Auto">
-                              <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="30" Height="30" HorizontalAlignment="Left" />
-                              <Border Grid.Column="1" Classes="chip" IsVisible="{Binding HasBadge}" VerticalAlignment="Top">
-                                <TextBlock Text="{Binding Badge}" FontSize="10" Foreground="{StaticResource CyanBrush}" />
-                              </Border>
-                            </Grid>
-                            <TextBlock Grid.Row="1" Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Margin="0,8,0,4" Foreground="{StaticResource TextBrush}" VerticalAlignment="Top" />
-                            <TextBlock Grid.Row="2" Text="{Binding Headline}" Classes="label" TextTrimming="CharacterEllipsis" />
-                          </Grid>
-                        </Border>
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
-                </StackPanel>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
+          <ItemsControl ItemsSource="{Binding InventoryGroups}" ItemTemplate="{StaticResource CardGroup}" Margin="0,0,0,22">
           </ItemsControl>
+        </ScrollViewer>
+      </DockPanel>
+
+      <!-- Abilities -->
+      <DockPanel IsVisible="{Binding IsAbilities}" Margin="28,22,28,0">
+        <Grid DockPanel.Dock="Top" Margin="0,0,0,14">
+          <TextBox Text="{Binding AbilityFilter}" PlaceholderText="Search spells, powers, forms, techniques…" Padding="40,9,10,9" />
+          <PathIcon Data="{StaticResource Icon.Search}" Width="15" Height="15" HorizontalAlignment="Left" Margin="14,0,0,0" Classes="muted" IsHitTestVisible="False" />
+        </Grid>
+        <Grid>
+          <StackPanel IsVisible="{Binding !HasAbilities}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+            <PathIcon Data="{StaticResource Icon.Spell}" Width="40" Height="40" Classes="muted" />
+            <TextBlock Text="No spells, powers or other abilities." Classes="muted" />
+          </StackPanel>
+          <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding AbilityGroups}" ItemTemplate="{StaticResource CardGroup}" Margin="0,0,0,22" />
+          </ScrollViewer>
+        </Grid>
+      </DockPanel>
+
+      <!-- Contacts / spirits -->
+      <DockPanel IsVisible="{Binding IsNetwork}" Margin="28,22,28,0">
+        <Grid DockPanel.Dock="Top" Margin="0,0,0,14">
+          <TextBox Text="{Binding NetworkFilter}" PlaceholderText="Search contacts, spirits, sprites…" Padding="40,9,10,9" />
+          <PathIcon Data="{StaticResource Icon.Search}" Width="15" Height="15" HorizontalAlignment="Left" Margin="14,0,0,0" Classes="muted" IsHitTestVisible="False" />
+        </Grid>
+        <ScrollViewer>
+          <ItemsControl ItemsSource="{Binding NetworkGroups}" ItemTemplate="{StaticResource CardGroup}" Margin="0,0,0,22" />
         </ScrollViewer>
       </DockPanel>
 
