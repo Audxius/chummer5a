@@ -10,11 +10,13 @@
   <Application.Styles>
     <FluentTheme />
     <StyleInclude Source="avares://chummer/Theme/NeonNoir.axaml" />
+    <StyleInclude Source="avares://chummer/Theme/Sheet.axaml" />
   </Application.Styles>
   <Application.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="avares://chummer/Theme/Icons.axaml" />
+        <ResourceInclude Source="avares://chummer/Theme/SheetResources.axaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

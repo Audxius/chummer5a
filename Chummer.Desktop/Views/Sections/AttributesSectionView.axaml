@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Chummer.Desktop.ViewModels"
+             xmlns:loc="using:Chummer.Desktop.Localization"
+             xmlns:conv="using:Chummer.Desktop.Converters"
+             x:Class="Chummer.Desktop.Views.Sections.AttributesSectionView"
+             x:DataType="vm:CharacterViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="28,22" Spacing="18">
+      <ItemsControl ItemsSource="{Binding Attributes}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:AttributeViewModel">
+            <Border Classes="panel lit" Width="200" Margin="0,0,14,14">
+              <StackPanel Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="22" Height="22" />
+                  <TextBlock Text="{Binding Abbrev}" Classes="h2" VerticalAlignment="Center" />
+                </StackPanel>
+                <TextBlock Text="{Binding Name}" Classes="muted" />
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <TextBlock Text="{Binding Display}" Classes="value" FontSize="30" />
+                  <TextBlock Text="{Binding MaximumText}" Classes="muted" VerticalAlignment="Bottom" Margin="0,0,0,6" />
+                </StackPanel>
+                <ProgressBar Minimum="0" Maximum="1" Value="{Binding Fill}" Height="4"
+                             Foreground="{StaticResource CyanBrush}" Background="{StaticResource SurfaceBrush}" />
+                <StackPanel IsVisible="{Binding IsCareer}" Spacing="6">
+                  <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                          Command="{Binding ImproveCommand}" IsEnabled="{Binding CanImprove}" ToolTip.Tip="{Binding QuickRaiseTip}" ToolTip.ShowOnDisabled="True">
+                    <TextBlock Text="{Binding ImproveButtonText}" FontWeight="Bold" />
+                  </Button>
+                  <Button Classes="hot" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsVisible="{Binding CanBurnEdge}"
+                          Command="{Binding BurnEdgeCommand}" Content="BURN 1 EDGE" ToolTip.Tip="Permanently lose a point of Edge" />
+                </StackPanel>
+                <Grid IsVisible="{Binding IsCreate}" ColumnDefinitions="Auto,*,Auto">
+                  <Button Classes="ghost" Content="−" Width="30" HorizontalContentAlignment="Center" Command="{Binding LowerCommand}" ToolTip.Tip="Lower by 1 (karma points first)" />
+                  <TextBlock Grid.Column="1" Text="{Binding PointsText}" Classes="muted" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  <Button Grid.Column="2" Classes="primary" Content="+" Width="30" HorizontalContentAlignment="Center" Command="{Binding RaiseCommand}" ToolTip.Tip="Raise by 1 (priority points first, then karma)" />
+                </Grid>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <ItemsControl ItemsSource="{Binding SpecialAttributes}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:AttributeViewModel">
+            <Border Classes="panel hot" Width="200" Margin="0,0,14,14">
+              <StackPanel Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="22" Height="22" Classes="hot" />
+                  <TextBlock Text="{Binding Abbrev}" Classes="h2" Foreground="{StaticResource MagentaBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+                <TextBlock Text="{Binding Name}" Classes="muted" />
+                <TextBlock Text="{Binding Display}" Classes="value" FontSize="30" />
+                <StackPanel IsVisible="{Binding IsCareer}" Spacing="6">
+                  <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                          Command="{Binding ImproveCommand}" IsEnabled="{Binding CanImprove}" ToolTip.Tip="{Binding QuickRaiseTip}" ToolTip.ShowOnDisabled="True">
+                    <TextBlock Text="{Binding ImproveButtonText}" FontWeight="Bold" />
+                  </Button>
+                  <Button Classes="hot" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsVisible="{Binding CanBurnEdge}"
+                          Command="{Binding BurnEdgeCommand}" Content="BURN 1 EDGE" ToolTip.Tip="Permanently lose a point of Edge" />
+                </StackPanel>
+                <Grid IsVisible="{Binding IsCreate}" ColumnDefinitions="Auto,*,Auto">
+                  <Button Classes="ghost" Content="−" Width="30" HorizontalContentAlignment="Center" Command="{Binding LowerCommand}" ToolTip.Tip="Lower by 1 (karma points first)" />
+                  <TextBlock Grid.Column="1" Text="{Binding PointsText}" Classes="muted" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  <Button Grid.Column="2" Classes="primary" Content="+" Width="30" HorizontalContentAlignment="Center" Command="{Binding RaiseCommand}" ToolTip.Tip="Raise by 1 (priority points first, then karma)" />
+                </Grid>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

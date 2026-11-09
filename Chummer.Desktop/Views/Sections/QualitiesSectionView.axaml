@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Chummer.Desktop.ViewModels"
+             xmlns:loc="using:Chummer.Desktop.Localization"
+             xmlns:conv="using:Chummer.Desktop.Converters"
+             x:Class="Chummer.Desktop.Views.Sections.QualitiesSectionView"
+             x:DataType="vm:CharacterViewModel">
+  <ScrollViewer>
+    <Grid ColumnDefinitions="*,*" Margin="28,22">
+      <Border Classes="panel lit" Margin="0,0,10,0" VerticalAlignment="Top">
+        <StackPanel Spacing="6">
+          <TextBlock Text="POSITIVE" Classes="h2" Foreground="{StaticResource GreenBrush}" />
+          <ItemsControl ItemsSource="{Binding PositiveQualities}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:QualityViewModel">
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,4">
+                  <PathIcon Data="{StaticResource Icon.Quality}" Width="16" Height="16" Foreground="{StaticResource GreenBrush}" />
+                  <StackPanel Grid.Column="1" Margin="10,0">
+                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock Text="{Binding Source}" Classes="label" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="2" Text="{Binding KarmaText}" Foreground="{StaticResource GreenBrush}" FontWeight="Bold" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="1" Classes="panel hot" Margin="10,0,0,0" VerticalAlignment="Top">
+        <StackPanel Spacing="6">
+          <TextBlock Text="NEGATIVE" Classes="h2" Foreground="{StaticResource RedBrush}" />
+          <ItemsControl ItemsSource="{Binding NegativeQualities}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:QualityViewModel">
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,4">
+                  <PathIcon Data="{StaticResource Icon.Quality}" Width="16" Height="16" Foreground="{StaticResource RedBrush}" />
+                  <StackPanel Grid.Column="1" Margin="10,0">
+                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock Text="{Binding Source}" Classes="label" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="2" Text="{Binding KarmaText}" Foreground="{StaticResource RedBrush}" FontWeight="Bold" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </ScrollViewer>
+</UserControl>

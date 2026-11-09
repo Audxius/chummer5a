@@ -1,0 +1,150 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Chummer.Desktop.ViewModels"
+             xmlns:loc="using:Chummer.Desktop.Localization"
+             xmlns:conv="using:Chummer.Desktop.Converters">
+    <conv:IconKeyConverter x:Key="Icon" />
+    <DataTemplate x:Key="ContactCard" x:DataType="vm:ContactCardViewModel">
+      <Border Classes="dossier" Classes.enemy="{Binding IsEnemy}" Width="360" Margin="0,0,12,12" Padding="14,12">
+        <StackPanel Spacing="10">
+          <Grid ColumnDefinitions="Auto,*">
+            <Border Classes="avatar" Width="46" Height="46" CornerRadius="23" Margin="0,0,12,0" VerticalAlignment="Top">
+              <TextBlock Text="{Binding Initials}" FontWeight="Black" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <StackPanel Grid.Column="1" Spacing="2">
+              <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="15" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding Subtitle}" IsVisible="{Binding HasSubtitle}" Classes="muted" TextWrapping="Wrap" />
+              <ItemsControl ItemsSource="{Binding Tags}" IsVisible="{Binding HasTags}" Margin="0,4,0,0">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <Border Classes="chip" Margin="0,0,4,0" Padding="5,1">
+                      <TextBlock Text="{Binding}" FontSize="9" FontWeight="Bold" Foreground="{StaticResource MagentaBrush}" />
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Grid>
+
+          <!-- Connection / loyalty -->
+          <Grid ColumnDefinitions="100,*,Auto,Auto" RowDefinitions="Auto,Auto" ToolTip.Tip="Connection: how much clout and reach they have.  Loyalty: how much they care about you.">
+            <TextBlock Text="CONNECTION" Classes="label" VerticalAlignment="Center" />
+            <ItemsControl Grid.Column="1" ItemsSource="{Binding ConnectionPips}" VerticalAlignment="Center">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="2" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:Boolean"><Border Classes="pip" Classes.on="{Binding}" /></DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Grid.Column="2" Text="{Binding ConnectionText}" FontWeight="Bold" FontSize="15" Foreground="{StaticResource CyanBrush}" MinWidth="22" TextAlignment="Right" VerticalAlignment="Center" />
+            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="2" Margin="8,0,0,0" IsVisible="{Binding IsEditable}">
+              <Button Classes="step" Content="−" Command="{Binding ConnectionDownCommand}" ToolTip.Tip="Lower connection" />
+              <Button Classes="step" Content="+" Command="{Binding ConnectionUpCommand}" ToolTip.Tip="Raise connection" />
+            </StackPanel>
+            <TextBlock Grid.Row="1" Text="LOYALTY" Classes="label" VerticalAlignment="Center" Margin="0,4,0,0" />
+            <ItemsControl Grid.Row="1" Grid.Column="1" ItemsSource="{Binding LoyaltyPips}" VerticalAlignment="Center" Margin="0,4,0,0">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="2" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:Boolean"><Border Classes="pip loy" Classes.on="{Binding}" /></DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding LoyaltyText}" FontWeight="Bold" FontSize="15" Foreground="{StaticResource MagentaBrush}" MinWidth="22" TextAlignment="Right" VerticalAlignment="Center" Margin="0,4,0,0" />
+            <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal" Spacing="2" Margin="8,4,0,0" IsVisible="{Binding IsEditable}">
+              <Button Classes="step" Content="−" Command="{Binding LoyaltyDownCommand}" IsEnabled="{Binding LoyaltyEnabled}" ToolTip.Tip="Lower loyalty" />
+              <Button Classes="step" Content="+" Command="{Binding LoyaltyUpCommand}" IsEnabled="{Binding LoyaltyEnabled}" ToolTip.Tip="Raise loyalty" />
+            </StackPanel>
+          </Grid>
+
+          <!-- Dossier facts -->
+          <ItemsControl ItemsSource="{Binding Facts}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ItemStat">
+                <StackPanel Width="164" Margin="0,0,0,6">
+                  <TextBlock Text="{Binding Label}" Classes="label" FontSize="9" />
+                  <TextBlock Text="{Binding Value}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Value}" />
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <Border IsVisible="{Binding HasNotes}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="2,0,0,0" Padding="8,2">
+            <TextBlock Text="{Binding Notes}" Classes="muted" TextWrapping="Wrap" MaxLines="4" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Notes}" />
+          </Border>
+        </StackPanel>
+      </Border>
+    </DataTemplate>
+    <DataTemplate x:Key="CardGroup" x:DataType="vm:InventoryGroupViewModel">
+      <StackPanel Spacing="8" Margin="0,0,0,18">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <TextBlock Text="{Binding Name}" Classes="h2" />
+          <TextBlock Text="{Binding CountText}" Classes="label" VerticalAlignment="Center" />
+        </StackPanel>
+        <ItemsControl ItemsSource="{Binding Items}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:InventoryItemViewModel">
+              <Border Classes="tile" Opacity="{Binding Opacity}" ToolTip.Placement="Right" ToolTip.ShowDelay="250">
+                <ToolTip.Tip>
+                  <StackPanel Width="320" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="28" Height="28" />
+                      <StackPanel>
+                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="15" TextWrapping="Wrap" MaxWidth="270" />
+                        <TextBlock Text="{Binding Category}" Classes="label" />
+                      </StackPanel>
+                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding Stats}">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <WrapPanel />
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ItemStat">
+                          <StackPanel Width="100" Margin="0,0,4,6">
+                            <TextBlock Text="{Binding Label}" Classes="label" />
+                            <TextBlock Text="{Binding Value}" FontWeight="SemiBold" Foreground="{StaticResource CyanBrush}" TextTrimming="CharacterEllipsis" />
+                          </StackPanel>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{Binding ContentsText}" IsVisible="{Binding HasContents}" TextWrapping="Wrap" FontSize="12" />
+                    <TextBlock Text="{Binding Notes}" IsVisible="{Binding HasNotes}" TextWrapping="Wrap" Classes="muted" FontSize="12" MaxHeight="120" />
+                    <Grid ColumnDefinitions="*,*,*">
+                      <StackPanel>
+                        <TextBlock Text="COST" Classes="label" />
+                        <TextBlock Text="{Binding Cost}" Foreground="{StaticResource YellowBrush}" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="1">
+                        <TextBlock Text="AVAIL" Classes="label" />
+                        <TextBlock Text="{Binding Avail}" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="2">
+                        <TextBlock Text="SOURCE" Classes="label" />
+                        <TextBlock Text="{Binding Source}" />
+                      </StackPanel>
+                    </Grid>
+                  </StackPanel>
+                </ToolTip.Tip>
+                <Grid RowDefinitions="Auto,*,Auto">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="30" Height="30" HorizontalAlignment="Left" />
+                    <Border Grid.Column="1" Classes="chip" IsVisible="{Binding HasBadge}" VerticalAlignment="Top">
+                      <TextBlock Text="{Binding Badge}" FontSize="10" Foreground="{StaticResource CyanBrush}" />
+                    </Border>
+                  </Grid>
+                  <TextBlock Grid.Row="1" Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Margin="0,8,0,4" Foreground="{StaticResource TextBrush}" VerticalAlignment="Top" />
+                  <TextBlock Grid.Row="2" Text="{Binding Headline}" Classes="label" TextTrimming="CharacterEllipsis" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>

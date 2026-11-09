@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Chummer.Desktop.ViewModels"
+             xmlns:loc="using:Chummer.Desktop.Localization"
+             xmlns:conv="using:Chummer.Desktop.Converters"
+             x:Class="Chummer.Desktop.Views.Sections.NotesSectionView"
+             x:DataType="vm:CharacterViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="28,22" Spacing="14" MaxWidth="900" HorizontalAlignment="Left">
+      <Border Classes="panel lit">
+        <StackPanel Spacing="6">
+          <TextBlock Text="{loc:Tr Label_Concept, Case=upper}" Classes="h2" />
+          <SelectableTextBlock Text="{Binding Concept}" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+      <Border Classes="panel lit">
+        <StackPanel Spacing="6">
+          <TextBlock Text="{loc:Tr Label_Description, Case=upper}" Classes="h2" />
+          <SelectableTextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+      <Border Classes="panel lit">
+        <StackPanel Spacing="6">
+          <TextBlock Text="{loc:Tr Label_Background, Case=upper}" Classes="h2" />
+          <SelectableTextBlock Text="{Binding Background}" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+      <Border Classes="panel hot">
+        <StackPanel Spacing="6">
+          <TextBlock Text="{loc:Tr Tab_Notes, Case=upper}" Classes="h2" Foreground="{StaticResource MagentaBrush}" />
+          <SelectableTextBlock Text="{Binding Notes}" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

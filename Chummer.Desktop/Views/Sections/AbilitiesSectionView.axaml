@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Chummer.Desktop.ViewModels"
+             xmlns:loc="using:Chummer.Desktop.Localization"
+             xmlns:conv="using:Chummer.Desktop.Converters"
+             x:Class="Chummer.Desktop.Views.Sections.AbilitiesSectionView"
+             x:DataType="vm:CharacterViewModel">
+  <DockPanel Margin="28,22,28,0">
+    <Grid DockPanel.Dock="Top" Margin="0,0,0,14">
+      <TextBox Text="{Binding AbilityFilter}" PlaceholderText="Search spells, powers, forms, techniques…" Padding="40,9,10,9" />
+      <PathIcon Data="{StaticResource Icon.Search}" Width="15" Height="15" HorizontalAlignment="Left" Margin="14,0,0,0" Classes="muted" IsHitTestVisible="False" />
+    </Grid>
+    <Grid>
+      <StackPanel IsVisible="{Binding !HasAbilities}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+        <PathIcon Data="{StaticResource Icon.Spell}" Width="40" Height="40" Classes="muted" />
+        <TextBlock Text="No spells, powers or other abilities." Classes="muted" />
+      </StackPanel>
+      <ScrollViewer>
+        <ItemsControl ItemsSource="{Binding AbilityGroups}" ItemTemplate="{StaticResource CardGroup}" Margin="0,0,0,22" />
+      </ScrollViewer>
+    </Grid>
+  </DockPanel>
+</UserControl>

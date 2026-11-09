@@ -1,0 +1,127 @@
+<Styles xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Chummer.Desktop.ViewModels"
+             xmlns:loc="using:Chummer.Desktop.Localization"
+             xmlns:conv="using:Chummer.Desktop.Converters">
+    <Style Selector="Border.dossier">
+      <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="3,1,1,1" />
+    </Style>
+    <Style Selector="Border.dossier:pointerover">
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    </Style>
+    <Style Selector="Border.dossier.enemy">
+      <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+    </Style>
+    <Style Selector="Border.avatar">
+      <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.dossier.enemy Border.avatar">
+      <Setter Property="Background" Value="#33FF3355" />
+      <Setter Property="BorderBrush" Value="{StaticResource RedBrush}" />
+    </Style>
+    <Style Selector="Border.pip">
+      <Setter Property="Width" Value="9" />
+      <Setter Property="Height" Value="8" />
+      <Setter Property="Background" Value="{StaticResource BorderBrush}" />
+    </Style>
+    <Style Selector="Border.pip.on">
+      <Setter Property="Background" Value="{StaticResource CyanBrush}" />
+    </Style>
+    <Style Selector="Border.pip.loy.on">
+      <Setter Property="Background" Value="{StaticResource MagentaBrush}" />
+    </Style>
+    <Style Selector="Button.step">
+      <Setter Property="Width" Value="22" />
+      <Setter Property="Height" Value="22" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="2" />
+    </Style>
+    <!-- A row or chip that rolls in the Dice Terminal when clicked. -->
+    <Style Selector="Button.roll">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="2" />
+      <Setter Property="Padding" Value="6,3" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+    <Style Selector="Button.roll:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#1A00E5FF" />
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    </Style>
+    <Style Selector="Button.roll:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#3300E5FF" />
+    </Style>
+    <Style Selector="Button.roll:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Opacity" Value="0.5" />
+    </Style>
+    <Style Selector="Button.roll PathIcon.rollhint">
+      <Setter Property="Opacity" Value="0" />
+      <Setter Property="Width" Value="14" />
+      <Setter Property="Height" Value="14" />
+      <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
+    </Style>
+    <Style Selector="Button.roll:pointerover PathIcon.rollhint">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="ToggleButton.section">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+      <Setter Property="BorderThickness" Value="0,0,0,2" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Padding" Value="16,10" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="LetterSpacing" Value="1.5" />
+    </Style>
+    <Style Selector="ToggleButton.section:checked /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{StaticResource MagentaBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+    <Style Selector="Button.cm">
+      <Setter Property="Width" Value="18" />
+      <Setter Property="Height" Value="18" />
+      <Setter Property="Margin" Value="0,0,4,4" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="Button.cm:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#55FFFFFF" />
+    </Style>
+    <Style Selector="Border.tile">
+      <Setter Property="Width" Value="196" />
+      <Setter Property="Height" Value="134" />
+      <Setter Property="Margin" Value="0,0,10,10" />
+      <Setter Property="Padding" Value="12,10" />
+      <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="1,1,1,2" />
+    </Style>
+    <Style Selector="Border.tile:pointerover">
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+      <Setter Property="BoxShadow" Value="0 0 14 0 #4400E5FF" />
+    </Style>
+    <Style Selector="Border.stat">
+      <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="0,0,0,2" />
+      <Setter Property="Padding" Value="16,10" />
+      <Setter Property="MinWidth" Value="150" />
+    </Style>
+</Styles>

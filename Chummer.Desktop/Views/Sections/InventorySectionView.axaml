@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Chummer.Desktop.ViewModels"
+             xmlns:loc="using:Chummer.Desktop.Localization"
+             xmlns:conv="using:Chummer.Desktop.Converters"
+             x:Class="Chummer.Desktop.Views.Sections.InventorySectionView"
+             x:DataType="vm:CharacterViewModel">
+  <DockPanel Margin="28,22,28,0">
+    <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,14">
+      <Grid ColumnDefinitions="*,Auto">
+        <Grid>
+          <TextBox Text="{Binding InventoryFilter}" PlaceholderText="Search inventory… (smartgun, armor, commlink, medkit)" Padding="40,9,10,9" />
+          <PathIcon Data="{StaticResource Icon.Search}" Width="15" Height="15" HorizontalAlignment="Left" Margin="14,0,0,0" Classes="muted" IsHitTestVisible="False" />
+        </Grid>
+        <TextBlock Grid.Column="1" Text="{Binding InventorySummary}" Classes="label" VerticalAlignment="Center" Margin="14,0,0,0" />
+      </Grid>
+      <ItemsControl ItemsSource="{Binding InventoryKinds}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:InventoryFilterOption">
+            <ToggleButton Classes="section" Margin="0,0,4,0" Padding="12,6" IsChecked="{Binding IsSelected, Mode=OneWay}" Command="{Binding SelectCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="14" Height="14" />
+                <TextBlock Text="{Binding Label}" />
+              </StackPanel>
+            </ToggleButton>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+    <ScrollViewer>
+      <ItemsControl ItemsSource="{Binding InventoryGroups}" ItemTemplate="{StaticResource CardGroup}" Margin="0,0,0,22">
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>
