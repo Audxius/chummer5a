@@ -21,7 +21,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Avalonia.Media;
+using Avalonia.Media.Immutable;
 using Chummer.Backend.Equipment;
+using Chummer.Rules;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Chummer.Desktop.ViewModels
 {
@@ -56,11 +60,42 @@ namespace Chummer.Desktop.ViewModels
         public bool IsPlain => RollName.Length == 0;
     }
 
+    /// <summary>One entry of a weapon's fire menu.</summary>
+    public sealed class FireModeOption
+    {
+        public FireModeOption(FiringModeInfo objInfo)
+        {
+            Mode = objInfo.Mode;
+            Label = objInfo.Label;
+            Allowed = objInfo.Allowed;
+            Rounds = objInfo.Rounds;
+        }
+
+        public FiringMode Mode { get; }
+        public string Label { get; }
+        public bool Allowed { get; }
+        public int Rounds { get; }
+        public string ShortLabel
+        {
+            get
+            {
+                switch (Mode)
+                {
+                    case FiringMode.SingleShot: return "SS";
+                    case FiringMode.ShortBurst: return "SB";
+                    case FiringMode.LongBurst: return "LB";
+                    case FiringMode.FullBurst: return "FA";
+                    default: return "SUP";
+                }
+            }
+        }
+    }
+
     /// <summary>
-    /// A read-only snapshot of one owned item (weapon, armor, cyberware...), shaped for the inventory grid and hover card.
-    /// Built on a background thread; holds no engine references the UI touches later.
+    /// A snapshot of one owned item (weapon, armor, cyberware...), shaped for the inventory slot grid and detail panel.
+    /// Built on a background thread; <see cref="Item"/> is the engine object the session actions work on.
     /// </summary>
-    public sealed class InventoryItemViewModel
+    public sealed class InventoryItemViewModel : ObservableObject
     {
         private InventoryItemViewModel(InventoryKind eKind, string strName, string strCategory, string strIconKey)
         {
@@ -68,12 +103,20 @@ namespace Chummer.Desktop.ViewModels
             Name = strName ?? string.Empty;
             Category = strCategory ?? string.Empty;
             IconKey = strIconKey;
+            Accent = AccentFor(eKind);
         }
 
         public InventoryKind Kind { get; }
         public string Name { get; }
         public string Category { get; }
         public string IconKey { get; }
+
+        /// <summary>Engine object behind the slot (Weapon, Gear, Armor...); null for ability cards.</summary>
+        internal object Item { get; private set; }
+
+        /// <summary>Engine InternalId, used to keep the selection across reloads.</summary>
+        public string Id { get; private set; } = string.Empty;
+
         public string Badge { get; private set; } = string.Empty;
         public string Headline { get; private set; } = string.Empty;
         public bool IsEquipped { get; private set; } = true;
@@ -84,12 +127,104 @@ namespace Chummer.Desktop.ViewModels
         public List<ItemStat> Stats { get; } = new List<ItemStat>();
         public List<string> Contents { get; } = new List<string>();
 
+        /// <summary>Mods, accessories, plugins and contents as nested mini-slots.</summary>
+        public List<InventoryItemViewModel> Children { get; } = new List<InventoryItemViewModel>();
+
         public bool HasBadge => Badge.Length > 0;
         public bool HasNotes => Notes.Length > 0;
         public bool HasContents => Contents.Count > 0;
+        public bool HasChildren => Children.Count > 0;
+        public bool HasSource => Source.Length > 0;
+        public bool HasAvail => Avail.Length > 0;
         public string ContentsText => string.Join("\n", Contents.Take(16)) + (Contents.Count > 16 ? "\n+" + (Contents.Count - 16).ToString(CultureInfo.CurrentCulture) + " more" : string.Empty);
         public string KindLabel => Kind.ToString().ToUpperInvariant();
         public double Opacity => IsEquipped ? 1.0 : 0.55;
+
+        // ---------- look ----------
+
+        public Color Accent { get; }
+        public IBrush AccentBrush => new ImmutableSolidColorBrush(Accent);
+        public IBrush AccentFill => new ImmutableLinearGradientBrush(
+            new[] { new ImmutableGradientStop(0, Color.FromArgb(0x30, Accent.R, Accent.G, Accent.B)), new ImmutableGradientStop(1, Color.FromArgb(0x06, Accent.R, Accent.G, Accent.B)) },
+            startPoint: new Avalonia.RelativePoint(0.5, 0, Avalonia.RelativeUnit.Relative), endPoint: new Avalonia.RelativePoint(0.5, 1, Avalonia.RelativeUnit.Relative));
+        public BoxShadows AccentGlow => new BoxShadows(new BoxShadow { Blur = 16, Color = Color.FromArgb(0x55, Accent.R, Accent.G, Accent.B) });
+
+        /// <summary>"Rarity" colour per kind of item, like a game inventory.</summary>
+        public static Color AccentFor(InventoryKind eKind)
+        {
+            switch (eKind)
+            {
+                case InventoryKind.Weapon: return Color.FromRgb(0xFF, 0x4D, 0x5E);
+                case InventoryKind.Armor: return Color.FromRgb(0x00, 0xE5, 0xFF);
+                case InventoryKind.Cyberware: return Color.FromRgb(0xB6, 0x6D, 0xFF);
+                case InventoryKind.Gear: return Color.FromRgb(0x39, 0xFF, 0x88);
+                case InventoryKind.Vehicle: return Color.FromRgb(0xF3, 0xE6, 0x00);
+                case InventoryKind.Drug: return Color.FromRgb(0xFF, 0x2E, 0x88);
+                default: return Color.FromRgb(0xFF, 0xA0, 0x2E);
+            }
+        }
+
+        // ---------- selection ----------
+
+        private bool _blnIsSelected;
+
+        public bool IsSelected
+        {
+            get => _blnIsSelected;
+            set => SetProperty(ref _blnIsSelected, value);
+        }
+
+        // ---------- corner badges ----------
+
+        public string RatingBadge { get; private set; } = string.Empty;
+        public string QuantityBadge { get; private set; } = string.Empty;
+        public bool HasRatingBadge => RatingBadge.Length > 0;
+        public bool HasQuantityBadge => QuantityBadge.Length > 0;
+
+        // ---------- session state & what can be done ----------
+
+        public bool IsCareer { get; private set; }
+        public bool CanEquip { get; private set; }
+        public bool ShowEquippedMarker => CanEquip && IsEquipped;
+        public string EquipLabel => IsEquipped ? "UNEQUIP" : "EQUIP";
+        public bool HasWireless { get; private set; }
+        public bool IsWirelessOn { get; private set; }
+        public bool ShowWirelessBadge => HasWireless && IsWirelessOn;
+        public string WirelessLabel => IsWirelessOn ? "WIRELESS ON" : "WIRELESS OFF";
+        public bool IsCommlink { get; private set; }
+        public bool IsActiveCommlink { get; private set; }
+        public string CommlinkLabel => IsActiveCommlink ? "ACTIVE COMMLINK" : "MAKE ACTIVE";
+
+        public bool UsesAmmo { get; private set; }
+        public bool CanFire => UsesAmmo && IsCareer;
+        public int AmmoRemaining { get; private set; }
+        public int AmmoCapacity { get; private set; }
+        public string AmmoLoadedName { get; private set; } = string.Empty;
+        public string AmmoText => AmmoRemaining.ToString(CultureInfo.CurrentCulture) + (AmmoCapacity > 0 ? " / " + AmmoCapacity.ToString(CultureInfo.CurrentCulture) : string.Empty);
+        public double AmmoFraction => AmmoCapacity > 0 ? Math.Max(0, Math.Min(1, AmmoRemaining / (double)AmmoCapacity)) : AmmoRemaining > 0 ? 1 : 0;
+        public double AmmoBarWidth => 200 * AmmoFraction;
+        public bool IsAmmoLow => AmmoCapacity > 0 && AmmoRemaining * 4 <= AmmoCapacity;
+        public bool CanUnload { get; private set; }
+        public List<FireModeOption> FireModes { get; } = new List<FireModeOption>();
+        public List<FireModeOption> AllowedFireModes => FireModes.Where(x => x.Allowed).ToList();
+
+        public bool IsArmorPiece => Item is Armor;
+        public bool CanDamageArmor => IsArmorPiece && IsCareer;
+        public int ArmorDamage { get; private set; }
+        public string ArmorDamageText => ArmorDamage.ToString(CultureInfo.CurrentCulture);
+
+        public bool HasQuantity { get; private set; }
+        public decimal Quantity { get; private set; }
+        public string QuantityText => Quantity.ToString("0.##", GlobalSettings.CultureInfo);
+        public bool CanAddQuantity => Item is Gear;
+        public bool IsConsumable { get; private set; }
+
+        public bool CanRename { get; private set; }
+        public bool CanSell { get; private set; }
+        public bool CanSellNow => CanSell && IsCareer;
+        public bool CanRemove { get; private set; }
+        public bool CanEditNotes => Item is IHasNotes;
+        public bool HasActions => Item != null;
 
         /// <summary>Everything searchable about the item, lower-cased.</summary>
         public string SearchText { get; private set; } = string.Empty;
@@ -99,11 +234,34 @@ namespace Chummer.Desktop.ViewModels
             SearchText = (Name + " " + Category + " " + KindLabel + " " + Headline + " " + string.Join(" ", Contents) + " " + Notes).ToLowerInvariant();
         }
 
+        private void Bind(Character objCharacter, object objItem, string strId)
+        {
+            Item = objItem;
+            Id = strId ?? string.Empty;
+            IsCareer = objCharacter.Created;
+            CanEquip = InventoryRules.CanChangeEquipped(objItem);
+            if (objItem is IHasWirelessBonus objWireless)
+            {
+                HasWireless = true;
+                IsWirelessOn = objWireless.WirelessOn;
+            }
+            if (objItem is IHasMatrixAttributes objMatrix && objMatrix.IsCommlink)
+            {
+                IsCommlink = true;
+                IsActiveCommlink = objMatrix.IsActiveCommlink(objCharacter);
+            }
+            CanRename = InventoryRules.RenameDescriptionKey(objItem) != null;
+            CanSell = InventoryRules.CanSell(objItem);
+            CanRemove = InventoryRules.CanRemove(objItem);
+        }
+
         private static string Money(Character objCharacter, decimal decValue)
             => decValue.ToString(objCharacter.Settings.NuyenFormat, GlobalSettings.CultureInfo) + LanguageManager.GetString("String_NuyenSymbol");
 
         private static string Src(string strSource, string strPage)
             => string.IsNullOrEmpty(strSource) ? string.Empty : (strSource + " " + strPage).Trim();
+
+        private static string Rating(int intRating) => intRating > 0 ? "R" + intRating.ToString(CultureInfo.CurrentCulture) : string.Empty;
 
         /// <summary>A generic card (spell, power, contact...) using the same tile and hover card as items.</summary>
         public static InventoryItemViewModel Card(string strName, string strCategory, string strIconKey, string strHeadline, string strBadge,
@@ -135,7 +293,7 @@ namespace Chummer.Desktop.ViewModels
             foreach (Cyberware objCyberware in objCharacter.Cyberware.ToList())
                 yield return FromCyberware(objCharacter, objCyberware);
             foreach (Gear objGear in objCharacter.Gear.ToList())
-                yield return FromGear(objCharacter, objGear);
+                yield return FromGear(objCharacter, objGear, InventoryKind.Gear);
             foreach (Vehicle objVehicle in objCharacter.Vehicles.ToList())
                 yield return FromVehicle(objCharacter, objVehicle);
             foreach (Drug objDrug in objCharacter.Drugs.ToList())
@@ -146,7 +304,9 @@ namespace Chummer.Desktop.ViewModels
 
         private static InventoryItemViewModel FromWeapon(Character objCharacter, Weapon objWeapon)
         {
-            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Weapon, objWeapon.CurrentDisplayName, objWeapon.DisplayCategory(GlobalSettings.Language), WeaponIcon(objWeapon.Category));
+            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Weapon, objWeapon.CurrentDisplayName, objWeapon.DisplayCategory(GlobalSettings.Language),
+                                                                          InventoryIcons.ForWeapon(objWeapon.Category, objWeapon.Name));
+            objReturn.Bind(objCharacter, objWeapon, objWeapon.InternalId);
             string strDamage = objWeapon.DisplayDamage;
             string strAp = objWeapon.DisplayTotalAP;
             objReturn.Headline = "DV " + strDamage + "   AP " + strAp;
@@ -163,37 +323,119 @@ namespace Chummer.Desktop.ViewModels
                 objReturn.Stats.Add(new ItemStat("Ammo", objWeapon.DisplayAmmo));
             }
             objReturn.Stats.Add(new ItemStat("Conceal", objWeapon.DisplayConcealability));
+            if (objWeapon.Rating > 0)
+                objReturn.Stats.Add(new ItemStat("Rating", objWeapon.Rating.ToString(CultureInfo.CurrentCulture)));
+            objReturn.RatingBadge = Rating(objWeapon.Rating);
             objReturn.IsEquipped = objWeapon.Equipped;
+            if (InventoryRules.UsesAmmo(objWeapon))
+            {
+                objReturn.UsesAmmo = true;
+                objReturn.AmmoRemaining = objWeapon.AmmoRemaining;
+                try
+                {
+                    List<string> lstCounts = InventoryRules.GetReloadCountsAsync(objWeapon).GetAwaiter().GetResult();
+                    objReturn.AmmoCapacity = (int)lstCounts.Select(InventoryRules.ParseCount).DefaultIfEmpty(0).Max();
+                    objReturn.FireModes.AddRange(InventoryRules.GetFiringModesAsync(objWeapon).GetAwaiter().GetResult().Select(x => new FireModeOption(x)));
+                }
+                catch (Exception e) when (!(e is OutOfMemoryException))
+                {
+                    Utils.BreakIfDebug();
+                }
+                Gear objLoaded = objWeapon.AmmoLoaded;
+                objReturn.AmmoLoadedName = objLoaded != null
+                    ? objLoaded.CurrentDisplayNameShort
+                    : LanguageManager.GetString(objWeapon.RequireAmmo ? (objReturn.AmmoRemaining > 0 ? "String_ExternalSource" : "String_Empty") : "String_MountInternal");
+                objReturn.CanUnload = InventoryRules.CanUnload(objWeapon);
+                objReturn.QuantityBadge = objReturn.AmmoRemaining.ToString(CultureInfo.CurrentCulture) + "rd";
+            }
             objReturn.Cost = Money(objCharacter, objWeapon.TotalCost);
             objReturn.Avail = objWeapon.DisplayTotalAvail;
             objReturn.Source = Src(objWeapon.Source, objWeapon.Page);
             objReturn.Notes = objWeapon.Notes ?? string.Empty;
             foreach (WeaponAccessory objAccessory in objWeapon.WeaponAccessories.ToList())
+            {
                 objReturn.Contents.Add("◆ " + objAccessory.CurrentDisplayName);
+                objReturn.Children.Add(FromAccessory(objCharacter, objAccessory));
+            }
             foreach (Weapon objUnder in objWeapon.UnderbarrelWeapons.ToList())
+            {
                 objReturn.Contents.Add("◆ " + objUnder.CurrentDisplayName);
+                objReturn.Children.Add(FromWeapon(objCharacter, objUnder));
+            }
+            objReturn.Finish();
+            return objReturn;
+        }
+
+        private static InventoryItemViewModel FromAccessory(Character objCharacter, WeaponAccessory objAccessory)
+        {
+            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Weapon, objAccessory.CurrentDisplayName, "Accessory", "Icon.Settings");
+            objReturn.Bind(objCharacter, objAccessory, objAccessory.InternalId);
+            objReturn.IsEquipped = objAccessory.Equipped;
+            objReturn.RatingBadge = Rating(objAccessory.Rating);
+            if (objAccessory.Rating > 0)
+                objReturn.Stats.Add(new ItemStat("Rating", objAccessory.Rating.ToString(CultureInfo.CurrentCulture)));
+            if (objAccessory.IncludedInWeapon)
+                objReturn.Stats.Add(new ItemStat("Included", "with weapon"));
+            objReturn.Cost = Money(objCharacter, objAccessory.TotalCost);
+            objReturn.Avail = objAccessory.DisplayTotalAvail;
+            objReturn.Source = objAccessory.SourceDetail.ToString();
+            objReturn.Notes = objAccessory.Notes ?? string.Empty;
+            foreach (Gear objGear in objAccessory.GearChildren.ToList())
+                objReturn.Children.Add(FromGear(objCharacter, objGear, InventoryKind.Gear));
             objReturn.Finish();
             return objReturn;
         }
 
         private static InventoryItemViewModel FromArmor(Character objCharacter, Armor objArmor)
         {
-            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Armor, objArmor.CurrentDisplayName, objArmor.DisplayCategory(GlobalSettings.Language), "Icon.Armor");
+            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Armor, objArmor.CurrentDisplayName, objArmor.DisplayCategory(GlobalSettings.Language),
+                                                                          InventoryIcons.ForArmor(objArmor.Category, objArmor.Name));
+            objReturn.Bind(objCharacter, objArmor, objArmor.InternalId);
             objReturn.Badge = objArmor.DisplayArmorValue;
             objReturn.Headline = "Armor " + objArmor.DisplayArmorValue;
+            objReturn.RatingBadge = objArmor.DisplayArmorValue;
             objReturn.Stats.Add(new ItemStat("Armor", objArmor.DisplayArmorValue));
             objReturn.Stats.Add(new ItemStat("Capacity", objArmor.TotalArmorCapacity(GlobalSettings.CultureInfo)));
             if (objArmor.Rating > 0)
                 objReturn.Stats.Add(new ItemStat("Rating", objArmor.Rating.ToString(CultureInfo.CurrentCulture)));
+            objReturn.ArmorDamage = objArmor.ArmorDamage;
+            if (objArmor.ArmorDamage > 0)
+                objReturn.Stats.Add(new ItemStat("Damage", "−" + objArmor.ArmorDamage.ToString(CultureInfo.CurrentCulture)));
             objReturn.IsEquipped = objArmor.Equipped;
             objReturn.Cost = Money(objCharacter, objArmor.TotalCost);
             objReturn.Avail = objArmor.DisplayTotalAvail;
             objReturn.Source = Src(objArmor.Source, objArmor.Page);
             objReturn.Notes = objArmor.Notes ?? string.Empty;
             foreach (ArmorMod objMod in objArmor.ArmorMods.ToList())
+            {
                 objReturn.Contents.Add("◆ " + objMod.CurrentDisplayName);
+                objReturn.Children.Add(FromArmorMod(objCharacter, objMod));
+            }
             foreach (Gear objGear in objArmor.GearChildren.ToList())
+            {
                 objReturn.Contents.Add("◆ " + objGear.CurrentDisplayName);
+                objReturn.Children.Add(FromGear(objCharacter, objGear, InventoryKind.Gear));
+            }
+            objReturn.Finish();
+            return objReturn;
+        }
+
+        private static InventoryItemViewModel FromArmorMod(Character objCharacter, ArmorMod objMod)
+        {
+            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Armor, objMod.CurrentDisplayName, objMod.DisplayCategory(GlobalSettings.Language), "Icon.Settings");
+            objReturn.Bind(objCharacter, objMod, objMod.InternalId);
+            objReturn.IsEquipped = objMod.Equipped;
+            objReturn.RatingBadge = Rating(objMod.Rating);
+            if (objMod.Armor != 0)
+                objReturn.Stats.Add(new ItemStat("Armor", "+" + objMod.Armor.ToString(CultureInfo.CurrentCulture)));
+            if (objMod.Rating > 0)
+                objReturn.Stats.Add(new ItemStat("Rating", objMod.Rating.ToString(CultureInfo.CurrentCulture)));
+            objReturn.Cost = Money(objCharacter, objMod.TotalCost);
+            objReturn.Avail = objMod.DisplayTotalAvail;
+            objReturn.Source = objMod.SourceDetail.ToString();
+            objReturn.Notes = objMod.Notes ?? string.Empty;
+            foreach (Gear objGear in objMod.GearChildren.ToList())
+                objReturn.Children.Add(FromGear(objCharacter, objGear, InventoryKind.Gear));
             objReturn.Finish();
             return objReturn;
         }
@@ -202,9 +444,11 @@ namespace Chummer.Desktop.ViewModels
         {
             bool blnBio = objCyberware.SourceType == Improvement.ImprovementSource.Bioware;
             InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Cyberware, objCyberware.CurrentDisplayNameShort, objCyberware.DisplayCategory(GlobalSettings.Language),
-                                                                          blnBio ? "Icon.Bioware" : "Icon.Cyberware");
+                                                                          InventoryIcons.ForCyberware(objCyberware.Category, objCyberware.Name, blnBio));
+            objReturn.Bind(objCharacter, objCyberware, objCyberware.InternalId);
             string strEssence = objCyberware.CalculatedESS.ToString("0.####", GlobalSettings.CultureInfo);
-            objReturn.Badge = objCyberware.Rating > 0 ? "R" + objCyberware.Rating.ToString(CultureInfo.CurrentCulture) : string.Empty;
+            objReturn.Badge = Rating(objCyberware.Rating);
+            objReturn.RatingBadge = objReturn.Badge;
             objReturn.Headline = "ESS " + strEssence + "   " + objCyberware.Grade?.CurrentDisplayName;
             objReturn.Stats.Add(new ItemStat("Essence", strEssence));
             objReturn.Stats.Add(new ItemStat("Grade", objCyberware.Grade?.CurrentDisplayName ?? string.Empty));
@@ -212,25 +456,62 @@ namespace Chummer.Desktop.ViewModels
                 objReturn.Stats.Add(new ItemStat("Rating", objCyberware.Rating.ToString(CultureInfo.CurrentCulture)));
             if (!string.IsNullOrEmpty(objCyberware.Location))
                 objReturn.Stats.Add(new ItemStat("Location", objCyberware.Location));
+            if (objCyberware.IsCommlink)
+            {
+                objReturn.Stats.Add(new ItemStat("Device rating", objCyberware.GetTotalMatrixAttribute("Device Rating").ToString(CultureInfo.CurrentCulture)));
+                AddMatrixStats(objReturn, objCyberware);
+            }
             objReturn.Cost = Money(objCharacter, objCyberware.TotalCost);
             objReturn.Avail = objCyberware.DisplayTotalAvail;
             objReturn.Source = Src(objCyberware.Source, objCyberware.Page);
             objReturn.Notes = objCyberware.Notes ?? string.Empty;
             foreach (Cyberware objChild in objCyberware.Children.ToList())
+            {
                 objReturn.Contents.Add("◆ " + objChild.CurrentDisplayName);
+                objReturn.Children.Add(FromCyberware(objCharacter, objChild));
+            }
             foreach (Gear objGear in objCyberware.GearChildren.ToList())
+            {
                 objReturn.Contents.Add("◆ " + objGear.CurrentDisplayName);
+                objReturn.Children.Add(FromGear(objCharacter, objGear, InventoryKind.Gear));
+            }
             objReturn.Finish();
             return objReturn;
         }
 
-        private static InventoryItemViewModel FromGear(Character objCharacter, Gear objGear)
+        private static void AddMatrixStats(InventoryItemViewModel objReturn, IHasMatrixAttributes objMatrix)
         {
-            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Gear, objGear.CurrentDisplayNameShort, objGear.DisplayCategory(GlobalSettings.Language), GearIcon(objGear.Category));
+            foreach (string strAttribute in new[] { "Attack", "Sleaze", "Data Processing", "Firewall" })
+            {
+                int intValue = objMatrix.GetTotalMatrixAttribute(strAttribute);
+                if (intValue > 0)
+                    objReturn.Stats.Add(new ItemStat(strAttribute, intValue.ToString(CultureInfo.CurrentCulture)));
+            }
+        }
+
+        private static readonly HashSet<string> s_setConsumableCategories = new HashSet<string>
+        {
+            "Ammunition", "Biotech", "Drugs", "Custom Drugs", "Toxins", "Chemicals", "Explosives", "Food", "Tir Tairngire Beverages",
+            "Alchemical Preperations", "Magical Compounds", "Magical Supplies", "BTLs", "Currency", "Nanogear"
+        };
+
+        private static InventoryItemViewModel FromGear(Character objCharacter, Gear objGear, InventoryKind eKind)
+        {
+            InventoryItemViewModel objReturn = new InventoryItemViewModel(eKind, objGear.CurrentDisplayNameShort, objGear.DisplayCategory(GlobalSettings.Language),
+                                                                          InventoryIcons.ForGear(objGear.Category, objGear.Name));
+            objReturn.Bind(objCharacter, objGear, objGear.InternalId);
+            objReturn.HasQuantity = true;
+            objReturn.Quantity = objGear.Quantity;
+            objReturn.IsConsumable = s_setConsumableCategories.Contains(objGear.Category) || objGear.Name.IndexOf("Medkit", StringComparison.OrdinalIgnoreCase) >= 0
+                                     || objGear.Name.IndexOf("Patch", StringComparison.OrdinalIgnoreCase) >= 0;
             if (objGear.Quantity != 1)
+            {
                 objReturn.Badge = "×" + objGear.Quantity.ToString("0.##", GlobalSettings.CultureInfo);
+                objReturn.QuantityBadge = objReturn.Badge;
+            }
             else if (objGear.Rating > 0)
-                objReturn.Badge = "R" + objGear.Rating.ToString(CultureInfo.CurrentCulture);
+                objReturn.Badge = Rating(objGear.Rating);
+            objReturn.RatingBadge = Rating(objGear.Rating);
             objReturn.Headline = objGear.DisplayCategory(GlobalSettings.Language);
             if (objGear.Rating > 0)
                 objReturn.Stats.Add(new ItemStat("Rating", objGear.Rating.ToString(CultureInfo.CurrentCulture)));
@@ -238,27 +519,29 @@ namespace Chummer.Desktop.ViewModels
             if (objGear.IsCommlink)
             {
                 objReturn.Stats.Add(new ItemStat("Device rating", objGear.GetTotalMatrixAttribute("Device Rating").ToString(CultureInfo.CurrentCulture)));
-                foreach (string strAttribute in new[] { "Attack", "Sleaze", "Data Processing", "Firewall" })
-                {
-                    int intValue = objGear.GetTotalMatrixAttribute(strAttribute);
-                    if (intValue > 0)
-                        objReturn.Stats.Add(new ItemStat(strAttribute, intValue.ToString(CultureInfo.CurrentCulture)));
-                }
+                AddMatrixStats(objReturn, objGear);
             }
+            if (!string.IsNullOrEmpty(objGear.Capacity) && objGear.Capacity != "0")
+                objReturn.Stats.Add(new ItemStat("Capacity", objGear.Capacity));
             objReturn.IsEquipped = objGear.Equipped;
             objReturn.Cost = Money(objCharacter, objGear.TotalCost);
             objReturn.Avail = objGear.DisplayTotalAvail;
             objReturn.Source = Src(objGear.Source, objGear.Page);
             objReturn.Notes = objGear.Notes ?? string.Empty;
             foreach (Gear objChild in objGear.Children.ToList())
+            {
                 objReturn.Contents.Add("◆ " + objChild.CurrentDisplayName);
+                objReturn.Children.Add(FromGear(objCharacter, objChild, InventoryKind.Gear));
+            }
             objReturn.Finish();
             return objReturn;
         }
 
         private static InventoryItemViewModel FromVehicle(Character objCharacter, Vehicle objVehicle)
         {
-            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Vehicle, objVehicle.CurrentDisplayName, objVehicle.DisplayCategory(GlobalSettings.Language), VehicleIcon(objVehicle.Category));
+            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Vehicle, objVehicle.CurrentDisplayName, objVehicle.DisplayCategory(GlobalSettings.Language),
+                                                                          InventoryIcons.ForVehicle(objVehicle.Category, objVehicle.Name));
+            objReturn.Bind(objCharacter, objVehicle, objVehicle.InternalId);
             objReturn.Headline = "HND " + objVehicle.TotalHandling + "   SPD " + objVehicle.TotalSpeed + "   BOD " + objVehicle.TotalBody.ToString(CultureInfo.CurrentCulture);
             objReturn.Stats.Add(new ItemStat("Handling", objVehicle.TotalHandling));
             objReturn.Stats.Add(new ItemStat("Speed", objVehicle.TotalSpeed));
@@ -267,35 +550,74 @@ namespace Chummer.Desktop.ViewModels
             objReturn.Stats.Add(new ItemStat("Armor", objVehicle.TotalArmor.ToString(CultureInfo.CurrentCulture)));
             objReturn.Stats.Add(new ItemStat("Pilot", objVehicle.Pilot.ToString(CultureInfo.CurrentCulture)));
             objReturn.Stats.Add(new ItemStat("Sensor", objVehicle.CalculatedSensor.ToString(CultureInfo.CurrentCulture)));
+            objReturn.Stats.Add(new ItemStat("Seats", objVehicle.TotalSeats.ToString(CultureInfo.CurrentCulture)));
             objReturn.Cost = Money(objCharacter, objVehicle.TotalCost);
             objReturn.Avail = objVehicle.DisplayTotalAvail;
             objReturn.Source = Src(objVehicle.Source, objVehicle.Page);
             objReturn.Notes = objVehicle.Notes ?? string.Empty;
             foreach (VehicleMod objMod in objVehicle.Mods.ToList())
+            {
                 objReturn.Contents.Add("◆ " + objMod.CurrentDisplayName);
+                objReturn.Children.Add(FromVehicleMod(objCharacter, objMod));
+            }
             foreach (Weapon objWeapon in objVehicle.Weapons.ToList())
+            {
                 objReturn.Contents.Add("⌖ " + objWeapon.CurrentDisplayName);
+                objReturn.Children.Add(FromWeapon(objCharacter, objWeapon));
+            }
             foreach (Gear objGear in objVehicle.GearChildren.ToList())
+            {
                 objReturn.Contents.Add("◇ " + objGear.CurrentDisplayName);
+                objReturn.Children.Add(FromGear(objCharacter, objGear, InventoryKind.Gear));
+            }
+            objReturn.Finish();
+            return objReturn;
+        }
+
+        private static InventoryItemViewModel FromVehicleMod(Character objCharacter, VehicleMod objMod)
+        {
+            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Vehicle, objMod.CurrentDisplayName, objMod.DisplayCategory(GlobalSettings.Language), "Icon.Settings");
+            objReturn.Bind(objCharacter, objMod, objMod.InternalId);
+            objReturn.CanEquip = false;
+            objReturn.RatingBadge = Rating(objMod.Rating);
+            if (objMod.Rating > 0)
+                objReturn.Stats.Add(new ItemStat("Rating", objMod.Rating.ToString(CultureInfo.CurrentCulture)));
+            if (objMod.IncludedInVehicle)
+                objReturn.Stats.Add(new ItemStat("Included", "with vehicle"));
+            objReturn.Cost = Money(objCharacter, objMod.TotalCost);
+            objReturn.Avail = objMod.DisplayTotalAvail;
+            objReturn.Source = objMod.SourceDetail.ToString();
+            objReturn.Notes = objMod.Notes ?? string.Empty;
+            foreach (Weapon objWeapon in objMod.Weapons.ToList())
+                objReturn.Children.Add(FromWeapon(objCharacter, objWeapon));
             objReturn.Finish();
             return objReturn;
         }
 
         private static InventoryItemViewModel FromDrug(Character objCharacter, Drug objDrug)
         {
-            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Drug, objDrug.CurrentDisplayName, objDrug.Category, "Icon.Drug");
+            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Drug, objDrug.CurrentDisplayName, objDrug.Category, InventoryIcons.ForDrug(objDrug.Name));
+            objReturn.Bind(objCharacter, objDrug, objDrug.InternalId);
             objReturn.Badge = "×" + objDrug.Quantity.ToString("0.##", GlobalSettings.CultureInfo);
+            objReturn.QuantityBadge = objReturn.Badge;
+            objReturn.HasQuantity = true;
+            objReturn.IsConsumable = true;
+            objReturn.Quantity = objDrug.Quantity;
             objReturn.Headline = objDrug.Category;
             objReturn.Stats.Add(new ItemStat("Doses", objDrug.Quantity.ToString("0.##", GlobalSettings.CultureInfo)));
             objReturn.Cost = Money(objCharacter, objDrug.TotalCost);
+            objReturn.Notes = objDrug.Notes ?? string.Empty;
             objReturn.Finish();
             return objReturn;
         }
 
         private static InventoryItemViewModel FromLifestyle(Character objCharacter, Lifestyle objLifestyle)
         {
-            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Lifestyle, objLifestyle.CurrentDisplayName, objLifestyle.BaseLifestyle, "Icon.Lifestyle");
+            InventoryItemViewModel objReturn = new InventoryItemViewModel(InventoryKind.Lifestyle, objLifestyle.CurrentDisplayName, objLifestyle.BaseLifestyle,
+                                                                          InventoryIcons.ForLifestyle(objLifestyle.BaseLifestyle, objLifestyle.Name));
+            objReturn.Bind(objCharacter, objLifestyle, objLifestyle.InternalId);
             objReturn.Badge = objLifestyle.Increments.ToString(CultureInfo.CurrentCulture) + "×";
+            objReturn.QuantityBadge = objReturn.Badge;
             objReturn.Headline = objLifestyle.BaseLifestyle + "   " + objLifestyle.DisplayTotalMonthlyCost;
             objReturn.Stats.Add(new ItemStat("Lifestyle", objLifestyle.BaseLifestyle));
             objReturn.Stats.Add(new ItemStat("Per period", objLifestyle.DisplayTotalMonthlyCost));
@@ -307,81 +629,15 @@ namespace Chummer.Desktop.ViewModels
             return objReturn;
         }
 
-        // ---------- icon mapping by data category ----------
-
-        internal static string WeaponIcon(string strCategory)
+        /// <summary>This item and every nested child, depth first.</summary>
+        public IEnumerable<InventoryItemViewModel> SelfAndDescendants()
         {
-            switch (strCategory ?? string.Empty)
+            yield return this;
+            foreach (InventoryItemViewModel objChild in Children)
             {
-                case "Blades":
-                case "Clubs":
-                case "Exotic Melee Weapons":
-                case "Unarmed":
-                case "Improvised Weapons":
-                    return "Icon.Blade";
-                case "Assault Rifles":
-                case "Sniper Rifles":
-                case "Sporting Rifles":
-                case "Shotguns":
-                case "Assault Cannons":
-                case "Light Machineguns":
-                case "Medium Machineguns":
-                case "Heavy Machineguns":
-                    return "Icon.Rifle";
-                case "Grenades":
-                case "Missile Launchers":
-                case "Grenade Launchers":
-                case "Rocket Launchers":
-                    return "Icon.Explosive";
-                case "Gear":
-                    return "Icon.Ammo";
-                default:
-                    return "Icon.Weapon";
+                foreach (InventoryItemViewModel objLoop in objChild.SelfAndDescendants())
+                    yield return objLoop;
             }
-        }
-
-        internal static string GearIcon(string strCategory)
-        {
-            string strLoop = strCategory ?? string.Empty;
-            if (strLoop == "Commlinks" || strLoop == "Commlink Accessories")
-                return "Icon.Commlink";
-            if (strLoop.StartsWith("Cyberdeck", StringComparison.Ordinal) || strLoop == "Rigger Command Consoles" || strLoop == "Cyberterminals")
-                return "Icon.Cyberdeck";
-            if (strLoop.StartsWith("Ammunition", StringComparison.Ordinal))
-                return "Icon.Ammo";
-            if (strLoop == "Explosives")
-                return "Icon.Explosive";
-            if (strLoop == "Biotech" || strLoop == "Medical" || strLoop == "Slap Patches")
-                return "Icon.Medkit";
-            if (strLoop == "Breaking and Entering Gear" || strLoop == "B&E Gear" || strLoop == "Lockpicks")
-                return "Icon.Lockpick";
-            if (strLoop == "Sensors" || strLoop == "Sensor Functions" || strLoop == "Audio Devices" || strLoop == "Optical Devices"
-                || strLoop == "Vision Devices" || strLoop == "Vision Enhancements" || strLoop == "Audio Enhancements" || strLoop == "Security Devices")
-                return "Icon.Sensor";
-            if (strLoop == "Foci" || strLoop == "Magical Supplies" || strLoop == "Metamagic Foci" || strLoop.IndexOf("Focus", StringComparison.Ordinal) >= 0)
-                return "Icon.Focus";
-            if (strLoop == "Drugs" || strLoop == "Toxins")
-                return "Icon.Drug";
-            if (strLoop == "Contracts/Upkeep" || strLoop == "Licenses" || strLoop == "ID/Credsticks")
-                return "Icon.Contract";
-            if (strLoop == "Common Programs" || strLoop == "Hacking Programs" || strLoop == "Software" || strLoop == "Autosofts" || strLoop == "Skillsofts")
-                return "Icon.Cyberdeck";
-            return "Icon.Gear";
-        }
-
-        internal static string VehicleIcon(string strCategory)
-        {
-            string strLoop = strCategory ?? string.Empty;
-            if (strLoop.IndexOf("Drone", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Icon.Drone";
-            if (strLoop.IndexOf("Boat", StringComparison.OrdinalIgnoreCase) >= 0 || strLoop.IndexOf("Submarine", StringComparison.OrdinalIgnoreCase) >= 0
-                || strLoop.IndexOf("Ship", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Icon.Boat";
-            if (strLoop.IndexOf("craft", StringComparison.OrdinalIgnoreCase) >= 0 || strLoop.IndexOf("VTOL", StringComparison.OrdinalIgnoreCase) >= 0
-                || strLoop.IndexOf("Wing", StringComparison.OrdinalIgnoreCase) >= 0 || strLoop.IndexOf("LTA", StringComparison.OrdinalIgnoreCase) >= 0
-                || strLoop.IndexOf("Plane", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Icon.Aircraft";
-            return "Icon.Vehicle";
         }
     }
 }
@@ -408,6 +664,8 @@ namespace Chummer.Desktop.ViewModels
         public List<InventoryItemViewModel> Items { get; }
         public string Name => _strTitle ?? Title(Kind);
         public string CountText => Items.Count.ToString(CultureInfo.CurrentCulture);
+        public IBrush AccentBrush => new Avalonia.Media.Immutable.ImmutableSolidColorBrush(InventoryItemViewModel.AccentFor(Kind));
+        public string IconKey => KindIcon(Kind);
 
         public static string Title(InventoryKind eKind)
         {
@@ -422,6 +680,20 @@ namespace Chummer.Desktop.ViewModels
                 default: return "LIFESTYLES";
             }
         }
+
+        public static string KindIcon(InventoryKind eKind)
+        {
+            switch (eKind)
+            {
+                case InventoryKind.Weapon: return "Icon.Item.HeavyPistol";
+                case InventoryKind.Armor: return "Icon.Item.Vest";
+                case InventoryKind.Cyberware: return "Icon.Item.Cyberarm";
+                case InventoryKind.Gear: return "Icon.Item.Backpack";
+                case InventoryKind.Vehicle: return "Icon.Item.Car";
+                case InventoryKind.Drug: return "Icon.Item.Pills";
+                default: return "Icon.Item.House";
+            }
+        }
     }
 
     /// <summary>A category chip above the inventory grid.</summary>
@@ -433,7 +705,7 @@ namespace Chummer.Desktop.ViewModels
         {
             Kind = eKind;
             Name = strName;
-            IconKey = strIconKey;
+            IconKey = eKind.HasValue ? InventoryGroupViewModel.KindIcon(eKind.Value) : strIconKey;
             Count = intCount;
             _objOwner = objOwner;
             SelectCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(() => _objOwner.InventoryKind = Kind);

@@ -421,6 +421,7 @@ namespace Chummer.Desktop.ViewModels
             foreach (InventoryFilterOption objOption in InventoryKinds)
                 objOption.Refresh();
             InventorySummary = intShown.ToString(GlobalSettings.CultureInfo) + " / " + _lstAllInventory.Count.ToString(GlobalSettings.CultureInfo) + " ITEMS";
+            OnInventoryRefreshed();
         }
 
         private void CharacterOnPropertyChanged(object sender, PropertyChangedEventArgs e)
