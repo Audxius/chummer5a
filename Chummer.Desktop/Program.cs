@@ -45,7 +45,7 @@ namespace Chummer.Desktop
                                               .WithInterFont()
                                               .LogToTrace();
             if (OperatingSystem.IsLinux() && UseNativeWayland())
-                return objBuilder.UseWayland().UseSkia();
+                return objBuilder.UseWayland().UseSkia().UseHarfBuzz();
             return objBuilder.UsePlatformDetect();
         }
 

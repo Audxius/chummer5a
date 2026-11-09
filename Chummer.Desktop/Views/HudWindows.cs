@@ -172,7 +172,7 @@ namespace Chummer.Desktop.Views
         public static async Task<ListItem?> ChooseAsync(object owner, string strTitle, IReadOnlyList<ListItem> lstItems, string strPreselected)
         {
             PromptWindow objWindow = new PromptWindow(strTitle);
-            TextBox txtSearch = new TextBox { Watermark = Tr.Get("String_Search") };
+            TextBox txtSearch = new TextBox { PlaceholderText = Tr.Get("String_Search") };
             ListBox lstChoices = new ListBox { Height = 360, ItemsSource = lstItems };
             lstChoices.ItemTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<ListItem>((x, _) => new TextBlock { Text = x.Name });
             if (!string.IsNullOrEmpty(strPreselected))
