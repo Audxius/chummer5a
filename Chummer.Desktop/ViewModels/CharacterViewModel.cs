@@ -113,7 +113,7 @@ namespace Chummer.Desktop.ViewModels
 
         partial void OnInventoryKindChanged(InventoryKind? value) => ApplyInventoryFilter();
 
-        partial void OnAbilityFilterChanged(string value) => FilterCards(_lstAllAbilities, AbilityGroups, value);
+        partial void OnAbilityFilterChanged(string value) => ApplyAbilityFilter();
 
         partial void OnNetworkFilterChanged(string value)
         {
@@ -214,13 +214,14 @@ namespace Chummer.Desktop.ViewModels
             List<KnowledgeSkill> lstKnowledge = Character.SkillsSection.KnowledgeSkills.ToList();
             if (lstKnowledge.Count > 0)
                 lstCategories.Add(new SkillCategoryViewModel("Knowledge", lstKnowledge));
-            List<QualityViewModel> lstQualities = Character.Qualities.ToList().Select(x => new QualityViewModel(x)).ToList();
+            List<QualityViewModel> lstQualities = QualityViewModel.FromCharacter(this);
             string strConcept = Character.Concept.RtfToPlainText();
             string strDescription = Character.Description.RtfToPlainText();
             string strBackground = Character.Background.RtfToPlainText();
             string strNotes = Character.Notes.RtfToPlainText();
             List<InventoryItemViewModel> lstInventory = InventoryItemViewModel.FromCharacter(Character).ToList();
-            List<InventoryGroupViewModel> lstAbilities = AbilityCards.Abilities(Character);
+            List<AbilityGroupViewModel> lstAbilitySections = AbilityCards.Abilities(this);
+            List<InventoryGroupViewModel> lstAbilities = lstAbilitySections.Select(x => x.ToInventoryGroup()).ToList();
             List<InventoryGroupViewModel> lstNetwork = AbilityCards.Network(Character);
             List<ContactCardViewModel> lstContacts = Character.Contacts.ToList().Select(x => new ContactCardViewModel(this, x))
                                                               .OrderByDescending(x => x.Connection + x.Loyalty).ThenBy(x => x.Name, StringComparer.CurrentCulture).ToList();
@@ -232,6 +233,7 @@ namespace Chummer.Desktop.ViewModels
                 ApplySkillFilter();
                 Reset(PositiveQualities, lstQualities.Where(x => x.IsPositive));
                 Reset(NegativeQualities, lstQualities.Where(x => !x.IsPositive));
+                RefreshQualitySummary(lstQualities);
                 Concept = strConcept;
                 Description = strDescription;
                 Background = strBackground;
@@ -244,7 +246,8 @@ namespace Chummer.Desktop.ViewModels
                 _lstAllContacts = lstContacts;
                 ApplyContactFilter();
                 OnPropertyChanged(nameof(HasAbilities));
-                FilterCards(_lstAllAbilities, AbilityGroups, AbilityFilter);
+                _lstAllAbilitySections = lstAbilitySections;
+                ApplyAbilityFilter();
                 FilterCards(_lstAllNetwork, NetworkGroups, NetworkFilter);
             });
         }
@@ -667,23 +670,6 @@ namespace Chummer.Desktop.ViewModels
 
         /// <summary>Rating pips 1..12 (filled up to the rating).</summary>
         public IReadOnlyList<bool> Pips => Enumerable.Range(1, Math.Max(6, Rating)).Select(x => x <= Rating).ToList();
-    }
-
-    public sealed class QualityViewModel
-    {
-        public QualityViewModel(Quality objQuality)
-        {
-            Name = objQuality.CurrentDisplayName;
-            Karma = objQuality.BP * Math.Max(1, objQuality.Levels);
-            IsPositive = objQuality.Type == QualityType.Positive;
-            Source = objQuality.SourceDetail.ToString();
-        }
-
-        public string Name { get; }
-        public int Karma { get; }
-        public bool IsPositive { get; }
-        public string Source { get; }
-        public string KarmaText => (IsPositive ? "+" : string.Empty) + Karma.ToString(GlobalSettings.CultureInfo);
     }
 }
 

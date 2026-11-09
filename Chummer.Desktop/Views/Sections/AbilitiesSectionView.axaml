@@ -5,19 +5,155 @@
              xmlns:conv="using:Chummer.Desktop.Converters"
              x:Class="Chummer.Desktop.Views.Sections.AbilitiesSectionView"
              x:DataType="vm:CharacterViewModel">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://chummer/Theme/EditorResources.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="Border.acard">
+      <Setter Property="Width" Value="236" />
+      <Setter Property="MinHeight" Value="128" />
+      <Setter Property="Margin" Value="0,0,10,10" />
+      <Setter Property="Padding" Value="12,10,8,10" />
+      <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="1,1,1,2" />
+    </Style>
+    <Style Selector="Border.acard:pointerover">
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+      <Setter Property="BoxShadow" Value="0 0 14 0 #4400E5FF" />
+    </Style>
+    <Style Selector="Button.icon">
+      <Setter Property="Width" Value="26" />
+      <Setter Property="Height" Value="26" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    </Style>
+    <Style Selector="Button.icon:pointerover PathIcon">
+      <Setter Property="Foreground" Value="{StaticResource RedBrush}" />
+    </Style>
+    <Style Selector="Button.mini">
+      <Setter Property="Padding" Value="7,2" />
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
+    </Style>
+  </UserControl.Styles>
   <DockPanel Margin="28,22,28,0">
     <Grid DockPanel.Dock="Top" Margin="0,0,0,14">
-      <TextBox Text="{Binding AbilityFilter}" PlaceholderText="Search spells, powers, forms, techniques…" Padding="40,9,10,9" />
+      <TextBox Text="{Binding AbilityFilter}" PlaceholderText="Search spells, powers, forms, techniques, spirits…" Padding="40,9,10,9" />
       <PathIcon Data="{StaticResource Icon.Search}" Width="15" Height="15" HorizontalAlignment="Left" Margin="14,0,0,0" Classes="muted" IsHitTestVisible="False" />
     </Grid>
-    <Grid>
-      <StackPanel IsVisible="{Binding !HasAbilities}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-        <PathIcon Data="{StaticResource Icon.Spell}" Width="40" Height="40" Classes="muted" />
-        <TextBlock Text="No spells, powers or other abilities." Classes="muted" />
-      </StackPanel>
-      <ScrollViewer>
-        <ItemsControl ItemsSource="{Binding AbilityGroups}" ItemTemplate="{StaticResource CardGroup}" Margin="0,0,0,22" />
-      </ScrollViewer>
-    </Grid>
+    <ScrollViewer>
+      <ItemsControl ItemsSource="{Binding AbilitySections}" Margin="0,0,0,22">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:AbilityGroupViewModel">
+            <StackPanel Spacing="8" Margin="0,0,0,20">
+              <!-- Section header: icon, title, count, summary, add buttons -->
+              <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,6">
+                <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
+                  <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="1" Text="{Binding Title}" Classes="h2" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="2" Text="{Binding CountText}" Classes="label" VerticalAlignment="Center" Margin="10,0,0,0" />
+                  <TextBlock Grid.Column="3" Text="{Binding Summary}" Classes="muted" FontSize="12" VerticalAlignment="Center" Margin="18,0,0,0" TextTrimming="CharacterEllipsis" />
+                  <ItemsControl Grid.Column="4" ItemsSource="{Binding Actions}">
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="6" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:AbilityAction">
+                        <Button Classes.primary="{Binding IsPrimary}" Classes.hot="{Binding IsHot}" Command="{Binding Command}" IsEnabled="{Binding IsEnabled}"
+                                ToolTip.Tip="{Binding Tip}" ToolTip.ShowOnDisabled="True" Padding="10,5">
+                          <StackPanel Orientation="Horizontal" Spacing="6">
+                            <PathIcon Data="{StaticResource Edit.Add}" Width="12" Height="12" />
+                            <TextBlock Text="{Binding Label}" FontWeight="Bold" FontSize="11" />
+                          </StackPanel>
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </Grid>
+              </Border>
+              <TextBlock Text="{Binding EmptyText}" Classes="muted" IsVisible="{Binding IsEmpty}" Margin="2,0,0,0" />
+              <ItemsControl ItemsSource="{Binding Cards}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:AbilityCardViewModel">
+                    <Border Classes="acard" ToolTip.Placement="Right" ToolTip.ShowDelay="300">
+                      <ToolTip.Tip>
+                        <StackPanel Width="320" Spacing="8">
+                          <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{Binding Item.IconKey, Converter={StaticResource Icon}}" Width="28" Height="28" />
+                            <StackPanel>
+                              <TextBlock Text="{Binding Item.Name}" FontWeight="Bold" FontSize="15" TextWrapping="Wrap" MaxWidth="270" />
+                              <TextBlock Text="{Binding Item.Category}" Classes="label" />
+                            </StackPanel>
+                          </StackPanel>
+                          <ItemsControl ItemsSource="{Binding Item.Stats}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="vm:ItemStat">
+                                <StackPanel Width="100" Margin="0,0,4,6">
+                                  <TextBlock Text="{Binding Label}" Classes="label" />
+                                  <TextBlock Text="{Binding Value}" FontWeight="SemiBold" Foreground="{StaticResource CyanBrush}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                          <TextBlock Text="{Binding Item.ContentsText}" IsVisible="{Binding Item.HasContents}" TextWrapping="Wrap" FontSize="12" />
+                          <TextBlock Text="{Binding Item.Notes}" IsVisible="{Binding Item.HasNotes}" TextWrapping="Wrap" Classes="muted" FontSize="12" MaxHeight="120" />
+                          <TextBlock Text="{Binding Item.Source}" Classes="muted" FontSize="11" />
+                        </StackPanel>
+                      </ToolTip.Tip>
+                      <Grid RowDefinitions="Auto,Auto,*,Auto,Auto">
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                          <PathIcon Data="{Binding Item.IconKey, Converter={StaticResource Icon}}" Width="26" Height="26" VerticalAlignment="Top" />
+                          <Border Grid.Column="2" Classes="chip" IsVisible="{Binding Item.HasBadge}" VerticalAlignment="Top" Margin="0,2,2,0">
+                            <TextBlock Text="{Binding Item.Badge}" FontSize="10" Foreground="{StaticResource CyanBrush}" />
+                          </Border>
+                          <Button Grid.Column="3" Classes="icon" IsVisible="{Binding CanRemove}" Command="{Binding RemoveCommand}" ToolTip.Tip="{Binding RemoveTip}" VerticalAlignment="Top" Margin="0,-4,-2,0">
+                            <PathIcon Data="{StaticResource Edit.Remove}" Width="14" Height="14" />
+                          </Button>
+                        </Grid>
+                        <TextBlock Grid.Row="1" Text="{Binding Item.Name}" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Margin="0,8,0,2" Foreground="{StaticResource TextBrush}" />
+                        <TextBlock Grid.Row="2" Text="{Binding Item.Headline}" Classes="label" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                        <ItemsControl Grid.Row="3" ItemsSource="{Binding Steppers}" IsVisible="{Binding HasSteppers}" Margin="0,8,0,0">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AbilityStepper">
+                              <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,2,0,0">
+                                <TextBlock Text="{Binding Label}" Classes="label" FontSize="10" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Classes="step" Content="−" Command="{Binding DownCommand}" IsEnabled="{Binding CanDown}" ToolTip.Tip="{Binding DownTip}" />
+                                <TextBlock Grid.Column="2" Text="{Binding Value}" FontWeight="Bold" MinWidth="34" TextAlignment="Center" VerticalAlignment="Center" Margin="4,0" />
+                                <Button Grid.Column="3" Classes="step" Content="+" Command="{Binding UpCommand}" IsEnabled="{Binding CanUp}" ToolTip.Tip="{Binding UpTip}" ToolTip.ShowOnDisabled="True" />
+                              </Grid>
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <ItemsControl Grid.Row="4" ItemsSource="{Binding Actions}" IsVisible="{Binding HasActions}" Margin="0,8,0,0">
+                          <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AbilityAction">
+                              <Button Classes="mini" Content="{Binding Label}" Command="{Binding Command}" IsEnabled="{Binding IsEnabled}" ToolTip.Tip="{Binding Tip}" Margin="0,0,4,4" />
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
   </DockPanel>
 </UserControl>

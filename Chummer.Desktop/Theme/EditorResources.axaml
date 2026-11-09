@@ -1,0 +1,7 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Small edit glyphs used by the Qualities and Abilities editors (merged into those views only). -->
+  <StreamGeometry x:Key="Edit.Add">M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z</StreamGeometry>
+  <StreamGeometry x:Key="Edit.Remove">M9,3V4H4V6H5V19A2,2 0 0,0 7,21H17A2,2 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z</StreamGeometry>
+  <StreamGeometry x:Key="Edit.Book">M18,2A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2H18M18,4H13V12L10.5,9.75L8,12V4H6V20H18V4Z</StreamGeometry>
+</ResourceDictionary>
