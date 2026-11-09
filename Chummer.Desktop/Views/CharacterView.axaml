@@ -7,6 +7,9 @@
              x:Class="Chummer.Desktop.Views.CharacterView"
              x:DataType="vm:CharacterViewModel">
 
+  <UserControl.KeyBindings>
+    <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveAsCommand}" />
+  </UserControl.KeyBindings>
   <DockPanel>
     <!-- Header -->
     <Border DockPanel.Dock="Top" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
@@ -76,7 +79,12 @@
                 <TextBlock Text="PRINT" />
               </StackPanel>
             </Button>
-            <Button Classes="primary" Command="{Binding SaveCommand}" VerticalAlignment="Stretch" HotKey="Ctrl+S">
+            <Button Classes="primary" Command="{Binding SaveCommand}" VerticalAlignment="Stretch" HotKey="Ctrl+S" ToolTip.Tip="Save (Ctrl+S). Right-click for Save As (Ctrl+Shift+S)">
+              <Button.ContextFlyout>
+                <MenuFlyout>
+                  <MenuItem Header="Save as…" Command="{Binding SaveAsCommand}" />
+                </MenuFlyout>
+              </Button.ContextFlyout>
               <StackPanel Spacing="4" HorizontalAlignment="Center">
                 <PathIcon Data="{StaticResource Icon.Save}" Width="18" Height="18" Foreground="{StaticResource BaseBrush}" />
                 <TextBlock Text="SAVE" />
