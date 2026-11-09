@@ -117,6 +117,9 @@ internal static class Program
                         objViewModel.Palette.ActivateCommand.Execute(null);
                         await Settle();
                         Save(objWindow, strOut, "07-search-jump");
+                        // ==== Store (purchase flows) ====
+                        await StoreHarness.RunAsync(objCharacter, strOut, Settle);
+                        // ==== end store ====
                     }
                 }
                 if (args.Length > 2)
