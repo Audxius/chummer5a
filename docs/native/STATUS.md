@@ -7,7 +7,7 @@ Branch `native` on https://github.com/Audxius/chummer5a. The plan is in `~/.clau
 - **Desktop:** double-click `~/Desktop/Chummer Native.desktop`.
 - **Terminal:** run `tools/native/chummer-native.sh`.
 
-It builds on first run and whenever the sources change. It uses native Wayland when `WAYLAND_DISPLAY` is set (niri, KDE Plasma Wayland). Set `CHUMMER_BACKEND=x11` to force X11.
+It builds on first run and whenever the sources change. Custom character settings files (for example from your GM) go in `~/.config/chummer5/settings/`. It uses native Wayland when `WAYLAND_DISPLAY` is set (niri, KDE Plasma Wayland). Set `CHUMMER_BACKEND=x11` to force X11.
 
 ## What works today
 
