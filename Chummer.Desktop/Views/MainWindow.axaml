@@ -1,0 +1,84 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Chummer.Desktop.ViewModels"
+        xmlns:loc="using:Chummer.Desktop.Localization"
+        x:Class="Chummer.Desktop.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Chummer Native"
+        Width="1440" Height="900" MinWidth="980" MinHeight="620">
+  <Grid ColumnDefinitions="232,*" RowDefinitions="*,26">
+
+    <!-- Navigation rail -->
+    <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource SurfaceBrush}"
+            BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Margin="18,20,18,18" Spacing="2">
+          <TextBlock Text="CHUMMER" FontSize="24" FontWeight="Black" LetterSpacing="4"
+                     Foreground="{StaticResource HeaderGradient}" />
+          <TextBlock Text="// NATIVE" Classes="label" Foreground="{StaticResource MagentaBrush}" />
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,12">
+          <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="17,10"
+                  IsEnabled="False" ToolTip.Tip="Dice Terminal (coming soon)">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <PathIcon Data="{StaticResource Icon.Dice}" Width="18" Height="18" Classes="muted" />
+              <TextBlock Text="DICE TERMINAL" LetterSpacing="1.5" FontSize="12" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+
+        <StackPanel Spacing="2">
+          <ToggleButton Classes="nav" IsChecked="{Binding IsRosterActive, Mode=OneWay}" Command="{Binding ShowRosterCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <PathIcon Data="{StaticResource Icon.Roster}" Width="18" Height="18" />
+              <TextBlock Text="{loc:Tr String_CharacterRoster, Case=upper}" LetterSpacing="1.5" FontSize="12" VerticalAlignment="Center" />
+            </StackPanel>
+          </ToggleButton>
+          <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="17,10"
+                  Command="{Binding OpenFileCommand}" HotKey="Ctrl+O">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+              <PathIcon Data="{StaticResource Icon.Open}" Width="18" Height="18" />
+              <TextBlock Text="{loc:Tr Label_Open, Case=upper}" LetterSpacing="1.5" FontSize="12" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+
+          <TextBlock Text="OPEN RUNNERS" Classes="label" Margin="18,22,18,6" />
+          <ItemsControl ItemsSource="{Binding OpenCharacters}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:CharacterViewModel">
+                <Grid ColumnDefinitions="*,Auto">
+                  <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="17,8"
+                          Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ShowCharacterCommand}"
+                          CommandParameter="{Binding}">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <Border Width="6" Height="6" CornerRadius="3" Background="{StaticResource CyanBrush}" VerticalAlignment="Center" />
+                      <TextBlock Text="{Binding TabTitle}" Foreground="{StaticResource TextBrush}" TextTrimming="CharacterEllipsis" MaxWidth="140" />
+                    </StackPanel>
+                  </Button>
+                  <Button Grid.Column="1" Classes="ghost" Padding="8,4" Content="✕" FontSize="11"
+                          ToolTip.Tip="Close"
+                          Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CloseCharacterCommand}"
+                          CommandParameter="{Binding}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <!-- Current page -->
+    <ContentControl Grid.Row="0" Grid.Column="1" Content="{Binding CurrentPage}" />
+
+    <!-- Status line -->
+    <Border Grid.Row="1" Grid.ColumnSpan="2" Background="{StaticResource SurfaceBrush}"
+            BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0" Padding="12,0">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Text="{Binding Status}" Classes="label" VerticalAlignment="Center" />
+        <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding IsBusy}" Width="160" Height="3"
+                     Foreground="{StaticResource CyanBrush}" />
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

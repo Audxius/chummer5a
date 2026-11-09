@@ -147,7 +147,12 @@ namespace Chummer
         /// <summary>
         /// String comparison to use for comparing paths. Potentially important for if/when native Linux support is added, since paths are case-insensitive in Windows but case-sensitive in Linux.
         /// </summary>
-        public static StringComparison PathStringComparison { get; } = StringComparison.OrdinalIgnoreCase;
+        public static StringComparison PathStringComparison { get; } = Path.DirectorySeparatorChar == '\\' ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+        /// <summary>
+        /// String comparer matching <see cref="PathStringComparison"/>, for path-keyed sets and dictionaries.
+        /// </summary>
+        public static StringComparer PathStringComparer { get; } = Path.DirectorySeparatorChar == '\\' ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
 
         /// <summary>
         /// Cached latest version of Chummer from its GitHub page.

@@ -1,0 +1,226 @@
+<!-- "Neon Noir": Chummer Native's own cyberpunk look. Original palette and shapes; no third-party game assets. -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Styles.Resources>
+    <ResourceDictionary>
+      <!-- Palette -->
+      <Color x:Key="NeonBase">#FF07090D</Color>
+      <Color x:Key="NeonSurface">#FF0C1118</Color>
+      <Color x:Key="NeonPanel">#FF101823</Color>
+      <Color x:Key="NeonPanelRaised">#FF16212F</Color>
+      <Color x:Key="NeonBorder">#FF1F2C3D</Color>
+      <Color x:Key="NeonText">#FFD8E4F5</Color>
+      <Color x:Key="NeonMuted">#FF7C8CA6</Color>
+      <Color x:Key="NeonCyan">#FF00E5FF</Color>
+      <Color x:Key="NeonMagenta">#FFFF2E88</Color>
+      <Color x:Key="NeonYellow">#FFF3E600</Color>
+      <Color x:Key="NeonGreen">#FF39FF88</Color>
+      <Color x:Key="NeonRed">#FFFF3B4E</Color>
+
+      <SolidColorBrush x:Key="BaseBrush" Color="{StaticResource NeonBase}" />
+      <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource NeonSurface}" />
+      <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource NeonPanel}" />
+      <SolidColorBrush x:Key="PanelRaisedBrush" Color="{StaticResource NeonPanelRaised}" />
+      <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource NeonBorder}" />
+      <SolidColorBrush x:Key="TextBrush" Color="{StaticResource NeonText}" />
+      <SolidColorBrush x:Key="MutedBrush" Color="{StaticResource NeonMuted}" />
+      <SolidColorBrush x:Key="CyanBrush" Color="{StaticResource NeonCyan}" />
+      <SolidColorBrush x:Key="MagentaBrush" Color="{StaticResource NeonMagenta}" />
+      <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource NeonYellow}" />
+      <SolidColorBrush x:Key="GreenBrush" Color="{StaticResource NeonGreen}" />
+      <SolidColorBrush x:Key="RedBrush" Color="{StaticResource NeonRed}" />
+      <SolidColorBrush x:Key="CyanDimBrush" Color="#3300E5FF" />
+      <SolidColorBrush x:Key="MagentaDimBrush" Color="#33FF2E88" />
+
+      <LinearGradientBrush x:Key="HeaderGradient" StartPoint="0%,0%" EndPoint="100%,0%">
+        <GradientStop Offset="0" Color="#FF00E5FF" />
+        <GradientStop Offset="1" Color="#FFFF2E88" />
+      </LinearGradientBrush>
+
+      <!-- Fluent theme overrides so stock controls pick up the palette -->
+      <SolidColorBrush x:Key="SystemControlBackgroundAltHighBrush" Color="{StaticResource NeonSurface}" />
+      <Color x:Key="SystemAccentColor">#FF00E5FF</Color>
+      <Color x:Key="SystemAccentColorLight1">#FF5CF0FF</Color>
+      <Color x:Key="SystemAccentColorDark1">#FF00A9BD</Color>
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <!-- Base -->
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{StaticResource BaseBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    <Setter Property="FontSize" Value="14" />
+  </Style>
+
+  <!-- Typography -->
+  <Style Selector="TextBlock.h1">
+    <Setter Property="FontSize" Value="26" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="LetterSpacing" Value="2" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+  </Style>
+  <Style Selector="TextBlock.h2">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="LetterSpacing" Value="3" />
+    <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
+  </Style>
+  <Style Selector="TextBlock.label">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="LetterSpacing" Value="1.5" />
+    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+  </Style>
+  <Style Selector="TextBlock.value">
+    <Setter Property="FontSize" Value="22" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+  </Style>
+  <Style Selector="TextBlock.muted">
+    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+  </Style>
+  <Style Selector="TextBlock.accent">
+    <Setter Property="Foreground" Value="{StaticResource MagentaBrush}" />
+  </Style>
+
+  <!-- HUD panels: dark plate, hairline border, lit left edge -->
+  <Style Selector="Border.panel">
+    <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="2" />
+    <Setter Property="Padding" Value="14" />
+  </Style>
+  <Style Selector="Border.panel.lit">
+    <Setter Property="BorderThickness" Value="3,1,1,1" />
+    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    <Setter Property="BoxShadow" Value="0 0 18 0 #2200E5FF" />
+  </Style>
+  <Style Selector="Border.panel.hot">
+    <Setter Property="BorderThickness" Value="3,1,1,1" />
+    <Setter Property="BorderBrush" Value="{StaticResource MagentaBrush}" />
+    <Setter Property="BoxShadow" Value="0 0 18 0 #22FF2E88" />
+  </Style>
+  <Style Selector="Border.chip">
+    <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="2" />
+    <Setter Property="Padding" Value="6,2" />
+  </Style>
+
+  <!-- Buttons: neon outline that lights up -->
+  <Style Selector="Button">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="2" />
+    <Setter Property="Padding" Value="14,7" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="LetterSpacing" Value="1" />
+  </Style>
+  <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    <Setter Property="BoxShadow" Value="0 0 12 0 #6600E5FF" />
+  </Style>
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{StaticResource CyanBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource BaseBrush}" />
+  </Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#FF5CF0FF" />
+    <Setter Property="Foreground" Value="{StaticResource BaseBrush}" />
+  </Style>
+  <Style Selector="Button.hot">
+    <Setter Property="Foreground" Value="{StaticResource MagentaBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource MagentaBrush}" />
+  </Style>
+  <Style Selector="Button.hot:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource MagentaDimBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource MagentaBrush}" />
+    <Setter Property="BoxShadow" Value="0 0 12 0 #66FF2E88" />
+  </Style>
+  <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource BorderBrush}" />
+  </Style>
+  <Style Selector="Button.ghost">
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+  </Style>
+
+  <!-- Navigation rail entries -->
+  <Style Selector="ToggleButton.nav">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    <Setter Property="BorderThickness" Value="3,0,0,0" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Padding" Value="14,10" />
+  </Style>
+  <Style Selector="ToggleButton.nav:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+  </Style>
+
+  <!-- Inputs -->
+  <Style Selector="TextBox">
+    <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+    <Setter Property="CornerRadius" Value="2" />
+    <Setter Property="CaretBrush" Value="{StaticResource CyanBrush}" />
+    <Setter Property="SelectionBrush" Value="{StaticResource CyanDimBrush}" />
+  </Style>
+  <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+  </Style>
+
+  <!-- Lists -->
+  <Style Selector="ListBox">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ListBoxItem">
+    <Setter Property="Padding" Value="10,6" />
+    <Setter Property="CornerRadius" Value="2" />
+  </Style>
+  <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />
+  </Style>
+  <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
+  </Style>
+
+  <!-- Icons (Path data from Assets/Icons) -->
+  <Style Selector="PathIcon">
+    <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
+  </Style>
+  <Style Selector="PathIcon.muted">
+    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+  </Style>
+  <Style Selector="PathIcon.hot">
+    <Setter Property="Foreground" Value="{StaticResource MagentaBrush}" />
+  </Style>
+
+  <!-- Tooltips as HUD cards -->
+  <Style Selector="ToolTip">
+    <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="2" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    <Setter Property="MaxWidth" Value="420" />
+  </Style>
+</Styles>

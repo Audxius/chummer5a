@@ -1,0 +1,353 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Chummer.Desktop.ViewModels"
+             xmlns:loc="using:Chummer.Desktop.Localization"
+             xmlns:conv="using:Chummer.Desktop.Converters"
+             x:Class="Chummer.Desktop.Views.CharacterView"
+             x:DataType="vm:CharacterViewModel">
+  <UserControl.Resources>
+    <conv:IconKeyConverter x:Key="Icon" />
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="ToggleButton.section">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+      <Setter Property="BorderThickness" Value="0,0,0,2" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Padding" Value="16,10" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="LetterSpacing" Value="1.5" />
+    </Style>
+    <Style Selector="ToggleButton.section:checked /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{StaticResource MagentaBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+    <Style Selector="Border.stat">
+      <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="0,0,0,2" />
+      <Setter Property="Padding" Value="16,10" />
+      <Setter Property="MinWidth" Value="150" />
+    </Style>
+  </UserControl.Styles>
+
+  <DockPanel>
+    <!-- Header -->
+    <Border DockPanel.Dock="Top" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="0,0,0,1" Padding="28,20,28,0">
+      <StackPanel>
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Border Width="88" Height="88" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource CyanBrush}"
+                  BorderThickness="1" ClipToBounds="True" BoxShadow="0 0 16 0 #3300E5FF">
+            <Grid>
+              <PathIcon Data="{StaticResource Icon.Overview}" Width="44" Height="44" Classes="muted" />
+              <Image Source="{Binding Portrait}" Stretch="UniformToFill" />
+            </Grid>
+          </Border>
+          <StackPanel Grid.Column="1" Margin="20,2,0,0" Spacing="4">
+            <TextBlock Text="{Binding Name}" Classes="h1" />
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <TextBlock Text="{Binding Metatype}" Foreground="{StaticResource TextBrush}" />
+              <TextBlock Text="{Binding RealName}" Classes="muted" />
+            </StackPanel>
+            <Border Classes="chip" HorizontalAlignment="Left" Margin="0,4,0,0">
+              <TextBlock Text="{Binding Mode}" FontSize="10" LetterSpacing="1" Foreground="{StaticResource CyanBrush}" />
+            </Border>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
+            <Border Classes="stat" BorderBrush="{StaticResource MagentaBrush}">
+              <StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <PathIcon Data="{StaticResource Icon.Karma}" Width="12" Height="12" Classes="hot" />
+                  <TextBlock Text="{loc:Tr Label_Karma, Case=upper}" Classes="label" />
+                </StackPanel>
+                <TextBlock Text="{Binding Karma}" Classes="value" />
+              </StackPanel>
+            </Border>
+            <Border Classes="stat" BorderBrush="{StaticResource YellowBrush}">
+              <StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <PathIcon Data="{StaticResource Icon.Nuyen}" Width="12" Height="12" Foreground="{StaticResource YellowBrush}" />
+                  <TextBlock Text="{loc:Tr Label_Nuyen, Case=upper}" Classes="label" />
+                </StackPanel>
+                <TextBlock Text="{Binding Nuyen}" Classes="value" />
+              </StackPanel>
+            </Border>
+            <Border Classes="stat" BorderBrush="{StaticResource CyanBrush}">
+              <StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <PathIcon Data="{StaticResource Icon.Essence}" Width="12" Height="12" />
+                  <TextBlock Text="{loc:Tr Label_Essence, Case=upper}" Classes="label" />
+                </StackPanel>
+                <TextBlock Text="{Binding Essence}" Classes="value" />
+              </StackPanel>
+            </Border>
+            <Button Classes="primary" Command="{Binding SaveCommand}" VerticalAlignment="Stretch" HotKey="Ctrl+S">
+              <StackPanel Spacing="4" HorizontalAlignment="Center">
+                <PathIcon Data="{StaticResource Icon.Save}" Width="18" Height="18" Foreground="{StaticResource BaseBrush}" />
+                <TextBlock Text="SAVE" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Grid>
+
+        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+          <ToggleButton Classes="section" Content="OVERVIEW" IsChecked="{Binding IsOverview, Mode=OneWay}"
+                        Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Overview}" />
+          <ToggleButton Classes="section" Content="{loc:Tr Label_Attributes, Case=upper}" IsChecked="{Binding IsAttributes, Mode=OneWay}"
+                        Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Attributes}" />
+          <ToggleButton Classes="section" Content="{loc:Tr Tab_Skills, Case=upper}" IsChecked="{Binding IsSkills, Mode=OneWay}"
+                        Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Skills}" />
+          <ToggleButton Classes="section" Content="{loc:Tr String_Qualities, Case=upper}" IsChecked="{Binding IsQualities, Mode=OneWay}"
+                        Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Qualities}" />
+          <ToggleButton Classes="section" Content="{loc:Tr Tab_Notes, Case=upper}" IsChecked="{Binding IsNotes, Mode=OneWay}"
+                        Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Notes}" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <!-- Sections -->
+    <Grid>
+      <!-- Overview -->
+      <ScrollViewer IsVisible="{Binding IsOverview}">
+        <Grid ColumnDefinitions="*,*" Margin="28,22" >
+          <Border Classes="panel lit" Margin="0,0,10,0" VerticalAlignment="Top">
+            <StackPanel Spacing="10">
+              <TextBlock Text="{loc:Tr Label_Attributes, Case=upper}" Classes="h2" />
+              <ItemsControl ItemsSource="{Binding Attributes}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:AttributeViewModel">
+                    <Grid ColumnDefinitions="28,60,*,48" Margin="0,4">
+                      <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="16" Height="16" />
+                      <TextBlock Grid.Column="1" Text="{Binding Abbrev}" FontWeight="Bold" VerticalAlignment="Center" />
+                      <ProgressBar Grid.Column="2" Minimum="0" Maximum="1" Value="{Binding Fill}" Height="6"
+                                   Foreground="{StaticResource CyanBrush}" Background="{StaticResource SurfaceBrush}" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="3" Text="{Binding Display}" HorizontalAlignment="Right" FontWeight="SemiBold" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="1" Classes="panel hot" Margin="10,0,0,0" VerticalAlignment="Top">
+            <StackPanel Spacing="8">
+              <TextBlock Text="{loc:Tr String_Qualities, Case=upper}" Classes="h2" Foreground="{StaticResource MagentaBrush}" />
+              <ItemsControl ItemsSource="{Binding PositiveQualities}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:QualityViewModel">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,3" ToolTip.Tip="{Binding Source}">
+                      <TextBlock Text="{Binding Name}" />
+                      <TextBlock Grid.Column="1" Text="{Binding KarmaText}" Foreground="{StaticResource GreenBrush}" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <ItemsControl ItemsSource="{Binding NegativeQualities}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:QualityViewModel">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,3" ToolTip.Tip="{Binding Source}">
+                      <TextBlock Text="{Binding Name}" />
+                      <TextBlock Grid.Column="1" Text="{Binding KarmaText}" Foreground="{StaticResource RedBrush}" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+        </Grid>
+      </ScrollViewer>
+
+      <!-- Attributes -->
+      <ScrollViewer IsVisible="{Binding IsAttributes}">
+        <StackPanel Margin="28,22" Spacing="18">
+          <ItemsControl ItemsSource="{Binding Attributes}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:AttributeViewModel">
+                <Border Classes="panel lit" Width="200" Margin="0,0,14,14">
+                  <StackPanel Spacing="6">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="22" Height="22" />
+                      <TextBlock Text="{Binding Abbrev}" Classes="h2" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding Name}" Classes="muted" />
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <TextBlock Text="{Binding Display}" Classes="value" FontSize="30" />
+                      <TextBlock Text="{Binding MaximumText}" Classes="muted" VerticalAlignment="Bottom" Margin="0,0,0,6" />
+                    </StackPanel>
+                    <ProgressBar Minimum="0" Maximum="1" Value="{Binding Fill}" Height="4"
+                                 Foreground="{StaticResource CyanBrush}" Background="{StaticResource SurfaceBrush}" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <ItemsControl ItemsSource="{Binding SpecialAttributes}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:AttributeViewModel">
+                <Border Classes="panel hot" Width="200" Margin="0,0,14,14">
+                  <StackPanel Spacing="6">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="22" Height="22" Classes="hot" />
+                      <TextBlock Text="{Binding Abbrev}" Classes="h2" Foreground="{StaticResource MagentaBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding Name}" Classes="muted" />
+                    <TextBlock Text="{Binding Display}" Classes="value" FontSize="30" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- Skills -->
+      <DockPanel IsVisible="{Binding IsSkills}" Margin="28,22,28,0">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="16" Margin="0,0,0,14">
+          <TextBox Width="320" Text="{Binding SkillFilter}" Watermark="Search skills...">
+            <TextBox.InnerLeftContent>
+              <PathIcon Data="{StaticResource Icon.Search}" Width="14" Height="14" Margin="8,0,0,0" Classes="muted" />
+            </TextBox.InnerLeftContent>
+          </TextBox>
+          <CheckBox Content="Show untrained" IsChecked="{Binding ShowUntrainedSkills}" />
+        </StackPanel>
+        <ScrollViewer>
+          <ItemsControl ItemsSource="{Binding SkillCategories}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SkillCategoryViewModel">
+                <Border Classes="panel lit" Width="420" Margin="0,0,16,16" VerticalAlignment="Top">
+                  <StackPanel Spacing="6">
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,6">
+                      <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="20" Height="20" />
+                      <TextBlock Text="{Binding Name}" Classes="h2" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding Skills}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SkillViewModel">
+                          <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,3">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                              <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="230" ToolTip.Tip="{Binding Name}" />
+                              <Border Classes="chip" IsVisible="{Binding HasSpecialization}" Background="{StaticResource MagentaDimBrush}"
+                                      BorderBrush="{StaticResource MagentaBrush}">
+                                <TextBlock Text="{Binding Specialization}" FontSize="10" Foreground="{StaticResource MagentaBrush}" />
+                              </Border>
+                            </StackPanel>
+                            <ItemsControl Grid.Column="1" ItemsSource="{Binding Pips}" VerticalAlignment="Center" Margin="8,0">
+                              <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="3" /></ItemsPanelTemplate>
+                              </ItemsControl.ItemsPanel>
+                              <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:Boolean">
+                                  <Border Width="7" Height="12" CornerRadius="1" Classes.on="{Binding}" />
+                                </DataTemplate>
+                              </ItemsControl.ItemTemplate>
+                              <ItemsControl.Styles>
+                                <Style Selector="Border">
+                                  <Setter Property="Background" Value="{StaticResource BorderBrush}" />
+                                </Style>
+                                <Style Selector="Border.on">
+                                  <Setter Property="Background" Value="{StaticResource CyanBrush}" />
+                                </Style>
+                              </ItemsControl.Styles>
+                            </ItemsControl>
+                            <Border Grid.Column="2" Classes="chip" HorizontalAlignment="Right" MinWidth="34" ToolTip.Tip="Dice pool">
+                              <TextBlock Text="{Binding Pool}" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
+                            </Border>
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </DockPanel>
+
+      <!-- Qualities -->
+      <ScrollViewer IsVisible="{Binding IsQualities}">
+        <Grid ColumnDefinitions="*,*" Margin="28,22">
+          <Border Classes="panel lit" Margin="0,0,10,0" VerticalAlignment="Top">
+            <StackPanel Spacing="6">
+              <TextBlock Text="POSITIVE" Classes="h2" Foreground="{StaticResource GreenBrush}" />
+              <ItemsControl ItemsSource="{Binding PositiveQualities}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:QualityViewModel">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,4">
+                      <PathIcon Data="{StaticResource Icon.Quality}" Width="16" Height="16" Foreground="{StaticResource GreenBrush}" />
+                      <StackPanel Grid.Column="1" Margin="10,0">
+                        <TextBlock Text="{Binding Name}" />
+                        <TextBlock Text="{Binding Source}" Classes="label" />
+                      </StackPanel>
+                      <TextBlock Grid.Column="2" Text="{Binding KarmaText}" Foreground="{StaticResource GreenBrush}" FontWeight="Bold" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="1" Classes="panel hot" Margin="10,0,0,0" VerticalAlignment="Top">
+            <StackPanel Spacing="6">
+              <TextBlock Text="NEGATIVE" Classes="h2" Foreground="{StaticResource RedBrush}" />
+              <ItemsControl ItemsSource="{Binding NegativeQualities}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:QualityViewModel">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,4">
+                      <PathIcon Data="{StaticResource Icon.Quality}" Width="16" Height="16" Foreground="{StaticResource RedBrush}" />
+                      <StackPanel Grid.Column="1" Margin="10,0">
+                        <TextBlock Text="{Binding Name}" />
+                        <TextBlock Text="{Binding Source}" Classes="label" />
+                      </StackPanel>
+                      <TextBlock Grid.Column="2" Text="{Binding KarmaText}" Foreground="{StaticResource RedBrush}" FontWeight="Bold" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+        </Grid>
+      </ScrollViewer>
+
+      <!-- Notes -->
+      <ScrollViewer IsVisible="{Binding IsNotes}">
+        <StackPanel Margin="28,22" Spacing="14" MaxWidth="900" HorizontalAlignment="Left">
+          <Border Classes="panel lit">
+            <StackPanel Spacing="6">
+              <TextBlock Text="{loc:Tr Label_Concept, Case=upper}" Classes="h2" />
+              <SelectableTextBlock Text="{Binding Concept}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+          <Border Classes="panel lit">
+            <StackPanel Spacing="6">
+              <TextBlock Text="{loc:Tr Label_Description, Case=upper}" Classes="h2" />
+              <SelectableTextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+          <Border Classes="panel lit">
+            <StackPanel Spacing="6">
+              <TextBlock Text="{loc:Tr Label_Background, Case=upper}" Classes="h2" />
+              <SelectableTextBlock Text="{Binding Background}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+          <Border Classes="panel hot">
+            <StackPanel Spacing="6">
+              <TextBlock Text="{loc:Tr Tab_Notes, Case=upper}" Classes="h2" Foreground="{StaticResource MagentaBrush}" />
+              <SelectableTextBlock Text="{Binding Notes}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+  </DockPanel>
+</UserControl>

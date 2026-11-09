@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chummer.Core", "Chummer.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chummer.Core.Tests", "Chummer.Core.Tests\Chummer.Core.Tests.csproj", "{4D9AF0F6-1864-4D78-A969-31B522A4EA3A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chummer.Desktop", "Chummer.Desktop\Chummer.Desktop.csproj", "{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug with ChummerHub|Any CPU = Debug with ChummerHub|Any CPU
@@ -280,6 +282,26 @@ Global
 		{4D9AF0F6-1864-4D78-A969-31B522A4EA3A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4D9AF0F6-1864-4D78-A969-31B522A4EA3A}.Release|x86.ActiveCfg = Release|Any CPU
 		{4D9AF0F6-1864-4D78-A969-31B522A4EA3A}.Release|x86.Build.0 = Release|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debug with ChummerHub|Any CPU.ActiveCfg = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debug with ChummerHub|Any CPU.Build.0 = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debug with ChummerHub|x86.ActiveCfg = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debug with ChummerHub|x86.Build.0 = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debug|x86.Build.0 = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debuggable Release with ChummerHub|Any CPU.ActiveCfg = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debuggable Release with ChummerHub|Any CPU.Build.0 = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debuggable Release with ChummerHub|x86.ActiveCfg = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debuggable Release with ChummerHub|x86.Build.0 = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debuggable Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debuggable Release|Any CPU.Build.0 = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debuggable Release|x86.ActiveCfg = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Debuggable Release|x86.Build.0 = Debug|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Release|x86.ActiveCfg = Release|Any CPU
+		{06B2FB7D-6FE3-4141-BAB4-9A30D43C8AF0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

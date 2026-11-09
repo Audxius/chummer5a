@@ -1,0 +1,74 @@
+# Icon key = game-icons.net path (https://game-icons.net, CC BY 3.0; authors credited in Chummer.Desktop/Assets/ICONS-CREDITS.md)
+# Navigation / actions
+Roster=delapouite/person
+Dice=delapouite/rolling-dices
+Settings=lorc/cog
+Search=lorc/magnifying-glass
+Open=delapouite/open-folder
+Save=delapouite/save
+Notes=delapouite/notebook
+Star=badges/star
+Overview=delapouite/cyborg-face
+Contract=delapouite/contract
+Backup=lorc/backup
+# Summary / resources
+Karma=delapouite/yin-yang
+Nuyen=lorc/cash
+Essence=delapouite/heart-beats
+Condition=zeromancer/heart-plus
+Edge=lorc/clover
+# Attributes
+BOD=lorc/muscle-up
+AGI=lorc/sprint
+REA=lorc/lightning-arc
+STR=lorc/fist
+CHA=delapouite/theater
+INT=lorc/light-bulb
+LOG=delapouite/brain-dump
+WIL=caro-asercion/mountain-climbing
+MAG=lorc/magic-swirl
+RES=lorc/circuitry
+DEP=lorc/processor
+# Skill groups / categories
+SkillCombat=lorc/crossed-swords
+SkillPhysical=lorc/run
+SkillSocial=delapouite/theater-curtains
+SkillMagical=delapouite/spell-book
+SkillResonance=lorc/circuitry
+SkillTechnical=sbed/wrench
+SkillVehicle=delapouite/jeep
+SkillKnowledge=lorc/open-book
+SkillLanguage=delapouite/earth-asia-oceania
+Skills=delapouite/skills
+# Inventory categories
+Weapon=john-colburn/pistol-gun
+Rifle=sbed/rifle
+Ammo=lorc/bullets
+Explosive=lorc/grenade
+Blade=lorc/knife-thrust
+Armor=badges/shield
+Cyberware=delapouite/cyber-eye
+Bioware=lorc/syringe
+Drug=lorc/pill
+Gear=delapouite/backpack
+Commlink=delapouite/smartphone
+Cyberdeck=delapouite/laptop
+Vehicle=delapouite/jeep
+Aircraft=delapouite/helicopter
+Boat=delapouite/boat-engine
+Drone=delapouite/robot-antennas
+Lifestyle=delapouite/house
+Medkit=delapouite/first-aid-kit
+Lockpick=delapouite/lock-picking
+Sensor=lorc/radar-sweep
+# Magic / resonance / other
+Spell=delapouite/spell-book
+Spirit=lorc/ghost
+Sprite=lorc/android-mask
+AdeptPower=lorc/meditation
+Initiation=lorc/third-eye
+MartialArt=delapouite/high-kick
+Quality=lorc/medal
+Contact=lorc/swap-bag
+Limit=delapouite/speedometer
+Focus=lorc/crystal-ball
