@@ -41,7 +41,7 @@ internal static class Program
                     Save(objWindow, strOut, "02-overview");
                     if (objViewModel.CurrentPage is CharacterViewModel objCharacter)
                     {
-                        foreach (CharacterSection eSection in new[] { CharacterSection.Attributes, CharacterSection.Skills, CharacterSection.Qualities, CharacterSection.Notes })
+                        foreach (CharacterSection eSection in new[] { CharacterSection.Attributes, CharacterSection.Skills, CharacterSection.Qualities, CharacterSection.Inventory, CharacterSection.Notes })
                         {
                             objCharacter.ShowSectionCommand.Execute(eSection);
                             await Settle();

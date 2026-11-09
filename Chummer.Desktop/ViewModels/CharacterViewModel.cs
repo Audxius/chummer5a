@@ -40,6 +40,7 @@ namespace Chummer.Desktop.ViewModels
         Attributes,
         Skills,
         Qualities,
+        Inventory,
         Notes
     }
 
@@ -79,6 +80,9 @@ namespace Chummer.Desktop.ViewModels
         [ObservableProperty] private CharacterSection _section = CharacterSection.Overview;
         [ObservableProperty] private string _skillFilter = string.Empty;
         [ObservableProperty] private bool _showUntrainedSkills;
+        [ObservableProperty] private string _inventoryFilter = string.Empty;
+        [ObservableProperty] private InventoryKind? _inventoryKind;
+        [ObservableProperty] private string _inventorySummary = string.Empty;
 
         public string TabTitle => (IsDirty ? "● " : string.Empty) + Name;
 
@@ -90,10 +94,15 @@ namespace Chummer.Desktop.ViewModels
 
         partial void OnShowUntrainedSkillsChanged(bool value) => ApplySkillFilter();
 
+        partial void OnInventoryFilterChanged(string value) => ApplyInventoryFilter();
+
+        partial void OnInventoryKindChanged(InventoryKind? value) => ApplyInventoryFilter();
+
         public bool IsOverview => Section == CharacterSection.Overview;
         public bool IsAttributes => Section == CharacterSection.Attributes;
         public bool IsSkills => Section == CharacterSection.Skills;
         public bool IsQualities => Section == CharacterSection.Qualities;
+        public bool IsInventory => Section == CharacterSection.Inventory;
         public bool IsNotes => Section == CharacterSection.Notes;
 
         partial void OnSectionChanged(CharacterSection value)
@@ -103,6 +112,7 @@ namespace Chummer.Desktop.ViewModels
             OnPropertyChanged(nameof(IsSkills));
             OnPropertyChanged(nameof(IsQualities));
             OnPropertyChanged(nameof(IsNotes));
+            OnPropertyChanged(nameof(IsInventory));
         }
 
         // ---------- sections ----------
@@ -119,6 +129,10 @@ namespace Chummer.Desktop.ViewModels
         [ObservableProperty] private string _notes = string.Empty;
 
         private List<SkillCategoryViewModel> _lstAllSkillCategories = new List<SkillCategoryViewModel>();
+        private List<InventoryItemViewModel> _lstAllInventory = new List<InventoryItemViewModel>();
+
+        public ObservableCollection<InventoryGroupViewModel> InventoryGroups { get; } = new ObservableCollection<InventoryGroupViewModel>();
+        public ObservableCollection<InventoryFilterOption> InventoryKinds { get; } = new ObservableCollection<InventoryFilterOption>();
 
         private void LoadSnapshot()
         {
@@ -138,6 +152,7 @@ namespace Chummer.Desktop.ViewModels
             string strDescription = Character.Description.RtfToPlainText();
             string strBackground = Character.Background.RtfToPlainText();
             string strNotes = Character.Notes.RtfToPlainText();
+            List<InventoryItemViewModel> lstInventory = InventoryItemViewModel.FromCharacter(Character).ToList();
             OnUi(() =>
             {
                 Reset(Attributes, lstAttributes);
@@ -150,6 +165,9 @@ namespace Chummer.Desktop.ViewModels
                 Description = strDescription;
                 Background = strBackground;
                 Notes = strNotes;
+                _lstAllInventory = lstInventory;
+                RefreshInventoryKinds();
+                ApplyInventoryFilter();
             });
         }
 
@@ -207,6 +225,33 @@ namespace Chummer.Desktop.ViewModels
                 if (objCategory.ApplyFilter(strFilter, ShowUntrainedSkills))
                     SkillCategories.Add(objCategory);
             }
+        }
+
+        private void RefreshInventoryKinds()
+        {
+            InventoryKinds.Clear();
+            InventoryKinds.Add(new InventoryFilterOption(null, "ALL", "Icon.Gear", _lstAllInventory.Count, this));
+            foreach (IGrouping<InventoryKind, InventoryItemViewModel> objGroup in _lstAllInventory.GroupBy(x => x.Kind).OrderBy(x => x.Key))
+                InventoryKinds.Add(new InventoryFilterOption(objGroup.Key, InventoryGroupViewModel.Title(objGroup.Key), objGroup.First().IconKey, objGroup.Count(), this));
+        }
+
+        private void ApplyInventoryFilter()
+        {
+            string[] astrWords = (InventoryFilter ?? string.Empty).ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            InventoryGroups.Clear();
+            int intShown = 0;
+            foreach (IGrouping<InventoryKind, InventoryItemViewModel> objGroup in _lstAllInventory
+                         .Where(x => InventoryKind == null || x.Kind == InventoryKind.Value)
+                         .Where(x => astrWords.All(w => x.SearchText.Contains(w)))
+                         .GroupBy(x => x.Kind).OrderBy(x => x.Key))
+            {
+                InventoryGroupViewModel objViewModel = new InventoryGroupViewModel(objGroup.Key, objGroup.OrderBy(x => x.Category, StringComparer.CurrentCulture).ThenBy(x => x.Name, StringComparer.CurrentCulture));
+                intShown += objViewModel.Items.Count;
+                InventoryGroups.Add(objViewModel);
+            }
+            foreach (InventoryFilterOption objOption in InventoryKinds)
+                objOption.Refresh();
+            InventorySummary = intShown.ToString(GlobalSettings.CultureInfo) + " / " + _lstAllInventory.Count.ToString(GlobalSettings.CultureInfo) + " ITEMS";
         }
 
         private void CharacterOnPropertyChanged(object sender, PropertyChangedEventArgs e)
