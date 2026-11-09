@@ -30,6 +30,7 @@ namespace Chummer.Rules
         NotAllowed,
         NotEnoughKarma,
         Cancelled,
+        NotEnoughNuyen,
     }
 
     /// <summary>
