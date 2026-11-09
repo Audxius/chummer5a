@@ -169,6 +169,65 @@ namespace Chummer.Desktop.Views
         {
         }
 
+        /// <summary>
+        /// Search-first browser: list on the left, details of the highlighted entry on the right, an "only show what I can take"
+        /// toggle (re-queries <paramref name="funcSource"/>), and a validation hook before accepting.
+        /// </summary>
+        public static async Task<ListItem?> BrowseAsync(object owner, string strTitle, Func<bool, IReadOnlyList<ListItem>> funcSource,
+                                                        Func<ListItem, string> funcDetails, Func<ListItem, bool> funcValidate = null, string strLimitLabel = null)
+        {
+            PromptWindow objWindow = new PromptWindow(strTitle) { Width = 860 };
+            bool blnLimit = true;
+            IReadOnlyList<ListItem> lstAll = funcSource(blnLimit);
+            TextBox txtSearch = new TextBox { PlaceholderText = Tr.Get("String_Search") };
+            ListBox lstChoices = new ListBox { Height = 420, ItemsSource = lstAll };
+            lstChoices.ItemTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<ListItem>((x, _) => new TextBlock { Text = x.Name });
+            TextBlock txtDetails = new TextBlock { TextWrapping = Avalonia.Media.TextWrapping.Wrap };
+            CheckBox chkLimit = new CheckBox { Content = strLimitLabel ?? "Only show what this runner can take", IsChecked = true };
+            void Refilter()
+            {
+                string strFilter = txtSearch.Text ?? string.Empty;
+                lstChoices.ItemsSource = strFilter.Length == 0
+                    ? lstAll
+                    : lstAll.Where(x => (x.Name ?? string.Empty).IndexOf(strFilter, StringComparison.CurrentCultureIgnoreCase) >= 0).ToList();
+            }
+            txtSearch.TextChanged += (sender, args) => Refilter();
+            chkLimit.IsCheckedChanged += (sender, args) =>
+            {
+                blnLimit = chkLimit.IsChecked == true;
+                lstAll = funcSource(blnLimit);
+                Refilter();
+            };
+            lstChoices.SelectionChanged += (sender, args) =>
+                txtDetails.Text = lstChoices.SelectedItem is ListItem objItem ? funcDetails?.Invoke(objItem) ?? string.Empty : string.Empty;
+            Button cmdOk = new Button { Content = Tr.Get("String_OK"), IsDefault = true, Classes = { "primary" } };
+            Button cmdCancel = new Button { Content = Tr.Get("String_Cancel"), IsCancel = true };
+            void Accept()
+            {
+                if (lstChoices.SelectedItem is ListItem objItem && (funcValidate == null || funcValidate(objItem)))
+                {
+                    objWindow._objResult = objItem;
+                    objWindow.Close();
+                }
+            }
+            cmdOk.Click += (sender, args) => Accept();
+            lstChoices.DoubleTapped += (sender, args) => Accept();
+            cmdCancel.Click += (sender, args) => objWindow.Close();
+            Grid grdBody = new Grid { ColumnDefinitions = new ColumnDefinitions("*,*") };
+            grdBody.Children.Add(lstChoices);
+            ScrollViewer scrDetails = new ScrollViewer { Content = txtDetails, Margin = new Avalonia.Thickness(14, 0, 0, 0), MaxHeight = 420 };
+            Grid.SetColumn(scrDetails, 1);
+            grdBody.Children.Add(scrDetails);
+            objWindow.Content = Frame(new StackPanel
+            {
+                Spacing = 8,
+                Children = { Heading(strTitle), txtSearch, chkLimit, grdBody, ButtonRow(cmdOk, cmdCancel) }
+            });
+            objWindow.Opened += (sender, args) => txtSearch.Focus();
+            await objWindow.ShowModalAsync(owner).ConfigureAwait(true);
+            return objWindow._objResult is ListItem objResult ? objResult : (ListItem?)null;
+        }
+
         public static async Task<ListItem?> ChooseAsync(object owner, string strTitle, IReadOnlyList<ListItem> lstItems, string strPreselected)
         {
             PromptWindow objWindow = new PromptWindow(strTitle);

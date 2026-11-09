@@ -24,6 +24,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Chummer.Desktop.Localization;
 using Chummer.Desktop.Views;
+using Chummer.Selection;
 
 namespace Chummer.Desktop.Services
 {
@@ -158,12 +159,239 @@ namespace Chummer.Desktop.Services
                         ? DialogOutcome.OK
                         : DialogOutcome.Cancel;
                 }
+                case SelectOptionalPowerRequest objOptional:
+                {
+                    Character objCharacter = objOptional.ConstructorArguments.FirstOrDefault() as Character;
+                    ValueTuple<string, string>[] aobjPairs = objOptional.ConstructorArguments.Count > 1 ? objOptional.ConstructorArguments[1] as ValueTuple<string, string>[] : null;
+                    if (objCharacter == null || aobjPairs == null || aobjPairs.Length == 0)
+                        return DialogOutcome.Cancel;
+                    List<ListItem> lstPowers = aobjPairs.Select(x => new ListItem(x, string.IsNullOrEmpty(x.Item2)
+                                                                ? objCharacter.TranslateExtra(x.Item1)
+                                                                : objCharacter.TranslateExtra(x.Item1) + " (" + objCharacter.TranslateExtra(x.Item2) + ")")).ToList();
+                    ValueTuple<string, string> objPicked;
+                    if (lstPowers.Count == 1)
+                        objPicked = aobjPairs[0];
+                    else
+                    {
+                        ListItem? objChoice = await PromptWindow.ChooseAsync(owner, objOptional.Description ?? Tr.Get("Title_SelectOptionalPower"), lstPowers, null).ConfigureAwait(true);
+                        if (objChoice == null)
+                            return DialogOutcome.Cancel;
+                        objPicked = (ValueTuple<string, string>)objChoice.Value.Value;
+                    }
+                    objOptional.SetResult(nameof(SelectOptionalPowerRequest.SelectedPower), objPicked.Item1);
+                    objOptional.SetResult(nameof(SelectOptionalPowerRequest.SelectedPowerExtra), objPicked.Item2);
+                    return DialogOutcome.OK;
+                }
+                case SelectDiceHitsRequest objHits:
+                {
+                    int intDice = 0;
+                    for (int i = objHits.Operations.Count - 1; i >= 0; --i)
+                    {
+                        DialogOperation objOperation = objHits.Operations[i];
+                        if (objOperation.IsCall && objOperation.Name == "SetDiceAsync" && objOperation.Arguments.Length > 0 && objOperation.Arguments[0] is int intLoop)
+                        {
+                            intDice = intLoop;
+                            break;
+                        }
+                    }
+                    decimal? decHits = await PromptWindow.AskNumberAsync(owner, (objHits.Description ?? objHits.Text ?? "Hits") + "  (" + intDice.ToString(GlobalSettings.CultureInfo) + "d6)",
+                                                                         0, Math.Max(0, intDice), true).ConfigureAwait(true);
+                    if (decHits == null)
+                        return DialogOutcome.Cancel;
+                    objHits.SetResult(nameof(SelectDiceHitsRequest.Result), (int)decHits.Value);
+                    return DialogOutcome.OK;
+                }
+                case SelectMetamagicRequest objMetamagic:
+                {
+                    Character objCharacter = objMetamagic.ConstructorArguments.FirstOrDefault() as Character;
+                    InitiationGrade objGrade = objMetamagic.ConstructorArguments.Count > 1 ? objMetamagic.ConstructorArguments[1] as InitiationGrade : null;
+                    if (objCharacter == null || objGrade == null)
+                        return DialogOutcome.Cancel;
+                    string strId = await BrowseIdAsync(owner, DataBrowser.Metamagic(objCharacter, objGrade)).ConfigureAwait(true);
+                    if (strId == null)
+                        return DialogOutcome.Cancel;
+                    objMetamagic.SetResult(nameof(SelectMetamagicRequest.SelectedMetamagic), strId);
+                    return DialogOutcome.OK;
+                }
+                case SelectArtRequest objArt:
+                {
+                    Character objCharacter = objArt.ConstructorArguments.FirstOrDefault() as Character;
+                    SelectArtMode eMode = objArt.ConstructorArguments.Count > 1 && objArt.ConstructorArguments[1] is SelectArtMode eTemp ? eTemp : SelectArtMode.Art;
+                    if (objCharacter == null)
+                        return DialogOutcome.Cancel;
+                    string strId = await BrowseIdAsync(owner, DataBrowser.Art(objCharacter, eMode)).ConfigureAwait(true);
+                    if (strId == null)
+                        return DialogOutcome.Cancel;
+                    objArt.SetResult(nameof(SelectArtRequest.SelectedItem), strId);
+                    return DialogOutcome.OK;
+                }
+                case SelectMartialArtRequest objMartialArt:
+                {
+                    Character objCharacter = objMartialArt.ConstructorArguments.FirstOrDefault() as Character;
+                    if (objCharacter == null)
+                        return DialogOutcome.Cancel;
+                    string strId = await BrowseIdAsync(owner, DataBrowser.MartialArt(objCharacter)).ConfigureAwait(true);
+                    if (strId == null)
+                        return DialogOutcome.Cancel;
+                    objMartialArt.SetResult(nameof(SelectMartialArtRequest.SelectedMartialArt), strId);
+                    objMartialArt.SetResult(nameof(SelectMartialArtRequest.AddAgain), false);
+                    return DialogOutcome.OK;
+                }
+                case SelectMentorSpiritRequest objMentor:
+                {
+                    Character objCharacter = objMentor.ConstructorArguments.FirstOrDefault() as Character;
+                    string strFile = objMentor.ConstructorArguments.Count > 1 ? objMentor.ConstructorArguments[1] as string : null;
+                    if (objCharacter == null)
+                        return DialogOutcome.Cancel;
+                    DataBrowser objBrowser = DataBrowser.Mentor(objCharacter, strFile);
+                    string strId;
+                    string strForced = objMentor.ForcedMentor;
+                    ListItem objForced = string.IsNullOrEmpty(strForced) ? default : objBrowser.Options(true).FirstOrDefault(x => objBrowser.Node(x.Value.ToString())?.SelectSingleNode("name")?.Value == strForced);
+                    if (objForced.Value != null)
+                        strId = objForced.Value.ToString();
+                    else
+                        strId = await BrowseIdAsync(owner, objBrowser).ConfigureAwait(true);
+                    if (strId == null)
+                        return DialogOutcome.Cancel;
+                    (List<ListItem> lstSet1, List<ListItem> lstSet2) = objBrowser.MentorChoices(strId);
+                    string strChoice1 = lstSet1.Count == 0 ? string.Empty : await ChooseValueAsync(owner, LanguageManager.GetString("Label_SelectMentor_ChooseOne"), lstSet1, true).ConfigureAwait(true);
+                    if (strChoice1 == null)
+                        return DialogOutcome.Cancel;
+                    string strChoice2 = lstSet2.Count == 0 ? string.Empty : await ChooseValueAsync(owner, LanguageManager.GetString("Label_SelectMentor_ChooseOne"), lstSet2, true).ConfigureAwait(true);
+                    if (strChoice2 == null)
+                        return DialogOutcome.Cancel;
+                    objMentor.SetResult(nameof(SelectMentorSpiritRequest.SelectedMentor), strId);
+                    objMentor.SetResult(nameof(SelectMentorSpiritRequest.Choice1), strChoice1);
+                    objMentor.SetResult(nameof(SelectMentorSpiritRequest.Choice2), strChoice2);
+                    return DialogOutcome.OK;
+                }
+                case SelectSkillRequest objSkill:
+                    return await ChooseSkillAsync(objSkill, owner).ConfigureAwait(true);
+                case SelectSkillGroupRequest objGroup:
+                {
+                    Character objCharacter = objGroup.ConstructorArguments.FirstOrDefault() as Character;
+                    List<ListItem> lstGroups = CategorySelector.GetSkillGroups(objCharacter, objGroup.OnlyGroup, objGroup.ExcludeCategory);
+                    string strChoice = await ChooseValueAsync(owner, objGroup.Description ?? Tr.Get("Title_SelectSkillGroup"), lstGroups, true).ConfigureAwait(true);
+                    if (strChoice == null)
+                        return DialogOutcome.Cancel;
+                    objGroup.SetResult(nameof(SelectSkillGroupRequest.SelectedSkillGroup), strChoice);
+                    return DialogOutcome.OK;
+                }
+                case SelectSpellCategoryRequest objSpellCategory:
+                {
+                    Character objCharacter = objSpellCategory.ConstructorArguments.FirstOrDefault() as Character;
+                    List<ListItem> lstCategories = CategorySelector.GetSpellCategories(objCharacter, null,
+                                                                                         LastCallArgument<IEnumerable<string>>(objSpellCategory, "SetExcludeCategories"));
+                    string strChoice = await ChooseValueAsync(owner, objSpellCategory.Description ?? Tr.Get("Title_SelectSpellCategory"), lstCategories, true).ConfigureAwait(true);
+                    if (strChoice == null)
+                        return DialogOutcome.Cancel;
+                    objSpellCategory.SetResult(nameof(SelectSpellCategoryRequest.SelectedCategory), strChoice);
+                    return DialogOutcome.OK;
+                }
+                case SelectWeaponCategoryRequest objWeaponCategory:
+                {
+                    Character objCharacter = objWeaponCategory.ConstructorArguments.FirstOrDefault() as Character;
+                    List<ListItem> lstCategories = CategorySelector.GetWeaponCategories(objCharacter, objWeaponCategory.OnlyCategory, objWeaponCategory.WeaponType);
+                    // Like the original: no categories confirms an empty choice, one confirms it without asking.
+                    string strChoice = lstCategories.Count == 0
+                        ? string.Empty
+                        : await ChooseValueAsync(owner, objWeaponCategory.Description ?? Tr.Get("Title_SelectWeaponCategory"), lstCategories, true).ConfigureAwait(true);
+                    if (strChoice == null)
+                        return DialogOutcome.Cancel;
+                    objWeaponCategory.SetResult(nameof(SelectWeaponCategoryRequest.SelectedCategory), strChoice);
+                    return DialogOutcome.OK;
+                }
                 default:
                     await MessageBoxes.ShowAsync(
                         "This choice (" + objRequest.DialogName + ") is not available in Chummer Native yet. The operation was cancelled.",
                         "Chummer Native", MessageButtons.OK, MessageIcon.Information).ConfigureAwait(true);
                     return DialogOutcome.Cancel;
             }
+        }
+
+        /// <summary>Asks for one value from a list; a single option is taken without asking when allowed.</summary>
+        private static async Task<string> ChooseValueAsync(object owner, string strTitle, List<ListItem> lstItems, bool blnAutoSelectSingle)
+        {
+            if (lstItems.Count == 0)
+                return null;
+            if (lstItems.Count == 1 && blnAutoSelectSingle)
+                return lstItems[0].Value?.ToString();
+            ListItem? objChoice = await PromptWindow.ChooseAsync(owner, strTitle, lstItems, null).ConfigureAwait(true);
+            return objChoice?.Value?.ToString();
+        }
+
+        private static async Task<string> BrowseIdAsync(object owner, DataBrowser objBrowser)
+        {
+            ListItem? objChoice = await PromptWindow.BrowseAsync(owner, string.Format(GlobalSettings.CultureInfo, LanguageManager.GetString("Title_SelectGeneric"), objBrowser.LocalName),
+                                                                 objBrowser.Options, x => objBrowser.Details(x.Value?.ToString()),
+                                                                 x => objBrowser.Validate(x.Value?.ToString())).ConfigureAwait(true);
+            return objChoice?.Value?.ToString();
+        }
+
+        private static async Task<DialogOutcome> ChooseSkillAsync(SelectSkillRequest objRequest, object owner)
+        {
+            Character objCharacter = objRequest.ConstructorArguments.FirstOrDefault() as Character;
+            string strSource = objRequest.ConstructorArguments.Count > 1 ? objRequest.ConstructorArguments[1] as string ?? string.Empty : string.Empty;
+            if (objCharacter == null)
+                return DialogOutcome.Cancel;
+            SkillSelectionFilter objFilter = new SkillSelectionFilter
+            {
+                IncludeCategory = objRequest.OnlyCategory ?? string.Empty,
+                ExcludeCategory = objRequest.ExcludeCategory ?? string.Empty,
+                IncludeSkillGroup = objRequest.OnlySkillGroup ?? string.Empty,
+                ExcludeSkillGroup = objRequest.ExcludeSkillGroup ?? string.Empty,
+                LimitToSkill = objRequest.LimitToSkill ?? string.Empty,
+                ExcludeSkill = objRequest.ExcludeSkill ?? string.Empty,
+                LinkedAttribute = objRequest.LinkedAttribute ?? string.Empty,
+                MinimumRating = objRequest.MinimumRating,
+                MaximumRating = objRequest.MaximumRating == 0 ? int.MaxValue : objRequest.MaximumRating,
+            };
+            objFilter.SetLimitToCategories(objRequest.LimitToCategories);
+            List<ListItem> lstSkills = SkillSelector.GetSkillOptions(objCharacter, objFilter, out bool _, out string _);
+            if (lstSkills.Count == 0)
+            {
+                await MessageBoxes.ShowAsync(string.Format(GlobalSettings.CultureInfo, LanguageManager.GetString("Message_Improvement_EmptySelectionListNamed"), strSource),
+                                             "Chummer Native", MessageButtons.OK, MessageIcon.Information).ConfigureAwait(true);
+                return DialogOutcome.Cancel;
+            }
+            ListItem objSkill;
+            if (lstSkills.Count == 1)
+                objSkill = lstSkills[0];
+            else
+            {
+                ListItem? objChoice = await PromptWindow.ChooseAsync(owner, objRequest.Description ?? Tr.Get("Title_SelectSkill"), lstSkills, null).ConfigureAwait(true);
+                if (objChoice == null)
+                    return DialogOutcome.Cancel;
+                objSkill = objChoice.Value;
+            }
+            (string strName, bool blnExotic) = (ValueTuple<string, bool>)objSkill.Value;
+            if (!blnExotic)
+            {
+                objRequest.SetResult(nameof(SelectSkillRequest.SelectedSkill), strName);
+                return DialogOutcome.OK;
+            }
+            // Exotic skills need a specific (which weapon, which vehicle...).
+            List<ListItem> lstSpecifics = SkillSelector.GetExoticSpecifics(objCharacter, strName, objFilter);
+            string strSpecific;
+            if (lstSpecifics.Count == 1)
+                strSpecific = lstSpecifics[0].Value?.ToString();
+            else if (lstSpecifics.Count > 1)
+            {
+                ListItem? objChoice = await PromptWindow.ChooseAsync(owner, objSkill.Name, lstSpecifics, null).ConfigureAwait(true);
+                strSpecific = objChoice?.Value?.ToString();
+            }
+            else if (objFilter.MinimumRating <= 0)
+                strSpecific = await PromptWindow.AskTextAsync(owner, objSkill.Name, string.Empty).ConfigureAwait(true);
+            else
+            {
+                await MessageBoxes.ShowAsync(string.Format(GlobalSettings.CultureInfo, LanguageManager.GetString("Message_Improvement_EmptySelectionListNamed"), strSource),
+                                             "Chummer Native", MessageButtons.OK, MessageIcon.Information).ConfigureAwait(true);
+                return DialogOutcome.Cancel;
+            }
+            if (string.IsNullOrEmpty(strSpecific))
+                return DialogOutcome.Cancel;
+            objRequest.SetResult(nameof(SelectSkillRequest.SelectedSkill), strName + " (" + strSpecific + ")");
+            return DialogOutcome.OK;
         }
 
         private static void Accept(SelectItemRequest objRequest, ListItem objItem)
