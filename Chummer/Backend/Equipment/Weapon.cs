@@ -10446,7 +10446,7 @@ namespace Chummer.Backend.Equipment
             return string.Empty;
         }
 
-        private Skill Skill
+        internal Skill Skill
         {
             get
             {
