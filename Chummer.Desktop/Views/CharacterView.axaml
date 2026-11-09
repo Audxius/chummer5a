@@ -97,6 +97,17 @@
       <Setter Property="BorderBrush" Value="{StaticResource MagentaBrush}" />
       <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
     </Style>
+    <Style Selector="Button.cm">
+      <Setter Property="Width" Value="18" />
+      <Setter Property="Height" Value="18" />
+      <Setter Property="Margin" Value="0,0,4,4" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="Button.cm:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#55FFFFFF" />
+    </Style>
     <Style Selector="Border.tile">
       <Setter Property="Width" Value="196" />
       <Setter Property="Height" Value="134" />
@@ -215,9 +226,9 @@
                   <ItemsControl ItemsSource="{Binding PhysicalBoxes}">
                     <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                      <DataTemplate x:DataType="x:Boolean">
-                        <Border Width="16" Height="16" Margin="0,0,4,4" BorderThickness="1" BorderBrush="{StaticResource RedBrush}"
-                                Background="{Binding Converter={x:Static conv:BoolBrushConverter.Red}}" />
+                      <DataTemplate x:DataType="vm:ConditionBoxViewModel">
+                        <Button Classes="cm" Command="{Binding ToggleCommand}" ToolTip.Tip="{Binding Tip}" BorderBrush="{StaticResource RedBrush}"
+                                Background="{Binding IsFilled, Converter={x:Static conv:BoolBrushConverter.Red}}" />
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
@@ -227,9 +238,9 @@
                   <ItemsControl ItemsSource="{Binding StunBoxes}">
                     <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                      <DataTemplate x:DataType="x:Boolean">
-                        <Border Width="16" Height="16" Margin="0,0,4,4" BorderThickness="1" BorderBrush="{StaticResource CyanBrush}"
-                                Background="{Binding Converter={x:Static conv:BoolBrushConverter.Cyan}}" />
+                      <DataTemplate x:DataType="vm:ConditionBoxViewModel">
+                        <Button Classes="cm" Command="{Binding ToggleCommand}" ToolTip.Tip="{Binding Tip}" BorderBrush="{StaticResource CyanBrush}"
+                                Background="{Binding IsFilled, Converter={x:Static conv:BoolBrushConverter.Cyan}}" />
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>

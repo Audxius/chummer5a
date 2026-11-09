@@ -40,6 +40,17 @@ internal static class Program
                     await objViewModel.OpenCharacterFileAsync(Path.GetFullPath(args[1]));
                     await Settle();
                     Save(objWindow, strOut, "02-overview");
+                    if (objViewModel.CurrentPage is CharacterViewModel objDamaged && objDamaged.PhysicalBoxes.Count > 3)
+                    {
+                        objDamaged.PhysicalBoxes[3].ToggleCommand.Execute(null);
+                        await Settle();
+                        await Settle();
+                        Save(objWindow, strOut, "02b-damage");
+                        Console.WriteLine("damage: " + objDamaged.PhysicalLabel + " dirty=" + objDamaged.IsDirty);
+                        objDamaged.PhysicalBoxes[3].ToggleCommand.Execute(null);
+                        objDamaged.PhysicalBoxes[3].ToggleCommand.Execute(null);
+                        await Settle();
+                    }
                     if (objViewModel.CurrentPage is CharacterViewModel objCharacter)
                     {
                         foreach (CharacterSection eSection in new[] { CharacterSection.Attributes, CharacterSection.Skills, CharacterSection.Qualities, CharacterSection.Inventory, CharacterSection.Abilities, CharacterSection.Network, CharacterSection.Notes })

@@ -79,8 +79,8 @@ namespace Chummer.Desktop.ViewModels
         [ObservableProperty] private string _essence = string.Empty;
         [ObservableProperty] private Bitmap _portrait;
         [ObservableProperty] private bool _isDirty;
-        [ObservableProperty] private IReadOnlyList<bool> _physicalBoxes = Array.Empty<bool>();
-        [ObservableProperty] private IReadOnlyList<bool> _stunBoxes = Array.Empty<bool>();
+        [ObservableProperty] private IReadOnlyList<ConditionBoxViewModel> _physicalBoxes = Array.Empty<ConditionBoxViewModel>();
+        [ObservableProperty] private IReadOnlyList<ConditionBoxViewModel> _stunBoxes = Array.Empty<ConditionBoxViewModel>();
         [ObservableProperty] private string _physicalLabel = string.Empty;
         [ObservableProperty] private string _stunLabel = string.Empty;
         [ObservableProperty] private IReadOnlyList<ItemStat> _combatStats = Array.Empty<ItemStat>();
@@ -270,8 +270,8 @@ namespace Chummer.Desktop.ViewModels
                 Karma = strKarma;
                 Nuyen = strNuyen;
                 Essence = strEssence;
-                PhysicalBoxes = Enumerable.Range(1, intPhysical).Select(x => x <= intPhysicalFilled).ToList();
-                StunBoxes = Enumerable.Range(1, intStun).Select(x => x <= intStunFilled).ToList();
+                PhysicalBoxes = Enumerable.Range(1, intPhysical).Select(x => new ConditionBoxViewModel(this, false, x, x <= intPhysicalFilled)).ToList();
+                StunBoxes = Enumerable.Range(1, intStun).Select(x => new ConditionBoxViewModel(this, true, x, x <= intStunFilled)).ToList();
                 PhysicalLabel = "PHYSICAL  " + intPhysicalFilled.ToString(objCulture) + " / " + intPhysical.ToString(objCulture);
                 StunLabel = "STUN  " + intStunFilled.ToString(objCulture) + " / " + intStun.ToString(objCulture);
                 CombatStats = lstCombat;
@@ -545,5 +545,41 @@ namespace Chummer.Desktop.ViewModels
         public bool IsPositive { get; }
         public string Source { get; }
         public string KarmaText => (IsPositive ? "+" : string.Empty) + Karma.ToString(GlobalSettings.CultureInfo);
+    }
+}
+
+namespace Chummer.Desktop.ViewModels
+{
+    /// <summary>One box of a condition monitor; clicking marks damage up to it (clicking the last filled box heals one).</summary>
+    public sealed class ConditionBoxViewModel
+    {
+        private readonly CharacterViewModel _objOwner;
+
+        public ConditionBoxViewModel(CharacterViewModel objOwner, bool blnStun, int intIndex, bool blnFilled)
+        {
+            _objOwner = objOwner;
+            IsStun = blnStun;
+            Index = intIndex;
+            IsFilled = blnFilled;
+            ToggleCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(Toggle);
+        }
+
+        public bool IsStun { get; }
+        public int Index { get; }
+        public bool IsFilled { get; }
+        public bool IsThreshold => Index % 3 == 0;
+        public string Tip => "-" + (Index / 3).ToString(GlobalSettings.CultureInfo) + " wound modifier at this box";
+        public CommunityToolkit.Mvvm.Input.IRelayCommand ToggleCommand { get; }
+
+        private void Toggle()
+        {
+            Character objCharacter = _objOwner.Character;
+            int intCurrent = IsStun ? objCharacter.StunCMFilled : objCharacter.PhysicalCMFilled;
+            int intNew = intCurrent == Index ? Index - 1 : Index;
+            if (IsStun)
+                objCharacter.StunCMFilled = intNew;
+            else
+                objCharacter.PhysicalCMFilled = intNew;
+        }
     }
 }

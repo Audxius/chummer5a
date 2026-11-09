@@ -128,6 +128,12 @@ namespace Chummer.Desktop.ViewModels
         {
             if (SelectedCharacter == null || !Characters.Contains(SelectedCharacter))
                 SelectedCharacter = _objShell.CurrentPage as CharacterViewModel ?? Characters.FirstOrDefault();
+            else
+            {
+                // Stats may have changed (damage taken, gear bought) since the last visit.
+                _ = SearchAsync();
+                Evaluate();
+            }
         }
 
         private void OpenCharactersOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

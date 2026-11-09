@@ -47,6 +47,9 @@ namespace Chummer.Rolls
         public Spirit Spirit { get; set; }
         public Gear Gear { get; set; }
 
+        /// <summary>Apply the character's wound modifier to the pool (SR5: every test except damage resistance).</summary>
+        public bool IncludeWoundModifier { get; set; } = true;
+
         /// <summary>
         /// Values the user supplies for things the engine cannot know (e.g. "Target: Physical" = 4), keyed by token text.
         /// </summary>
@@ -134,6 +137,15 @@ namespace Chummer.Rolls
             string strActor = intSplit >= 0 ? strDice.Substring(0, intSplit) : strDice;
             string strOpposition = intSplit >= 0 ? strDice.Substring(intSplit + 4).Trim() : string.Empty;
             objReturn.Pool = Evaluate(strActor, objContext);
+            if (objContext.IncludeWoundModifier && !IsDamageResistance(objAction))
+            {
+                int intWounds = objContext.Character.WoundModifier;
+                if (intWounds != 0)
+                {
+                    objReturn.Pool.Terms.Add(new RollTerm("Wounds", intWounds));
+                    objReturn.Pool.Value += intWounds;
+                }
+            }
             if (!string.IsNullOrWhiteSpace(objAction.Limit))
             {
                 DiceExpressionResult objLimit = Evaluate(objAction.Limit, objContext);
@@ -155,6 +167,14 @@ namespace Chummer.Rolls
                     objReturn.OpposedBy = Describe(strOpposition);
             }
             return objReturn;
+        }
+
+        private static bool IsDamageResistance(RollAction objAction)
+        {
+            string strName = objAction.Name ?? string.Empty;
+            return strName.IndexOf("Soak", StringComparison.OrdinalIgnoreCase) >= 0
+                   || (strName.IndexOf("Resist", StringComparison.OrdinalIgnoreCase) >= 0 && strName.IndexOf("Damage", StringComparison.OrdinalIgnoreCase) >= 0)
+                   || strName.IndexOf("Damage Resistance", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         public static DiceExpressionResult Evaluate(string strExpression, RollContext objContext)
