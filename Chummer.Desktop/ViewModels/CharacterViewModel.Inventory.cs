@@ -45,7 +45,6 @@ namespace Chummer.Desktop.ViewModels
         public bool HasLoadout => LoadoutSlots.Count > 0;
         public bool HasSelectedInventoryItem => SelectedInventoryItem != null;
         public bool HasNoSelectedInventoryItem => SelectedInventoryItem == null;
-        public bool IsCareerMode => Character.Created;
         public bool IsNotesDraftChanged => SelectedInventoryItem != null && (InventoryNotesDraft ?? string.Empty) != SelectedInventoryItem.Notes;
 
         partial void OnSelectedInventoryItemChanged(InventoryItemViewModel oldValue, InventoryItemViewModel newValue)

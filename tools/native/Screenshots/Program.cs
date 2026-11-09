@@ -177,6 +177,16 @@ internal static class Program
                         // ==== Store (purchase flows) ====
                         await StoreHarness.RunAsync(objCharacter, strOut, Settle);
                         // ==== end store ====
+                        // ===== Qualities & Abilities editing (QualityRules / MagicRules) =====
+                        await QualitiesAbilitiesDemo(objWindow, objCharacter, strOut, "10");
+                        if (args.Length > 2)
+                        {
+                            await objViewModel.OpenCharacterFileAsync(Path.GetFullPath(args[2]));
+                            await Settle();
+                            if (objViewModel.CurrentPage is CharacterViewModel objSecond)
+                                await QualitiesAbilitiesDemo(objWindow, objSecond, strOut, "20");
+                        }
+                        // ===== end Qualities & Abilities =====
                     }
                 }
                 if (args.Length > 2)
@@ -253,6 +263,88 @@ internal static class Program
         Save(objWindow, strOut, "08d-skills-after-edit");
     }
     // ===== end skills steps =====
+    // ===== Qualities & Abilities editing (QualityRules / MagicRules) =====
+    private static string DataId(Character objCharacter, string strFile, string strXPath, string strName)
+        => objCharacter.LoadDataXPath(strFile).SelectSingleNode(strXPath + "[name = " + strName.CleanXPath() + "]/id")?.Value;
+
+    private static async Task SaveDialog(Avalonia.Controls.Window objDialog, string strDir, string strName)
+    {
+        objDialog.Show();
+        await Settle();
+        Dispatcher.UIThread.RunJobs();
+        AvaloniaHeadlessPlatform.ForceRenderTimerTick();
+        objDialog.CaptureRenderedFrame()?.Save(Path.Combine(strDir, strName + ".png"));
+        Console.WriteLine("saved " + strName);
+        objDialog.Close();
+        await Settle();
+    }
+
+    private static async Task QualitiesAbilitiesDemo(MainWindow objWindow, CharacterViewModel objCharacter, string strOut, string strPrefix)
+    {
+        Character objChar = objCharacter.Character;
+        objCharacter.ShowSectionCommand.Execute(CharacterSection.Qualities);
+        await Settle();
+        Save(objWindow, strOut, strPrefix + "a-qualities");
+        await SaveDialog(new Chummer.Desktop.Views.Dialogs.QualityPickerWindow(objChar), strOut, strPrefix + "b-quality-picker");
+        string strName = new[] { "Analytical Mind", "Catlike", "Bilingual", "Photographic Memory" }.FirstOrDefault(x => objChar.Qualities.All(y => y.Name != x));
+        string strKarma = objCharacter.Karma;
+        await objCharacter.RunRuleAsync(t => Chummer.Rules.QualityRules.AddAsync(objChar, DataId(objChar, "qualities.xml", "/chummer/qualities/quality", strName), 1, false, t));
+        await Settle();
+        await Settle();
+        Console.WriteLine("add quality " + strName + ": karma " + strKarma + " -> " + objCharacter.Karma);
+        QualityViewModel objLevel = objCharacter.PositiveQualities.Concat(objCharacter.NegativeQualities).FirstOrDefault(x => x.CanLevelUp);
+        if (objLevel != null)
+        {
+            strKarma = objCharacter.Karma;
+            await objLevel.LevelUpCommand.ExecuteAsync(null);
+            await Settle();
+            await Settle();
+            Console.WriteLine("level up " + objLevel.Name + " " + objLevel.LevelText + ": karma " + strKarma + " -> " + objCharacter.Karma);
+        }
+        QualityViewModel objBuyOff = objCharacter.NegativeQualities.Where(x => x.CanRemove).OrderBy(x => x.RemovalCost).FirstOrDefault();
+        if (objBuyOff != null)
+        {
+            strKarma = objCharacter.Karma;
+            await objBuyOff.RemoveCommand.ExecuteAsync(null);
+            await Settle();
+            await Settle();
+            Console.WriteLine("remove " + objBuyOff.Name + " (" + objBuyOff.RemoveTip + "): karma " + strKarma + " -> " + objCharacter.Karma);
+        }
+        Save(objWindow, strOut, strPrefix + "c-qualities-edited");
+
+        objCharacter.ShowSectionCommand.Execute(CharacterSection.Abilities);
+        await Settle();
+        Save(objWindow, strOut, strPrefix + "d-abilities");
+        if (objChar.MagicianEnabled)
+        {
+            await SaveDialog(new Chummer.Desktop.Views.Dialogs.SpellPickerWindow(objChar, false), strOut, strPrefix + "e-spell-picker");
+            string strSpell = new[] { "Clout", "Fireball", "Detect Life", "Armor" }.FirstOrDefault(x => objChar.Spells.All(y => y.Name != x));
+            strKarma = objCharacter.Karma;
+            await objCharacter.RunRuleAsync(t => Chummer.Rules.MagicRules.LearnSpellAsync(objChar, DataId(objChar, "spells.xml", "/chummer/spells/spell", strSpell), token: t));
+            await Settle();
+            Console.WriteLine("learn spell " + strSpell + ": karma " + strKarma + " -> " + objCharacter.Karma);
+            System.Collections.Generic.List<ListItem> lstTypes = Chummer.Selection.MagicSelectors.SpiritTypes(objChar, Chummer.Backend.Enums.SpiritType.Spirit);
+            Console.WriteLine("spirit types: " + string.Join(", ", lstTypes.Select(x => x.Name)));
+            await objCharacter.RunRuleAsync(t => Chummer.Rules.MagicRules.AddSpiritAsync(objChar, Chummer.Backend.Enums.SpiritType.Spirit, lstTypes.Count > 0 ? lstTypes[0].Value.ToString() : string.Empty, t));
+            await Settle();
+        }
+        if (objChar.MAGEnabled || objChar.RESEnabled)
+        {
+            await SaveDialog(new Chummer.Desktop.Views.Dialogs.InitiationWindow(objChar), strOut, strPrefix + "f-initiation");
+            strKarma = objCharacter.Karma;
+            await objCharacter.RunRuleAsync(t => Chummer.Rules.MagicRules.InitiateAsync(objChar, false, false, false, t));
+            await Settle();
+            Console.WriteLine("initiate: grade " + objChar.InitiateGrade + ", karma " + strKarma + " -> " + objCharacter.Karma);
+        }
+        if (objChar.AdeptEnabled)
+        {
+            await objCharacter.RunRuleAsync(t => Chummer.Rules.MagicRules.AddPowerAsync(objChar, DataId(objChar, "powers.xml", "/chummer/powers/power", "Combat Sense"), t));
+            await Settle();
+        }
+        await Settle();
+        Save(objWindow, strOut, strPrefix + "g-abilities-edited");
+    }
+    // ===== end Qualities & Abilities =====
 
     private static async Task Settle()
     {
