@@ -60,6 +60,17 @@ namespace Chummer.Desktop.ViewModels
 
         public Roll20Formatter Formatter { get; }
 
+        public RollCatalog Catalog => _objCatalog;
+
+        /// <summary>Opens the terminal on one roll (from global search).</summary>
+        public void ShowRoll(RollAction objAction)
+        {
+            _objShell.CurrentPage = this;
+            Activate();
+            Query = objAction.DisplayName;
+            SelectedRoll = Results.FirstOrDefault(x => ReferenceEquals(x.Action, objAction)) ?? new RollItemViewModel(objAction, _setFavorites.Contains(objAction.Name));
+        }
+
         public ObservableCollection<CharacterViewModel> Characters => _objShell.OpenCharacters;
 
         public ObservableCollection<RollItemViewModel> Results { get; } = new ObservableCollection<RollItemViewModel>();
@@ -516,7 +527,7 @@ namespace Chummer.Desktop.ViewModels
             try
             {
                 RollEvaluation objEvaluation = DiceExpressionEvaluator.EvaluateTest(Action, objContext);
-                PoolPreview = objEvaluation.Pool.Value.ToString(CultureInfo.InvariantCulture) + "d6";
+                PoolPreview = Math.Max(0, objEvaluation.Pool.Value).ToString(CultureInfo.InvariantCulture) + "d6";
                 IsIncomplete = objEvaluation.Pool.Unknowns.Count > 0;
             }
             catch (Exception)

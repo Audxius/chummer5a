@@ -43,12 +43,15 @@ namespace Chummer.Desktop.ViewModels
             Current = this;
             Roster = new RosterViewModel(this);
             Dice = new DiceTerminalViewModel(this);
+            Palette = new PaletteViewModel(this);
             _currentPage = Roster;
         }
 
         public RosterViewModel Roster { get; }
 
         public DiceTerminalViewModel Dice { get; }
+
+        public PaletteViewModel Palette { get; }
 
         public ObservableCollection<CharacterViewModel> OpenCharacters { get; } = new ObservableCollection<CharacterViewModel>();
 
@@ -149,6 +152,7 @@ namespace Chummer.Desktop.ViewModels
                 if (objCharacter == null)
                     return;
                 await OpenCharacterAsync(objCharacter);
+                Dice.Activate();
                 await GlobalSettings.MostRecentlyUsedCharacters.InsertAsync(0, strPath);
             }
             finally

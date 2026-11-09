@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Chummer.Desktop.ViewModels"
         xmlns:loc="using:Chummer.Desktop.Localization"
+        xmlns:conv="using:Chummer.Desktop.Converters"
         x:Class="Chummer.Desktop.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Chummer Native"
@@ -29,6 +30,14 @@
         </StackPanel>
 
         <StackPanel Spacing="2">
+          <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="17,10" Margin="10,0,10,10"
+                  Command="{Binding Palette.OpenCommand}" HotKey="Ctrl+K" BorderThickness="1" BorderBrush="{StaticResource BorderBrush}">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <PathIcon Data="{StaticResource Icon.Search}" Width="16" Height="16" Classes="muted" />
+              <TextBlock Grid.Column="1" Text="Search…" Classes="muted" Margin="12,0,0,0" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2" Text="CTRL K" Classes="label" VerticalAlignment="Center" />
+            </Grid>
+          </Button>
           <ToggleButton Classes="nav" IsChecked="{Binding IsRosterActive, Mode=OneWay}" Command="{Binding ShowRosterCommand}">
             <StackPanel Orientation="Horizontal" Spacing="12">
               <PathIcon Data="{StaticResource Icon.Roster}" Width="18" Height="18" />
@@ -79,6 +88,36 @@
         <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding IsBusy}" Width="160" Height="3"
                      Foreground="{StaticResource CyanBrush}" />
       </Grid>
+    </Border>
+
+    <!-- Global search (Ctrl+K) -->
+    <Border Grid.RowSpan="2" Grid.ColumnSpan="2" Background="#B0050810" IsVisible="{Binding Palette.IsOpen}" ZIndex="100"
+            PointerPressed="PaletteBackdrop_OnPointerPressed">
+      <Border Width="720" VerticalAlignment="Top" Margin="0,110,0,0" Background="{StaticResource SurfaceBrush}"
+              BorderBrush="{StaticResource CyanBrush}" BorderThickness="1" BoxShadow="0 0 40 0 #4400E5FF" PointerPressed="PaletteCard_OnPointerPressed">
+        <StackPanel>
+          <Grid Margin="16,14">
+            <TextBox x:Name="PaletteBox" Text="{Binding Palette.Query}" PlaceholderText="Search everything — items, spells, skills, contacts, rolls…"
+                     FontSize="17" Padding="38,10,10,10" KeyDown="PaletteBox_OnKeyDown" />
+            <PathIcon Data="{StaticResource Icon.Search}" Width="16" Height="16" HorizontalAlignment="Left" Margin="12,0,0,0" Classes="muted" IsHitTestVisible="False" />
+          </Grid>
+          <ListBox ItemsSource="{Binding Palette.Results}" SelectedItem="{Binding Palette.Selected}" MaxHeight="460" Margin="0,0,0,8"
+                   DoubleTapped="PaletteList_OnDoubleTapped" Tapped="PaletteList_OnDoubleTapped">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:PaletteEntry">
+                <Grid ColumnDefinitions="34,*" Margin="6,3">
+                  <PathIcon Data="{Binding IconKey, Converter={x:Static conv:IconKeyConverter.Instance}}" Width="18" Height="18" />
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding Title}" Foreground="{StaticResource TextBrush}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Subtitle}" Classes="label" TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+          <TextBlock Text="↑↓ select   ⏎ open   esc close" Classes="label" Margin="16,0,16,12" />
+        </StackPanel>
+      </Border>
     </Border>
   </Grid>
 </Window>

@@ -251,6 +251,43 @@ namespace Chummer.Desktop.ViewModels
             }
         }
 
+        /// <summary>Entries for the global search palette (Ctrl+K).</summary>
+        public IEnumerable<PaletteEntry> PaletteEntries()
+        {
+            foreach (SkillViewModel objSkill in _lstAllSkillCategories.SelectMany(x => x.AllSkills).Where(x => x.Rating > 0))
+                yield return new PaletteEntry(objSkill.Name, Name + "  //  skill " + objSkill.Pool, "Icon.Skills", () => Navigate(CharacterSection.Skills, objSkill.Name));
+            foreach (InventoryItemViewModel objItem in _lstAllInventory)
+                yield return new PaletteEntry(objItem.Name, Name + "  //  " + objItem.KindLabel.ToLowerInvariant() + "  " + objItem.Headline, objItem.IconKey, () => Navigate(CharacterSection.Inventory, objItem.Name));
+            foreach (InventoryItemViewModel objItem in _lstAllAbilities.SelectMany(x => x.Items))
+                yield return new PaletteEntry(objItem.Name, Name + "  //  " + objItem.Category, objItem.IconKey, () => Navigate(CharacterSection.Abilities, objItem.Name));
+            foreach (InventoryItemViewModel objItem in _lstAllNetwork.SelectMany(x => x.Items))
+                yield return new PaletteEntry(objItem.Name, Name + "  //  " + objItem.Category, objItem.IconKey, () => Navigate(CharacterSection.Network, objItem.Name));
+            foreach (QualityViewModel objQuality in PositiveQualities.Concat(NegativeQualities))
+                yield return new PaletteEntry(objQuality.Name, Name + "  //  quality " + objQuality.KarmaText, "Icon.Quality", () => Navigate(CharacterSection.Qualities, null));
+        }
+
+        public void Navigate(CharacterSection eSection, string strFilter)
+        {
+            MainWindowViewModel.Current.CurrentPage = this;
+            switch (eSection)
+            {
+                case CharacterSection.Skills:
+                    SkillFilter = strFilter ?? string.Empty;
+                    break;
+                case CharacterSection.Inventory:
+                    InventoryKind = null;
+                    InventoryFilter = strFilter ?? string.Empty;
+                    break;
+                case CharacterSection.Abilities:
+                    AbilityFilter = strFilter ?? string.Empty;
+                    break;
+                case CharacterSection.Network:
+                    NetworkFilter = strFilter ?? string.Empty;
+                    break;
+            }
+            Section = eSection;
+        }
+
         private static void FilterCards(List<InventoryGroupViewModel> lstAll, ObservableCollection<InventoryGroupViewModel> lstTarget, string strFilter)
         {
             string[] astrWords = (strFilter ?? string.Empty).ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -393,6 +430,7 @@ namespace Chummer.Desktop.ViewModels
         public string IconKey { get; }
         public int SortOrder { get; }
         public ObservableCollection<SkillViewModel> Skills { get; } = new ObservableCollection<SkillViewModel>();
+        public IReadOnlyList<SkillViewModel> AllSkills => _lstAll;
 
         public bool ApplyFilter(string strFilter, bool blnShowUntrained)
         {

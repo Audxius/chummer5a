@@ -1,3 +1,4 @@
+using System.Linq;
 // Usage: Screenshots <output dir> <character file>...
 using System;
 using System.IO;
@@ -60,6 +61,14 @@ internal static class Program
                             Save(objWindow, strOut, "05-dice-" + strQuery);
                             Console.WriteLine(strQuery + ": " + objViewModel.Dice.Results.Count + " results; formula: " + objViewModel.Dice.Formula);
                         }
+                        objViewModel.Palette.OpenCommand.Execute(null);
+                        objViewModel.Palette.Query = "bolt";
+                        await Settle();
+                        Save(objWindow, strOut, "06-search");
+                        Console.WriteLine("search: " + string.Join(" | ", objViewModel.Palette.Results.Select(x => x.Title + " [" + x.Subtitle + "]")));
+                        objViewModel.Palette.ActivateCommand.Execute(null);
+                        await Settle();
+                        Save(objWindow, strOut, "07-search-jump");
                     }
                 }
                 return 0;
