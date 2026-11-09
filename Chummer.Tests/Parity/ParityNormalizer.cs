@@ -111,6 +111,46 @@ namespace Chummer.Tests.Parity
         }
 
         /// <summary>
+        /// Returns a copy of <paramref name="xmlDocument"/> whose unordered containers (see <see cref="UnorderedContainers"/>)
+        /// have their children in a canonical order. Engine output such as improvements is regenerated in parallel, so
+        /// anything rendered from it (XSLT sheets, exports) must be fed a canonical order to be comparable between runs.
+        /// GUIDs are kept; only the order changes.
+        /// </summary>
+        public XmlDocument CanonicalizeOrder(XmlDocument xmlDocument)
+        {
+            if (xmlDocument == null)
+                throw new ArgumentNullException(nameof(xmlDocument));
+            XmlDocument xmlReturn = (XmlDocument)xmlDocument.CloneNode(true);
+            List<XmlElement> lstContainers = new List<XmlElement>();
+            foreach (XmlNode xmlNode in xmlReturn.SelectNodes("//*"))
+            {
+                if (xmlNode is XmlElement xmlElement && UnorderedContainers.Contains(xmlElement.LocalName))
+                    lstContainers.Add(xmlElement);
+            }
+            // Deepest first, so a parent's sort key reflects already-sorted children.
+            foreach (XmlElement xmlContainer in lstContainers.OrderByDescending(Depth))
+            {
+                List<XmlElement> lstChildren = xmlContainer.ChildNodes.OfType<XmlElement>()
+                                                           .OrderBy(x => x.LocalName, StringComparer.Ordinal)
+                                                           .ThenBy(x => s_rgxGuid.Replace(x.OuterXml, "G"), StringComparer.Ordinal)
+                                                           .ToList();
+                foreach (XmlElement xmlChild in lstChildren)
+                    xmlContainer.RemoveChild(xmlChild);
+                foreach (XmlElement xmlChild in lstChildren)
+                    xmlContainer.AppendChild(xmlChild);
+            }
+            return xmlReturn;
+        }
+
+        private static int Depth(XmlNode xmlNode)
+        {
+            int intDepth = 0;
+            for (XmlNode xmlLoop = xmlNode.ParentNode; xmlLoop != null; xmlLoop = xmlLoop.ParentNode)
+                ++intDepth;
+            return intDepth;
+        }
+
+        /// <summary>
         /// Canonicalizes rendered sheet output (HTML from the XSLT sheets), which is not necessarily well-formed XML.
         /// </summary>
         public string NormalizeText(string strText)

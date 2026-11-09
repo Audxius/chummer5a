@@ -141,11 +141,11 @@ namespace Chummer.Tests.Parity
                     XmlDocument xmlExport = GenerateExport(objCharacter, "en-us", token);
                     CheckXml(Path.Combine("exports", "en-us", strName + ".xml"), xmlExport.OuterXml);
                     CheckText(Path.Combine("exports", "json", strName + ".json"),
-                              JsonConvert.SerializeXmlNode(xmlExport, Newtonsoft.Json.Formatting.Indented));
+                              JsonConvert.SerializeXmlNode(_objNormalizer.CanonicalizeOrder(xmlExport), Newtonsoft.Json.Formatting.Indented));
                     CheckText(Path.Combine("exports", "squad-manager", strName + ".txt"),
-                              Transform(Path.Combine(Utils.GetStartupPath, "export", "Squad Manager.xsl"), xmlExport, token));
+                              Transform(Path.Combine(Utils.GetStartupPath, "export", "Squad Manager.xsl"), _objNormalizer.CanonicalizeOrder(xmlExport), token));
                     CheckText(Path.Combine("sheets", "en-us", strDefaultSheet, strName + ".html"),
-                              Transform(Path.Combine(Utils.GetStartupPath, "sheets", strDefaultSheet + ".xsl"), xmlExport, token));
+                              Transform(Path.Combine(Utils.GetStartupPath, "sheets", strDefaultSheet + ".xsl"), _objNormalizer.CanonicalizeOrder(xmlExport), token));
                 }
             }
             ReportFailures();
@@ -187,6 +187,7 @@ namespace Chummer.Tests.Parity
                     foreach (string strLanguage in s_astrLanguages)
                     {
                         XmlDocument xmlExport = GenerateExport(objCharacter, strLanguage, token);
+                        XmlDocument xmlCanonical = _objNormalizer.CanonicalizeOrder(xmlExport);
                         string strSheetDirectory = strLanguage == "en-us"
                             ? Path.Combine(Utils.GetStartupPath, "sheets")
                             : Path.Combine(Utils.GetStartupPath, "sheets", strLanguage);
@@ -194,7 +195,7 @@ namespace Chummer.Tests.Parity
                                                              .OrderBy(x => x, StringComparer.Ordinal))
                         {
                             CheckText(Path.Combine("sheets", strLanguage, strSheet, strName + ".html"),
-                                      Transform(Path.Combine(strSheetDirectory, strSheet + ".xsl"), xmlExport, token));
+                                      Transform(Path.Combine(strSheetDirectory, strSheet + ".xsl"), xmlCanonical, token));
                         }
                     }
                 }
