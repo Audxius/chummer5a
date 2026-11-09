@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8"?>
+<chummer>
+  <actions>
+    <action>
+      <id>647085d2-6778-4c1b-b610-05ba4e7e4784</id>
+      <name>Escape Combat</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Bridge actions</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>escape flee chase disengage run away getaway bridge piloting</keywords>
+      <test>
+        <dice>{Vehicle: Skill} + {Vehicle: Speed} v. fastest enemy craft's Piloting + Speed</dice>
+        <bonusstring>Opposed piloting check plus speed against the fastest enemy craft. Net hits accumulate toward escaping combat.</bonusstring>
+      </test>
+      <notes>You need 6 accumulated net hits to completely escape combat. Only possible if you have movement left. Enemy Pursue Target net hits reduce your accumulated escape net hits.</notes>
+    </action>
+    <action>
+      <id>412379a6-4c26-42be-8378-db236c742d44</id>
+      <name>Evasive Manoeuvres</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Bridge actions</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>evasive maneuvers manoeuvres dodge evade jink reposition vehicle defense bridge piloting</keywords>
+      <test>
+        <dice>{Vehicle: Skill} + {Vehicle: Handling} v. opposing pilot's Piloting + Handling</dice>
+        <bonusstring>Opposed piloting check plus handling to change relative position; the result works as the vehicle's dodge test for the next round.</bonusstring>
+      </test>
+      <notes>Only possible if you have movement left. The book does not state exactly what the opposition rolls; assumed the opposing craft's piloting + handling.</notes>
+    </action>
+    <action>
+      <id>9dc48115-2e23-4888-867e-5256104c1560</id>
+      <name>Pursue Target</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Bridge actions</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>pursue chase follow hunt tail catch up bridge piloting</keywords>
+      <test>
+        <dice>{Vehicle: Skill} + {Vehicle: Speed} v. fastest enemy craft's Piloting + Speed</dice>
+        <bonusstring>Opposed piloting check plus speed against the fastest enemy craft. Your net hits reduce your opponent's accumulated escape net hits.</bonusstring>
+      </test>
+      <notes>Only possible if you have movement left.</notes>
+    </action>
+    <action>
+      <id>af268f5f-83b0-4282-a0df-836841a26e91</id>
+      <name>Inspire Department</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Captain actions</section>
+      <category>Social</category>
+      <type>No</type>
+      <keywords>inspire leadership captain rally morale department crew bonus</keywords>
+      <test>
+        <dice>{CHA} + {Leadership}</dice>
+        <limit>{Social}</limit>
+        <bonusstring>Leadership test; adds dice pool to the entire chosen department for a turn.</bonusstring>
+      </test>
+      <notes>The book only says "leadership test"; standard SR5 Charisma + Leadership [Social] assumed. The size of the bonus is not specified (presumably hits).</notes>
+    </action>
+    <action>
+      <id>29f78802-2350-4545-a792-065a009c0f12</id>
+      <name>Crash Systems</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Comms actions</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>crash systems crash program comms hacking disable ship system matrix attack</keywords>
+      <test>
+        <dice>{Cybercombat} + {LOG} v. target's Intuition + Firewall</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Opposed Crash Program test against a specified system: it suffers a negative modifier equal to your net hits; on double the needed net hits the system is disabled entirely for net-hits turns.</bonusstring>
+      </test>
+      <notes>The book says "opposed crash program test"; the pool and opposition are the SR5 core Crash Program test (Cybercombat + Logic [Attack] v. Intuition + Firewall).</notes>
+    </action>
+    <action>
+      <id>12093ddc-da7b-41b2-9914-6a6b7fec8619</id>
+      <name>DCM</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Comms actions</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>dcm matrix perception targeting comms sensors fire control attack bonus</keywords>
+      <test>
+        <dice>{Computer} + {INT} v. target's Logic + Sleaze</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Opposed Matrix Perception test; add your net hits to every attack dice pool made by your vehicle this turn.</bonusstring>
+      </test>
+      <notes>The book says "opposed matrix Perception test"; pool and opposition are the SR5 core Matrix Perception test (Computer + Intuition [Data Processing] v. Logic + Sleaze).</notes>
+    </action>
+    <action>
+      <id>7679a2cd-d656-4cf0-9790-0cc2d230193b</id>
+      <name>Sensor Ghost</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Comms actions</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>sensor ghost hide stealth jamming comms dodge decoy</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {INT} v. searcher's Intuition + Data Processing</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>Opposed Hide test; add your net hits to the ship's dodge for a turn.</bonusstring>
+      </test>
+      <notes>The book says "opposed hide test"; pool and opposition are the SR5 core Hide matrix action (Electronic Warfare + Intuition [Sleaze] v. Intuition + Data Processing).</notes>
+    </action>
+    <action>
+      <id>311ab986-c974-4f75-9e4f-810419edfa14</id>
+      <name>Boost Engines</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Engineering actions</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>boost engines speed overdrive engineering mechanic thrust</keywords>
+      <test>
+        <dice>{LOG} + {Max: {Automotive Mechanic} or {Aeronautics Mechanic} or {Nautical Mechanic}}</dice>
+        <limit>{Mental}</limit>
+        <bonusstring>Appropriate mechanics test; increase vehicle speed for hits above 5, up to +2.</bonusstring>
+      </test>
+      <notes>"Appropriate mechanics test": use the mechanic skill matching the vehicle (the formula takes your best of Automotive/Aeronautics/Nautical Mechanic). Logic + skill [Mental] is the SR5 default for mechanic tests. Each hit above 5 gives +1 Speed, maximum +2.</notes>
+    </action>
+    <action>
+      <id>ba80754d-a50d-46ea-86c7-89d94d7e0582</id>
+      <name>Damage Control</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Engineering actions</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>damage control repair hull hit points engineering mechanic fix heal ship</keywords>
+      <test>
+        <dice>{LOG} + {Max: {Automotive Mechanic} or {Aeronautics Mechanic} or {Nautical Mechanic}}</dice>
+        <limit>{Mental}</limit>
+        <bonusstring>Appropriate mechanics test; on a success repair lost hit points equal to hits x1 (fighter hull), x2 (frigate), x3 (cruiser) or x4 (capital-class hull).</bonusstring>
+      </test>
+      <notes>Each attempt after the first in a fight increases the difficulty by 2 (base difficulty not stated). Use the mechanic skill matching the vehicle.</notes>
+    </action>
+    <action>
+      <id>4d3cb4f4-8250-4f08-aa38-3fdd3e6a48ed</id>
+      <name>Emergency Repairs</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Engineering actions</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>emergency repairs fix disabled system degraded drive engineering mechanic</keywords>
+      <test>
+        <dice>{LOG} + {Max: {Automotive Mechanic} or {Aeronautics Mechanic} or {Nautical Mechanic}} v. degradation difficulty</dice>
+        <limit>{Mental}</limit>
+        <bonusstring>Appropriate mechanics test versus degradation difficulty; on a success a disabled system is repaired or a damage-degraded drive has its rating increased by 1.</bonusstring>
+      </test>
+      <notes>Destroyed systems cannot be fixed this way. Use the mechanic skill matching the vehicle.</notes>
+    </action>
+    <action>
+      <id>ed4bede5-6206-4688-8b9a-3f62124e3c16</id>
+      <name>Fire All Guns</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Gunnery actions</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>fire all guns broadside gunnery shoot attack weapons volley vehicle weapon</keywords>
+      <test>
+        <dice>{Gunnery} + {AGI} v. target's defense</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Gunners fire all weapons mounted on the ship, designating targets as they wish.</bonusstring>
+      </test>
+      <notes>Only for large crews, an AI or a jacked-in rigger. All ranged combat from fixed vehicle weaponry uses Gunnery. Agility + Gunnery [Accuracy] is the SR5 manual default (jumped-in riggers use Logic in core SR5). DCM net hits add to this pool.</notes>
+    </action>
+    <action>
+      <id>ed4d56d0-9fc9-4376-9ac7-8ec62738d24e</id>
+      <name>Fire One Weapon</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Gunnery actions</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>fire one weapon gunnery shoot attack gun turret vehicle weapon</keywords>
+      <test>
+        <dice>{Gunnery} + {AGI} v. target's defense</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>A gunner fires a single ship's weapon of their choice.</bonusstring>
+      </test>
+      <notes>Can be a called shot (see Called Shot entries). DCM net hits add to this pool.</notes>
+    </action>
+    <action>
+      <id>14e51647-df26-4a50-b3cd-72d2d5191185</id>
+      <name>Called Shot: Ship Section</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Gunnery actions</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>called shot vehicle ship section gunnery target system</keywords>
+      <test>
+        <dice>{Gunnery} + {AGI} - 2 v. target's defense</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Fire One Weapon targeting a ship's section at -2. If damage gets through, the system is disabled (drive/engine degraded by 1 level); disabled systems hit again are destroyed.</bonusstring>
+      </test>
+      <notes>Called-shot system damage is separate from vehicle hit points.</notes>
+    </action>
+    <action>
+      <id>fc217748-2cef-4629-bb88-db10e8de1b2c</id>
+      <name>Called Shot: External System</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Gunnery actions</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>called shot vehicle external system sensors weapons gunnery</keywords>
+      <test>
+        <dice>{Gunnery} + {AGI} - 4 v. target's defense</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Fire One Weapon targeting an external system at -4. If damage gets through, the system is disabled (drive/engine degraded by 1 level); disabled systems hit again are destroyed.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>84fea5e9-f2fb-46c5-8bcd-fbe4cf733633</id>
+      <name>Called Shot: Internal Compartment</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Gunnery actions</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>called shot vehicle internal compartment gunnery</keywords>
+      <test>
+        <dice>{Gunnery} + {AGI} - 6 v. target's defense</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Fire One Weapon targeting an internal compartment at -6. If damage gets through, the system is disabled (drive/engine degraded by 1 level); disabled systems hit again are destroyed.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>9f37791e-558e-4286-93a3-ae5b5623a156</id>
+      <name>Called Shot: Internal System</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Gunnery actions</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>called shot vehicle internal system drive engine reactor gunnery</keywords>
+      <test>
+        <dice>{Gunnery} + {AGI} - 8 v. target's defense</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Fire One Weapon targeting an internal system at -8. If damage gets through, the system is disabled (drive/engine degraded by 1 level); disabled systems hit again are destroyed.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>c723b2e7-8d17-4a58-ab37-5be933752794</id>
+      <name>Called Shot: Person's Limb</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Gunnery actions</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>called shot person limb arm leg human gunnery vehicle weapon</keywords>
+      <test>
+        <dice>{Gunnery} + {AGI} - 2 v. target's defense</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Fire One Weapon targeting a specific limb of a person at -2.</bonusstring>
+      </test>
+      <notes>Additional -2 if shooting from a relatively moving vehicle, and -6 if shooting at a person from engagement range on the space combat scale.</notes>
+    </action>
+    <action>
+      <id>5a551e0b-3ca6-48d6-bded-eaf0b1ced36d</id>
+      <name>Called Shot: Person's Head</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Gunnery actions</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>called shot person head headshot human gunnery vehicle weapon</keywords>
+      <test>
+        <dice>{Gunnery} + {AGI} - 4 v. target's defense</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Fire One Weapon targeting a person's head at -4.</bonusstring>
+      </test>
+      <notes>Additional -2 if shooting from a relatively moving vehicle, and -6 if shooting at a person from engagement range on the space combat scale.</notes>
+    </action>
+    <action>
+      <id>0bc2cbe9-157b-4c34-a122-e95aa1a3e498</id>
+      <name>Called Shot: Person's Organ</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / Gunnery actions</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>called shot person organ heart vital human gunnery vehicle weapon</keywords>
+      <test>
+        <dice>{Gunnery} + {AGI} - 6 v. target's defense</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Fire One Weapon targeting a specific organ of a person at -6.</bonusstring>
+      </test>
+      <notes>Additional -2 if shooting from a relatively moving vehicle, and -6 if shooting at a person from engagement range on the space combat scale.</notes>
+    </action>
+    <action>
+      <id>bdf3383f-9f74-4147-a2d3-a8a48f28a8a9</id>
+      <name>Above and Beyond</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / General actions</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>above and beyond push extra action help ship crew heroic general</keywords>
+      <test>
+        <dice>{Chosen Attribute} + {Chosen Skill} v. {Threshold: 6}</dice>
+        <bonusstring>Pick an attribute and skill and explain how you use them to help the ship; if the GM agrees, roll against difficulty 6. On a success the department gains an additional action; on a failure it loses the action.</bonusstring>
+      </test>
+      <notes>Attribute and skill are chosen by the player at the table; the formula cannot know them.</notes>
+    </action>
+    <action>
+      <id>ad7edc1e-6ce2-46fe-90bb-811c7d424c81</id>
+      <name>Deal With System Damage</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Vehicle actions / General actions</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>deal with system damage fix repair deteriorating damage general</keywords>
+      <test>
+        <dice>{Chosen Attribute} + {Relevant Skill} v. system damage difficulty</dice>
+        <bonusstring>Explain how you fix the damage and roll the relevant skill check; on a success the damage difficulty is reduced by your hits (0 difficulty = fixed).</bonusstring>
+      </test>
+      <notes>Difficulty = net hits the system took, +1 for every turn it was ignored (at 12 it becomes catastrophic / the system is destroyed), plus or minus 2 depending on the situation and the effectiveness of your action. Can also be used to aid another PC resolving the damage.</notes>
+    </action>
+    <action>
+      <id>e473f9b5-fe55-46d5-a804-f47ef8188171</id>
+      <name>Pilot Program Check</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Riggers</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>pilot program drone autopilot piloting check device rating</keywords>
+      <test>
+        <dice>{Vehicle: Pilot} * 2</dice>
+        <bonusstring>A vehicle's or drone's pilot program rolls device rating x2 for its piloting checks.</bonusstring>
+      </test>
+      <notes>Book says "device rating*2"; the vehicle's Pilot rating is used as the device rating. Pilot initiative is Pilot x2 + 4d6.</notes>
+    </action>
+    <action>
+      <id>ccb3ceed-1189-49aa-87c8-d02eca1b1aeb</id>
+      <name>Autosoft Task</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Riggers</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>autosoft drone program task crew replacement</keywords>
+      <test>
+        <dice>{Autosoft Rating} + {Vehicle: Pilot}</dice>
+        <bonusstring>An autosoft rolls its rating plus the pilot rating to achieve its task.</bonusstring>
+      </test>
+      <notes>Autosoft rating is not known to the formula engine; enter it manually. Each autosoft can replace one crew member and acts in one department only.</notes>
+    </action>
+    <action>
+      <id>4a1a1ea6-083f-49a6-8dc3-8d81bcf15271</id>
+      <name>Astral Drill</name>
+      <book>Reworked Rigger Handbook</book>
+      <section>Starship travel</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>astral drill jump hyperspace ftl spike drive starship travel navigation interstellar</keywords>
+      <test>
+        <dice>{REA} + {Pilot Aerospace} v. {Threshold: 5}</dice>
+        <bonusstring>Roll pilot + Aerospace against the drill difficulty to enter astral space and travel to another star. On a failure the ship may be lost in astral space (roll 3d6 on the consequence table).</bonusstring>
+      </test>
+      <notes>Base difficulty 5; course totally uncharted +4; map older than 5 years +2; map 1-5 years old +1; map less than a year old +0; map less than a month old -2; +1 per 2 full hexes of distance; trimming the course +2; rushed activation +2. Consumes 1 fuel cell. Transit time is six days to the nearest star divided by drive rating (trimming adds +1 effective drive rating). The book's "pilot + Aerospace" is interpreted as Reaction + Pilot Aerospace.</notes>
+    </action>
+  </actions>
+</chummer>

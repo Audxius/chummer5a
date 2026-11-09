@@ -47,6 +47,19 @@ internal static class Program
                             await Settle();
                             Save(objWindow, strOut, "03-" + eSection.ToString().ToLowerInvariant());
                         }
+                        objViewModel.ShowDiceCommand.Execute(null);
+                        await Settle();
+                        Save(objWindow, strOut, "04-dice");
+                        foreach (string strQuery in new[] { "escape", "dodge" })
+                        {
+                            objViewModel.Dice.Query = strQuery;
+                            await Settle();
+                            if (objViewModel.Dice.Results.Count > 0)
+                                objViewModel.Dice.SelectedRoll = objViewModel.Dice.Results[0];
+                            await Settle();
+                            Save(objWindow, strOut, "05-dice-" + strQuery);
+                            Console.WriteLine(strQuery + ": " + objViewModel.Dice.Results.Count + " results; formula: " + objViewModel.Dice.Formula);
+                        }
                     }
                 }
                 return 0;

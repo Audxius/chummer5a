@@ -1,0 +1,1947 @@
+<?xml version="1.0" encoding="utf-8"?>
+<chummer>
+  <actions>
+    <!-- ===================== Hardware hacking ===================== -->
+    <action>
+      <id>1ecc9aff-d970-4433-9957-436a9d611eb1</id>
+      <name>Detect Hardware Hack</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Hardware hacking / The defence sequence</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>hardware hack detection defence defend device malicious hardware notice tamper</keywords>
+      <test>
+        <dice>{Icon: Data Processing} * 2 v. hacking hardware's Sleaze x2</dice>
+        <bonusstring>The defending device tries to notice installed malicious hardware. If successful it knows it is being modified and can notify the owner, shut down or ignore the hardware; otherwise the hardware remains undetected.</bonusstring>
+      </test>
+      <notes>Book formula is (Data processing + defending bonus) x2 dice. Defending bonus = device rating - hacking device rating (min 0), only if the hacker could not obtain the device's electrical schematic; add it before doubling.</notes>
+    </action>
+    <action>
+      <id>cde5e8f3-8325-42ad-b500-2f00f340519e</id>
+      <name>Nullify Hacking Hardware</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Hardware hacking / The defence sequence</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>hardware hack defence attack firewall nullify disable skinlink</keywords>
+      <test>
+        <dice>{Icon: Attack} * 2 v. hacking hardware's Firewall x2</dice>
+        <bonusstring>A defending device with an Attack attribute strikes the hacking hardware; if successful the hacking hardware's Attack and Firewall attributes are nullified. Rolled even if the hardware is not detected.</bonusstring>
+      </test>
+      <notes>Also used by the Skinlink echo: if the defending hardware wins, the technomancer cannot use any actions involving Attack or Firewall on that device.</notes>
+    </action>
+    <action>
+      <id>9e97f183-5982-4b48-b8b8-e1f8604181fe</id>
+      <name>Hardware Hack (Attack)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Hardware hacking</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>hardware hack attack brick destroy protections throttle physical hacking</keywords>
+      <test>
+        <dice>{Icon: Attack} * 2 v. defending device's Firewall x2</dice>
+        <bonusstring>Malicious hardware attacks the device's Firewall to destroy protections or brick the device.</bonusstring>
+      </test>
+      <notes>Throttling (only if your attribute rating exceeds the hacked device's rating): spawn your own IC or get bonus dice on attack actions; +Attack rating dice to Cybercombat on that device.</notes>
+    </action>
+    <action>
+      <id>d25e048c-c2a5-4daf-b492-3c32119822e0</id>
+      <name>Hardware Hack (Sleaze)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Hardware hacking</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>hardware hack sleaze false information write lag throttle physical hacking</keywords>
+      <test>
+        <dice>{Icon: Sleaze} * 2 v. defending device's Data Processing x2</dice>
+        <bonusstring>Malicious hardware writes false information at a fundamental level with the same encryption or signal levels.</bonusstring>
+      </test>
+      <notes>Throttling (only if your rating exceeds the device's): everyone but the owner gets -(Sleaze - Data processing) dice; +Sleaze rating dice to Electronic Warfare on that device.</notes>
+    </action>
+    <action>
+      <id>7f54ff45-d43a-44e5-b452-87c612707444</id>
+      <name>Hardware Hack (Data Processing)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Hardware hacking</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>hardware hack data processing decrypt wiretap read signals throttle physical hacking</keywords>
+      <test>
+        <dice>{Icon: Data Processing} * 2 v. defending device's Sleaze x2</dice>
+        <bonusstring>Malicious hardware decrypts ciphers or reads the device's signals, allowing wiretapping or locating targets for subtle sabotage.</bonusstring>
+      </test>
+      <notes>Throttling (only if your rating exceeds the device's): break encryption completely; +Data processing rating dice to Hacking on that device; can corrupt accessed or new data.</notes>
+    </action>
+    <action>
+      <id>8c4d49d7-d32d-440e-9dc3-3320cea626bb</id>
+      <name>Hardware Hack (Firewall)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Hardware hacking</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>hardware hack firewall wipe malicious programs throttle physical hacking</keywords>
+      <test>
+        <dice>{Icon: Firewall} * 2 v. defending device's Attack x2</dice>
+        <bonusstring>Malicious hardware throttles the device's attacking capabilities by wiping malicious programs within it.</bonusstring>
+      </test>
+      <notes>Throttling (only if your rating exceeds the device's): replace the protections so your attacks pass and everyone else faces your firewall; extra dice on your matrix defence actions.</notes>
+    </action>
+
+    <!-- ===================== Internet actions ===================== -->
+    <action>
+      <id>d888200f-1a60-4c80-8735-ffe4280d2be0</id>
+      <name>Brute Force (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Attack</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>brute force internet attack damage hack server</keywords>
+      <test>
+        <dice>{Cybercombat} + {LOG} v. Firewall x2</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Do net hits d6 damage to the device.</bonusstring>
+      </test>
+      <notes>0 marks. Double damage for -4 dice, triple damage for -8 dice. Limit is the lowest attribute in the whole device link participating in the hack.</notes>
+    </action>
+    <action>
+      <id>1bea86a1-5b4f-4569-b571-fe061a54d357</id>
+      <name>Crack File (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Attack</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>crack file internet protection decrypt read</keywords>
+      <test>
+        <dice>{Hacking} + {LOG} v. Protection Rating x2</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Remove protection from a file so you can read it (reading sets off Data Bombs).</bonusstring>
+      </test>
+      <notes>1 mark (device must have lost at least 1 HP).</notes>
+    </action>
+    <action>
+      <id>0c96885a-12c4-4b4d-98d5-f05636a7ed84</id>
+      <name>Crash Program (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Attack</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>crash program internet kill stop software</keywords>
+      <test>
+        <dice>{Cybercombat} + {LOG} v. Firewall x2</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Program stops running and can't be reloaded until the device is rebooted.</bonusstring>
+      </test>
+      <notes>1 mark.</notes>
+    </action>
+    <action>
+      <id>cae92274-bd7c-4087-ad6c-f06d098e5c6c</id>
+      <name>Set Data Bomb (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Attack</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>set data bomb internet trap file explode email scam</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. Firewall x2 (hostile computer) or Data Bomb Rating x2</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Bomb rating = net hits; choose whether the trigger deletes the file; does (Rating)d6 Matrix damage. Detonation is not noticed if it only does damage and firewall does not block all of it.</bonusstring>
+      </test>
+      <notes>1 mark. Defence is Firewall x2 when data-bombing a hostile computer, otherwise 2 x Data bomb rating.</notes>
+    </action>
+    <action>
+      <id>4c6c75b3-a3f4-49f7-acf1-e6f391693641</id>
+      <name>Jam Signals/DOS (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Attack</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>jam signals dos denial of service internet jammer noise</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {LOG} v. Firewall x2</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Turns your device into a jammer: can't use it for Matrix actions while jamming; add hits to Noise rating within 100 meters.</bonusstring>
+      </test>
+      <notes>3 marks (device at 0 HP).</notes>
+    </action>
+    <action>
+      <id>cb0d9718-ec0a-4d9a-b056-f3f8c343b847</id>
+      <name>Brick (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Attack</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>brick internet destroy device kill</keywords>
+      <test>
+        <dice>{Cybercombat} + {LOG} v. Firewall x2</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Brick the device.</bonusstring>
+      </test>
+      <notes>3 marks (device must be at 0 HP).</notes>
+    </action>
+    <action>
+      <id>20685cf6-f1c5-4667-b549-1dd83b4b5811</id>
+      <name>Change Internet IP (Other Device, Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Attack</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>change ip address internet other device</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. Firewall x2</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Change the IP of another device.</bonusstring>
+      </test>
+      <notes>Takes 5 minutes. 3 marks.</notes>
+    </action>
+    <action>
+      <id>c25af931-9b9d-49a7-adb6-7b1d5abd4bb9</id>
+      <name>Device Search (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>device search internet hidden files find devices admin</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {INT} v. Sleaze x2</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Find hidden files or other devices up to the number of net hits.</bonusstring>
+      </test>
+      <notes>Admin action. 0 marks.</notes>
+    </action>
+    <action>
+      <id>b83153a8-416a-4813-b74d-d500a05f2329</id>
+      <name>Internet Search</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Extended</type>
+      <keywords>internet search information research google lookup</keywords>
+      <test>
+        <dice>{Computer} + {INT}</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Search for information on the internet. Publicly, openly shared comprehensive information is an automatic success.</bonusstring>
+      </test>
+      <notes>Action type listed as "Special". 0 marks.</notes>
+    </action>
+    <action>
+      <id>5e9b1bfc-7b0d-46d3-bace-99c665719c8e</id>
+      <name>Edit File (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>edit file internet create change copy delete protect admin</keywords>
+      <test>
+        <dice>{Computer} + {LOG} v. Sleaze x2</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Create, change, copy, delete, or protect a file; sets off Data Bombs.</bonusstring>
+      </test>
+      <notes>Admin action (depends). 1 mark. Unopposed on a personal device; when protecting, hits = Protection Rating.</notes>
+    </action>
+    <action>
+      <id>1895994e-177e-480d-a360-39d124af447a</id>
+      <name>Snoop (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>snoop internet intercept traffic wiretap eavesdrop</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {LOG} v. Sleaze x2</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Intercept Matrix traffic to and from the target.</bonusstring>
+      </test>
+      <notes>1 mark.</notes>
+    </action>
+    <action>
+      <id>6d76246f-2f52-4892-aae7-95ed66630a05</id>
+      <name>Reboot Device (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>reboot device internet restart</keywords>
+      <test>
+        <dice>{Computer} + {LOG} v. Sleaze x2</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Reboot the target device.</bonusstring>
+      </test>
+      <notes>3 marks. Book writes "Computers + LOG".</notes>
+    </action>
+    <action>
+      <id>c19ed04c-4469-4e2d-a772-bfac6336ba4a</id>
+      <name>Control Device (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Data Proc.</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>control device internet command use remote enslave</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {INT} v. Sleaze x2</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Use the device; action type is the same as the device action performed. Use your skills. Can command multiple devices with the same action.</bonusstring>
+      </test>
+      <notes>Variable action type. 3 marks. You can enslave or control up to your Data processing attribute in devices.</notes>
+    </action>
+    <action>
+      <id>03fc81ae-c571-4416-916c-1102a479c6c4</id>
+      <name>Format Device (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>format device internet wipe admin</keywords>
+      <test>
+        <dice>{Computer} + {LOG} v. Sleaze x2</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>When the device is rebooted, it won't start back up until it is restored (see Restore Formatted Device).</bonusstring>
+      </test>
+      <notes>Admin action. 3 marks.</notes>
+    </action>
+    <action>
+      <id>ffc32c16-7c72-4e5b-b504-9c100e972f15</id>
+      <name>Restore Formatted Device</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions; Matrix hacking</section>
+      <category>Matrix</category>
+      <type>Extended</type>
+      <keywords>restore formatted device repair reinstall start up boot</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. {Threshold: 12}</dice>
+        <limit>{Mental}</limit>
+        <bonusstring>Gets a formatted device to start back up.</bonusstring>
+      </test>
+      <notes>Extended test, threshold 12, interval 1 hour.</notes>
+    </action>
+    <action>
+      <id>7c1c1dd4-ee2d-4783-b274-c1b2a03b1102</id>
+      <name>Hide (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Sleaze</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>hide internet stealth invisible conceal</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {LOG} v. Data Processing x2</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>Become hidden to the target (can't use if they have your IP).</bonusstring>
+      </test>
+      <notes>0 marks. Sleaze actions are not noticed if you succeed.</notes>
+    </action>
+    <action>
+      <id>d9a0751c-210f-4d74-a383-2ac285861432</id>
+      <name>Hack (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Sleaze</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>hack internet stealthy damage server break in</keywords>
+      <test>
+        <dice>{Hacking} + {LOG} v. Firewall x2</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>Do net hits d6 damage; if the hack is successful you stay hidden.</bonusstring>
+      </test>
+      <notes>1 day per try. 0 marks. Double damage for -4 dice, triple for -8 dice.</notes>
+    </action>
+    <action>
+      <id>502dae8c-d337-4ea6-8911-4a37b7cc18d3</id>
+      <name>Erase IP Signature (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Sleaze</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>erase ip signature internet cover tracks trace log</keywords>
+      <test>
+        <dice>{Hacking} + {LOG} v. Data Processing x2</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>If you succeed you erase your IP from the device memory.</bonusstring>
+      </test>
+      <notes>0 marks.</notes>
+    </action>
+    <action>
+      <id>a5d21867-4e6d-44dc-8b9f-efd5a8e5cee1</id>
+      <name>Edit File (Stealthy, Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Sleaze</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>edit file stealthy internet create change copy protect sneaky</keywords>
+      <test>
+        <dice>{Hacking} + {LOG} v. Data Processing x2</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>Create, change, copy, or protect a file without being noticed; sets off Data Bombs.</bonusstring>
+      </test>
+      <notes>1 mark. Unopposed when protecting; hits = Protection Rating.</notes>
+    </action>
+    <action>
+      <id>413bfecb-addb-4296-a6e9-c1a8bc340b57</id>
+      <name>Spoof Command (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Sleaze</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>spoof command internet impersonate fake order agent</keywords>
+      <test>
+        <dice>{Hacking} + {LOG} v. Data Processing x2</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>Give a device or agent a command (need a mark on the owner you are imitating).</bonusstring>
+      </test>
+      <notes>1 mark.</notes>
+    </action>
+    <action>
+      <id>1be8affd-cdca-42bd-b264-326c4904f103</id>
+      <name>Give Permission (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Sleaze</section>
+      <category>Matrix</category>
+      <type>Simple</type>
+      <keywords>give permission internet admin grant access user</keywords>
+      <test>
+        <dice>{Hacking} + {LOG} v. Data Processing x2</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>Give permission for an action to another user.</bonusstring>
+      </test>
+      <notes>Admin action. 3 marks.</notes>
+    </action>
+    <action>
+      <id>7d5c6dcc-2e9c-4693-8ee8-f9e5cab375a4</id>
+      <name>Disarm Data Bomb (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Firewall</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>disarm data bomb internet defuse remove trap</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. Data Bomb Rating x2</dice>
+        <limit>{Icon: Firewall}</limit>
+        <bonusstring>Safely remove a Data Bomb (only need 1 net hit; must find it with Matrix Perception).</bonusstring>
+      </test>
+      <notes>0 marks.</notes>
+    </action>
+    <action>
+      <id>f4d96fb5-5790-4501-953d-fd9612eae818</id>
+      <name>Disinfection (Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Firewall</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>disinfection disinfect internet heal repair virus clean matrix damage</keywords>
+      <test>
+        <dice>{Software} + {LOG}</dice>
+        <limit>{Icon: Firewall}</limit>
+        <bonusstring>Heal your matrix damage bar by the successes on your test.</bonusstring>
+      </test>
+      <notes>0 marks. Also used to get rid of hacking software and viruses after locking a system down.</notes>
+    </action>
+    <action>
+      <id>d394ecc0-29b6-4bb1-9d2b-d232bdf5d33c</id>
+      <name>Change Internet IP (Own Device, Internet)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking / Internet actions / Firewall</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>change ip address internet own device hide tracks admin</keywords>
+      <test>
+        <dice>{Software} + {LOG}</dice>
+        <limit>{Icon: Firewall}</limit>
+        <bonusstring>Change the IP of your own device.</bonusstring>
+      </test>
+      <notes>Admin. Takes 5 minutes. You lose all server link connections and connections to enslaved devices afterwards.</notes>
+    </action>
+    <action>
+      <id>278ff623-5648-46a6-8d04-430781a3bbc1</id>
+      <name>Write Scam Email</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet hacking</section>
+      <category>Social</category>
+      <type>No</type>
+      <keywords>scam email phishing con data bomb convince message</keywords>
+      <test>
+        <dice>{CHA} + {Con}</dice>
+        <limit>{Social}</limit>
+        <bonusstring>Write an email carrying data bombs that convinces the receiver of its validity.</bonusstring>
+      </test>
+      <notes>Limit not stated by the book; Social is the SR5 default for Con.</notes>
+    </action>
+    <action>
+      <id>9cb8418d-de0e-40ec-af1e-597893c10053</id>
+      <name>Check Device for Intrusions</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Internet investigation</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>check device intrusion investigate hack forensics detect past hack audit</keywords>
+      <test>
+        <dice>{Computer} + {LOG} v. hacker device's Sleaze x2 at the time of hacking</dice>
+        <bonusstring>Check a device for intrusions that may have flown under the radar.</bonusstring>
+      </test>
+      <notes>Book writes "Computers + LOG".</notes>
+    </action>
+
+    <!-- ===================== Programs ===================== -->
+    <action>
+      <id>e3c28c1a-e77c-4451-b928-70575c70c90c</id>
+      <name>Recal Trajectory</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Programs / Hacking programs hacking use</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>recal program trajectory gunnery accuracy limit vehicle gun</keywords>
+      <test>
+        <dice>{Icon: Rating} * 2</dice>
+        <bonusstring>The Recal program rolls rating x2 dice; its hits act as your accuracy limit when firing manually.</bonusstring>
+      </test>
+      <notes>Uses the Recal program's rating (max = device rating), not the device rating. Retargeting to another gun type is a Simple action (Free in VR).</notes>
+    </action>
+    <action>
+      <id>375e5970-4f17-43e0-9b37-9e10d7893f34</id>
+      <name>Assemble Data Bomb (Demolition)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Programs / Hacking programs matrix combat use</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>demolition kit data bomb assemble build explosive</keywords>
+      <test>
+        <dice>{Demolitions} + {LOG}</dice>
+        <bonusstring>With the Demolition program kit, assemble a proper data bomb. Successes = data bomb rating.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>8f091f85-818e-4412-accf-d96cd659eaf5</id>
+      <name>Switch Crash Weapon Mode</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Programs / Hacking programs matrix combat use</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>crash program weapon switch melee ranged knife pistol</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. {Threshold: 3}</dice>
+        <bonusstring>Switch the Crash program weapon between melee knife and pistol.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>bcee98e4-46ad-444d-a67e-6a81c4684423</id>
+      <name>Modify Program for Matrix Combat</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Programs / Hacking programs matrix combat use</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>modify program modded matrix combat ready convert</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. {Threshold: 3}</dice>
+        <bonusstring>Modify a program to be matrix-combat ready (the "(Modded)" versions).</bonusstring>
+      </test>
+    </action>
+
+    <!-- ===================== Matrix ecosystems ===================== -->
+    <action>
+      <id>11e41a3a-9faf-4ef4-bb89-a2147355a174</id>
+      <name>Resist Bug Infection</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix ecosystems</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>bug infection virus resist swarm mosquito bite disease</keywords>
+      <test>
+        <dice>{Icon: Firewall} * 2 v. bug's rating x2</dice>
+        <bonusstring>When hit by a virus-carrying bug; if you fail you are infected by the program the bug carries.</bonusstring>
+      </test>
+      <notes>Infection persists until cured with a remedy (made or bought at a matrix pharmacy).</notes>
+    </action>
+    <action>
+      <id>faa0816a-d635-4b07-bb94-28f488b64bbd</id>
+      <name>Collect Swamp Mud</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix ecosystems / Swamp</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>swamp mud collect gather data scavenging deleted messages</keywords>
+      <test>
+        <dice>{Software} + {INT}</dice>
+        <bonusstring>Collect data mud from the swamp; successes become the limit for filtering it.</bonusstring>
+      </test>
+      <notes>Takes 5 minutes per success; you choose how many successes are enough.</notes>
+    </action>
+    <action>
+      <id>6202ef50-fad6-4aed-9729-fda50f586787</id>
+      <name>Filter Swamp Mud</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix ecosystems / Swamp</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>swamp mud filter data scavenging find research deleted files</keywords>
+      <test>
+        <dice>{Icon: Data Processing} + {INT}</dice>
+        <bonusstring>Filter collected mud for important data; successes determine what you find (0-1 spam ... 12 a fully working accidentally deleted corporate file).</bonusstring>
+      </test>
+      <notes>Limit = successes on Collect Swamp Mud. 12 hours per try. Table: 2 short clip/message, 3 private small talk, 4 personal private, 5 spicy, 6 incriminating/pirated, 7 public deleted research, 8 private deleted research, 9 old corp research, 10 recent corp research, 11 experimental corp programs/facilities, 12 working corp file.</notes>
+    </action>
+    <action>
+      <id>fc938905-b172-468e-a5f0-0d69427d8745</id>
+      <name>Swamp Infection Check</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix ecosystems / Swamp</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>swamp infection twig mud water virus</keywords>
+      <test>
+        <dice>{Icon: Firewall} * 2 v. {Threshold: 4}</dice>
+        <bonusstring>If you roll any 1s while in swamp water, roll this; a result of 3 or below means you get an infection.</bonusstring>
+      </test>
+      <notes>Book: "if the result is 3 or below" - treated as needing 4+ hits to avoid infection.</notes>
+    </action>
+    <action>
+      <id>e689c2d2-0368-4517-a55a-9ec7c1d85078</id>
+      <name>Find Dig Site (Tundra/Savanna)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix ecosystems / Tundra/Savanna</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>tundra savanna dig site buried server host search excavate</keywords>
+      <test>
+        <dice>{Icon: Data Processing} * 2 v. threshold 2 x tier</dice>
+        <bonusstring>Find a place to start digging for buried servers and hosts; the tier defines what can be found.</bonusstring>
+      </test>
+      <notes>Tiers 1-12: new private server, archive, abandoned host, old internet media, government sites, old website, government servers, matrix architecture data, old corporate host, corporate archives, corporate secrets, lost tech.</notes>
+    </action>
+    <action>
+      <id>a92b4797-2d24-44ed-9669-c7c3c64bafe6</id>
+      <name>Drill Dig Site (Tundra/Savanna)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix ecosystems / Tundra/Savanna</section>
+      <category>Matrix</category>
+      <type>Extended</type>
+      <keywords>tundra savanna drill dig excavate buried host guardian</keywords>
+      <test>
+        <dice>{Icon: Attack} * 2 v. extended threshold 10 x tier</dice>
+        <bonusstring>Drill down to the buried find; need 10 x tier hits in total.</bonusstring>
+      </test>
+      <notes>If a single roll scores fewer than tier hits, a protosapient guardian spawns (attributes Tier+3, up to Tier forms/powers/programs, skills up to Tier x2).</notes>
+    </action>
+    <action>
+      <id>454e5595-4100-46c8-9afd-bc851c3f2a5b</id>
+      <name>Run in Arctic</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix ecosystems / Arctic</section>
+      <category>Physical</category>
+      <type>No</type>
+      <keywords>arctic run sprint movement biome</keywords>
+      <test>
+        <dice>{AGI} + {Icon: Data Processing} v. {Threshold: 3}</dice>
+        <bonusstring>Additional test required to run in the arctic biome.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>d4fac812-869a-485f-a335-044cde0b8e5f</id>
+      <name>Find Antidote Herb (Rainforest)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix ecosystems / Rainforest</section>
+      <category>Matrix</category>
+      <type>Extended</type>
+      <keywords>rainforest herb antidote search cure virus infection</keywords>
+      <test>
+        <dice>{Icon: Data Processing} * 2 v. threshold by virus duration and variation</dice>
+        <bonusstring>Search the rainforest for a herb that cures your virus.</bonusstring>
+      </test>
+      <notes>Extended, 1 hour interval. Requires a virus sample (see Prepare Virus Sample). Threshold by duration: hours 2, days 4, weeks 6, months 8, years 10, unlimited 12; variation: common +0, modified +4, custom x2.</notes>
+    </action>
+    <action>
+      <id>37bac95b-d816-401e-8ae6-48fd8eac36fe</id>
+      <name>Prepare Virus Sample</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix ecosystems / Rainforest</section>
+      <category>Matrix</category>
+      <type>Simple</type>
+      <keywords>virus sample prepare antidote rainforest infection</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. {Threshold: 3}</dice>
+        <bonusstring>Prepare a sample of the virus (from the animal or yourself) needed to search for an antidote herb.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>9e8108f8-1161-48c3-b9e5-02dd9e9ff5f6</id>
+      <name>Analyse Herb (Rainforest)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix ecosystems / Rainforest</section>
+      <category>Matrix</category>
+      <type>Extended</type>
+      <keywords>analyse analyze herb rainforest antidote poison cure</keywords>
+      <test>
+        <dice>{Icon: Data Processing} * 2 v. threshold 4 (common), 8 (modified), 12 (custom)</dice>
+        <bonusstring>Analyse a found herb. On failure you get false information and need another specimen.</bonusstring>
+      </test>
+      <notes>Extended, 1 day interval. The herb must be inserted into one of your constructs.</notes>
+    </action>
+    <action>
+      <id>3cd67dce-3007-447d-bf38-9b971c30e13f</id>
+      <name>Make Antidote</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix ecosystems / Rainforest</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>antidote craft cure virus herb remedy infection</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. {Threshold: 3}</dice>
+        <bonusstring>Make the antidote from an analysed herb.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>e6f7ed71-073b-488c-b0d9-32b85ae70f9e</id>
+      <name>Find Host Backdoor (Taiga)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix ecosystems / Taiga</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>taiga host backdoor cave find search entry</keywords>
+      <test>
+        <dice>{Icon: Data Processing} * 2 v. threshold equal to host rating</dice>
+        <bonusstring>Find an active host backdoor (usually inside caves) in the taiga.</bonusstring>
+      </test>
+      <notes>One day per try.</notes>
+    </action>
+
+    <!-- ===================== Constructs / Hosts ===================== -->
+    <action>
+      <id>e555f5ba-8435-4ee6-a532-8f51635ff1c4</id>
+      <name>Craft Matrix Construct</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix constructs</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>craft matrix construct build part weapon repair bricked construct</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. threshold = total attribute points in the part</dice>
+        <bonusstring>Craft each construct part. Falling short means permanently losing attribute points equal to the shortfall.</bonusstring>
+      </test>
+      <notes>Extended, 1 hour interval, per part. Repairing a bricked construct means constructing it again.</notes>
+    </action>
+    <action>
+      <id>ae616841-ad02-4a09-813f-e9494c795da4</id>
+      <name>Physics Override</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Hosts; Matrix combat</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>physics law host anti-grav grenade gravity rules override contest</keywords>
+      <test>
+        <dice>{Icon: Attack} * 2 v. host's Attack x2</dice>
+        <bonusstring>Inside a host, tools like anti-grav grenades battle the host over whose rules of physics apply at that location.</bonusstring>
+      </test>
+      <notes>Outside hosts such tools are unopposed.</notes>
+    </action>
+    <action>
+      <id>4334b778-7ca4-491f-af03-d9f1f12cd5a3</id>
+      <name>Host Lock Check</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Hosts</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>host lock door fake key pick lock analyse</keywords>
+      <test>
+        <dice>{Icon: Data Processing} * 2 v. hacking device's Sleaze x2</dice>
+        <bonusstring>Host (or door) analyses fake keys and sleazy entry attempts such as digital lock picks.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>a3948f02-e0fe-493d-8e27-7507d6b6a0b2</id>
+      <name>Host Hide/Encrypt</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Hosts</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>host hide encrypt lock protection sleaze secret path</keywords>
+      <test>
+        <dice>{Icon: Sleaze} * 2 v. Data Processing x2</dice>
+        <bonusstring>Hiding, locks and encryption/protection inside a host.</bonusstring>
+      </test>
+    </action>
+
+    <!-- ===================== Matrix hacking ===================== -->
+    <action>
+      <id>de26404e-3eb3-4edb-9cff-f02786a9a43e</id>
+      <name>Brute Force</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Attack</section>
+      <category>Matrix</category>
+      <type>Simple</type>
+      <keywords>brute force attack damage hack matrix</keywords>
+      <test>
+        <dice>{Cybercombat} + {LOG} v. WIL + Firewall</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Do net hits d6 damage.</bonusstring>
+      </test>
+      <notes>0 marks. Double damage for -4 dice, triple for -8 dice (Easily exploitable AI: -3 / -6).</notes>
+    </action>
+    <action>
+      <id>b91c3179-32c5-419d-b04b-cc3eaa73b3be</id>
+      <name>Crack File</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Attack</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>crack file protection decrypt read</keywords>
+      <test>
+        <dice>{Hacking} + {LOG} v. Protection Rating x2</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Remove protection from a file so you can read it (reading sets off Data Bombs).</bonusstring>
+      </test>
+      <notes>1 mark.</notes>
+    </action>
+    <action>
+      <id>3bdc78e9-9082-437a-9095-3bccfef6bffc</id>
+      <name>Crash Program</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Attack</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>crash program kill stop software</keywords>
+      <test>
+        <dice>{Cybercombat} + {LOG} v. INT + Firewall</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Program stops running and can't be reloaded until the device is rebooted.</bonusstring>
+      </test>
+      <notes>1 mark.</notes>
+    </action>
+    <action>
+      <id>57da16f8-8f33-4a1f-841d-edbf91fded4c</id>
+      <name>Jam Signals/DDOS</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Attack</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>jam signals ddos jammer noise denial of service</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {LOG}</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Turns your device into a jammer: can't use it for Matrix actions while jamming; add hits to Noise rating within 100 meters. Not targeted, so no defence.</bonusstring>
+      </test>
+      <notes>3 marks.</notes>
+    </action>
+    <action>
+      <id>2d07a481-e458-4d7d-81e4-dfda74c824ab</id>
+      <name>Set Data Bomb</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Attack</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>set data bomb trap file explode</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. Data Bomb Rating x2</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Bomb rating = net hits; choose whether the trigger deletes the file; does (Rating)d6 Matrix damage. Detonation unnoticed if it only does damage and firewall does not block all of it.</bonusstring>
+      </test>
+      <notes>1 mark.</notes>
+    </action>
+    <action>
+      <id>65a8ae2e-6181-4a9a-bf2b-19839f44410c</id>
+      <name>Brick</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Attack</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>brick destroy device kill</keywords>
+      <test>
+        <dice>{Cybercombat} + {LOG} v. Firewall + WIL</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Brick the device.</bonusstring>
+      </test>
+      <notes>3 marks (device at 0 HP).</notes>
+    </action>
+    <action>
+      <id>8bdedc03-3aa4-4433-b0c6-801c70d6e004</id>
+      <name>Change Internet IP (Other Device)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Attack</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>change ip address other device matrix</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. Firewall + INT</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Change the IP of another device.</bonusstring>
+      </test>
+      <notes>Takes 5 minutes. 3 marks.</notes>
+    </action>
+    <action>
+      <id>9840b915-7041-4e3e-9390-6a43973e3f42</id>
+      <name>Matrix Perception</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>matrix perception spot find hidden icon analyse notice scan</keywords>
+      <test>
+        <dice>{Computer} + {INT} v. INT + Sleaze (or Sleaze x2)</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Find hidden icons or icons 100+ meters away. Analyse icon: 1 piece of info per hit.</bonusstring>
+      </test>
+      <notes>0 marks. +2 dice for Technomancers and AIs (AI section says +3 for AIs). Defence is Sleaze x2 when there is no sapient defender.</notes>
+    </action>
+    <action>
+      <id>8d23e2f6-749b-4231-b6de-cda7931b4a9f</id>
+      <name>Matrix Search</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Extended</type>
+      <keywords>matrix search information research lookup training data</keywords>
+      <test>
+        <dice>{Computer} + {INT}</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Search for information in the Matrix (see Matrix Search table). Divide Base Time by hits above Threshold.</bonusstring>
+      </test>
+      <notes>Action type "Special". Searching in a Host always has a Base Time of 1 minute. Also used to prepare AI training data.</notes>
+    </action>
+    <action>
+      <id>e785df77-c64a-40dc-9f76-a14ab1bfce16</id>
+      <name>Edit File</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>edit file create change copy delete protect memory vi</keywords>
+      <test>
+        <dice>{Computer} + {LOG} v. INT + Firewall</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Create, change, copy, delete, or protect a file; sets off Data Bombs.</bonusstring>
+      </test>
+      <notes>1 mark. Unopposed on a personal device; when protecting, hits = Protection Rating. Also used to edit a VI's memories.</notes>
+    </action>
+    <action>
+      <id>b74168dd-3d74-46f1-a2ce-5b6703192bf3</id>
+      <name>Trace Icon</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>trace icon physical location track find persona device</keywords>
+      <test>
+        <dice>{Computer} + {LOG} v. INT + Sleaze</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Find the physical location of a device or persona.</bonusstring>
+      </test>
+      <notes>3 marks. On an AI it reveals a backdoor to its resonance home.</notes>
+    </action>
+    <action>
+      <id>9bb0614a-3a16-47be-acb6-fd5138d2fb23</id>
+      <name>Reboot Device</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>reboot device restart reset</keywords>
+      <test>
+        <dice>{Computer} + {LOG} v. WIL + Firewall</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Can't be link-locked; suffer dump shock; resets OS. Back online end of next turn.</bonusstring>
+      </test>
+      <notes>3 marks.</notes>
+    </action>
+    <action>
+      <id>41bf4489-5abd-4cbc-87f8-15cad310c113</id>
+      <name>Snoop</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>snoop intercept traffic wiretap eavesdrop</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {LOG} v. INT + Sleaze</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Intercept Matrix traffic to and from the target.</bonusstring>
+      </test>
+      <notes>1 mark.</notes>
+    </action>
+    <action>
+      <id>bf518c12-65c8-47d5-8917-a6ed991662d7</id>
+      <name>Format Device</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Data Proc.</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>format device wipe admin</keywords>
+      <test>
+        <dice>{Computer} + {LOG} v. WIL + Firewall</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>When the device is rebooted, it won't start back up until restored (see Restore Formatted Device).</bonusstring>
+      </test>
+      <notes>Admin action. 3 marks.</notes>
+    </action>
+    <action>
+      <id>6e1e2c05-35f9-41fa-917d-e8bed976ef01</id>
+      <name>Control Device</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Data Proc.</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>control device command remote use drone rigger</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {INT} v. INT + Firewall</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Use the device; action type same as the action the device is doing. Use your skills. Can command multiple devices with the same action if owner.</bonusstring>
+      </test>
+      <notes>Variable action type. Marks required: 1 for Free, 2 for Simple, 3 for Complex actions.</notes>
+    </action>
+    <action>
+      <id>f69b47eb-1c4f-40ab-b630-c6c175225af6</id>
+      <name>Hack on the Fly</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Sleaze</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>hack on the fly stealthy damage sneak</keywords>
+      <test>
+        <dice>{Hacking} + {LOG} v. WIL + Firewall</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>Do net hits d6 damage; if the hack is successful you stay hidden.</bonusstring>
+      </test>
+      <notes>0 marks. Double damage for -4 dice, triple for -8 dice (Easily exploitable AI: -3 / -6).</notes>
+    </action>
+    <action>
+      <id>7a031390-88bf-406e-a5e5-dde119f70acf</id>
+      <name>Hide</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Sleaze</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>hide stealth invisible conceal matrix</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {INT} v. INT + Data Processing</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>Become hidden to the target (can't use if they have a mark on you).</bonusstring>
+      </test>
+      <notes>0 marks.</notes>
+    </action>
+    <action>
+      <id>293eb3ff-f3b0-4679-9839-1e35d8e833f8</id>
+      <name>Spoof Command</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Sleaze</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>spoof command impersonate fake order agent</keywords>
+      <test>
+        <dice>{Hacking} + {LOG} v. INT + Data Processing</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>Give a device or agent a command (need a mark on the owner you are imitating).</bonusstring>
+      </test>
+      <notes>1 mark.</notes>
+    </action>
+    <action>
+      <id>643012d3-6112-4a46-a322-24767f99b863</id>
+      <name>Erase IP Signature</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Sleaze</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>erase ip signature cover tracks trace log</keywords>
+      <test>
+        <dice>{Hacking} + {LOG} v. Data Processing + INT</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>If you succeed you erase your IP from the device memory.</bonusstring>
+      </test>
+      <notes>0 marks.</notes>
+    </action>
+    <action>
+      <id>1d7514ba-f7be-45fc-bb28-5e1f0485ff23</id>
+      <name>Edit File (Stealthy)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Sleaze</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>edit file stealthy create change copy protect sneaky</keywords>
+      <test>
+        <dice>{Hacking} + {LOG} v. Data Processing + INT</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>Create, change, copy, or protect a file stealthily; sets off Data Bombs.</bonusstring>
+      </test>
+      <notes>1 mark. Unopposed when protecting; hits = Protection Rating.</notes>
+    </action>
+    <action>
+      <id>049b6650-d7c9-4044-b9f8-7f88909c0ff6</id>
+      <name>Give Permission</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Sleaze</section>
+      <category>Matrix</category>
+      <type>Simple</type>
+      <keywords>give permission admin grant access user</keywords>
+      <test>
+        <dice>{Hacking} + {LOG} v. Data Processing + INT</dice>
+        <limit>{Icon: Sleaze}</limit>
+        <bonusstring>Give permission for an action to another user.</bonusstring>
+      </test>
+      <notes>Admin action. 3 marks.</notes>
+    </action>
+    <action>
+      <id>72225ceb-0bb3-4026-9072-e1765140cd9a</id>
+      <name>Disarm Data Bomb</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Firewall</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>disarm data bomb defuse remove trap</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. Data Bomb Rating x2</dice>
+        <limit>{Icon: Firewall}</limit>
+        <bonusstring>Safely remove a Data Bomb (only need 1 net hit; must find it with Matrix Perception).</bonusstring>
+      </test>
+      <notes>0 marks.</notes>
+    </action>
+    <action>
+      <id>62d3458d-4f69-499b-8110-1af8a82ab9d2</id>
+      <name>Jack Out</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Firewall</section>
+      <category>Matrix</category>
+      <type>Simple</type>
+      <keywords>jack out exit leave matrix link-lock escape disconnect</keywords>
+      <test>
+        <dice>{Hardware} + {WIL} v. LOG + Attack</dice>
+        <limit>{Icon: Firewall}</limit>
+        <bonusstring>Only roll if link-locked: exit the Matrix, reboot device, suffer dump shock if in VR.</bonusstring>
+      </test>
+      <notes>3 marks.</notes>
+    </action>
+    <action>
+      <id>c353324e-5d7c-4da7-b371-729b7c44d0bb</id>
+      <name>Disinfection</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Firewall</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>disinfection disinfect heal repair virus clean matrix damage</keywords>
+      <test>
+        <dice>{Software} + {LOG}</dice>
+        <limit>{Icon: Firewall}</limit>
+        <bonusstring>Heal your matrix damage bar by the successes on your test.</bonusstring>
+      </test>
+      <notes>0 marks. AIs may roll Depth + Software instead (see AI Disinfection).</notes>
+    </action>
+    <action>
+      <id>29d31faa-67c8-4206-836e-c0eab8ed8d4d</id>
+      <name>Change Internet IP (Own Device)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix hacking / Firewall</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>change ip address own device hide tracks admin</keywords>
+      <test>
+        <dice>{Software} + {LOG}</dice>
+        <limit>{Icon: Firewall}</limit>
+        <bonusstring>Change the IP of your own device.</bonusstring>
+      </test>
+      <notes>Admin. 3 marks.</notes>
+    </action>
+    <action>
+      <id>1584a9e8-870c-4e8d-acf0-f5a646d94214</id>
+      <name>Set Autohack Command</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Hardware autohacking</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>autohack hardware autohacking automatic hack command target</keywords>
+      <test>
+        <dice>{Hardware} + {LOG} v. {Threshold: 3}</dice>
+        <bonusstring>Set your hardware to perform a matrix action against a target on its own.</bonusstring>
+      </test>
+      <notes>Afterwards the hardware rolls the matrix attribute x2 that limits that action (e.g. Attack x2 for Brute Force). Leaves your IP. Not possible while the device is used in VR.</notes>
+    </action>
+
+    <!-- ===================== Matrix combat ===================== -->
+    <action>
+      <id>91aee98e-d360-4211-ac5f-c025133e997d</id>
+      <name>Matrix Melee Attack (VR)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix combat</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>matrix combat punch unarmed melee attack vr virtual fight</keywords>
+      <test>
+        <dice>{Unarmed Combat} + {Icon: Sleaze} v. {Action: Matrix Dodge (AR/VR)}</dice>
+        <bonusstring>In VR, physical actions roll device attribute + appropriate skill. Unarmed damage is Attack attribute + net hits.</bonusstring>
+      </test>
+      <notes>Sleaze replaces Agility per the conversion table. Deckers may use Cybercombat instead of Unarmed Combat. In hot sim use your physical attributes (AGI) instead. Does not leave your IP.</notes>
+    </action>
+    <action>
+      <id>0e07f684-e170-44a9-83fb-1c1747f69134</id>
+      <name>Matrix Dodge (AR/VR)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix combat</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>matrix dodge defense evade vr ar virtual combat</keywords>
+      <test>
+        <dice>{Icon: Data Processing} + {INT}</dice>
+        <bonusstring>Dodge a matrix combat attack while in AR or VR.</bonusstring>
+      </test>
+      <notes>Transcendent complex form adds its Level in dice to matrix combat dodging.</notes>
+    </action>
+    <action>
+      <id>02cc4a7b-42df-4c27-9387-59d28ff38b83</id>
+      <name>Matrix Dodge (Hot Sim)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix combat</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>matrix dodge defense evade hot sim virtual combat</keywords>
+      <test>
+        <dice>{REA} + {INT}</dice>
+        <bonusstring>Dodge a matrix combat attack while in hot sim.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>cdd79c69-2558-4786-ad11-d93a98bbe777</id>
+      <name>Matrix Soak (AR/VR)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix combat</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>matrix soak resist damage armor firewall vr ar</keywords>
+      <test>
+        <dice>{Icon: Firewall} + {WIL}</dice>
+        <bonusstring>Soak damage from matrix combat attacks while in AR or VR.</bonusstring>
+      </test>
+      <notes>Alternatively Firewall x2. Defuse adds +2; Hello world! quality adds +1 per level.</notes>
+    </action>
+    <action>
+      <id>e6499c61-5e08-458d-a0c2-076f46233fee</id>
+      <name>Matrix Soak (Hot Sim)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Matrix combat</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>matrix soak resist damage armor body firewall hot sim</keywords>
+      <test>
+        <dice>{BOD} + {Icon: Firewall}</dice>
+        <bonusstring>Soak damage from matrix combat in hot sim. Damage below modified armour rating becomes stun biofeedback.</bonusstring>
+      </test>
+      <notes>Add armour (firewall from clothing, e.g. Armor program +4) - not computed.</notes>
+    </action>
+
+    <!-- ===================== Riggers ===================== -->
+    <action>
+      <id>27980c9b-d5ac-4dc2-98fd-6fa08a7a4d55</id>
+      <name>Pilot Program Check</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Riggers; VI</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>pilot program autopilot instructions unclear drone vehicle check autosoft</keywords>
+      <test>
+        <dice>{Vehicle: Pilot} * 2 v. threshold 2 (close to design), 4 (vague), 6 (completely new)</dice>
+        <bonusstring>Pilot programs check when instructions are unclear or the situation is unseen before.</bonusstring>
+      </test>
+      <notes>Pilots also roll device rating x2 for their piloting checks; initiative is Pilot x2 + 4d6.</notes>
+    </action>
+    <action>
+      <id>8190fcd5-19e4-40b0-9f84-b5052bcb397c</id>
+      <name>Autosoft Task</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Riggers</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>autosoft task drone skill program crew department</keywords>
+      <test>
+        <dice>{Vehicle: Pilot}</dice>
+        <bonusstring>Autosofts roll their rating + pilot rating to achieve their task.</bonusstring>
+      </test>
+      <notes>Add the autosoft rating (not computed).</notes>
+    </action>
+    <action>
+      <id>12655a80-2230-4e77-87ec-b71584fa1a6a</id>
+      <name>Boot Jumped-In Rigger</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>TL4 / Rematrix (RM)</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>advanced ecm rigger boot jumped in crash drone disable</keywords>
+      <test>
+        <dice>{Cybercombat} + {LOG} v. INT + Firewall</dice>
+        <limit>{Icon: Attack}</limit>
+        <bonusstring>Under advanced ECM, a crash program check boots a jumped-in rigger out and disables the drone.</bonusstring>
+      </test>
+      <notes>No need for double net hits. Uses the Crash Program test.</notes>
+    </action>
+
+    <!-- ===================== Technomancers ===================== -->
+    <action>
+      <id>a5b7e7a5-35e8-47dd-95d3-88e6b32d56e5</id>
+      <name>Gauge Complex Form</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Technomancers / Changes</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>gauge complex form level counter thread kill dispel technomancer</keywords>
+      <test>
+        <dice>{Computer} + {INT} + 2 v. threshold equal to the form's level</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Matrix Perception to gauge the level of an enemy complex form before counter-threading. On failure the GM gives a level off by 1dF.</bonusstring>
+      </test>
+      <notes>Then declare the counter level, take that form's fade at that level, and reduce the enemy form's level by your counter level.</notes>
+    </action>
+    <action>
+      <id>0b6dccfa-419f-4c07-ada5-7d634302fc27</id>
+      <name>Notice Transcendent</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Complex forms / Transcendent</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>transcendent notice glitching perception technomancer</keywords>
+      <test>
+        <dice>{Computer} + {INT} v. threshold equal to form level</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Matrix Perception to notice a technomancer visually glitching while using Transcendent.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>4992d4bb-765f-4cde-90b4-19239ae2a112</id>
+      <name>Enforce Reality vs Transcendent</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Complex forms / Transcendent</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>transcendent security door host enforce reality block</keywords>
+      <test>
+        <dice>{Icon: Data Processing} * 2 v. threshold equal to form level</dice>
+        <bonusstring>A security door (Data processing x2) or host (Attack x2) enforces its reality against a Transcendent technomancer.</bonusstring>
+      </test>
+      <notes>Hosts roll Attack x2 instead.</notes>
+    </action>
+    <action>
+      <id>8a2aa8ad-63aa-46fd-9499-2f5a75740397</id>
+      <name>Hide History vs Tattletale</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Complex forms / Tattletale</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>tattletale hide history mod reveal hacking</keywords>
+      <test>
+        <dice>{Icon: Sleaze} * 2 v. threshold equal to form level</dice>
+        <bonusstring>The targeted device attempts to hide its hacking history from Tattletale.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>801a5043-e9a8-44fd-910c-d151f1a3cd7e</id>
+      <name>Misread IPs</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Complex forms</section>
+      <category>Matrix</category>
+      <type>Simple</type>
+      <keywords>misread ips misread marks ic trick turn complex form</keywords>
+      <test>
+        <dice>{Software} + {RES}</dice>
+        <bonusstring>Trick targeted IC into attacking anyone you hacked, prioritising the most wounded.</bonusstring>
+      </test>
+      <notes>Book: "Simple Software + Resonance [Level] combat rounds" - read as hits (limited by Level) = duration in combat rounds. Fade L+2.</notes>
+    </action>
+    <action>
+      <id>cee9804f-488f-467b-a8f2-afcf8da16a95</id>
+      <name>Host Emulator</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Complex forms</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>host emulator illusion track personas complex form</keywords>
+      <test>
+        <dice>{RES} + {Software}</dice>
+        <bonusstring>Coat a host room with resonance to track personas and their actions.</bonusstring>
+      </test>
+      <notes>Seeing through it: Matrix Perception with threshold = Level. Fade L.</notes>
+    </action>
+    <action>
+      <id>67c46ab5-2a9b-47c9-8d94-ae72253518e2</id>
+      <name>See Through Host Emulator</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Complex forms / Host emulator</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>host emulator detect perception illusion feel wrong</keywords>
+      <test>
+        <dice>{Computer} + {INT} v. threshold equal to form level</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Matrix Perception to feel through a Host emulator illusion; afterwards you may attempt to hack it (it goes to the technomancer).</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>b093afbf-08ac-409e-8835-242dc111fc4c</id>
+      <name>Resonance Cache</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Complex forms</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>resonance cache trap ic complex form</keywords>
+      <test>
+        <dice>{RES} + {Software} v. Data Processing x2</dice>
+        <bonusstring>On a success you trap the targeted IC in a stream of resonance for net hits turns.</bonusstring>
+      </test>
+      <notes>Fade L-2.</notes>
+    </action>
+    <action>
+      <id>f77b52a7-88e2-4892-b4a4-4b7126d13de6</id>
+      <name>Search History</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Complex forms</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>search history device log complex form</keywords>
+      <test>
+        <dice>{RES} + {Software} v. Sleaze x2 or Sleaze + INT</dice>
+        <bonusstring>On a success you get the complete device matrix history over the past net hits days.</bonusstring>
+      </test>
+      <notes>Fade L-2.</notes>
+    </action>
+    <action>
+      <id>9cbd2338-11b3-4bd1-87b0-25182df48965</id>
+      <name>Extinguish Matrix Fire</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Complex forms / (Elemental) ball</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>extinguish fire elemental ball put out burn</keywords>
+      <test>
+        <dice>{Icon: Sleaze} + {INT}</dice>
+        <bonusstring>Put out fires created by an elemental complex form.</bonusstring>
+      </test>
+      <notes>Alternatives: Sleaze x2, or Agility + Intuition (hot sim).</notes>
+    </action>
+    <action>
+      <id>c50b8ac2-a9c5-4fb1-bb14-7e0f3e6ff775</id>
+      <name>Patch</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Complex forms</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>patch heal matrix damage repair complex form</keywords>
+      <test>
+        <dice>{RES} + {Software}</dice>
+        <bonusstring>Heal matrix damage equal to hits.</bonusstring>
+      </test>
+      <notes>Fade L-3.</notes>
+    </action>
+    <action>
+      <id>903dfa37-8b3f-42f4-b781-1c408f78b76a</id>
+      <name>Resonance Construct</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Complex forms</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>resonance construct build craft complex form</keywords>
+      <test>
+        <dice>{RES} + {Software} v. threshold = total attribute points in the part</dice>
+        <bonusstring>Construct like normal matrix construction but with Resonance instead of Logic.</bonusstring>
+      </test>
+      <notes>One hour per attempt. Fade L.</notes>
+    </action>
+    <action>
+      <id>54f8a657-0dae-4eb5-8699-a65f98dda46a</id>
+      <name>Law</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Complex forms</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>law physics host change rule gravity complex form</keywords>
+      <test>
+        <dice>{RES} + {Software} v. host's Attack x2</dice>
+        <bonusstring>If you succeed you establish or change one physical law in a radius of Level meters.</bonusstring>
+      </test>
+      <notes>Fade L+2.</notes>
+    </action>
+
+    <!-- ===================== Sprites ===================== -->
+    <action>
+      <id>a413857c-937a-4477-8c71-406d197f4d1b</id>
+      <name>Evade Resonance Detection</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Sprites; Finding matrix pulse</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>resonance signature pulse detection mac agents hide technomancer sprite unregistered</keywords>
+      <test>
+        <dice>{RES} + {INT} v. agents' Electronic Warfare + Intuition</dice>
+        <bonusstring>Each time your unregistered sprite acts or you thread a complex form; if the hunters succeed you must fight or flee.</bonusstring>
+      </test>
+      <notes>AIs use Depth instead of Resonance to hide pulses.</notes>
+    </action>
+    <action>
+      <id>beda8723-3ae0-4320-a022-ba54fe31e153</id>
+      <name>Find Matrix Pulse</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Finding matrix pulse</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>find matrix pulse track technomancer anomaly rift resonance realm</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {INT} v. technomancer's Resonance + Intuition</dice>
+        <bonusstring>Track matrix pulses from anomalies or unregistered resonance actions; also finds short-term rifts to resonance realms.</bonusstring>
+      </test>
+      <notes>Add (level - 3), where level is the target's level (AI: Depth). Requires a pulse-measuring construct (min 1 Data processing, 1 Firewall).</notes>
+    </action>
+    <action>
+      <id>bf8b69be-111b-4746-b153-7833ba9187c3</id>
+      <name>Find Camouflaged File</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Sprites / Camouflage</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>camouflage file hidden sprite find perception</keywords>
+      <test>
+        <dice>{Computer} + {INT} v. sprite's Electronic Warfare + Resonance [Sleaze]</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>Matrix Perception to find a file hidden inside another file by a sprite.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>c689e783-2411-46de-b35a-65c7a701288a</id>
+      <name>Gremlins (Sprite)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Sprites</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>gremlins sprite malfunction glitch device</keywords>
+      <test>
+        <dice>{Hardware} + {Spirit: Force} v. Firewall x2 or Firewall + WIL</dice>
+        <bonusstring>If it succeeds the device glitches; with 4+ net hits it critically glitches.</bonusstring>
+      </test>
+      <notes>Rolled by the sprite (Hardware + level).</notes>
+    </action>
+    <action>
+      <id>467dde41-b5f8-4b1d-a3f3-b95b78c2b6f4</id>
+      <name>Unlock (Crack Sprite)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Sprites</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>unlock door crack sprite lock</keywords>
+      <test>
+        <dice>{Spirit: Force} + {Hacking} v. Data Processing x2</dice>
+        <bonusstring>If successful any locked door unlocks instantly; if failed you do not alert anyone.</bonusstring>
+      </test>
+      <notes>Rolled by the sprite (Resonance + Hacking; sprite Resonance = level).</notes>
+    </action>
+    <action>
+      <id>7e5c45fc-56a0-45d4-b7c9-c1f502357c86</id>
+      <name>Steal (Fault Sprite)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Sprites</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>steal ic power program fault sprite</keywords>
+      <test>
+        <dice>{Computer} + {Icon: Data Processing} v. Sleaze x2</dice>
+        <bonusstring>Steal an IC power or program; next use you can use the stolen goods instead, or a passive activates next turn.</bonusstring>
+      </test>
+      <notes>Rolled by the sprite.</notes>
+    </action>
+    <action>
+      <id>ede37827-1c4b-490e-9c73-19a6847ba77d</id>
+      <name>Exploit (Fault Sprite)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Sprites</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>exploit weakness fault sprite cybercombat bonus</keywords>
+      <test>
+        <dice>{Spirit: Force} + {Cybercombat} v. Data Processing x2, Data Processing + INT or REA + INT</dice>
+        <bonusstring>Net hits give the sprite +2 to its Cybercombat against that device or persona.</bonusstring>
+      </test>
+      <notes>Rolled by the sprite (Resonance + Cybercombat).</notes>
+    </action>
+    <action>
+      <id>fdebec51-27cb-4e4a-97f1-9a5d639a2faa</id>
+      <name>Active Analytics</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Sprites</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>active analytics radar pulse locator alert agents closing</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {Icon: Data Processing}</dice>
+        <bonusstring>GM may call for this roll when agents are closing in on your location.</bonusstring>
+      </test>
+      <notes>Optional sprite power.</notes>
+    </action>
+
+    <!-- ===================== Resonance realms ===================== -->
+    <action>
+      <id>5e491cc7-32f0-4311-956d-fd50e4a562d9</id>
+      <name>Resist Resonance Pool</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Resonance Realms</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>resonance pool dragged resist realm</keywords>
+      <test>
+        <dice>{WIL} + {Icon: Attack} v. threshold equal to pool rating</dice>
+        <bonusstring>Resist being dragged into a resonance pool.</bonusstring>
+      </test>
+      <notes>Alternatively Strength x2 (book: "for VR and hot sim you might make Strength x2").</notes>
+    </action>
+
+    <!-- ===================== AI ===================== -->
+    <action>
+      <id>f392b35a-565d-468d-990a-6ced51115205</id>
+      <name>Build Resonance Home</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>AI</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>ai resonance home house build host create</keywords>
+      <test>
+        <dice>{DEP} + {LOG}</dice>
+        <bonusstring>Create a new house in the resonance; roll 4 times, once for each matrix attribute (max 15).</bonusstring>
+      </test>
+      <notes>Glitch: start over. Critical glitch: alerts MAC agents to your location.</notes>
+    </action>
+    <action>
+      <id>97f686a3-eed5-48e3-b9e7-91532496040c</id>
+      <name>AI Disinfection</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>AI</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>ai disinfection heal matrix damage depth</keywords>
+      <test>
+        <dice>{DEP} + {Software}</dice>
+        <bonusstring>Instead of the Disinfection action, an AI can roll Depth + Software which does exactly the same: heal matrix damage by successes.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>f50530d1-34ef-402d-be1d-25d243b6dbeb</id>
+      <name>Low Profile</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>AI qualities</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>low profile ai hide ip erase quality</keywords>
+      <test>
+        <dice>{DEP} + {Software} v. Data Processing x2 or Data Processing + INT</dice>
+        <bonusstring>After a hacking action, hide your IP immediately without an Erase IP action.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>62ae6b38-da98-4838-bb3f-89e4a6d7340e</id>
+      <name>Emulate Device Attribute</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Depth actions</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>ai depth emulate device attribute boost aid</keywords>
+      <test>
+        <dice>{DEP} + {Software} v. Firewall x2 or Firewall + LOG</dice>
+        <bonusstring>Add half of an owned or hacked device's matrix attribute to your own (max 15) or to the matching physical/mental attribute for up to net hits actions.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>fa6331f4-a6a4-4606-8c88-539b265bcb36</id>
+      <name>Reset Ownership</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Depth actions</section>
+      <category>Matrix</category>
+      <type>Extended</type>
+      <keywords>ai reset ownership take over device owner</keywords>
+      <test>
+        <dice>{DEP} + {Computer} v. extended threshold Device Rating + Firewall</dice>
+        <limit>{DEP}</limit>
+        <bonusstring>Take over a fully hacked device you are jumped into or running on; dump-shocks the original owner if jumped in.</bonusstring>
+      </test>
+      <notes>1 Combat Turn interval. Failure/glitch alerts the owner; critical glitch link-locks you and alerts the owner, or bricks you.</notes>
+    </action>
+    <action>
+      <id>8e0ef1f0-cc57-4b3d-9bb2-9c8748b86256</id>
+      <name>Create Advanced Program</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Advanced programs</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>advanced program create modify ai craft</keywords>
+      <test>
+        <dice>{LOG} + {Software} v. threshold 3 (common) or 6 (hacking programs)</dice>
+        <bonusstring>Modify a regular program into its advanced counterpart.</bonusstring>
+      </test>
+      <notes>8 hour interval. Requires the regular counterpart.</notes>
+    </action>
+    <action>
+      <id>7450a0ec-27a1-440e-aa96-b04898917ab3</id>
+      <name>Register Advanced Program</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Advanced programs</section>
+      <category>Matrix</category>
+      <type>Extended</type>
+      <keywords>register advanced program ai pulse</keywords>
+      <test>
+        <dice>{DEP} + {Software} v. threshold 6 (common) or 12 (hacking programs)</dice>
+        <bonusstring>Register an advanced program to the matrix so its use no longer creates pulses.</bonusstring>
+      </test>
+      <notes>1 day interval.</notes>
+    </action>
+    <action>
+      <id>30113f6e-a8ae-4077-af8c-0385195e2e1e</id>
+      <name>Medic (Advanced Program)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Advanced programs</section>
+      <category>Matrix</category>
+      <type>Complex</type>
+      <keywords>medic toolbox heal ai ic sprite advanced program</keywords>
+      <test>
+        <dice>{DEP} + {Software}</dice>
+        <bonusstring>Heal AIs, ICs and sprites a number of boxes equal to your hits.</bonusstring>
+      </test>
+      <notes>Only once on the same set of wounds.</notes>
+    </action>
+
+    <!-- ===================== VI ===================== -->
+    <action>
+      <id>2eb64778-2001-4161-9dd7-b5ee9d11a57f</id>
+      <name>Set VI Crystal Attribute</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>VI</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>vi crystal parameters mental attribute program nanocrystal</keywords>
+      <test>
+        <dice>{LOG} + {Software} v. threshold equal to crystal rating</dice>
+        <bonusstring>Set crystal parameters: rolled for every mental attribute of the VI.</bonusstring>
+      </test>
+      <notes>6 day interval. Requires a crystal interface.</notes>
+    </action>
+    <action>
+      <id>914e1f7b-afd7-4e65-a45e-6206655465de</id>
+      <name>Program VI Skill</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>VI</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>vi skill program add install nanocrystal</keywords>
+      <test>
+        <dice>{LOG} + {Software} v. threshold equal to crystal rating</dice>
+        <bonusstring>Program a skill into a VI (also used to add a new skill in place of a dismantled one).</bonusstring>
+      </test>
+      <notes>1 day interval per skill. Personality traits take one day each (no roll).</notes>
+    </action>
+    <action>
+      <id>a88fcb34-5d4c-4988-81b1-465d938e7ec4</id>
+      <name>Dismantle VI Skill</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>VI</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>vi skill remove dismantle uninstall</keywords>
+      <test>
+        <dice>{LOG} + {Software} v. threshold equal to skill rating</dice>
+        <bonusstring>Dismantle a chosen VI skill.</bonusstring>
+      </test>
+      <notes>1 day interval.</notes>
+    </action>
+    <action>
+      <id>9830e813-5f64-41ac-92ca-c3f765d055ec</id>
+      <name>VI Crystal Fusion</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>VI</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>vi fusion crystal chassis robot android</keywords>
+      <test>
+        <dice>{Icon: Rating} * 2 v. threshold set by chassis Body x2 roll</dice>
+        <bonusstring>The crystal fuses with the chassis; the threshold is set once by rolling chassis Body x2.</bonusstring>
+      </test>
+      <notes>Rolled by the crystal (rating x2). 3 day interval.</notes>
+    </action>
+
+    <!-- ===================== Nanites ===================== -->
+    <action>
+      <id>872ccdc7-c35b-4106-848d-b35b0048a888</id>
+      <name>Craft Nanite Fabricator</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Nanites</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>nanite fabricator craft build grey goo</keywords>
+      <test>
+        <dice>{Industrial Mechanic} + {LOG} v. {Threshold: 5}</dice>
+        <bonusstring>Craft a nanite fabricator (requires 5 TL4 spare parts).</bonusstring>
+      </test>
+      <notes>1 day interval. Produces 1 tiny swarm per 1 day / rating.</notes>
+    </action>
+    <action>
+      <id>e500afc1-a61c-4a91-bd41-ff32a62bd2df</id>
+      <name>Reconfigure Nanite Skill</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Nanites</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>nanite swarm skill reconfigure install uninstall</keywords>
+      <test>
+        <dice>{LOG} + {Software} v. threshold equal to skill rating</dice>
+        <bonusstring>Uninstall a swarm skill, then the same roll installs another one.</bonusstring>
+      </test>
+      <notes>1 day interval.</notes>
+    </action>
+    <action>
+      <id>276d91d8-ebe7-48d0-9947-8ff79cb597f3</id>
+      <name>Create Nanite Schematic</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>Nanites</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>nanite schematic blueprint design create</keywords>
+      <test>
+        <dice>{LOG} + {Software} v. {Threshold: 3}</dice>
+        <bonusstring>Turn your own design into a schematic nanites can build.</bonusstring>
+      </test>
+    </action>
+
+    <!-- ===================== TL5 / AI creation ===================== -->
+    <action>
+      <id>373b0549-7eb6-4b77-badd-4b48b879727c</id>
+      <name>Build Resonance Monitor</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>TL5</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>resonance monitor build craft tl5</keywords>
+      <test>
+        <dice>{LOG} + {Computer} v. {Threshold: 6}</dice>
+        <bonusstring>Build a resonance monitor (requires 2 TL5 spare parts).</bonusstring>
+      </test>
+      <notes>1 day interval.</notes>
+    </action>
+    <action>
+      <id>56d5b310-60a4-469d-97d8-fec1289e7d64</id>
+      <name>Assist AI Skill Development</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>TL5 / Creation of mind</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>ai skill development help programmer assist creation</keywords>
+      <test>
+        <dice>{Software} + {LOG}</dice>
+        <bonusstring>Programmers add their hits to the new AI's Depth x2 dice pool for a skill.</bonusstring>
+      </test>
+      <notes>Must be rolled for every skill the AI wants.</notes>
+    </action>
+    <action>
+      <id>704b72cb-37cf-4a58-8d4a-1ad83a633afb</id>
+      <name>Create AI Limit (Software)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>TL5 / Creation of mind</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>ai limit create software</keywords>
+      <test>
+        <dice>{LOG} + {Software}</dice>
+        <bonusstring>One of three extended tests building an AI limit; total hits of all three = the limit's hit points.</bonusstring>
+      </test>
+      <notes>1 week interval. Glitch: AI must choose its do-nots. Critical glitch: AI goes insane.</notes>
+    </action>
+    <action>
+      <id>282a775b-ec51-43fc-b6a5-fef54e76444e</id>
+      <name>Create AI Limit (Hardware)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>TL5 / Creation of mind</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>ai limit create hardware</keywords>
+      <test>
+        <dice>{LOG} + {Hardware}</dice>
+        <bonusstring>One of three extended tests building an AI limit; total hits of all three = the limit's hit points.</bonusstring>
+      </test>
+      <notes>1 week interval. Glitch: AI must choose its do-nots. Critical glitch: AI goes insane.</notes>
+    </action>
+    <action>
+      <id>6a612448-52ab-4b34-bccb-2228d594b148</id>
+      <name>Create AI Limit (Computer)</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>TL5 / Creation of mind</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>ai limit create computer</keywords>
+      <test>
+        <dice>{LOG} + {Computer}</dice>
+        <bonusstring>One of three extended tests building an AI limit; total hits of all three = the limit's hit points.</bonusstring>
+      </test>
+      <notes>1 week interval. Glitch: AI must choose its do-nots. Critical glitch: AI goes insane.</notes>
+    </action>
+    <action>
+      <id>2124ef1e-b0a8-4b70-a217-15fc467c36fe</id>
+      <name>Break AI Limit</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>TL5 / Creation of mind</section>
+      <category>Matrix</category>
+      <type>Extended</type>
+      <keywords>ai limit break unlimited hack</keywords>
+      <test>
+        <dice>{LOG} + {Hacking} v. threshold equal to the limit's hit points</dice>
+        <bonusstring>Break an AI's limit to make it unlimited.</bonusstring>
+      </test>
+      <notes>1 month interval. The AI can defend like against normal hacking.</notes>
+    </action>
+    <action>
+      <id>6b59a50d-ea52-4b61-a77f-a842d9462dc8</id>
+      <name>Restore AI Limit</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>TL5 / Creation of mind</section>
+      <category>Matrix</category>
+      <type>Extended</type>
+      <keywords>ai limit restore repair</keywords>
+      <test>
+        <dice>{DEP} + {Software}</dice>
+        <bonusstring>An AI restores hit points of its limit.</bonusstring>
+      </test>
+      <notes>1 week interval.</notes>
+    </action>
+    <action>
+      <id>40e18d02-6c86-4726-9555-7657f642ede5</id>
+      <name>Build Nanocrystal Interface</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>TL5 / Creation of mind</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>nanocrystal interface build ai craft</keywords>
+      <test>
+        <dice>{LOG} + {Hardware}</dice>
+        <bonusstring>Create a nanocrystal interface (requires 2 TL5 parts) that connects to the matrix or any hardware.</bonusstring>
+      </test>
+      <notes>1 day interval; no threshold given.</notes>
+    </action>
+    <action>
+      <id>a1c8aac0-ecfb-4e54-a09c-0c1f638d4606</id>
+      <name>Unlimited AI Sanity Check</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>TL5 / True unlimited AI</section>
+      <category>General</category>
+      <type>No</type>
+      <keywords>unlimited ai sanity insanity check madness</keywords>
+      <test>
+        <dice>{LOG} + {WIL} v. Depth x2</dice>
+        <bonusstring>GM occasionally requires this; if you ever fail you become insane.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>44ed9e7f-9077-469b-8537-653acc91a3be</id>
+      <name>Core Manifestation Survival</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>TL5 / Routines</section>
+      <category>General</category>
+      <type>No</type>
+      <keywords>core manifestation projection destroyed survive routine</keywords>
+      <test>
+        <dice>{LOG} + {WIL} v. threshold equal to Depth</dice>
+        <bonusstring>When your energy projection is destroyed; on failure your core is destroyed too.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>a804921d-0441-49c4-89fd-6570787bbb19</id>
+      <name>Location Calculation</name>
+      <book>Shadowrun 5e matrix reworked</book>
+      <section>TL5 / Routines</section>
+      <category>General</category>
+      <type>Complex</type>
+      <keywords>location calculation teleport routine</keywords>
+      <test>
+        <dice>{LOG} + {INT} v. threshold 1 per 100 m (visited) or 2 per 100 m (not visited)</dice>
+        <bonusstring>Teleport yourself and up to 6 allies (or cargo) to any location.</bonusstring>
+      </test>
+      <notes>On failure take 1d6 unsoakable damage per 100 m travelled and lose 10% of cargo per 100 m.</notes>
+    </action>
+  </actions>
+</chummer>

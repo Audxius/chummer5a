@@ -25,6 +25,7 @@
     <None Include="../Chummer/sheets/**/*" Link="sheets/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../Chummer/export/**/*" Link="export/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../Chummer/customdata/**/*" Link="customdata/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../Chummer/houserules/**/*" Link="houserules/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../Chummer.Tests/TestFiles/*.chum5" Link="TestFiles/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

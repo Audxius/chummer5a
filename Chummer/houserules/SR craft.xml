@@ -1,0 +1,1551 @@
+<?xml version="1.0" encoding="utf-8"?>
+<chummer>
+  <actions>
+    <action>
+      <id>b3ff2a5f-5658-482a-b05d-1b227cce993d</id>
+      <name>Design Phase</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Design phase</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>design plan blueprint calculate invent crafting limit</keywords>
+      <test>
+        <dice>{LOG} + {Appropriate Knowledge Skill}</dice>
+        <bonusstring>Design the item before crafting it; hits set the limit for the item's attributes or rating. Glitch gives a noticeable quirk, critical glitch a fatal flaw discovered only on use.</bonusstring>
+      </test>
+      <notes>Costs nothing and can be repeated until satisfied (start over instead of adding hits, unless you use Edge). Knowledge skill depends on the item being designed.</notes>
+    </action>
+    <action>
+      <id>c482192d-76a5-4f82-8b7e-9ca9b1c11642</id>
+      <name>Study Design</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Design phase</section>
+      <category>Knowledge</category>
+      <type>No</type>
+      <keywords>study reverse engineer analyse design exploit flaw</keywords>
+      <test>
+        <dice>{LOG} + {Appropriate Knowledge Skill} v. the design's successes</dice>
+        <bonusstring>Study someone else's design with the same roll it was made with. Beat its successes to learn it and gain +2 dice to use or break it; double them to discover an exploit that auto-succeeds at breaking or bypassing it.</bonusstring>
+      </test>
+      <notes>Also applies to hardware designs (+2 to hack it, or auto-bypass its security on a big success).</notes>
+    </action>
+    <action>
+      <id>9ea8c35b-2046-48cc-a03c-c0d17e000724</id>
+      <name>Craft General Gear</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / General gear</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>craft make build gear tools rope small items</keywords>
+      <test>
+        <dice>{LOG} + {Appropriate Skill}</dice>
+        <bonusstring>Hits go toward the gear's attribute or rating, or if it has none, how many copies you make with one roll.</bonusstring>
+      </test>
+      <notes>Limited by design phase hits. 1 spare part of the TL per unit (per attribute if several); small items give 100 rolls per spare part. 1 hour per attribute/rating/roll, faster or slower by tech level difference (from 5 min at -3 to 12 hours at +3).</notes>
+    </action>
+    <action>
+      <id>0fd99368-979b-41fe-b6d0-aa9a35f72826</id>
+      <name>Craft Lock</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Locks and picks</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>lock make lock build lock electronic mechanical alarm</keywords>
+      <test>
+        <dice>{LOG} + {Locksmith}</dice>
+        <bonusstring>Build a mechanical or electronic lock; hits set its rating. Electronic locks can carry an alarm that triggers if an intruder does not pick it in one roll.</bonusstring>
+      </test>
+      <notes>Limited by design. Alarm requires hardware with Data Processing. Toolkit works; shop gives +2 dice, facility +4.</notes>
+    </action>
+    <action>
+      <id>3a98b14a-0287-4b49-b5de-7b8ede26362f</id>
+      <name>Craft Mechanical Lock Picks</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Locks and picks</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>lockpicks picks make lock picks</keywords>
+      <test>
+        <dice>{LOG} + {Locksmith} v. {Threshold: 1}</dice>
+        <bonusstring>Make mechanical lock picks; more hits means more lock picks.</bonusstring>
+      </test>
+      <notes>1 hour. 1 spare part per 100 rolls. Shop +2 dice, facility +4.</notes>
+    </action>
+    <action>
+      <id>228c3d2a-3302-41b1-ada8-94d2eee593cd</id>
+      <name>Pick Mechanical Lock</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Locks and picks</section>
+      <category>Physical</category>
+      <type>No</type>
+      <keywords>lockpicking pick lock open door mechanical lock</keywords>
+      <test>
+        <dice>{AGI} + {Locksmith} v. lock's rating</dice>
+        <bonusstring>Pick a mechanical lock; threshold equals the lock's rating.</bonusstring>
+      </test>
+      <notes>Tech level difference (lock TL - pick TL): -3 = +8, -2 = +4, -1 = +2, +1 = -2, +2 = -4, +3 = -8; below -3 auto success, above 3 auto failure. +2 dice if you studied the lock's design. Electronic locks with an alarm trigger it if not picked in one roll.</notes>
+    </action>
+    <action>
+      <id>27c77165-6e59-43af-a89b-e56c5ccaaeea</id>
+      <name>Defeat Lock Alarm</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Locks and picks</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>alarm disable electronic lock bypass sleaze</keywords>
+      <test>
+        <dice>{Icon: Sleaze} * 2 v. lock's Data Processing * 2</dice>
+        <bonusstring>Using hardware with a Sleaze attribute, disable an electronic lock's alarm on a success; on a failure the device's response (usually the alarm) triggers.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>286646c9-23f5-4dfe-9a0c-2e38e92e8312</id>
+      <name>Pick Electronic Lock</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Locks and picks</section>
+      <category>Physical</category>
+      <type>No</type>
+      <keywords>lockpicking electronic picker maglock open door</keywords>
+      <test>
+        <dice>{LOG} + {Locksmith} v. lock's rating</dice>
+        <bonusstring>With an electronic picker, open an electronic lock; threshold equals the lock's rating (uses Logic, not Agility).</bonusstring>
+      </test>
+      <notes>Same tech level modifiers as mechanical picking. Defeat the alarm first if present.</notes>
+    </action>
+    <action>
+      <id>40e8f6e8-2011-491c-aa54-468ece46109b</id>
+      <name>Craft Melee Weapon</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Weapons</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>melee weapon sword blade club forge make weapon</keywords>
+      <test>
+        <dice>{LOG} + {Armorer}</dice>
+        <bonusstring>Roll once for each attribute (DV, AP, Accuracy); hits become that attribute's value.</bonusstring>
+      </test>
+      <notes>Reach chosen first, limited by TL; costs 1 + Reach spare parts. DV limited by TL*TL. Each roll takes Reach/TL hours. Shop tools needed; facility +2 dice. Limited by design.</notes>
+    </action>
+    <action>
+      <id>380fcd05-879b-42b8-809f-81fef5eb226e</id>
+      <name>Craft Ranged Weapon</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Weapons</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>gun firearm rifle pistol bow crossbow artillery make weapon</keywords>
+      <test>
+        <dice>{LOG} + {Armorer}</dice>
+        <bonusstring>Roll for each attribute: DV, AP, Accuracy, modes (each hit adds SS/SA/BF/FA), ammo capacity (hits*6 clip, hits*50 belt) and range (hits*TL short; medium = short*10, long = medium*3, extreme = long*2).</bonusstring>
+      </test>
+      <notes>Parts by type: bow 1, handgun 1, SMG 2, crossbow 3, rifle 3, sniper 3, machine gun 4, assault cannon 5. Each roll takes (1 + weapon type)/TL hours. Artillery: short range max hits*TL*10, capacity = hits, scatter = short range/(Accuracy + hits). Facility +2 dice. Limited by design.</notes>
+    </action>
+    <action>
+      <id>37b71a6a-93c8-4c16-b130-99e81a4bbd56</id>
+      <name>Overcharge Energy Weapon</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Weapons</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>overcharge energy weapon laser plasma explode overload</keywords>
+      <test>
+        <dice>{LOG} + {Armorer} v. your {Weapon: Skill} + {AGI}</dice>
+        <bonusstring>An overcharged energy weapon deals double DV and AP; after shooting, make this test. On failure the gun explodes, dealing its original DV and AP to you.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>2dc0b43b-84e6-4614-953f-7cb7773c5523</id>
+      <name>Craft Ammunition</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Ammunition</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>ammo bullets rounds grenades rockets shells reload handload</keywords>
+      <test>
+        <dice>{LOG} + {Armorer}</dice>
+        <bonusstring>Hits determine how many bullets per minute you produce; parts are paid per bullet (1/500 part plus property costs).</bonusstring>
+      </test>
+      <notes>The book does not name the skill for ammunition (Armorer assumed). Properties selectable up to design phase successes. Grenades 2/100 part base (free TL*TL DV), rockets cost x20, shells 1/5 part.</notes>
+    </action>
+    <action>
+      <id>15ac2d36-aade-46fb-ba65-413e07320744</id>
+      <name>Craft Armor</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Armor</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>armor armour vest helmet shield make armor</keywords>
+      <test>
+        <dice>{LOG} + {Armorer}</dice>
+        <bonusstring>Hits set the armor rating; requires hits/2 (round down) spare parts.</bonusstring>
+      </test>
+      <notes>Each roll takes armor rating/2 hours. Limited by design; rating max is TL max hardware rating*2 (24 for SR). Shields made the same way.</notes>
+    </action>
+    <action>
+      <id>7944091c-75cb-4764-9b36-59b4c6a580ed</id>
+      <name>Harden Armor</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Armor</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>harden hardened armor armour upgrade</keywords>
+      <test>
+        <dice>{LOG} + {Armorer} v. armor rating - TL*2</dice>
+        <bonusstring>Harden body armor or a helmet; same roll as making the armor with threshold armor rating - TL*2, costing twice the spare parts.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>e49a6740-5a27-45d4-9683-f13f460e3d5c</id>
+      <name>Build Vehicle (Body and Armor)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Vehicles</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>build vehicle car ship starship chassis body armor hull construct mech</keywords>
+      <test>
+        <dice>{LOG} + {Automotive Mechanic}</dice>
+        <bonusstring>Roll for the Body attribute, then for the Armor attribute; hits become the attribute.</bonusstring>
+      </test>
+      <notes>Limit = design rating, 1 hour per rating. Spare parts = (Body + Armor)/2 * seats. HP = 6 + Body/2 for drones, 12 + Body/2 otherwise. Starships also roll for Mass and Hardpoints (skill not stated).</notes>
+    </action>
+    <action>
+      <id>0f557bdc-9863-4578-8270-85b889fd6168</id>
+      <name>Build Vehicle (Handling, Speed, Acceleration)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Vehicles</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>build vehicle handling speed acceleration engine performance</keywords>
+      <test>
+        <dice>{LOG} + {Automotive Mechanic}</dice>
+        <bonusstring>Roll separately for Handling, Speed and Acceleration; hits become the attribute.</bonusstring>
+      </test>
+      <notes>Limit = design rating, 1 hour per roll. Speed and Acceleration limited by TL*TL.</notes>
+    </action>
+    <action>
+      <id>d7ead1fa-f896-4aa6-bd12-ef289c1ee08f</id>
+      <name>Program Vehicle Pilot</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Vehicles</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>pilot program autopilot vehicle drone mech software</keywords>
+      <test>
+        <dice>{LOG} + {Software}</dice>
+        <bonusstring>Create the Pilot attribute of a vehicle or mech; cannot exceed the rating of its hardware device (usually the sensor array).</bonusstring>
+      </test>
+      <notes>Limited by design; takes attribute rating hours.</notes>
+    </action>
+    <action>
+      <id>16c1b5dc-56a7-4c91-89cd-ae70d1e625a7</id>
+      <name>Build Sensor Array</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Vehicles</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>sensor array vehicle sensors hardware mech</keywords>
+      <test>
+        <dice>{LOG} + {Hardware}</dice>
+        <bonusstring>Make a sensor array as hardware and upgrade it by the normal hardware rules.</bonusstring>
+      </test>
+      <notes>Limited by design; 1 hour per rating.</notes>
+    </action>
+    <action>
+      <id>bb19f3f5-cb21-4ecc-a998-bcd45e28524e</id>
+      <name>Navigator Rating</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Fittings</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>navigator starship fitting navigation computer</keywords>
+      <test>
+        <dice>{Software} + {LOG}</dice>
+        <bonusstring>Hits set the rating of the Navigator fitting, which adds to pilot skill checks.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>8f0c6007-2a57-49e1-8e77-41356baaf152</id>
+      <name>Pierce Sensor Mask</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Fittings</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>sensor mask disguise ship hull matrix perception detect</keywords>
+      <test>
+        <dice>{Computer} + {INT} v. opposed by the masking ship</dice>
+        <limit>{Icon: Data Processing}</limit>
+        <bonusstring>An opposed matrix perception test to see through a ship's Sensor Mask; useless once the ship is seen visually.</bonusstring>
+      </test>
+      <notes>Uses the core SR5 Matrix Perception pool (Computer + Intuition [Data Processing]).</notes>
+    </action>
+    <action>
+      <id>bfb9308c-2c22-47bd-ad0f-9b67305118a3</id>
+      <name>Find Smuggler's Hold</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Fittings</section>
+      <category>Physical</category>
+      <type>Extended</type>
+      <keywords>search smuggler hold hidden compartment contraband inspect</keywords>
+      <test>
+        <dice>{INT} + {Perception} v. {Threshold: 10}</dice>
+        <limit>{Mental}</limit>
+        <bonusstring>Extended perception search to find a smuggler's hold: threshold 10 at one hour per roll, or threshold 7 at one week per roll.</bonusstring>
+      </test>
+      <notes>Alternative: [7, one week] search, practically a disassembly.</notes>
+    </action>
+    <action>
+      <id>797c5d41-2e5d-44eb-bcfc-d65163175444</id>
+      <name>Planetary Defence Array</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Fittings</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>planetary defence defense array orbital bombardment nuke snuffer</keywords>
+      <test>
+        <dice>{Hardware} + {LOG}</dice>
+        <bonusstring>Roll every time the array is used; hits decrease the hits of an orbital attack, deflect it or dissipate it.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>35575fcb-3f31-4c29-a09b-7b57ecaaa6ef</id>
+      <name>Clear Weapon Jam (Jamming)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Starship weaponry</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>jam jamming starship weapon quality armoury</keywords>
+      <test>
+        <dice>{LOG} + {Armorer} v. Jamming rating</dice>
+        <bonusstring>Each time a Jamming weapon fires, pass this armoury check or lose your next turn clearing the jam.</bonusstring>
+      </test>
+      <notes>The book says only "armoury skill check"; Logic assumed as the attribute.</notes>
+    </action>
+    <action>
+      <id>3495b751-993b-4a7b-af44-402c2deecfdb</id>
+      <name>Reset Twin Link</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Starship weaponry</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>twin linked starship weapon reset armoury</keywords>
+      <test>
+        <dice>{LOG} + {Armorer} v. Twin linked rating</dice>
+        <bonusstring>Reset a Twin linked weapon's attacks once you have run out of linked attacks.</bonusstring>
+      </test>
+      <notes>The book says only "armoury skill check"; Logic assumed.</notes>
+    </action>
+    <action>
+      <id>7fad000a-45f6-488f-b359-5040b25aa511</id>
+      <name>Cool Hot Weapon</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Starship weaponry</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>hot weapon heat cooldown starship armoury</keywords>
+      <test>
+        <dice>{LOG} + {Armorer}</dice>
+        <bonusstring>Armoury roll hits help regain the dice lost to the Hot weapon quality.</bonusstring>
+      </test>
+      <notes>Attribute not stated; Logic assumed. You also regain one die each turn you do not shoot.</notes>
+    </action>
+    <action>
+      <id>12296aee-32af-4103-bf50-8aba82645ad5</id>
+      <name>Armature Design</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Armatures</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>armature robot shell android design AI VI</keywords>
+      <test>
+        <dice>{LOG} + {Cybertechnology}</dice>
+        <bonusstring>Design phase for an armature; hits limit its initial physical attributes.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>50ffcece-4e16-4ca3-ac55-fb7c65e93de3</id>
+      <name>Build Armature Attributes</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Armatures</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>armature robot body physical attributes build android</keywords>
+      <test>
+        <dice>{LOG} + {Cybertechnology}</dice>
+        <bonusstring>Roll once for each of the four physical attributes; each hit takes 1 hour.</bonusstring>
+      </test>
+      <notes>Needs 1/5 spare parts equal to the desired attribute rating. Mental attributes come from the VI/AI.</notes>
+    </action>
+    <action>
+      <id>8a1378f3-1bea-4348-8ec5-db250036062c</id>
+      <name>Armature Armor</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Armatures</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>armature armor armour plating robot</keywords>
+      <test>
+        <dice>{LOG} + {Armorer}</dice>
+        <bonusstring>Create the armature's (stackable) armor rating; requires hits/2 spare parts.</bonusstring>
+      </test>
+      <notes>Limited by design; each roll takes armor rating/2 hours.</notes>
+    </action>
+    <action>
+      <id>a14253c5-893d-4ad2-9908-635f0860cfd5</id>
+      <name>Armature Health Boxes</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Armatures</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>armature health boxes hit points condition monitor robot</keywords>
+      <test>
+        <dice>{LOG} + {Armorer} v. health box count</dice>
+        <bonusstring>Add health boxes to an armature (up to design successes); threshold and hours equal the box count.</bonusstring>
+      </test>
+      <notes>2 spare parts per health box.</notes>
+    </action>
+    <action>
+      <id>085aedeb-f248-4ff4-87e0-33cd78cb230b</id>
+      <name>Armature Synthetic Skin</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Armatures</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>synthetic skin human appearance android disguise armature</keywords>
+      <test>
+        <dice>{LOG} + {Biotechnology} v. armature's Body rating</dice>
+        <bonusstring>Cover the armature in synthetic skin and organic features indistinguishable from human; threshold and hours equal its Body.</bonusstring>
+      </test>
+      <notes>Up to Body rating of chemical parts.</notes>
+    </action>
+    <action>
+      <id>9391b125-ea43-433b-9c7e-68a81555d201</id>
+      <name>Mech Running</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Mechs</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>mech suit run sprint movement</keywords>
+      <test>
+        <dice>{Running} + {STR}</dice>
+        <limit>{Physical}</limit>
+        <bonusstring>When running, suits add 10 * successes meters and light/heavy mechs add 20 * successes meters to their movement for the round.</bonusstring>
+      </test>
+      <notes>Uses the core Running test; book only says "when rolling running".</notes>
+    </action>
+    <action>
+      <id>230e4ab6-cf6c-45b1-bf9f-18bc7027cf4d</id>
+      <name>Mech Ammunition Check</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Mechs</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>mech ammo ammunition out of ammo reload check</keywords>
+      <test>
+        <dice>{Max: {LOG} or {AGI}} + {Armorer} v. bullets fired + combat rounds spent firing</dice>
+        <bonusstring>Each time you fire conventional mech guns, beat bullets fired + rounds spent firing to still have ammo; otherwise you are out.</bonusstring>
+      </test>
+      <notes>Logic or Agility. Ammunition Cells fitting allows one reroll of a failed check.</notes>
+    </action>
+    <action>
+      <id>2e04c65b-6946-420e-99e8-d5c8c159a65d</id>
+      <name>Build Mech (Body and Armor)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Mechs</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>build mech suit chassis body armor</keywords>
+      <test>
+        <dice>{LOG} + {Automotive Mechanic}</dice>
+        <bonusstring>Roll for the mech's Body, then its Armor.</bonusstring>
+      </test>
+      <notes>Limit = design rating, 1 hour per rating. Spare parts = (Body + Armor + Power + Mass) * Speed * maintenance for size; caster mechs cost double. Pilot and sensor array as for vehicles.</notes>
+    </action>
+    <action>
+      <id>75a7797f-7697-42a9-99fc-7a3ec1812b56</id>
+      <name>Build Mech (Mass)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Mechs</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>build mech mass hardpoints</keywords>
+      <test>
+        <dice>{LOG} + {Automotive Mechanic}</dice>
+        <bonusstring>Roll for the mech's Mass attribute.</bonusstring>
+      </test>
+      <notes>Limit = design rating, 1 hour per hit. Size limits apply (suit 10, light 20, heavy 40).</notes>
+    </action>
+    <action>
+      <id>58ab75e1-b502-47b3-a8be-e0e124791f8d</id>
+      <name>Build Mech (Speed)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Mechs</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>build mech speed movement</keywords>
+      <test>
+        <dice>{LOG} + {Automotive Mechanic}</dice>
+        <bonusstring>Roll for the mech's Speed attribute.</bonusstring>
+      </test>
+      <notes>Limit = design rating, 1 hour per roll. Speed limited by TL*2.</notes>
+    </action>
+    <action>
+      <id>ec78af86-62e8-48b7-898f-556d40f02322</id>
+      <name>Comm Interceptor Snoop</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Mech fittings</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>snoop intercept comm encryption military mech fitting</keywords>
+      <test>
+        <dice>{Electronic Warfare} + {LOG} + 4 v. Intuition + Sleaze or Sleaze * 2</dice>
+        <bonusstring>Break military-grade comm encryption with the Comm Interceptors fitting; you must see the source or receiver. Civilian encryption breaks automatically.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>cece9b6c-9214-4393-acc7-e8b23b375695</id>
+      <name>Field Medical Unit</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Mech fittings</section>
+      <category>Physical</category>
+      <type>No</type>
+      <keywords>medical drones first aid heal mech fitting treat</keywords>
+      <test>
+        <dice>{First Aid} + {LOG}</dice>
+        <bonusstring>Spend a round guiding medical drones to treat up to 20 individuals within 200 meters at once.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>72ff8c44-7512-4add-9c27-83b05026bbef</id>
+      <name>Inquisitor Probe</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Mech fittings</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>read mind telepathy probe tactical plan caster mech</keywords>
+      <test>
+        <dice>{Spellcasting} + {LOG} v. Logic + Willpower</dice>
+        <bonusstring>Caster pilot (Telepath-1+) targets a visible person or mech; success gives an impression of their tactical plan and foremost thoughts. A successful save makes the target immune for 24 hours.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>43b3e862-69f4-41a5-90c7-150180daaf2f</id>
+      <name>Slow Weapon Cooldown</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Mech weaponry</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>slow weapon cooldown mech overheat</keywords>
+      <test>
+        <dice>{LOG} + {Max: {Armorer} or {Spellcasting}} v. {Threshold: 6}</dice>
+        <bonusstring>A Slow mech weapon (double additional damage) requires this test; on a failure the weapon must cool down for one round.</bonusstring>
+      </test>
+      <notes>Armorer + Logic or Spellcasting + Logic.</notes>
+    </action>
+    <action>
+      <id>b73e9ee5-aadd-4c16-8782-4d9d2e821610</id>
+      <name>Astral Weapon Attack</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Mech weaponry</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>astral weapon mech attack magic tradition</keywords>
+      <test>
+        <dice>{Max: {LOG} or {CHA} or {INT}} + {Weapon: Skill} v. {Action: Ranged Defense}</dice>
+        <bonusstring>Astral weapons ignore conventional armor; attack with your tradition attribute + combat skill instead of Agility + combat skill.</bonusstring>
+      </test>
+      <notes>Formula takes the highest of Logic/Charisma/Intuition; substitute your tradition's attribute. Defense test not specified by the book.</notes>
+    </action>
+    <action>
+      <id>7f5bcb00-cfcc-46be-8cd5-061d76541fd3</id>
+      <name>Craft Drug</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Drugs</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>drug chemistry cook narcotic stim make drugs dose</keywords>
+      <test>
+        <dice>{LOG} + {Chemistry} v. addiction threshold</dice>
+        <bonusstring>Threshold and hours equal the drug's addiction threshold (number of different changes). Multiple doses with one roll by paying parts for each.</bonusstring>
+      </test>
+      <notes>Each modification costs 1/100 part per point. Addiction rating = positive - negative points (0-12).</notes>
+    </action>
+    <action>
+      <id>d4c774d1-deb2-489e-80fa-ff7786b554ee</id>
+      <name>Addiction Test (Physical)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Drugs</section>
+      <category>General</category>
+      <type>No</type>
+      <keywords>addiction resist drug physical dependency</keywords>
+      <test>
+        <dice>{BOD} + {WIL} v. addiction threshold</dice>
+        <bonusstring>Resist a physical addiction; on failure addiction rises one level or you gain the addiction quality.</bonusstring>
+      </test>
+      <notes>Required each time you use during (12 - Addiction Rating) weeks in a row; each week clean reduces threshold by 1. Substances with both qualities need both tests. BTLs: rating 6, threshold 2.</notes>
+    </action>
+    <action>
+      <id>ce5aad68-9390-42d9-9211-f310bd86cfa3</id>
+      <name>Addiction Test (Mental)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Drugs</section>
+      <category>General</category>
+      <type>No</type>
+      <keywords>addiction resist drug mental psychological BTL dependency</keywords>
+      <test>
+        <dice>{LOG} + {WIL} v. addiction threshold</dice>
+        <bonusstring>Resist a mental addiction; on failure addiction rises one level or you gain the addiction quality.</bonusstring>
+      </test>
+      <notes>BTLs have addiction rating 6 and threshold 2.</notes>
+    </action>
+    <action>
+      <id>35841546-b3a1-4b80-a6fd-add53a90c1c8</id>
+      <name>BTL Design</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / BTLs</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>BTL better than life chip simsense design</keywords>
+      <test>
+        <dice>{Hardware} + {LOG}</dice>
+        <bonusstring>Design phase for a BTL card; hits set its maximum rating (max 6) and how many properties can be taken.</bonusstring>
+      </test>
+      <notes>1/100 part per rating. Properties up to twice the BTL rating.</notes>
+    </action>
+    <action>
+      <id>36298387-e5d5-4c52-991d-18ea49a1ff6f</id>
+      <name>Install BTL Property</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / BTLs</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>BTL property sensation mood program chip</keywords>
+      <test>
+        <dice>{Software} + {LOG}</dice>
+        <bonusstring>Successes determine how many times you can take that property.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>dcab1d6d-1013-49e2-967a-79f4df51b20b</id>
+      <name>BTL Recording Quality</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / BTLs</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>BTL recording artisan simsense quality</keywords>
+      <test>
+        <dice>{INT} + {Artisan}</dice>
+        <bonusstring>If you record the BTL event yourself, an artisan check determines the quality of the recording.</bonusstring>
+      </test>
+      <notes>Book says "artisan check"; core Artisan pool (Intuition) assumed.</notes>
+    </action>
+    <action>
+      <id>58b721c2-2219-46c4-8574-1f65473060d8</id>
+      <name>Build Machine</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Machinery</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>machine machinery factory production line drive miner build</keywords>
+      <test>
+        <dice>{Industrial Mechanic} + {LOG} v. machine rating</dice>
+        <bonusstring>Build a machine (rating 1 first, then upgrade); threshold and hours equal the rating.</bonusstring>
+      </test>
+      <notes>Upgrade cost in spare parts equals the target rating. Rating max by TL and size (portable/station/line/room). Drives are built the same way (room size, max 6).</notes>
+    </action>
+    <action>
+      <id>9c38bcdb-32c5-4f9f-b2a7-dc3061393ea9</id>
+      <name>Rebalance Equipment</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Upgrading and modifying equipment</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>modify rebalance tweak adjust equipment attributes</keywords>
+      <test>
+        <dice>{LOG} + {Appropriate Skill}</dice>
+        <bonusstring>Spend 1 spare part; hits are points you can move from one attribute to another (no points added).</bonusstring>
+      </test>
+      <notes>Book says "appropriate skill check"; Logic assumed as with other crafting rolls.</notes>
+    </action>
+    <action>
+      <id>4ae94496-dc6d-4477-82c6-fc51b709ae3c</id>
+      <name>Upgrade Equipment</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Upgrading and modifying equipment</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>upgrade improve boost equipment power attributes</keywords>
+      <test>
+        <dice>{LOG} + {Appropriate Skill}</dice>
+        <bonusstring>Pay 10% of the item's spare part cost; hits are points to distribute among attributes. Only once per item.</bonusstring>
+      </test>
+      <notes>Book says "appropriate skill check"; Logic assumed.</notes>
+    </action>
+    <action>
+      <id>0e218c70-edba-4676-908e-12e9fdbde34f</id>
+      <name>Repair</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Repair</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>repair fix damage mend vehicle gear</keywords>
+      <test>
+        <dice>{LOG} + {Appropriate Skill}</dice>
+        <bonusstring>Hits equal damage boxes or rating fixed per hour; each box costs one spare part.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>c7bfc7f5-82c1-4518-9e91-466b55d5b8f8</id>
+      <name>Construction</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Construction</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>construction build building wall barrier structure</keywords>
+      <test>
+        <dice>{LOG} + {STR}</dice>
+        <bonusstring>Each hit builds a 1 by 1 meter area with the chosen Body and Armor.</bonusstring>
+      </test>
+      <notes>Limited by design. Spare parts per roll = (Body + Armor) * 5. Barrier HP = 8 + Body/2.</notes>
+    </action>
+    <action>
+      <id>8ffaa3a4-ddec-4c69-971b-0abfd3d087f2</id>
+      <name>Juryrigging</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Juryrigging (quality 10 karma)</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>juryrig jury rig improvise hack together bypass temporary fix</keywords>
+      <test>
+        <dice>{LOG} + {Appropriate Skill} + 2 v. gear rating (or count, attribute, skill, property cost) - 1</dice>
+        <bonusstring>Juryrigger quality: temporarily revive a destroyed device ((net hits + 1)D6 minutes), raise a device rating by 1 ((net hits + 1)D6 turns), boost a vehicle attribute by +1, improvise a one-shot device, or bypass a security measure.</bonusstring>
+      </test>
+      <notes>The +2 is the Juryrigger quality bonus to Mechanical Tests. May need one spare part of the device's type.</notes>
+    </action>
+    <action>
+      <id>5a56c483-3566-4a7f-9c31-1946168c28f9</id>
+      <name>Craft Cyberware</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Cyberware</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>cyberware chrome implant install augmentation</keywords>
+      <test>
+        <dice>{LOG} + {Cybertechnology} v. rating</dice>
+        <bonusstring>Build custom cyberware; threshold and hours equal the rating.</bonusstring>
+      </test>
+      <notes>Spare parts = rating + number of attributes/rolls/skills changed. Installing existing ware costs 1 spare part, threshold and time by its rating/size. Essence 1/0.5/0.2/0.05 * rating by type.</notes>
+    </action>
+    <action>
+      <id>8f50cb0c-a770-4d6f-9bc9-de48f73976db</id>
+      <name>Craft Bioware</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Cyberware</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>bioware biotech implant organic augmentation</keywords>
+      <test>
+        <dice>{LOG} + {Biotechnology} v. rating</dice>
+        <bonusstring>Build custom bioware; threshold equals rating, takes rating*5 hours.</bonusstring>
+      </test>
+      <notes>Same spare parts as cyber but chemical; essence cost 5 times less than similar cyber.</notes>
+    </action>
+    <action>
+      <id>0690edc8-5eb9-484f-ac37-68b0faa6058e</id>
+      <name>Build Hardware Frame</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Hardware</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>hardware frame commlink cyberdeck server chip device build</keywords>
+      <test>
+        <dice>{Hardware} + {LOG} v. rating</dice>
+        <bonusstring>Build the device frame; threshold and hours equal the rating. At rating 1 the roll determines how many chips you make.</bonusstring>
+      </test>
+      <notes>Parts per rating step: small 1/100, commlink 1/5, cyberdeck 1, server 3 (pay for every rating). Data Processing and Sleaze need 1 extra part each.</notes>
+    </action>
+    <action>
+      <id>7021d642-1b9d-47c3-ad57-35b480834cb2</id>
+      <name>Hardware Attack and Firewall</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Hardware</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>hardware attack firewall matrix attributes</keywords>
+      <test>
+        <dice>{LOG} + {Software}</dice>
+        <bonusstring>Hits set the Attack or Firewall attribute; cannot exceed the frame rating.</bonusstring>
+      </test>
+      <notes>Takes frame rating in hours. Matrix HP = 8 + Firewall/2.</notes>
+    </action>
+    <action>
+      <id>fb994804-efbf-41fc-b4fc-e45bb7c83a5c</id>
+      <name>Hardware Data Processing and Sleaze</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Hardware</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>hardware data processing sleaze matrix attributes</keywords>
+      <test>
+        <dice>{LOG} + {Hardware}</dice>
+        <bonusstring>Hits set the Data Processing or Sleaze attribute; cannot exceed the frame rating.</bonusstring>
+      </test>
+      <notes>Takes frame rating in hours. Upgrades/modifications can go up to rating + 3.</notes>
+    </action>
+    <action>
+      <id>1939a4ec-70d5-47b6-a935-ef123946123a</id>
+      <name>Write Program</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Programs</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>program code software write physical program</keywords>
+      <test>
+        <dice>{LOG} + {Software} v. total property threshold</dice>
+        <bonusstring>Beat the summed thresholds of the chosen scaling, attribute and action properties; 1 hour per threshold point.</bonusstring>
+      </test>
+      <notes>Design acts as the threshold limit. Physical programs are made the same way with their own property table (minimum threshold 1).</notes>
+    </action>
+    <action>
+      <id>17d8f820-21c1-47d9-94da-d0ffbb26b69c</id>
+      <name>Program Autosoft</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Autosofts</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>autosoft drone vehicle skill program</keywords>
+      <test>
+        <dice>{Software} + {LOG}</dice>
+        <bonusstring>Hits set the autosoft's rating (max TL*2); you or a helper must have the skill.</bonusstring>
+      </test>
+      <notes>Limit = design rating, 1 hour.</notes>
+    </action>
+    <action>
+      <id>6458d312-fef1-4563-b2fd-425762a56869</id>
+      <name>Program Autosoft Technique</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Autosofts</section>
+      <category>Matrix</category>
+      <type>Extended</type>
+      <keywords>autosoft technique martial arts drone program</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. technique karma cost</dice>
+        <bonusstring>Program techniques (up to autosoft rating) that you or the helper know; extended test, 1 hour per karma.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>d1577370-579a-4956-89ea-a94efbd02a65</id>
+      <name>Reprogram Skillsoft</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Skillsofts</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>skillsoft reprogram chip knowsoft activesoft</keywords>
+      <test>
+        <dice>{LOG} + {Software} v. skillsoft rating</dice>
+        <bonusstring>On success, replace one skill on an existing skillsoft chip with another; threshold and hours equal its rating.</bonusstring>
+      </test>
+      <notes>You or a friend must have the new skill.</notes>
+    </action>
+    <action>
+      <id>fab7a561-abfa-4d73-b25c-ddb855df586a</id>
+      <name>Craft Matrix Construct</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Matrix constructs</section>
+      <category>Matrix</category>
+      <type>Extended</type>
+      <keywords>matrix construct build automaton host repair bricked construct</keywords>
+      <test>
+        <dice>{Software} + {LOG} v. total attribute points in the part</dice>
+        <bonusstring>Extended test (1 hour) per construct part; any shortfall in the threshold is lost permanently as attribute points.</bonusstring>
+      </test>
+      <notes>Repairing a bricked construct means constructing it again. Automatons and hosts are built the same way.</notes>
+    </action>
+    <action>
+      <id>b83d2fe0-0eb3-48b6-a53c-cea90d0ec6ed</id>
+      <name>Override Host Physics</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Hosts</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>host rules gravity physics override attack</keywords>
+      <test>
+        <dice>{Icon: Attack} * 2 v. host's Attack * 2</dice>
+        <bonusstring>A device or item (e.g. anti-grav grenade) battles the host over whose rules of physics apply at that location.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>96b9d537-47bd-419c-bb4a-a98102ee94ac</id>
+      <name>Bypass Host Lock</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Hosts</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>host door lock digital pick lock sleaze</keywords>
+      <test>
+        <dice>{Icon: Sleaze} * 2 v. host's Data Processing * 2</dice>
+        <bonusstring>Defeat a host lock checked by Data Processing using a sleazy device.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>fdb635f5-8b63-4194-9594-b908fba270aa</id>
+      <name>Find Hidden Host Object</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Hosts</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>host hidden path encryption sleaze lock analyse</keywords>
+      <test>
+        <dice>{Icon: Data Processing} * 2 v. host's Sleaze * 2</dice>
+        <bonusstring>Uncover objects, paths, encryption or Sleaze-based locks hidden by the host.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>677d55ab-8047-4cc1-9a3b-9ca6fc06f58f</id>
+      <name>Bypass Physics (Complex Form)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Complex forms</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>complex form bypass physics technomancer resonance</keywords>
+      <test>
+        <dice>{Spell: Force} * 2 v. Data Processing * 2 or Attack * 2</dice>
+        <bonusstring>When the environment tries to enforce the physical property the target ignores, roll the form's Level * 2.</bonusstring>
+      </test>
+      <notes>Force here stands for the complex form's Level.</notes>
+    </action>
+    <action>
+      <id>cc707661-64ea-441c-bd00-ded9ce5bcab4</id>
+      <name>Trails (Complex Form)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Electronics and matrix / Complex forms</section>
+      <category>Matrix</category>
+      <type>No</type>
+      <keywords>trails data trail history complex form technomancer</keywords>
+      <test>
+        <dice>{Icon: Sleaze} * 2</dice>
+        <bonusstring>Read the target's data trails; you read history in days equal to the net hits.</bonusstring>
+      </test>
+      <notes>Limited by the form's Level. Book wording ("from the target") is ambiguous about whose Sleaze.</notes>
+    </action>
+    <action>
+      <id>0a6dc1d5-2d1e-4283-9de4-1e5ec74c6e32</id>
+      <name>Spellcrafting</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>spellcrafting create spell design custom spell arcana</keywords>
+      <test>
+        <dice>{Max: {LOG} or {CHA} or {INT}} + {Arcana}</dice>
+        <bonusstring>Hits determine how many different properties you can pick for your spell. Glitch adds side effects; critical glitch may warrant a magic advancement table roll.</bonusstring>
+      </test>
+      <notes>Use your tradition's main attribute (formula takes the highest of Logic/Charisma/Intuition). Drain starts at F for TL3 spells.</notes>
+    </action>
+    <action>
+      <id>6eab93eb-d83c-4a35-9b68-12a37de34412</id>
+      <name>Resist Mental Manipulation</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / Manipulation spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>resist manipulation mental mind control spell</keywords>
+      <test>
+        <dice>{LOG} + {WIL} v. caster's hits</dice>
+        <bonusstring>Resist a mental manipulation spell; each turn afterwards you may resist again with a complex action to reduce the net hits.</bonusstring>
+      </test>
+      <notes>Ongoing resistance is Logic + Willpower - Force.</notes>
+    </action>
+    <action>
+      <id>91288b70-c46c-4533-b4b4-f9e91494a06a</id>
+      <name>Resist Physical Manipulation</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / Manipulation spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>resist manipulation physical spell</keywords>
+      <test>
+        <dice>{BOD} + {WIL} v. caster's hits</dice>
+        <bonusstring>Resist a physical manipulation spell (objects use object resistance).</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>b9982af0-6900-4876-b532-3902dd30e0de</id>
+      <name>Resist Change Temperature</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / Manipulation spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>freeze burn temperature spell resist</keywords>
+      <test>
+        <dice>{BOD} + {REA} v. caster's hits</dice>
+        <bonusstring>Living creatures resist the Change temperature effect with Body + Reaction.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>2c3250e8-8aaf-4bd2-968e-fe402a72d360</id>
+      <name>Resist Illusion (Mana)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / Illusion spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>resist illusion mana magic spell disbelieve</keywords>
+      <test>
+        <dice>{LOG} + {WIL} v. caster's hits</dice>
+        <bonusstring>Resist a magic-type illusion spell.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>41f40933-f558-4789-8dc6-ada195919a8a</id>
+      <name>Resist Illusion (Physical)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / Illusion spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>resist illusion physical spell disbelieve</keywords>
+      <test>
+        <dice>{LOG} + {INT} v. caster's hits</dice>
+        <bonusstring>Resist a physical-type illusion spell.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>b45cf949-272d-476d-af8e-74d4a43d6803</id>
+      <name>Fling</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / Manipulation spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>fling throw telekinesis spell object</keywords>
+      <test>
+        <dice>{MAG} + {Spellcasting} v. target's defense</dice>
+        <limit>{Spell: Force}</limit>
+        <bonusstring>Fling an object of F kilograms; your spellcasting test is the attack and your Magic determines DV.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>2fee8fbd-0a2e-4b2c-841a-633262ba5234</id>
+      <name>Animate (Break Free)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / Manipulation spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>animate object telekinesis break free</keywords>
+      <test>
+        <dice>{Spell: Force} * 2 v. holder's Strength + Body</dice>
+        <bonusstring>Win this opposed test to break an animated object free of someone holding it.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>b647555b-e961-45db-ad67-e02d4008164e</id>
+      <name>Shake Off Bad Luck</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / TL4 / Prophecy spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>bad luck curse prophecy resist</keywords>
+      <test>
+        <dice>{LOG} + {WIL} v. spell Force</dice>
+        <bonusstring>Each time the Bad luck effect triggers, roll to shake it off; otherwise roll checks twice and take the worse result.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>4f7cb8d1-a2de-4887-ba48-20bbb7a6110a</id>
+      <name>Resist Remove Friction</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / TL4 / Telekinesis spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>remove friction slip fall prone telekinesis</keywords>
+      <test>
+        <dice>{REA} + {INT} v. spell Force</dice>
+        <bonusstring>Fail and you fall prone, unable to stand or move. Those who save are immune.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>e3cd769f-f26d-48db-8546-155756571645</id>
+      <name>Remove Friction (Vehicle Control)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / TL4 / Telekinesis spells</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>remove friction skid crash out of control vehicle</keywords>
+      <test>
+        <dice>{Vehicle: Skill} + {REA} v. spell Force</dice>
+        <limit>{Vehicle: Handling}</limit>
+        <bonusstring>A ground vehicle driver must pass or go out of control, driving forward for a round and crashing into obstacles.</bonusstring>
+      </test>
+      <notes>Book says "Pilot skill check"; core Reaction + Pilot [Handling] used.</notes>
+    </action>
+    <action>
+      <id>5c4ab125-7010-4989-9b00-25514473e6f8</id>
+      <name>Resist Force Puppetry</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / TL4 / Telekinesis spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>puppet control body telekinesis resist</keywords>
+      <test>
+        <dice>{LOG} + {WIL} v. spell Force</dice>
+        <bonusstring>On a failure you lose control of your physical actions.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>dfab44bc-4919-4eb4-bf71-3ccfe59ccb8b</id>
+      <name>Resist Memory Edit</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / TL4 / Detection spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>memory edit telepathy resist</keywords>
+      <test>
+        <dice>{LOG} + {WIL} v. spell Force - 2</dice>
+        <bonusstring>Resist memory editing for the rest of the encounter; on failure you won't notice the changes until given reason to recall.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>b13ec905-4a39-4151-a053-74b538149a6b</id>
+      <name>Resist Suppress Thoughts</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / TL4 / Detection spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>suppress thoughts telepathy resist</keywords>
+      <test>
+        <dice>{LOG} + {WIL} v. spell Force</dice>
+        <bonusstring>Resist and become immune for the day; on failure the thought stays unthinkable for the encounter.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>4f8053e9-23f6-4950-81cf-3227b58b664a</id>
+      <name>Resist Telepathic Assault</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Spellcrafting / TL4 / Detection spells</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>telepathic assault stun telepathy resist halve</keywords>
+      <test>
+        <dice>{LOG} + {WIL} v. spell Force - 2</dice>
+        <bonusstring>Success halves the Fd6 (or (F+3)d6) stun damage.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>4bc43512-bf50-4592-85c0-48b20499ba2e</id>
+      <name>Adept Power Crafting</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>adept power create meditation custom power</keywords>
+      <test>
+        <dice>{BOD} + {Arcana}</dice>
+        <bonusstring>Meditation roll; hits determine how many different properties you can pick for your power. Critical glitch may warrant an adept advancement table roll.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>99ae4580-da13-4e6e-90c4-91edf8083223</id>
+      <name>Unpredictable Power</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>unpredictable adept power boost</keywords>
+      <test>
+        <dice>{MAG}</dice>
+        <bonusstring>Roll Magic + level to increase the main effect bonuses of the power.</bonusstring>
+      </test>
+      <notes>Add the power's level to the pool.</notes>
+    </action>
+    <action>
+      <id>85cbb4b2-7ca0-4bc2-aa24-2b0821cc6a0b</id>
+      <name>Control Wild Power (Mental)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>wild power control adept</keywords>
+      <test>
+        <dice>{WIL} + {LOG}</dice>
+        <bonusstring>Roll to stop a Wild power with mental effects from going off.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>da66d0f0-cf43-4df9-866b-8de5d99bca15</id>
+      <name>Control Wild Power (Social)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>wild power control adept</keywords>
+      <test>
+        <dice>{WIL} + {CHA}</dice>
+        <bonusstring>Roll to stop a Wild power with social effects from going off.</bonusstring>
+      </test>
+      <notes>Book says "charisma for social"; read as Willpower + Charisma.</notes>
+    </action>
+    <action>
+      <id>02685e1d-f06d-49fc-9653-bd6feefad27e</id>
+      <name>Control Wild Power (Physical)</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>wild power control adept</keywords>
+      <test>
+        <dice>{WIL} + {BOD}</dice>
+        <bonusstring>Roll to stop a Wild power with physical effects from going off.</bonusstring>
+      </test>
+      <notes>Book says "body for physical"; read as Willpower + Body.</notes>
+    </action>
+    <action>
+      <id>862b0e25-2383-4dd0-8d2e-581a94944b49</id>
+      <name>Resist Exertion Drain</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>exertion drain physical adept power resist</keywords>
+      <test>
+        <dice>{BOD} + {WIL}</dice>
+        <bonusstring>Powers with Exertion deal physical drain resisted with Body + Willpower.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>5894b1bf-bea4-41e9-a992-3ed36080791e</id>
+      <name>Combat Sense</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>combat sense danger ambush surprise perception adept</keywords>
+      <test>
+        <dice>{INT} + {Perception}</dice>
+        <limit>{Mental}</limit>
+        <bonusstring>Perception test to be alerted of a dangerous situation.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>1fb289e5-c1dd-42d5-9404-d8cfbd03031b</id>
+      <name>Voice Mimicry</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Social</category>
+      <type>No</type>
+      <keywords>voice mimic imitate impersonate adept</keywords>
+      <test>
+        <dice>{Impersonation} + {CHA} v. sensor rating * 2 or listener's perception</dice>
+        <bonusstring>Mimic someone's voice; add the power's level to the dice pool.</bonusstring>
+      </test>
+      <notes>Add power level.</notes>
+    </action>
+    <action>
+      <id>c78938ed-9e6b-433b-9177-2a9be7c79b0a</id>
+      <name>Commanding Voice</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Social</category>
+      <type>No</type>
+      <keywords>command voice order compel adept</keywords>
+      <test>
+        <dice>{Leadership} + {CHA} v. Willpower + Intuition</dice>
+        <bonusstring>On success give a simple forceful command carried out on their turn, or they stand confused; they snap out of it after one turn.</bonusstring>
+      </test>
+      <notes>+1 to defence for every person affected if multiple targets. Natural voice only, targets must understand.</notes>
+    </action>
+    <action>
+      <id>a1dd10f7-a448-45eb-8bb3-c7fdd4b7507b</id>
+      <name>Voice of Terror</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>terror fear scare voice adept</keywords>
+      <test>
+        <dice>{MAG} v. Logic + Willpower</dice>
+        <bonusstring>Affects everyone within Magic meters who hears it. If net hits exceed a target's Willpower they flee in fear.</bonusstring>
+      </test>
+      <notes>Add power level to the pool.</notes>
+    </action>
+    <action>
+      <id>74d1800f-06ae-4a71-8659-6784802c77a8</id>
+      <name>Face the Terror</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>fear courage resist voice of terror</keywords>
+      <test>
+        <dice>{WIL} + {LOG} v. Voice of Terror net hits</dice>
+        <bonusstring>A target driven off by Voice of Terror must pass to face the adept again.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>7339c390-0f66-4c73-8163-39b9e1b19580</id>
+      <name>Warcry</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>warcry shout intimidate adept</keywords>
+      <test>
+        <dice>{MAG} v. Logic + Willpower</dice>
+        <bonusstring>Everyone within Magic meters who hears it gets -2 dice on all actions for net hits combat turns.</bonusstring>
+      </test>
+      <notes>Add power level to the pool.</notes>
+    </action>
+    <action>
+      <id>8f8a8658-7ba0-402c-b252-f752fcafd850</id>
+      <name>Wall Running</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Physical</category>
+      <type>No</type>
+      <keywords>wall run climb parkour adept</keywords>
+      <test>
+        <dice>{Running} + {STR}</dice>
+        <bonusstring>Hits are meters you can run up a wall.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>c2d16c7d-1512-40ca-a520-5fe743deb3c3</id>
+      <name>Empathic Healing</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>heal empathic transfer damage adept</keywords>
+      <test>
+        <dice>{MAG} + {WIL}</dice>
+        <bonusstring>Heal one box of someone's physical damage per hit, taking the same damage yourself unresisted.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>944d5a5a-45c5-4721-9985-6ada38e5ccc5</id>
+      <name>Facial Sculpting</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>facial sculpting disguise change face adept</keywords>
+      <test>
+        <dice>{MAG} + {BOD}</dice>
+        <bonusstring>Each hit changes one facial feature completely.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>a9e53a15-0ba0-42f6-be84-be99b3b5e580</id>
+      <name>Linguistics</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Knowledge</category>
+      <type>No</type>
+      <keywords>language learn linguistics adept</keywords>
+      <test>
+        <dice>{LOG} + {INT} v. {Threshold: 1}</dice>
+        <bonusstring>After 12 - Magic hours (min 1) of exposure, gain 1 rating in the language. Threshold 1 common, 2 uncommon, 3 obscure.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>2bb4a1fb-28c6-4992-a899-28fec6f72c84</id>
+      <name>Motion Sense</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>motion sense detect movement adept</keywords>
+      <test>
+        <dice>{Perception} + {MAG} v. size threshold</dice>
+        <bonusstring>Detect movement: threshold 3 smaller than a dog/cat, 2 dwarf size, 1 human size, 0 troll and larger.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>3666d83a-55a6-4b47-afc9-80427f01faa6</id>
+      <name>Relief</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>relief heal stun adept</keywords>
+      <test>
+        <dice>{MAG} + {AGI} v. target</dice>
+        <bonusstring>Every net hit heals one box of stun damage.</bonusstring>
+      </test>
+      <notes>Book does not specify the target's opposing roll.</notes>
+    </action>
+    <action>
+      <id>bbc12655-5936-482d-be15-3819fd64d9e7</id>
+      <name>Rapid Draw</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Combat</category>
+      <type>Free</type>
+      <keywords>quick draw rapid draw holster pistol blade adept</keywords>
+      <test>
+        <dice>{Weapon: Skill} + {REA} v. {Threshold: 2}</dice>
+        <limit>{Physical}</limit>
+        <bonusstring>Free action quick draw test with -1 threshold for a properly holstered blade, pistol or throwing weapon.</bonusstring>
+      </test>
+      <notes>Core quick draw (threshold 3) reduced by 1.</notes>
+    </action>
+    <action>
+      <id>31255fb1-91ba-46c8-9b09-d2af18c5c2e7</id>
+      <name>Rapid Sling</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Combat</category>
+      <type>Free</type>
+      <keywords>quick draw rapid sling rifle low ready adept</keywords>
+      <test>
+        <dice>{Weapon: Skill} + {REA} v. {Threshold: 2}</dice>
+        <limit>{Physical}</limit>
+        <bonusstring>As Rapid Draw, for larger weapons on a sling or at low ready.</bonusstring>
+      </test>
+      <notes>Core quick draw (threshold 3) reduced by 1.</notes>
+    </action>
+    <action>
+      <id>77f313c6-a145-4f02-ac64-7c1234c3ce8c</id>
+      <name>Three Dimensional Memory</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>memory recall recording eidetic adept</keywords>
+      <test>
+        <dice>{Perception} + {MAG} v. {Threshold: 1}</dice>
+        <bonusstring>Recall a recording; threshold by time passed: 1 within 24 hours, 2 week, 3 month, 4 year, 5 over a year.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>cc753e49-053c-40a1-a177-1a0a69adc03a</id>
+      <name>Adept Accident</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>accident glitch jinx adept</keywords>
+      <test>
+        <dice>{MAG} + {WIL} v. Reaction + Intuition</dice>
+        <bonusstring>Any net hits make the target suffer a glitch; 4+ net hits is a critical glitch.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>0e73a36d-91a0-4329-985d-04d23fbe8e94</id>
+      <name>Enthralling Performance</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Adepts / TL3</section>
+      <category>Social</category>
+      <type>No</type>
+      <keywords>performance enthrall distract audience adept</keywords>
+      <test>
+        <dice>{Performance} + {MAG}</dice>
+        <bonusstring>Hits act as a threshold modifier on the audience's perception tests while you perform.</bonusstring>
+      </test>
+      <notes>Book says "appropriate skill + Magic"; Performance assumed.</notes>
+    </action>
+    <action>
+      <id>a45cff4c-29b1-4cdc-9d22-166fd93633f8</id>
+      <name>Alchemical Preparation</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Magic / Alchemy</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>alchemy preparation potion enchant bullets trigger</keywords>
+      <test>
+        <dice>{Alchemy} + {MAG} v. Force</dice>
+        <bonusstring>Make an alchemical preparation in a container; threshold is Force, 1 hour per Force. Add a trigger observer.</bonusstring>
+      </test>
+      <notes>Force limit by container rating or whole spare parts (default 1), raised only by reagents. Enchanted bullets limited to Force 1 each.</notes>
+    </action>
+    <action>
+      <id>51723838-4ba9-451a-a242-91e0ca6de8e2</id>
+      <name>Precognitive Chamber</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Physical gear / Fittings</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>precognition chamber starship bonus department</keywords>
+      <test>
+        <dice>{MAG} + {Spellcasting}</dice>
+        <bonusstring>A precog level 2 magician adds bonus dice to a department equal to their spellcasting check.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>13d8fb52-12e6-4532-8ee5-d391750fac89</id>
+      <name>Research Test</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Advancements</section>
+      <category>Knowledge</category>
+      <type>No</type>
+      <keywords>research advancement breakthrough higher TL study meditate</keywords>
+      <test>
+        <dice>{LOG} + {Appropriate Skill} + {Appropriate Knowledge Skill}</dice>
+        <bonusstring>Logic + engineering or spellcasting skill + an associated knowledge skill (8 hours); successes reduce the score of negative advancement effects, eliminating them at 0.</bonusstring>
+      </test>
+      <notes>Glitch +1 difficulty, critical glitch +2. +6 per breakthrough already gained on the same research.</notes>
+    </action>
+    <action>
+      <id>82f1517f-4472-444c-ba31-e72020c2909c</id>
+      <name>Experiment Check</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Advancements</section>
+      <category>Crafting</category>
+      <type>Extended</type>
+      <keywords>experiment advancement breakthrough glitch higher TL</keywords>
+      <test>
+        <dice>{LOG} + {Appropriate Skill}</dice>
+        <bonusstring>Extended test (4 hours per roll) aiming for a glitch or critical glitch to roll on the advancement table; a critical glitch can yield a breakthrough.</bonusstring>
+      </test>
+      <notes>Book says "appropriate attribute + skill" (Logic assumed). Difficulty +1 per TL above yours. Stopping loses research hits. +4 on the advancement table per previous breakthrough.</notes>
+    </action>
+    <action>
+      <id>7d64cb33-3a29-4585-88b9-8a81994bbceb</id>
+      <name>Malfunctioning Item Check</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Advancements / Engineering advancement</section>
+      <category>Crafting</category>
+      <type>No</type>
+      <keywords>malfunction advancement item use fix</keywords>
+      <test>
+        <dice>{LOG} + {Armorer} v. difficulty</dice>
+        <bonusstring>After using a Malfunctioning item; on failure spend one hour and one spare part of its TL to fix it.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>8c78ce51-73c4-4095-b2a3-8a219538af75</id>
+      <name>Does It Work Now</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Advancements / Engineering advancement</section>
+      <category>General</category>
+      <type>No</type>
+      <keywords>advancement item work edge critical glitch</keywords>
+      <test>
+        <dice>{EDG} * 2 v. difficulty</dice>
+        <bonusstring>An item with this critical glitch effect only works if this test succeeds.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>91b970e8-d469-48e9-a9e6-df2b1d613e0f</id>
+      <name>Self-Disassembly Check</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Advancements / Engineering advancement</section>
+      <category>General</category>
+      <type>No</type>
+      <keywords>self disassembly advancement item breaks edge</keywords>
+      <test>
+        <dice>{EDG} * 2 v. difficulty</dice>
+        <bonusstring>Upon use of an item with Self-disassembly, roll to keep it from falling apart.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>66dfd450-1ca0-4a31-a34a-5334cf0d17a2</id>
+      <name>Resist Astral Plague</name>
+      <book>Shadowrun 5e crafting reworked</book>
+      <section>Advancements / Adept advancement</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>astral plague mutation infection resist</keywords>
+      <test>
+        <dice>{BOD} + {WIL} v. difficulty level</dice>
+        <bonusstring>Everyone around an adept with an infectious monstrosity mutation must pass or mutate.</bonusstring>
+      </test>
+    </action>
+  </actions>
+</chummer>

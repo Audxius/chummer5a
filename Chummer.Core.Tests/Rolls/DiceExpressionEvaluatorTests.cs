@@ -148,6 +148,22 @@ namespace Chummer.Tests.Rolls
         }
 
         [TestMethod]
+        public void HouseRulesLoadAndEvaluate()
+        {
+            System.Collections.Generic.List<RollAction> lstHouse = s_objCatalog.Actions.Where(x => x.IsHouseRule).ToList();
+            Assert.IsTrue(lstHouse.Count > 0, "No house rules found in " + string.Join(", ", RollCatalog.HouseRuleFolders()));
+            System.Text.StringBuilder sbdUnknowns = new System.Text.StringBuilder();
+            foreach (RollAction objAction in lstHouse.Where(x => x.IsRollable))
+            {
+                RollEvaluation objEvaluation = DiceExpressionEvaluator.EvaluateTest(objAction, NewContext());
+                foreach (string strUnknown in objEvaluation.Pool.Unknowns)
+                    sbdUnknowns.AppendLine(objAction.Book + " / " + objAction.Name + ": " + strUnknown);
+            }
+            // Unresolved tokens are expected for item context (weapon, vehicle...) and table-chosen skills; logged for review.
+            System.Console.WriteLine("House rules: " + lstHouse.Count + System.Environment.NewLine + sbdUnknowns);
+        }
+
+        [TestMethod]
         public void SearchRanksNameMatchesFirst()
         {
             RollAction objFirst = s_objCatalog.Search("melee def").FirstOrDefault();

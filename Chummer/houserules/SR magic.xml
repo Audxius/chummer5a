@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<chummer>
+  <actions>
+    <action>
+      <id>2ec1fa6f-b5a0-4e06-8a9e-9d7ac1f832d4</id>
+      <name>Gauge Spell Force</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>TL4 spell craft / Clarifications, changes / Counter spelling</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>assensing gauge spell force counterspelling counter spell read magic analyze</keywords>
+      <test>
+        <dice>{INT} + {Assensing} v. threshold equal to the spell's Force</dice>
+        <limit>{Astral}</limit>
+        <bonusstring>First step of counterspelling: Assensing to gauge the Force of an enemy spell; the threshold is the Force of the spell.</bonusstring>
+      </test>
+      <notes>On a failure the GM tells you the spell's Force shifted by 1dF (+ or - decided by 1d2). Then declare the counter Force you cast. Intuition + Assensing [Astral] is the SR5 default pool.</notes>
+    </action>
+    <action>
+      <id>18f95957-9f1b-424c-ae9f-7e9a233e71c4</id>
+      <name>Counterspelling</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>TL4 spell craft / Clarifications, changes / Counter spelling</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>counterspelling counter spell dispel reduce spell force spell defense</keywords>
+      <test>
+        <dice>{MAG} + {Counterspelling}</dice>
+        <bonusstring>Cast a counterspell at a declared Force; if successfully rolled, the enemy spell's Force is reduced by your counter Force.</bonusstring>
+      </test>
+      <notes>Normally preceded by Gauge Spell Force. You take drain equal to that spell's drain at the Force you counterspelled. Drain can be reduced with the same reagents that reduce spellcasting drain. The book does not state the pool or what counts as success; Magic + Counterspelling assumed.</notes>
+    </action>
+    <action>
+      <id>ccc883d9-09d1-4a61-8c30-d8746a6bc635</id>
+      <name>Sustained Counterspelling</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>TL4 spell craft / Clarifications, changes / Counter spelling</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>sustained counterspelling area counter spell anti-teleport alchemical ward</keywords>
+      <test>
+        <dice>{MAG} + {Counterspelling}</dice>
+        <bonusstring>Skip assensing and roll counterspelling of some Force over an area; works against alchemical and other spell-sustaining objects and all spells, including teleportation into or within the area.</bonusstring>
+      </test>
+      <notes>The mage must stay in the counterspelled area at all times. Drain as for counterspelling; reducible with drain-reducing reagents.</notes>
+    </action>
+    <action>
+      <id>772476f3-b48f-4d97-b9be-a0d6d192370e</id>
+      <name>Astral Friction</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Manipulation (L3)</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>astral friction spell anti-mage stun magic punish manipulation</keywords>
+      <test>
+        <dice>{MAG} + {Spellcasting} v. target's Logic + Willpower</dice>
+        <limit>{Spell: Force}</limit>
+        <bonusstring>Cast on an opposing mage; if it succeeds, the target takes Stun damage equal to Force every time they use magic, for Force combat turns.</bonusstring>
+      </test>
+      <notes>Drain F-3, permanent, LOS. Can only be cast once. Magic + Spellcasting [Force] is the SR5 default for "spellcasting".</notes>
+    </action>
+    <action>
+      <id>c700b7e7-5d7f-496a-af05-6686072f4ebc</id>
+      <name>Astral Friction (Shrug Off)</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Manipulation (L3)</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>astral friction resist shrug off save logic willpower</keywords>
+      <test>
+        <dice>{LOG} + {WIL}</dice>
+        <bonusstring>Every time Astral Friction activates, the affected mage can attempt to shrug it off.</bonusstring>
+      </test>
+      <notes>Limit is the Force of the enemy's Astral Friction spell [F]; apply it manually.</notes>
+    </action>
+    <action>
+      <id>39c8c3ba-d15b-4a52-9fa3-6a2e0715c439</id>
+      <name>Cursed Luck (Throw Off)</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Prophecy (L3)</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>cursed luck resist save throw off bad luck curse probability</keywords>
+      <test>
+        <dice>{LOG} + {WIL}</dice>
+        <bonusstring>An intelligent target of Cursed Luck can try at the end of each round to throw off the effect; this save is not penalized by the curse.</bonusstring>
+      </test>
+      <notes>Limit is the Force of the Cursed Luck spell [F]; apply it manually. While cursed the target rolls attacks, damage, skill checks and saves twice taking the worst.</notes>
+    </action>
+    <action>
+      <id>311f0452-5aee-40c1-b4d6-b6897db17b8d</id>
+      <name>Slip Field (Resist)</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Telekinesis (L2)</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>slip field resist fall prone slippery friction save reaction intuition</keywords>
+      <test>
+        <dice>{REA} + {INT}</dice>
+        <bonusstring>Each chosen target in a Slip Field must roll or fall prone, becoming unable to stand up or move. Targets who save are immune to this power.</bonusstring>
+      </test>
+      <notes>Limit is the Force of the Slip Field spell [F]; apply it manually.</notes>
+    </action>
+    <action>
+      <id>8f45c1ca-c501-4d7b-90e5-ed28a19f5354</id>
+      <name>Slip Field (Vehicle Control)</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Telekinesis (L2)</section>
+      <category>Vehicle</category>
+      <type>No</type>
+      <keywords>slip field vehicle control loss of control skid driver piloting crash</keywords>
+      <test>
+        <dice>{REA} + {Vehicle: Skill} v. threshold equal to the Slip Field's Force</dice>
+        <limit>{Vehicle: Handling}</limit>
+        <bonusstring>A ground vehicle's driver must make a Pilot skill check at a difficulty of F or go out of control, driving directly forward for a round and crashing into any obstacles.</bonusstring>
+      </test>
+      <notes>The book says only "Pilot skill check"; SR5 Reaction + Pilot [Handling] assumed.</notes>
+    </action>
+    <action>
+      <id>6a14f097-5010-4d95-af85-702b6b0f1953</id>
+      <name>Telekinetic Armory Attack</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Telekinesis (L1)</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>telekinetic armory weapon attack force blade rifle telekinesis summoned weapon</keywords>
+      <test>
+        <dice>{Max: {AGI} or {WIL} or {LOG}} + {Spellcasting} v. target's defense</dice>
+        <bonusstring>Attack with a telekinetic weapon (acts as a TL4 rifle or advanced melee weapon) dealing Force + hits DV with Force x2 AP.</bonusstring>
+      </test>
+      <notes>Attack rolls can use Agility, Willpower or Logic, and may use Spellcasting as the combat skill (or the normal weapon skill instead). Telekinetic armour grants Force x2 armour (does not stack with conventional armour). Drain F-2, sustained.</notes>
+    </action>
+    <action>
+      <id>ec26c8ab-015e-4de9-9d60-f64110ff0413</id>
+      <name>Force Puppetry (Resist)</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Telekinesis (L4)</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>force puppetry resist puppet mind control body control save logic willpower</keywords>
+      <test>
+        <dice>{LOG} + {WIL}</dice>
+        <bonusstring>A sapient victim resists the telekinetic onslaught; on a failure they lose control of their physical actions.</bonusstring>
+      </test>
+      <notes>Limit is the Force of the Force Puppetry spell [F]; apply it manually.</notes>
+    </action>
+    <action>
+      <id>7aa897d6-98c8-4125-b1ee-6db16daa2795</id>
+      <name>Telepathic Contact (Resist)</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Detection default spell</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>telepathic contact resist mind reading telepathy thoughts memory detection save</keywords>
+      <test>
+        <dice>{LOG} + {WIL}</dice>
+        <bonusstring>The target resists Telepathic Contact at Level-2 (reading surface thoughts) or higher (memory questions at Level-3, full topic recall at Level-4).</bonusstring>
+      </test>
+      <notes>Limit is the Force of the contact spell [F]; apply it manually. At Level-3 and Level-4 the contact ends afterwards whether or not the resistance succeeds. If resisted it cannot be attempted again that day.</notes>
+    </action>
+    <action>
+      <id>a0a6e315-a63c-41e3-bcba-2f763423d598</id>
+      <name>Suppress Cognition (Resist)</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Detection (L2)</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>suppress cognition resist mind block thought telepathy save</keywords>
+      <test>
+        <dice>{LOG} + {WIL}</dice>
+        <bonusstring>The target resists having a single action or person made unthinkable; success makes them immune to this technique for the day.</bonusstring>
+      </test>
+      <notes>Limit is the Force of the spell [F]; apply it manually.</notes>
+    </action>
+    <action>
+      <id>1495c231-c8a2-4aa9-bf76-5bdc33cc8f54</id>
+      <name>Reflex Response (Resist)</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Detection (L3)</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>reflex response resist impulse compulsion telepathy save</keywords>
+      <test>
+        <dice>{LOG} + {WIL}</dice>
+        <bonusstring>The target resists a forced irrational impulse; on a failure they use their next available action to carry it out.</bonusstring>
+      </test>
+      <notes>Limit is the Force of the spell [F]; apply it manually.</notes>
+    </action>
+    <action>
+      <id>136cf23f-5773-4c93-8c13-7f5028ec0490</id>
+      <name>Telepathic Assault (Halve Damage)</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Detection (L3)</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>telepathic assault resist halve stun damage mind blast telepathy save</keywords>
+      <test>
+        <dice>{LOG} + {WIL}</dice>
+        <bonusstring>The target of a Telepathic Assault (Fd6 stun, or (F+3)d6 at Detection-4) rolls to halve the damage.</bonusstring>
+      </test>
+      <notes>Limit is the spell's Force - 2 [F-2]; apply it manually. Can only be used once per encounter.</notes>
+    </action>
+    <action>
+      <id>fcfdcccb-333f-425e-b6d4-07e43a2d1289</id>
+      <name>Memory Editing (Resist)</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Detection (L4)</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>memory editing resist mind wipe false memory telepathy save</keywords>
+      <test>
+        <dice>{LOG} + {WIL}</dice>
+        <bonusstring>The target resists memory editing for the rest of the encounter; on a failure they will not notice the changed memories until given a reason to recollect them.</bonusstring>
+      </test>
+      <notes>Limit is the spell's Force - 2 [F-2]; apply it manually.</notes>
+    </action>
+    <action>
+      <id>152cf478-0e67-4bb3-a1c8-afb24b9e790a</id>
+      <name>Offensive Apportation (Resist)</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Improved TL4 spells / Teleportation (L4)</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>offensive apportation resist teleport unwilling abort save</keywords>
+      <test>
+        <dice>{LOG} + {WIL}</dice>
+        <bonusstring>A conscious, resisting target rolls to forcibly abort being teleported.</bonusstring>
+      </test>
+      <notes>Limit is the spell's Force - 3 [F-3]; apply it manually.</notes>
+    </action>
+    <action>
+      <id>04ed0756-4512-485d-8dca-8f2adfd7d067</id>
+      <name>Energy Beam</name>
+      <book>Shadowrun 5e magic reworked</book>
+      <section>Space and magic in TL5 worlds / Ways to spellcast</section>
+      <category>Magic</category>
+      <type>No</type>
+      <keywords>energy beam void battery throw energy blast spell attack tl5</keywords>
+      <test>
+        <dice>{MAG} + {Spellcasting} v. {Action: Ranged Defense}</dice>
+        <bonusstring>Throw an energy beam powered by a void battery: each minute of battery charge buys a point of damage or AP; roll spellcasting to hit and the target gets to dodge.</bonusstring>
+      </test>
+      <notes>Choose damage and AP before rolling. Can also be used for mundane tasks like heating or welding (seconds of charge). The book says "roll your spellcasting skill"; Magic + Spellcasting assumed.</notes>
+    </action>
+  </actions>
+</chummer>

@@ -42,10 +42,13 @@ namespace Chummer.Desktop.ViewModels
         {
             Current = this;
             Roster = new RosterViewModel(this);
+            Dice = new DiceTerminalViewModel(this);
             _currentPage = Roster;
         }
 
         public RosterViewModel Roster { get; }
+
+        public DiceTerminalViewModel Dice { get; }
 
         public ObservableCollection<CharacterViewModel> OpenCharacters { get; } = new ObservableCollection<CharacterViewModel>();
 
@@ -60,7 +63,13 @@ namespace Chummer.Desktop.ViewModels
 
         public bool IsRosterActive => ReferenceEquals(CurrentPage, Roster);
 
-        partial void OnCurrentPageChanged(ViewModelBase value) => OnPropertyChanged(nameof(IsRosterActive));
+        public bool IsDiceActive => ReferenceEquals(CurrentPage, Dice);
+
+        partial void OnCurrentPageChanged(ViewModelBase value)
+        {
+            OnPropertyChanged(nameof(IsRosterActive));
+            OnPropertyChanged(nameof(IsDiceActive));
+        }
 
         public string Title => "CHUMMER // NATIVE";
 
@@ -72,6 +81,13 @@ namespace Chummer.Desktop.ViewModels
 
         [RelayCommand]
         private void ShowRoster() => CurrentPage = Roster;
+
+        [RelayCommand]
+        private void ShowDice()
+        {
+            Dice.Activate();
+            CurrentPage = Dice;
+        }
 
         [RelayCommand]
         private void ShowCharacter(CharacterViewModel objCharacter)

@@ -1,0 +1,294 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Chummer.Desktop.ViewModels"
+             xmlns:conv="using:Chummer.Desktop.Converters"
+             x:Class="Chummer.Desktop.Views.DiceTerminalView"
+             x:DataType="vm:DiceTerminalViewModel">
+  <UserControl.Resources>
+    <conv:IconKeyConverter x:Key="Icon" />
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="ToggleButton.filter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Padding" Value="10,4" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="LetterSpacing" Value="1" />
+      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+    </Style>
+    <Style Selector="ToggleButton.filter:checked /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#2200E5FF" />
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
+    </Style>
+    <Style Selector="Button.roll">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Padding" Value="14,9" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="Button.roll:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#1400E5FF" />
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    </Style>
+    <Style Selector="Button.star">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="6" />
+    </Style>
+    <Style Selector="TextBlock.pool">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBlock.house">
+      <Setter Property="Foreground" Value="{StaticResource MagentaBrush}" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,*">
+    <!-- Header -->
+    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="28,18">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="14">
+          <PathIcon Data="{StaticResource Icon.Dice}" Width="34" Height="34" Classes="hot" />
+          <StackPanel>
+            <TextBlock Text="DICE TERMINAL" Classes="h1" />
+            <TextBlock Text="search a roll  //  click it  //  paste into Roll20" Classes="label" />
+          </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+          <TextBlock Text="RUNNER" Classes="label" VerticalAlignment="Center" />
+          <ComboBox ItemsSource="{Binding Characters}" SelectedItem="{Binding SelectedCharacter}" MinWidth="220">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:CharacterViewModel">
+                <TextBlock Text="{Binding Name}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- No runner open -->
+    <StackPanel Grid.Row="1" IsVisible="{Binding HasNoCharacter}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+      <PathIcon Data="{StaticResource Icon.Roster}" Width="48" Height="48" Classes="muted" />
+      <TextBlock Text="OPEN A RUNNER FIRST" Classes="h2" HorizontalAlignment="Center" />
+      <TextBlock Text="Rolls are computed from the runner's attributes, skills, gear and modifiers." Classes="muted" HorizontalAlignment="Center" />
+    </StackPanel>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,440" IsVisible="{Binding HasCharacter}">
+      <!-- Search + results -->
+      <DockPanel Margin="28,20,14,20">
+        <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,12">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBox x:Name="SearchBox" Text="{Binding Query}" PlaceholderText="Roll for…  (escape, dodge, hack, ram, craft, drain…)" FontSize="16" Padding="40,10,10,10" />
+            <PathIcon Data="{StaticResource Icon.Search}" Width="16" Height="16" HorizontalAlignment="Left" Margin="14,0,0,0" Classes="muted" IsHitTestVisible="False" />
+            <Button Grid.Column="1" Classes="ghost" Content="✕" Margin="6,0,0,0" Command="{Binding ClearQueryCommand}" ToolTip.Tip="Clear" />
+          </Grid>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ToggleButton Classes="filter" Content="HOUSE RULES" IsChecked="{Binding OnlyHouseRules}" />
+            <ToggleButton Classes="filter" Content="★ FAVORITES" IsChecked="{Binding OnlyFavorites}" />
+            <TextBlock Text="{Binding ResultCount}" Classes="label" VerticalAlignment="Center" Margin="8,0,0,0" />
+          </StackPanel>
+          <StackPanel IsVisible="{Binding HasRecent}" Spacing="6">
+            <TextBlock Text="RECENT" Classes="label" />
+            <ItemsControl ItemsSource="{Binding Recent}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:RollItemViewModel">
+                  <Button Classes="ghost" Margin="0,0,6,6" Padding="10,4" BorderThickness="1" BorderBrush="{StaticResource BorderBrush}"
+                          Command="{Binding $parent[UserControl].((vm:DiceTerminalViewModel)DataContext).RollCommand}" CommandParameter="{Binding}"
+                          ToolTip.Tip="{Binding Dice}">
+                    <TextBlock Text="{Binding Name}" FontSize="12" />
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </StackPanel>
+
+        <Border Classes="panel" Padding="0">
+          <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding Results}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:RollItemViewModel">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <Button Classes="roll" Command="{Binding $parent[UserControl].((vm:DiceTerminalViewModel)DataContext).RollCommand}" CommandParameter="{Binding}">
+                      <ToolTip.Tip>
+                        <StackPanel MaxWidth="420" Spacing="6">
+                          <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                          <TextBlock Text="{Binding Dice}" Foreground="{StaticResource CyanBrush}" TextWrapping="Wrap" />
+                          <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+                          <TextBlock Text="{Binding Notes}" IsVisible="{Binding HasNotes}" Classes="muted" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </ToolTip.Tip>
+                      <Grid ColumnDefinitions="30,*,Auto">
+                        <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="18" Height="18" />
+                        <StackPanel Grid.Column="1" Spacing="2" Margin="4,0,12,0">
+                          <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextBrush}" FontWeight="SemiBold" />
+                          <Grid ColumnDefinitions="Auto,Auto,*">
+                            <TextBlock Text="{Binding Tag}" Classes="label" Classes.house="{Binding IsHouseRule}" Margin="0,0,10,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding Category}" Classes="label" Margin="0,0,10,0" />
+                            <TextBlock Grid.Column="2" Text="{Binding Dice}" Classes="muted" FontSize="11" TextTrimming="CharacterEllipsis" />
+                          </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6">
+                          <TextBlock Text="!" IsVisible="{Binding IsIncomplete}" Foreground="{StaticResource YellowBrush}" FontWeight="Bold" VerticalAlignment="Center"
+                                     ToolTip.Tip="Needs a value the sheet can't know (target, item) — set it on the right" />
+                          <TextBlock Text="{Binding PoolPreview}" Classes="pool" />
+                        </StackPanel>
+                      </Grid>
+                    </Button>
+                    <Button Grid.Column="1" Classes="star" Command="{Binding $parent[UserControl].((vm:DiceTerminalViewModel)DataContext).ToggleFavoriteCommand}"
+                            CommandParameter="{Binding}" ToolTip.Tip="Favorite">
+                      <Panel>
+                        <PathIcon Data="{StaticResource Icon.Star}" Width="14" Height="14" Classes="muted" IsVisible="{Binding !IsFavorite}" />
+                        <PathIcon Data="{StaticResource Icon.Star}" Width="14" Height="14" Foreground="{StaticResource YellowBrush}" IsVisible="{Binding IsFavorite}" />
+                      </Panel>
+                    </Button>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Border>
+      </DockPanel>
+
+      <!-- Selected roll -->
+      <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0">
+        <Grid>
+          <StackPanel IsVisible="{Binding !HasSelection}" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8" Margin="24">
+            <PathIcon Data="{StaticResource Icon.Dice}" Width="40" Height="40" Classes="muted" />
+            <TextBlock Text="Click a roll to copy it." Classes="muted" HorizontalAlignment="Center" />
+            <TextBlock Text="Its breakdown and options show up here." Classes="muted" HorizontalAlignment="Center" />
+          </StackPanel>
+          <ScrollViewer IsVisible="{Binding HasSelection}">
+            <StackPanel Margin="24,22" Spacing="14">
+              <StackPanel Spacing="4">
+                <TextBlock Text="{Binding SelectedRoll.Tag}" Classes="label" Classes.house="{Binding SelectedRoll.IsHouseRule}" />
+                <TextBlock Text="{Binding SelectedRoll.Name}" Classes="h1" TextWrapping="Wrap" />
+              </StackPanel>
+
+              <!-- Pool -->
+              <Border Classes="panel lit">
+                <StackPanel Spacing="8">
+                  <Grid ColumnDefinitions="Auto,*,Auto">
+                    <TextBlock Text="{Binding Pool}" FontSize="48" FontWeight="Black" Foreground="{StaticResource CyanBrush}" />
+                    <TextBlock Grid.Column="1" Text="d6" FontSize="20" Margin="6,0,0,10" VerticalAlignment="Bottom" Classes="muted" />
+                    <StackPanel Grid.Column="2" Spacing="6" VerticalAlignment="Center">
+                      <Border Classes="chip" IsVisible="{Binding HasLimit}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                          <TextBlock Text="LIMIT" Classes="label" />
+                          <TextBlock Text="{Binding LimitText}" FontWeight="Bold" />
+                        </StackPanel>
+                      </Border>
+                      <Border Classes="chip" IsVisible="{Binding HasThreshold}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                          <TextBlock Text="THRESHOLD" Classes="label" />
+                          <TextBlock Text="{Binding ThresholdText}" FontWeight="Bold" />
+                        </StackPanel>
+                      </Border>
+                    </StackPanel>
+                  </Grid>
+                  <TextBlock Text="{Binding Breakdown}" TextWrapping="Wrap" Classes="muted" />
+                  <StackPanel IsVisible="{Binding HasOpposed}" Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="VS" Classes="label" Foreground="{StaticResource MagentaBrush}" />
+                    <TextBlock Text="{Binding OpposedText}" TextWrapping="Wrap" />
+                  </StackPanel>
+                </StackPanel>
+              </Border>
+
+              <!-- Context -->
+              <StackPanel Spacing="4" IsVisible="{Binding NeedsWeapon}">
+                <TextBlock Text="WEAPON" Classes="label" />
+                <ComboBox ItemsSource="{Binding Weapons}" SelectedItem="{Binding SelectedWeapon}" HorizontalAlignment="Stretch" />
+              </StackPanel>
+              <StackPanel Spacing="4" IsVisible="{Binding NeedsVehicle}">
+                <TextBlock Text="VEHICLE / DRONE" Classes="label" />
+                <ComboBox ItemsSource="{Binding Vehicles}" SelectedItem="{Binding SelectedVehicle}" HorizontalAlignment="Stretch" />
+              </StackPanel>
+              <Grid ColumnDefinitions="*,110" IsVisible="{Binding NeedsSpell}">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="SPELL" Classes="label" />
+                  <ComboBox ItemsSource="{Binding SpellOptions}" SelectedItem="{Binding SelectedSpell}" HorizontalAlignment="Stretch" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4" Margin="10,0,0,0">
+                  <TextBlock Text="FORCE" Classes="label" />
+                  <NumericUpDown Value="{Binding SpellForce}" Minimum="1" Maximum="30" Increment="1" FormatString="0" />
+                </StackPanel>
+              </Grid>
+              <StackPanel Spacing="4" IsVisible="{Binding NeedsDevice}">
+                <TextBlock Text="DEVICE" Classes="label" />
+                <ComboBox ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice}" HorizontalAlignment="Stretch" />
+              </StackPanel>
+              <StackPanel Spacing="4" IsVisible="{Binding NeedsSpirit}">
+                <TextBlock Text="SPIRIT" Classes="label" />
+                <ComboBox ItemsSource="{Binding SpiritOptions}" SelectedItem="{Binding SelectedSpirit}" HorizontalAlignment="Stretch" />
+              </StackPanel>
+
+              <!-- Values the sheet cannot know -->
+              <StackPanel Spacing="6" IsVisible="{Binding HasOverrides}">
+                <TextBlock Text="FILL IN" Classes="label" Foreground="{StaticResource YellowBrush}" />
+                <ItemsControl ItemsSource="{Binding Overrides}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:OverrideViewModel">
+                      <Grid ColumnDefinitions="*,110" Margin="0,2">
+                        <TextBlock Text="{Binding Label}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                        <NumericUpDown Grid.Column="1" Value="{Binding Value}" Increment="1" FormatString="0" PlaceholderText="0" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+
+              <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="SITUATIONAL MODIFIER" Classes="label" />
+                  <NumericUpDown Value="{Binding Modifier}" Minimum="-30" Maximum="30" Increment="1" FormatString="+0;-0;0" HorizontalAlignment="Left" Width="140" />
+                </StackPanel>
+                <ToggleButton Grid.Column="1" Classes="filter" IsChecked="{Binding UseEdge}" VerticalAlignment="Bottom" Padding="14,8"
+                              ToolTip.Tip="Push the Limit: add Edge dice, sixes explode, ignore the limit">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <PathIcon Data="{StaticResource Icon.Edge}" Width="14" Height="14" />
+                    <TextBlock Text="EDGE" />
+                  </StackPanel>
+                </ToggleButton>
+              </Grid>
+
+              <Button Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="12" Command="{Binding CopyCommand}" HotKey="Ctrl+Enter">
+                <TextBlock Text="COPY ROLL20 FORMULA" LetterSpacing="1.5" />
+              </Button>
+              <Border Background="{StaticResource BaseBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="10">
+                <SelectableTextBlock Text="{Binding Formula}" FontFamily="monospace" FontSize="11" TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" />
+              </Border>
+
+              <StackPanel Spacing="6">
+                <TextBlock Text="RULE" Classes="label" />
+                <TextBlock Text="{Binding SelectedRoll.Description}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding SelectedRoll.Notes}" TextWrapping="Wrap" Classes="muted" IsVisible="{Binding SelectedRoll.HasNotes}" />
+                <TextBlock Text="{Binding SelectedRoll.Dice}" TextWrapping="Wrap" Foreground="{StaticResource CyanBrush}" FontSize="11" />
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+
+          <!-- Toast -->
+          <Border IsVisible="{Binding HasToast}" VerticalAlignment="Bottom" Margin="16" Padding="14,10"
+                  Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource CyanBrush}" BorderThickness="1" BoxShadow="0 0 24 0 #5500E5FF">
+            <TextBlock Text="{Binding Toast}" Foreground="{StaticResource CyanBrush}" FontWeight="Bold" LetterSpacing="1" TextTrimming="CharacterEllipsis" />
+          </Border>
+        </Grid>
+      </Border>
+    </Grid>
+  </Grid>
+</UserControl>

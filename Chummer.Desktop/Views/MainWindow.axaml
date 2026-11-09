@@ -19,13 +19,13 @@
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,12">
-          <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="17,10"
-                  IsEnabled="False" ToolTip.Tip="Dice Terminal (coming soon)">
+          <ToggleButton Classes="nav" IsChecked="{Binding IsDiceActive, Mode=OneWay}" Command="{Binding ShowDiceCommand}"
+                        HotKey="Ctrl+R" ToolTip.Tip="Dice Terminal (Ctrl+R)">
             <StackPanel Orientation="Horizontal" Spacing="12">
-              <PathIcon Data="{StaticResource Icon.Dice}" Width="18" Height="18" Classes="muted" />
+              <PathIcon Data="{StaticResource Icon.Dice}" Width="18" Height="18" Classes="hot" />
               <TextBlock Text="DICE TERMINAL" LetterSpacing="1.5" FontSize="12" VerticalAlignment="Center" />
             </StackPanel>
-          </Button>
+          </ToggleButton>
         </StackPanel>
 
         <StackPanel Spacing="2">

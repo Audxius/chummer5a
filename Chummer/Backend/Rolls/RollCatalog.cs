@@ -36,6 +36,7 @@ namespace Chummer.Rolls
         public string Dice { get; set; } = string.Empty;
         public string Limit { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public string Notes { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
         public string ActionType { get; set; } = string.Empty;
         public string Source { get; set; } = string.Empty;
@@ -110,6 +111,9 @@ namespace Chummer.Rolls
         {
             if (objAction == null)
                 throw new ArgumentNullException(nameof(objAction));
+            // Books that share a chapter (same rule copied into two docs) would show the roll twice.
+            if (objAction.IsHouseRule && _lstActions.Exists(x => x.IsHouseRule && string.Equals(x.Name, objAction.Name, StringComparison.OrdinalIgnoreCase)))
+                return;
             _lstActions.Add(objAction);
             // House rules may deliberately shadow a core action of the same name; core lookups via {Action: X} prefer the core one.
             if (!_dicByName.ContainsKey(objAction.Name) || (_dicByName[objAction.Name].IsHouseRule && !objAction.IsHouseRule))
@@ -171,8 +175,8 @@ namespace Chummer.Rolls
                     DisplayName = (blnTranslate ? xmlAction.SelectSingleNode("translate")?.Value : null) ?? strName,
                     Dice = xmlAction.SelectSingleNode("test/dice")?.Value ?? string.Empty,
                     Limit = xmlAction.SelectSingleNode("test/limit")?.Value ?? string.Empty,
-                    Description = xmlAction.SelectSingleNode("test/bonusstring")?.Value
-                                  ?? xmlAction.SelectSingleNode("notes")?.Value ?? string.Empty,
+                    Description = xmlAction.SelectSingleNode("test/bonusstring")?.Value ?? string.Empty,
+                    Notes = xmlAction.SelectSingleNode("notes")?.Value ?? string.Empty,
                     Category = xmlAction.SelectSingleNode("category")?.Value ?? string.Empty,
                     ActionType = xmlAction.SelectSingleNode("type")?.Value ?? string.Empty,
                     Source = xmlAction.SelectSingleNode("source")?.Value ?? string.Empty,
@@ -196,6 +200,7 @@ namespace Chummer.Rolls
             return lstPool.Select(x => new { Action = x, Score = Score(x, astrWords) })
                           .Where(x => x.Score > 0)
                           .OrderByDescending(x => x.Score)
+                          .ThenBy(x => x.Action.IsHouseRule ? 0 : 1)
                           .ThenBy(x => x.Action.DisplayName, StringComparer.CurrentCultureIgnoreCase)
                           .Select(x => x.Action);
         }
@@ -219,7 +224,8 @@ namespace Chummer.Rolls
                     intWord = 30;
                 else if (objAction.Dice.IndexOf(strWord, StringComparison.CurrentCultureIgnoreCase) >= 0)
                     intWord = 20;
-                else if (objAction.Description.IndexOf(strWord, StringComparison.CurrentCultureIgnoreCase) >= 0)
+                else if (objAction.Description.IndexOf(strWord, StringComparison.CurrentCultureIgnoreCase) >= 0
+                         || objAction.Notes.IndexOf(strWord, StringComparison.CurrentCultureIgnoreCase) >= 0)
                     intWord = 10;
                 if (intWord == 0)
                     return 0;

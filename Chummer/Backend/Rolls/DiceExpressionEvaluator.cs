@@ -113,6 +113,17 @@ namespace Chummer.Rolls
             "BOD", "AGI", "REA", "STR", "CHA", "INT", "LOG", "WIL", "EDG", "MAG", "MAGAdept", "RES", "DEP", "ESS"
         };
 
+        private static readonly Lazy<HashSet<string>> s_setKnownSkillNames = new Lazy<HashSet<string>>(() =>
+        {
+            HashSet<string> setReturn = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            System.Xml.XPath.XPathNavigator xmlSkills = XmlManager.LoadXPath("skills.xml");
+            foreach (System.Xml.XPath.XPathNavigator xmlName in xmlSkills.Select("/chummer/skills/skill/name"))
+                setReturn.Add(xmlName.Value);
+            return setReturn;
+        });
+
+        internal static HashSet<string> KnownSkillNames => s_setKnownSkillNames.Value;
+
         public static RollEvaluation EvaluateTest(RollAction objAction, RollContext objContext)
         {
             if (objAction == null)
@@ -487,12 +498,15 @@ namespace Chummer.Rolls
                                  ?? objCharacter.SkillsSection.KnowledgeSkills.FirstOrDefault(x => x.Name.Equals(strName, StringComparison.OrdinalIgnoreCase)
                                                                                                    || x.CurrentDisplayName.Equals(strName, StringComparison.OrdinalIgnoreCase));
                 if (objSkill == null)
-                    return Unknown(strName);
+                {
+                    // A real SR5 skill the character simply lacks (e.g. Spellcasting on a mundane): untrained, no default.
+                    return KnownSkillNames.Contains(strName) ? Record(strName + " (untrained, no default)", 0) : Unknown(strName);
+                }
                 int intRating = objSkill.Rating;
                 if (intRating > 0)
                     return Record(objSkill.CurrentDisplayName, intRating);
                 // SR5 defaulting: untrained skills that allow it roll attribute - 1.
-                return objSkill.Default ? Record(objSkill.CurrentDisplayName + " (defaulting)", -1) : Unknown(strName + " (untrained, cannot default)");
+                return objSkill.Default ? Record(objSkill.CurrentDisplayName + " (defaulting)", -1) : Record(objSkill.CurrentDisplayName + " (untrained, no default)", 0);
             }
 
             private double ResolveWeapon(string strToken, string strArgument)

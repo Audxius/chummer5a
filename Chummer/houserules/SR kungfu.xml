@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="utf-8"?>
+<chummer>
+  <actions>
+    <action>
+      <id>7b13f273-03ba-460f-85dd-4c6cb416fd44</id>
+      <name>Block</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / General melee combat dynamic</section>
+      <category>Martial Arts</category>
+      <type>No</type>
+      <keywords>block parry defend guard melee defense</keywords>
+      <test>
+        <dice>{REA} + {Weapon: Skill} v. attacker's attack</dice>
+        <bonusstring>Block a melee attack with Reaction + the applied melee combat skill rating; no penalties for multiple blocks.</bonusstring>
+      </test>
+      <notes>Unarmed cannot block swords (unless Catch technique). Requires basic rating 1. Sword and shield technique: +4. Defensive stance (dual wielding): +2 to block, -2 to attack; Aggressive stance: -2 to block. Techniques may add effects on a successful block (Trip, Grab, Weaken, Wall, Pain dealer).</notes>
+    </action>
+    <action>
+      <id>c82800a4-31ed-43d8-ad9a-4dc66a09cdb1</id>
+      <name>Block Thrown Weapon (Deflect)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / Blades, Blunt and Ranged melee techniques</section>
+      <category>Martial Arts</category>
+      <type>No</type>
+      <keywords>deflect block arrow thrown knife projectile parry</keywords>
+      <test>
+        <dice>{REA} + {Weapon: Skill} - 4 v. attacker's attack</dice>
+        <bonusstring>Deflect technique: block thrown weapons and arrows at -4.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>bb04ac33-9414-4aeb-9dc6-a4ffe42e5eac</id>
+      <name>Counterattack (Melee)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / General melee combat dynamic</section>
+      <category>Martial Arts</category>
+      <type>No</type>
+      <keywords>counter counterattack riposte retaliate</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} v. {Action: Melee Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>After a successful dodge or block, make any melee action against the attacker. Only one counter per melee action (attack, counter, enemy counter).</bonusstring>
+      </test>
+      <notes>Requires basic rating 2. Ultra-instinct gives 2 counterattacks; Seize initiative adds a follow-up attack; Fast (dual wielding) attacks twice when countering.</notes>
+    </action>
+    <action>
+      <id>ce518ac7-9dcb-49dd-b497-c016c9c548e9</id>
+      <name>Throw Off Balance (Melee)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / General melee combat dynamic</section>
+      <category>Martial Arts</category>
+      <type>No</type>
+      <keywords>throw off balance stagger feint unbalance debuff</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} v. {Action: Melee Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Roll your normal attack; it deals no damage but the target gets a penalty to his next roll equal to your net hits.</bonusstring>
+      </test>
+      <notes>Requires basic rating 4. Techniques modify it (System shock doubles net hits, Mighty push/Pressure moves target, Confusing attack applies to dodge/block, Hitting nerves deals damage).</notes>
+    </action>
+    <action>
+      <id>b5398773-0e58-487c-9d25-1f4eb1f2c54f</id>
+      <name>Disarm</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / General melee combat dynamic</section>
+      <category>Martial Arts</category>
+      <type>No</type>
+      <keywords>disarm knock weapon away strip weapon</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} v. target's combat skill or Strength + Agility</dice>
+        <bonusstring>Combat skill vs combat skill or Strength + Agility; on success toss the weapon net hits meters in any direction.</bonusstring>
+      </test>
+      <notes>Book says only 'combat skill'; Agility added as the usual SR5 linked attribute. Requires basic rating 3. Techniques: Mine (take weapon), Breakdown (reduce accuracy), Chip away (reduce damage), Malfunction (jam), Impale (damage hand).</notes>
+    </action>
+    <action>
+      <id>99dd520a-81b8-4206-8406-caefd9663e57</id>
+      <name>Melee Shooting</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / General melee combat dynamic</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>point blank shoot in melee gun close range</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} v. {Action: Ranged Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Shooting in melee is only possible with handguns; rifles at -2.</bonusstring>
+      </test>
+      <notes>-2 dice if using a rifle (Ranged specialist technique removes this). Ranged defence mastery gives +4 to actions against ranged weapons in melee.</notes>
+    </action>
+    <action>
+      <id>8f64d589-e3d0-4fa1-9844-30cb5f01599b</id>
+      <name>Called Shot: Head (Melee)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / General melee combat dynamic</section>
+      <category>Martial Arts</category>
+      <type>No</type>
+      <keywords>called shot aimed strike head</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} - 2 v. {Action: Melee Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Melee called shot to the head: damage is net hits x2.</bonusstring>
+      </test>
+      <notes>AP must exceed the part's armour (helmet for head, body vest for everything else). If damage goes through, the part stops functioning; a head hit knocks the target unconscious for net hits rounds. Requires basic rating 5.</notes>
+    </action>
+    <action>
+      <id>a0985ea8-4f5b-47fa-bdce-81c27f54f0bf</id>
+      <name>Called Shot: Arm/Leg (Melee)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / General melee combat dynamic</section>
+      <category>Martial Arts</category>
+      <type>No</type>
+      <keywords>called shot aimed strike arm leg</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} v. {Action: Melee Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Melee called shot to the arm/leg: damage is net hits x1/2.</bonusstring>
+      </test>
+      <notes>AP must exceed the part's armour (helmet for head, body vest for everything else). If damage goes through, the part stops functioning; a head hit knocks the target unconscious for net hits rounds. Requires basic rating 5.</notes>
+    </action>
+    <action>
+      <id>7a41efd4-4002-450b-91cb-010e87eb2260</id>
+      <name>Called Shot: Hand/Foot/Knee/Cheek (Melee)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / General melee combat dynamic</section>
+      <category>Martial Arts</category>
+      <type>No</type>
+      <keywords>called shot aimed strike hand foot knee cheek</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} - 4 v. {Action: Melee Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Melee called shot to the hand/foot/knee/cheek: damage is net hits x1/2.</bonusstring>
+      </test>
+      <notes>AP must exceed the part's armour (helmet for head, body vest for everything else). If damage goes through, the part stops functioning; a head hit knocks the target unconscious for net hits rounds. Requires basic rating 5.</notes>
+    </action>
+    <action>
+      <id>56ef79a2-1863-4359-a54c-494a7ac318eb</id>
+      <name>Called Shot: Eye/Finger/Nose (Melee)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / General melee combat dynamic</section>
+      <category>Martial Arts</category>
+      <type>No</type>
+      <keywords>called shot aimed strike eye finger nose</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} - 6 v. {Action: Melee Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Melee called shot to the eye/finger/nose: damage is no damage.</bonusstring>
+      </test>
+      <notes>AP must exceed the part's armour (helmet for head, body vest for everything else). If damage goes through, the part stops functioning; a head hit knocks the target unconscious for net hits rounds. Requires basic rating 5.</notes>
+    </action>
+    <action>
+      <id>ead87623-0137-47c6-8ea0-4f7e858867b1</id>
+      <name>Knowledge Skill Assist</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / General melee combat dynamic</section>
+      <category>Knowledge</category>
+      <type>No</type>
+      <keywords>knowledge assist bonus dice lore help</keywords>
+      <test>
+        <dice>{LOG} + {Knowledge Skill}</dice>
+        <limit>{Mental}</limit>
+        <bonusstring>Roll a knowledge skill applicable to the action you are about to do and add your hits as bonus dice to that skill check.</bonusstring>
+      </test>
+      <notes>Use the knowledge skill's linked attribute (Logic or Intuition) and the relevant knowledge skill.</notes>
+    </action>
+    <action>
+      <id>6165dacb-a4b8-4dad-b85a-2ebf520c5229</id>
+      <name>Sprint (Running)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / General melee combat dynamic</section>
+      <category>Physical</category>
+      <type>No</type>
+      <keywords>run sprint movement dash</keywords>
+      <test>
+        <dice>{STR} + {Running}</dice>
+        <limit>{Physical}</limit>
+        <bonusstring>Running hits give hits x4 meters of additional movement (movement is now Strength x4).</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>f9e3e09a-d774-4362-9637-5b344c41f854</id>
+      <name>Group Attack</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Group combat</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>group squad unit mass battle army attack</keywords>
+      <test>
+        <dice>{Weapon: Skill} v. chosen defenders' count + average Dodge + modifiers</dice>
+        <bonusstring>Attacker picks a number of defenders and rolls (members + average combat skill + modifiers)d6. Net hits = hits defenders must soak, each adding net hits to damage.</bonusstring>
+      </test>
+      <notes>Add the number of attacking members and group modifiers. Damage per hit = group average damage + net hits, group average AP. Hits land on the member with lowest health or armour.</notes>
+    </action>
+    <action>
+      <id>58bac10a-6965-4760-970b-2f7d6ee3327b</id>
+      <name>Group Dodge</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Group combat</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>group squad unit dodge defense mass battle</keywords>
+      <test>
+        <dice>{REA} + {INT} v. attacking unit's members + combat skill average</dice>
+        <bonusstring>Defenders roll (chosen defenders + average dodge + modifiers)d6 against a group attack.</bonusstring>
+      </test>
+      <notes>Uses the group's average Dodge stat; add the number of chosen defenders. Dodge pool shown as SR5 Reaction + Intuition.</notes>
+    </action>
+    <action>
+      <id>18e88ebc-7c29-429c-a208-e29ed45a0bdb</id>
+      <name>Group Damage Resistance</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Group combat</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>group soak damage resistance armor body mass battle</keywords>
+      <test>
+        <dice>{BOD}</dice>
+        <bonusstring>Defenders soak hits with Armour + Body (individually, once with group averages, or once multiplied by hits).</bonusstring>
+      </test>
+      <notes>Add Armour. Slower: resist each hit individually. Faster: roll once with average armour + body, subtract from average damage + net hits, apply per hit. Fastest: roll once, multiply remaining damage by hits; each time damage exceeds average health one defender dies.</notes>
+    </action>
+    <action>
+      <id>7b8b66de-68df-419f-ad2c-ad56852f2c76</id>
+      <name>Morale Check</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Group combat</section>
+      <category>Social</category>
+      <type>No</type>
+      <keywords>morale rout panic break casualties group</keywords>
+      <test>
+        <dice>{WIL} + {CHA}</dice>
+        <bonusstring>When heavy casualties occur roll (original members - current members)d6; succeed if the result is less than current morale + modifiers.</bonusstring>
+      </test>
+      <notes>Morale = sum of Willpower + Charisma of the unit. The actual roll is (casualties)d6 compared against morale; the dice shown are one member's morale contribution.</notes>
+    </action>
+    <action>
+      <id>9a5c416a-57fd-4004-8cb6-003d7112881c</id>
+      <name>Shield Attack</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Melee combat / Shield techniques</section>
+      <category>Martial Arts</category>
+      <type>No</type>
+      <keywords>shield bash attack</keywords>
+      <test>
+        <dice>{AGI} + {Max: {Unarmed Combat} or {Max: {Blades} or {Clubs}}} v. {Action: Melee Defense}</dice>
+        <bonusstring>Shield attacks use your best melee skill; damage is your normal melee damage but physical.</bonusstring>
+      </test>
+      <notes>Wall technique: double net hits on a block breaks opponent's arm.</notes>
+    </action>
+    <action>
+      <id>6b134412-a57e-460e-992b-092b9c8ecc3f</id>
+      <name>Broken (Medieval Ranged)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat / Medieval ranged techniques</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>broken wound cripple arrow</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} - 2 v. {Action: Ranged Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>With a successful -2 attack permanently decrease someone's dice pool like Throw off balance until the wound is treated.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>c8185ec0-34fc-4df4-b9c4-53fd07de4979</id>
+      <name>Legolas</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat / Medieval ranged techniques</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>legolas perception aim bow archery spot</keywords>
+      <test>
+        <dice>{INT} + {Perception}</dice>
+        <limit>{Mental}</limit>
+        <bonusstring>Roll Perception and add the hits to your shooting dice pool.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>b2d587d8-60b0-483b-bb12-cbe9619048a3</id>
+      <name>Rapid Fire (Arrows)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat / Medieval ranged techniques</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>rapid fire two arrows bow archery multishot</keywords>
+      <test>
+        <dice>{AGI} + {Archery} - 4 v. {Action: Ranged Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Shoot 2 arrows with -4 dice.</bonusstring>
+      </test>
+      <notes>High ground: +2 if higher than enemies.</notes>
+    </action>
+    <action>
+      <id>77ee708a-704b-4e76-a5bd-18b72ce7cba6</id>
+      <name>Double Tap (Handgun)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat / Handgun techniques</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>double tap pistol two shots</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} - 2 v. {Action: Ranged Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>-2 dice but attack two times.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>a2fecd60-51bc-467d-8318-f44b7ce37c33</id>
+      <name>Double Tap (Long Burst)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat / Rifle, Heavy and Gunnery techniques</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>double tap long burst two targets automatic</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} - 2 v. {Action: Ranged Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>-2 dice but attack two targets when using a long burst.</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>1813b29e-92b1-42e8-a401-e603f26d9b47</id>
+      <name>Operate Weapon (Untrained)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>operation reload operate weapon armorer jam clear</keywords>
+      <test>
+        <dice>{LOG} + {Armorer}</dice>
+        <limit>{Mental}</limit>
+        <bonusstring>Without the Operation benefit (basic rating 1) you might need to roll Armorer to complete a weapon action other than shooting (e.g. reload).</bonusstring>
+      </test>
+    </action>
+    <action>
+      <id>02d8c4bc-15a6-4296-a5a6-a8f9959ba65e</id>
+      <name>Called Shot: Head (Ranged)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>called shot aimed shot sniper head</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} - 6 v. {Action: Ranged Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Ranged called shot to the head: damage is net hits x2.</bonusstring>
+      </test>
+      <notes>AP must exceed the part's armour (helmet for head, body vest for everything else). If damage goes through, the part stops functioning; a head hit knocks the target unconscious for net hits rounds. Requires ranged basic rating 5.</notes>
+    </action>
+    <action>
+      <id>8c23078c-13d2-45f1-b6a2-3568a7f6a303</id>
+      <name>Called Shot: Arm/Leg (Ranged)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>called shot aimed shot sniper arm leg</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} - 6 v. {Action: Ranged Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Ranged called shot to the arm/leg: damage is net hits x1/2.</bonusstring>
+      </test>
+      <notes>AP must exceed the part's armour (helmet for head, body vest for everything else). If damage goes through, the part stops functioning; a head hit knocks the target unconscious for net hits rounds. Requires ranged basic rating 5.</notes>
+    </action>
+    <action>
+      <id>920f5245-d507-47fb-adbd-5b484b055a8f</id>
+      <name>Called Shot: Hand/Foot/Knee/Cheek (Ranged)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>called shot aimed shot sniper hand foot knee cheek</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} - 8 v. {Action: Ranged Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Ranged called shot to the hand/foot/knee/cheek: damage is net hits x1/2.</bonusstring>
+      </test>
+      <notes>AP must exceed the part's armour (helmet for head, body vest for everything else). If damage goes through, the part stops functioning; a head hit knocks the target unconscious for net hits rounds. Requires ranged basic rating 5.</notes>
+    </action>
+    <action>
+      <id>009f728e-6beb-4286-ba83-bae558a857eb</id>
+      <name>Called Shot: Eye/Finger/Nose (Ranged)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>called shot aimed shot sniper eye finger nose</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} - 10 v. {Action: Ranged Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Ranged called shot to the eye/finger/nose: damage is no damage.</bonusstring>
+      </test>
+      <notes>AP must exceed the part's armour (helmet for head, body vest for everything else). If damage goes through, the part stops functioning; a head hit knocks the target unconscious for net hits rounds. Requires ranged basic rating 5.</notes>
+    </action>
+    <action>
+      <id>7693a918-04fe-43d9-a7f1-8fbca386f71d</id>
+      <name>Counterattack (Ranged)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>counter counterattack return fire</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} v. {Action: Ranged Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Ranged counterattack after a successful defense; accumulates recoil until the chain of counters stops.</bonusstring>
+      </test>
+      <notes>Requires ranged basic rating 2. Steady hands: no recoil accumulation for short bursts. Silence: long bursts prevent counterattacks. Lightfoot: instead get +2 on next attack ignoring cover.</notes>
+    </action>
+    <action>
+      <id>42f56521-366f-4f79-95ef-e29d2bf8042b</id>
+      <name>Throw Off Balance (Ranged)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>throw off balance suppress pin down debuff</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} v. {Action: Ranged Defense}</dice>
+        <limit>{Weapon: Accuracy}</limit>
+        <bonusstring>Attack that deals no damage; the target gets a penalty to his next roll equal to your net hits.</bonusstring>
+      </test>
+      <notes>Requires ranged basic rating 4.</notes>
+    </action>
+    <action>
+      <id>fcbe4e8a-d43c-434a-8349-2a8dd908bf87</id>
+      <name>Reaction (vs Charge)</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Ranged combat</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>reaction charge quick draw duel high noon quick reflex fast draw</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} v. threshold equal to the charger's attack hits</dice>
+        <bonusstring>Like counterattack but against charge attacks: roll combat skill with the enemy's attack hits as threshold; on success you can attack the charger. Also used in duels to see who is faster.</bonusstring>
+      </test>
+      <notes>Book says 'roll combat skill'; Agility added as linked attribute. Requires ranged basic rating 3. Derail stops the charge; Shoot to kill adds half the hits to your attack; Guardian lets friends use your Reaction. High noon / Quick reflex: if both have it, both roll Reaction.</notes>
+    </action>
+    <action>
+      <id>1274662d-e113-4d04-8982-f9d6f3044ce2</id>
+      <name>Calculate Trajectory</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Gunnery and artillery</section>
+      <category>Combat</category>
+      <type>Complex</type>
+      <keywords>calculate trajectory artillery aim ballistics firing solution</keywords>
+      <test>
+        <dice>{LOG} + {Max: {INT} or {Weapon: Skill}}</dice>
+        <bonusstring>Logic + (Intuition or applicable ranged combat skill); hits act as the limit for the shooting test.</bonusstring>
+      </test>
+      <notes>A complex action can be spent to roll again and add to the next calculate test. Must be redone if target position changes relative to you. Can cover several closely situated weapons; can be made by an aiming assist program.</notes>
+    </action>
+    <action>
+      <id>76d25fe5-b7cd-48df-a7ba-6fb7b6d272bb</id>
+      <name>Calculated Shot</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Gunnery and artillery</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>heavy gun main gun cannon fire gunnery artillery</keywords>
+      <test>
+        <dice>{AGI} + {Weapon: Skill} v. {Action: Ranged Defense}</dice>
+        <bonusstring>Heavy/fixed weapon shot using Agility + combat skill, limited by Calculate Trajectory hits.</bonusstring>
+      </test>
+      <notes>Limit = hits from Calculate Trajectory (alternative to Gunnery).</notes>
+    </action>
+    <action>
+      <id>27170415-4b58-47b8-a554-35190d6f7ca2</id>
+      <name>Artillery Fire</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Gunnery and artillery</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>artillery bombard indirect fire shell barrage</keywords>
+      <test>
+        <dice>{AGI} + {Gunnery}</dice>
+        <bonusstring>Use Gunnery to shoot at the targeted area.</bonusstring>
+      </test>
+      <notes>-6 dice if you can't see what you are shooting. Scouts can add bonus dice equal to their Perception v. Stealth net hits.</notes>
+    </action>
+    <action>
+      <id>deb332ea-c30c-427f-8a6f-31aa19511647</id>
+      <name>Artillery Evasion</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Gunnery and artillery</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>artillery dodge scatter edge cover shelling</keywords>
+      <test>
+        <dice>{EDG} * 2</dice>
+        <bonusstring>Units in an artillery area roll average Edge x2 + modifiers; on a success the shot scatters, otherwise they are hit.</bonusstring>
+      </test>
+      <notes>Cover: low quality +2, buildings +4, reinforced/underground +6. One gun vs several units: lowest result is taken. Several guns vs one unit: one roll for all.</notes>
+    </action>
+    <action>
+      <id>9cf572eb-280f-4a35-b451-b9d8347972f4</id>
+      <name>Scout Spotting</name>
+      <book>Shadowrun 5e combat reworked</book>
+      <section>Gunnery and artillery</section>
+      <category>Combat</category>
+      <type>No</type>
+      <keywords>scout spotter forward observer artillery spot</keywords>
+      <test>
+        <dice>{INT} + {Perception} v. enemy Sneaking</dice>
+        <limit>{Mental}</limit>
+        <bonusstring>Opposed Perception vs Stealth; net hits give artillery bonus dice (bonuses do not stack).</bonusstring>
+      </test>
+      <notes>-6 if the scout cannot see the enemy units directly but observes their area. Needs line of sight and direct communication.</notes>
+    </action>
+  </actions>
+</chummer>
