@@ -128,6 +128,73 @@ namespace Chummer.Tests.Rules
         }
 
         [TestMethod]
+        public async Task SustainedEffectsRetainSourceForceHitsAndPenaltyThroughSave()
+        {
+            _settings.DicePenaltySustaining = 2;
+            var perception = _character.SkillsSection.Skills.First(x => x.Name == "Perception"); await perception.SetBaseAsync(4);
+            int originalPool = await perception.GetPoolAsync(); Assert.IsTrue(originalPool > 2);
+            var spell = new Spell(_character);
+            await spell.CreateAsync(_character.LoadData("spells.xml").SelectSingleNode("/chummer/spells/spell[name='Increase Reflexes']"));
+            await _character.Spells.AddAsync(spell);
+            Assert.AreEqual(RuleResult.Changed, await SustainingRules.AddAsync(_character, spell, 4, 3, true));
+            var sustained = _character.SustainedCollection.Single(); Assert.AreEqual(-2, _character.SustainingPenalty);
+            Assert.AreEqual(originalPool - 2, await perception.GetPoolAsync());
+            Assert.AreEqual(RuleResult.Changed, await SustainingRules.UpdateAsync(_character, sustained, 6, 5, false));
+            Assert.AreEqual(0, _character.SustainingPenalty); Assert.AreEqual(6, sustained.Force); Assert.AreEqual(5, sustained.NetHits);
+            Assert.AreEqual(originalPool, await perception.GetPoolAsync());
+            await SustainingRules.UpdateAsync(_character, sustained, 6, 5, true);
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            try
+            {
+                Assert.IsTrue(await _character.SaveAsync(path, false, false));
+                using var loaded = new Character(); loaded.FileName = path; Assert.IsTrue(await loaded.LoadAsync());
+                var saved = loaded.SustainedCollection.Single(); Assert.AreEqual(spell.InternalId, saved.LinkedObject.InternalId);
+                Assert.AreSame(loaded.Spells.Single(), saved.LinkedObject); Assert.AreEqual(6, saved.Force); Assert.AreEqual(5, saved.NetHits); Assert.IsTrue(saved.SelfSustained);
+                Assert.AreEqual(-2, loaded.SustainingPenalty);
+                Assert.AreEqual(originalPool - 2, await loaded.SkillsSection.Skills.First(x => x.Name == "Perception").GetPoolAsync());
+                Assert.AreEqual(RuleResult.Changed, await SustainingRules.RemoveAsync(loaded, saved)); Assert.AreEqual(0, loaded.SustainedCollection.Count);
+            }
+            finally { if (File.Exists(path)) File.Delete(path); }
+        }
+
+        [TestMethod]
+        public async Task SustainingPenaltiesRespondToPsycheForceSupportAndSourceRemoval()
+        {
+            _settings.DicePenaltySustaining = 2;
+            var spell = new Spell(_character);
+            await spell.CreateAsync(_character.LoadData("spells.xml").SelectSingleNode("/chummer/spells/spell[name='Increase Reflexes']"));
+            await _character.Spells.AddAsync(spell);
+            await SustainingRules.AddAsync(_character, spell, 2, 1, true); await SustainingRules.AddAsync(_character, spell, 5, 2, true);
+            Assert.AreEqual(-4, _character.SustainingPenalty);
+            await SustainingRules.SetPsycheAsync(_character, true); Assert.AreEqual(-2, _character.SustainingPenalty);
+            await SustainingRules.SetPsycheAsync(_character, false); Assert.AreEqual(-4, _character.SustainingPenalty);
+            var support = new Improvement(_character) { ImproveSource = Improvement.ImprovementSource.Custom, ImproveType = Improvement.ImprovementType.PenaltyFreeSustain, SourceName = "Test support", Value = 3, Rating = 1, Enabled = true };
+            await _character.Improvements.AddAsync(support); await _character.RefreshSustainingPenaltiesAsync();
+            Assert.AreEqual(-2, _character.SustainingPenalty);
+            var low = _character.SustainedCollection.First();
+            await SustainingRules.UpdateAsync(_character, low, 4, 1, true); Assert.AreEqual(-4, _character.SustainingPenalty);
+            await _character.Spells.RemoveAsync(spell); Assert.AreEqual(0, _character.SustainedCollection.Count); Assert.AreEqual(0, _character.SustainingPenalty);
+            await _character.Spells.AddAsync(spell); await SustainingRules.AddAsync(_character, spell, 2, 1, true);
+            await _character.Spells.ClearAsync(); Assert.AreEqual(0, _character.SustainedCollection.Count); Assert.AreEqual(0, _character.SustainingPenalty);
+        }
+
+        [TestMethod]
+        public async Task SustainingAcceptsOwnedFormsAndPowersAndRejectsInvalidSourcesAndRanges()
+        {
+            _settings.DicePenaltySustaining = 2;
+            var form = new ComplexForm(_character) { Name = "Test form", Duration = "S" }; await _character.ComplexForms.AddAsync(form);
+            var power = new CritterPower(_character) { Name = "Test power" }; await _character.CritterPowers.AddAsync(power);
+            Assert.AreEqual(RuleResult.Changed, await SustainingRules.AddAsync(_character, power, 3, 0, true)); Assert.AreEqual(0, _character.SustainingPenalty);
+            var trackedPower = _character.SustainedCollection.Single(); Assert.IsFalse(trackedPower.HasSustainingPenalty); Assert.IsFalse(await trackedPower.GetHasSustainingPenaltyAsync());
+            Assert.AreEqual(RuleResult.Changed, await SustainingRules.AddAsync(_character, form, 3, 1, true)); Assert.AreEqual(-2, _character.SustainingPenalty);
+            var trackedForm = _character.SustainedCollection.Last(); Assert.IsTrue(trackedForm.HasSustainingPenalty); Assert.IsTrue(await trackedForm.GetHasSustainingPenaltyAsync());
+            Assert.AreEqual(RuleResult.NotAllowed, await SustainingRules.AddAsync(_character, new Spell(_character), 3, 1, true));
+            Assert.AreEqual(RuleResult.NotAllowed, await SustainingRules.AddAsync(_character, form, -1, 1, true));
+            Assert.AreEqual(RuleResult.NotAllowed, await SustainingRules.UpdateAsync(_character, _character.SustainedCollection.Last(), 3, 101, true));
+            Assert.AreEqual(2, _character.SustainedCollection.Count);
+        }
+
+        [TestMethod]
         public async Task FactoryMountCanReplaceItsNamedUnderbarrelWeaponWithoutOfferingUnrelatedWeapons()
         {
             var vehicle = new Vehicle(_character) { Name = "Factory drone" }; await _character.Vehicles.AddAsync(vehicle);

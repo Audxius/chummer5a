@@ -124,6 +124,10 @@ internal static class PacksScript
         if (!character.Drugs.Any(x => x.Name == "Clear thinker")) throw new InvalidOperationException("Custom drug purchase failed.");
         runner.SelectedInventoryItem = runner.InventoryGroups.SelectMany(x => x.Items).First(x => x.Name == "Clear thinker");
         await settle(); Save(window, output, "29b-custom-drug-inventory");
+        var sustained = new SustainedEffectsWindow(runner); sustained.Show(); await sustained.LoadAsync();
+        await sustained.SaveAsync(character.Spells.Single(x => x.Name == "Prismatic burst"), 4, 3, true); await settle();
+        Save(sustained, output, "31-sustained-effects"); sustained.Close();
+        if (character.SustainingPenalty >= 0 || character.SustainedCollection.Count != 1) throw new InvalidOperationException("Sustained effect did not apply a dice-pool penalty.");
         if (character.Gear.Single(x => x.Name == "Ammo: Regular Ammo").Quantity != 100 || character.Vehicles.Count != 1)
             throw new InvalidOperationException("PACKS items were not granted correctly.");
         Console.WriteLine("PACKS grants verified: " + character.Gear.Count + " gear, " + character.Weapons.Count + " weapons, " + character.Cyberware.Count + " implants, " + character.Vehicles.Count + " vehicles.");

@@ -29,6 +29,7 @@ It builds on first run and whenever the sources change. Custom character setting
 | **Natural weapons** | Native combat skill, damage base/type/modifier, AP and reach designer. Creation, validation, save/reload and removal tested; builder and resulting inventory rendered. |
 | **Cyberware suites** | Create from owned implants, save/append XML, load installed suites or external XML, preview nested contents/cost/essence, install with grade restrictions and suite discounts. Preview isolation, nested saved state, funds and malformed-item rollback tested; authoring screen rendered. Suite expenses follow the original application's lack of expense undo. |
 | **Custom drugs** | Component/level recipe designer, grades, live effects/price/availability, purchase and additional doses. Inventory displays full effects. Foundation conflicts, component limits, free creation, career funds, saved recipes/grade, expense undo and separate effects for identically named recipes tested. Builder and inventory rendered. |
+| **Sustained effects** | Track spells, complex forms and critter powers with force/level, net hits, self/external sustaining and Psyche. Penalties affect skill dice pools and persist after reload. Ownership, force-dependent penalty-free support, deletion and saved source links tested; manager rendered. Corrects the original async penalty inversion and an out-of-range source-removal loop. |
 | **Equipment locations** | Assign/clear, create, rename and delete locations for top-level gear, armor, weapons, vehicles and vehicle gear. Scope checks protect plugins and other equipment categories. Movement and save/reload tested; native details show location and management actions. |
 | **XML amendment editor** | Load base data and amendment files, edit/format, apply with the game amendment engine, inspect result and named changes, save amendments and handle unsaved edits. Replace/add/remove and input isolation tested; rendered preview checked. |
 | **Contacts** | ✅ Dossier cards: role, location, connection/loyalty bars with +/-, type, metatype, payment, vice, personal life, family/blackmail/group tags, notes. Enemies and pets separate; spirits and sprites below. |
@@ -72,7 +73,7 @@ Rolls come from two places:
 ## Safety net
 
 - **Parity baseline:** Run `42553325872` captured 750 Windows reference outputs, bundled with [provenance](parity-baseline.json). All 750 retained Linux outputs have been compared: saves and structured exports pass the documented policies; 49 rendered-sheet ordering differences remain. [Results and limitations](parity-linux.md). The original Windows determinism test and disabled Actions still prevent claiming a corrected Windows rerun.
-- **Engine and roll tests:** `nix shell nixpkgs#dotnet-sdk_8 -c dotnet test Chummer.Core.Tests --filter 'FullyQualifiedName!~ParityGoldenTests'` (118 passed, including mount retrofits/refunds/rollback, saved attachment ownership and factory-weapon replacement).
+- **Engine and roll tests:** `nix shell nixpkgs#dotnet-sdk_8 -c dotnet test Chummer.Core.Tests --filter 'FullyQualifiedName!~ParityGoldenTests'` (121 passed, including active sustained effects, persisted dice-pool penalties, Psyche and penalty-free force support).
 - **Screenshots of every screen:** `tools/native/Screenshots`, which runs headless.
 
 ## Recovery from the November 9 handoff

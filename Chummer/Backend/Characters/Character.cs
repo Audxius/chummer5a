@@ -512,7 +512,7 @@ namespace Chummer
                     case NotifyCollectionChangedAction.Replace:
                         foreach (IHasInternalId objItem in e.OldItems)
                         {
-                            for (int i = await SustainedCollection.GetCountAsync(token).ConfigureAwait(false);
+                            for (int i = await SustainedCollection.GetCountAsync(token).ConfigureAwait(false) - 1;
                                  i >= 0;
                                  --i)
                             {
@@ -530,7 +530,7 @@ namespace Chummer
                         break;
 
                     case NotifyCollectionChangedAction.Reset:
-                        for (int i = await SustainedCollection.GetCountAsync(token).ConfigureAwait(false); i >= 0; --i)
+                        for (int i = await SustainedCollection.GetCountAsync(token).ConfigureAwait(false) - 1; i >= 0; --i)
                         {
                             SustainedObject objLoop =
                                 await SustainedCollection.GetValueAtAsync(i, token).ConfigureAwait(false);

@@ -50,6 +50,7 @@
     </Style>
   </UserControl.Styles>
   <DockPanel Margin="28,22,28,0">
+    <Button DockPanel.Dock="Top" Content="SUSTAINED EFFECTS" Command="{Binding ManageSustainedEffectsCommand}" HorizontalAlignment="Left" Margin="0,0,0,12" />
     <Grid DockPanel.Dock="Top" Margin="0,0,0,14">
       <TextBox Text="{Binding AbilityFilter}" PlaceholderText="Search spells, powers, forms, techniques, spirits…" Padding="40,9,10,9" />
       <PathIcon Data="{StaticResource Icon.Search}" Width="15" Height="15" HorizontalAlignment="Left" Margin="14,0,0,0" Classes="muted" IsHitTestVisible="False" />

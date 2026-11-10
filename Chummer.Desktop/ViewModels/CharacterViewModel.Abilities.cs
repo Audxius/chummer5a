@@ -66,6 +66,9 @@ namespace Chummer.Desktop.ViewModels
         private static Task<T> OffUi<T>(Func<Task<T>> funcRun) => Task.Run(funcRun);
 
         [RelayCommand]
+        private Task ManageSustainedEffects() => DialogHost.ShowModalAsync(new SustainedEffectsWindow(this), null);
+
+        [RelayCommand]
         private async Task CreateCustomSpell()
         {
             var picker = new CustomSpellWindow();

@@ -22,6 +22,7 @@ The generated [legacy event inventory](legacy-actions.tsv) records the source lo
 | Custom drugs | Component/level recipe editor with grades, live description/price, purchase, extra doses and inventory effects | Foundation/level/limit conflicts, free creation, career funds, saved recipes/grade, expense undo and same-name effect isolation tested; builder and inventory rendered |
 | Qualities and abilities | Add/remove/levels; spells, powers, CFs, AI, martial arts, initiation | Rules tests and screenshots; reapply-improvement and specialized editing audit pending |
 | Traditions and streams | Standard/custom selection and mystic adept PP | Regression test and rendered editor |
+| Sustained effects | Spell/form/critter-power tracker; force/level, net hits, self/external sustaining and Psyche | Penalties and real skill-pool changes, force-dependent free sustaining, saved active effects, ownership and source deletion tested; native manager rendered; fixes legacy async penalty inversion and removal loop bounds |
 | Custom improvements | Type/target/value/options, edit, enable/disable, notes, delete | Attribute effect lifecycle and linked metadata tests; full type-by-type parity pending |
 | Contacts/spirits/pets | Editors and actions | Screen checks; comprehensive handler audit pending |
 | Limits | Derived limits and custom-modifier manager with conditions/notes, add/edit/remove | Identity, metadata, save/reload and automatic-modifier edit protection tested; automatic improvement-only modifier presentation audit remains |

@@ -606,7 +606,7 @@ namespace Chummer
         {
             if (token.IsCancellationRequested)
                 return Task.FromCanceled<bool>(token);
-            if (LinkedObjectType != Improvement.ImprovementSource.CritterPower)
+            if (LinkedObjectType == Improvement.ImprovementSource.CritterPower)
                 return Task.FromResult(false);
             return GetSelfSustainedAsync(token);
         }
