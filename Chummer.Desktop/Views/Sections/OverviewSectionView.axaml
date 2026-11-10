@@ -65,6 +65,7 @@
           </StackPanel>
           <StackPanel Grid.Column="2" Spacing="8">
             <TextBlock Text="LIMITS &amp; DERIVED" Classes="h2" />
+            <Button Content="LIMIT MODIFIERS" Command="{Binding EditLimitModifiersCommand}" />
             <ItemsControl ItemsSource="{Binding DerivedStats}">
               <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
               <ItemsControl.ItemTemplate>

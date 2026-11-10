@@ -278,6 +278,8 @@
             <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,16,0,12" />
             <WrapPanel>
               <Button Classes="act" Content="RENAME" IsVisible="{Binding CanRename}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RenameItemCommand}" />
+              <Button Classes="act" Content="ADD WEAPON MOUNT" IsVisible="{Binding CanAddWeaponMount}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddWeaponMountCommand}" />
+              <Button Classes="act" Content="ADD MOUNTED WEAPON" IsVisible="{Binding CanAddMountedWeapon}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddMountedWeaponCommand}" />
               <Button Classes="act" Content="LOCATION…" IsVisible="{Binding CanSetLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).SetItemLocationCommand}" />
               <Button Classes="act" Content="RENAME LOCATION" IsVisible="{Binding HasLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RenameItemLocationCommand}" />
               <Button Classes="act" Content="DELETE LOCATION" IsVisible="{Binding HasLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RemoveItemLocationCommand}" ToolTip.Tip="Remove this location and leave its items unassigned" />

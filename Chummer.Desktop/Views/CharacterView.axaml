@@ -11,7 +11,7 @@
     <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveAsCommand}" />
     <KeyBinding Gesture="Ctrl+E" Command="{Binding ExportCharacterCommand}" />
   </UserControl.KeyBindings>
-  <DockPanel IsEnabled="{Binding !IsCheckingCreation}">
+  <DockPanel IsEnabled="{Binding CanInteract}">
     <!-- Header -->
     <Border DockPanel.Dock="Top" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="0,0,0,1" Padding="28,20,28,0">
@@ -78,6 +78,7 @@
               <Button.ContextFlyout>
                 <MenuFlyout>
                   <MenuItem Header="Export JSON / XML / Squad Manager…" Command="{Binding ExportCharacterCommand}" />
+                  <MenuItem Header="Create PACKS kit…" Command="{Binding ExportPacksKitCommand}" />
                   <MenuItem Header="Print all open runners…" Command="{Binding PrintAllOpenCommand}" />
                 </MenuFlyout>
               </Button.ContextFlyout>

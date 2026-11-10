@@ -122,6 +122,8 @@ namespace Chummer.Desktop.ViewModels
         public bool HasLocation => LocationName.Length > 0;
 
         public bool CanAddMod => CharacterViewModel.ModSectionFor(Item) != null;
+        public bool CanAddWeaponMount => Item is Vehicle;
+        public bool CanAddMountedWeapon { get; private set; }
         public bool IsLifestyle => Item is Lifestyle;
 
         /// <summary>Engine InternalId, used to keep the selection across reloads.</summary>
@@ -249,6 +251,7 @@ namespace Chummer.Desktop.ViewModels
             Item = objItem;
             Id = strId ?? string.Empty;
             IsCareer = objCharacter.Created;
+            CanAddMountedWeapon = objItem is WeaponMount mount && !mount.IsWeaponsFull;
             CanSetLocation = EquipmentLocationRules.LocationsFor(objCharacter, objItem) != null;
             LocationName = (objItem as IHasLocation)?.Location?.Name ?? "";
             if (LocationName.Length > 0) Stats.Add(new ItemStat("Location", LocationName));
@@ -588,6 +591,11 @@ namespace Chummer.Desktop.ViewModels
                 objReturn.Contents.Add("⌖ " + objWeapon.CurrentDisplayName);
                 objReturn.Children.Add(FromWeapon(objCharacter, objWeapon));
             }
+            foreach (WeaponMount mount in objVehicle.WeaponMounts.ToList())
+            {
+                objReturn.Contents.Add("⌖ " + mount.CurrentDisplayName);
+                objReturn.Children.Add(FromWeaponMount(objCharacter, mount));
+            }
             foreach (Gear objGear in objVehicle.GearChildren.ToList())
             {
                 objReturn.Contents.Add("◇ " + objGear.CurrentDisplayName);
@@ -595,6 +603,22 @@ namespace Chummer.Desktop.ViewModels
             }
             objReturn.Finish();
             return objReturn;
+        }
+
+        private static InventoryItemViewModel FromWeaponMount(Character character, WeaponMount mount)
+        {
+            var item = new InventoryItemViewModel(InventoryKind.Vehicle, mount.CurrentDisplayName, "Weapon mount", "Icon.Item.WeaponMount");
+            item.Bind(character, mount, mount.InternalId);
+            item.IsEquipped = mount.Equipped;
+            item.Cost = Money(character, mount.TotalCost); item.Avail = mount.DisplayTotalAvail;
+            item.Source = mount.SourceDetail.ToString(); item.Notes = mount.Notes ?? "";
+            item.Stats.Add(new ItemStat("Slots", mount.CalculatedSlots.ToString(GlobalSettings.CultureInfo)));
+            item.Stats.Add(new ItemStat("Weapon capacity", mount.WeaponCapacity.ToString(GlobalSettings.CultureInfo)));
+            item.Stats.Add(new ItemStat("Allowed weapons", mount.AllowedWeaponCategories));
+            foreach (var option in mount.WeaponMountOptions) item.Stats.Add(new ItemStat(option.Category, option.CurrentDisplayName));
+            foreach (Weapon weapon in mount.Weapons) { item.Contents.Add("⌖ " + weapon.CurrentDisplayName); item.Children.Add(FromWeapon(character, weapon)); }
+            foreach (VehicleMod mod in mount.Mods) { item.Contents.Add("◆ " + mod.CurrentDisplayName); item.Children.Add(FromVehicleMod(character, mod)); }
+            item.Finish(); return item;
         }
 
         private static InventoryItemViewModel FromVehicleMod(Character objCharacter, VehicleMod objMod)

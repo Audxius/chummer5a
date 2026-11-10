@@ -17,6 +17,12 @@ namespace Chummer.Desktop.ViewModels
         private Task ExportCharacter() => DialogHost.ShowModalAsync(new CharacterExportWindow(Character), null);
 
         [RelayCommand]
+        private Task ExportPacksKit() => DialogHost.ShowModalAsync(new PacksExportWindow(Character), null);
+
+        [RelayCommand]
+        private Task EditLimitModifiers() => DialogHost.ShowModalAsync(new LimitModifiersWindow(this), null);
+
+        [RelayCommand]
         private Task PrintAllOpen() => SheetWindow.ShowAsync(MainWindowViewModel.Current.OpenCharacters.Select(x => x.Character).ToArray());
     }
 }

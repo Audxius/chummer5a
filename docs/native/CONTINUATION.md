@@ -1,0 +1,86 @@
+# Active continuation — 2026-11-10
+
+## Latest uncommitted work (read before older sections)
+
+Update: limit editor now passed all105 tests (session96072 exited0), Screenshots build zero errors and /tmp/chummer-native-review/limits/26-limit-modifiers.png was rendered and visually inspected. Coupling check and staged whitespace check pass. All mount/PACKS/limit work below is being checkpointed before natural-weapon work continues.
+
+Checkpoint remains 74676a282; substantial further changes are uncommitted. Weapon mounts are now implemented, superseding the old planned-mount section below: WeaponMountRules.cs plus .Weapons.cs and .Mods.cs, WeaponMountWindow, mount inventory children and weapon/mod store actions. Tests cover option quotes, markup/street multipliers, capacity/funds rollback, ownership/full mount rejection, expense undo, save/reload, and drone parent-slot pricing. Drone-mod test must set Settings.DroneMods=true, since BookXPath intentionally hides optionaldrone definitions otherwise.
+
+PACKS authoring implemented in PacksExporter.cs (extracted original CreatePACKSKit serializer), PacksExportWindow, character export menu command. Section choices, preview, saving, append preserving other kits and duplicate rejection. Regression checks cover nested gear, ammo quantities, accessory data, exclusions, append input isolation and duplicate rejection. Legacy skill export is commented out in original and remains unsupported. 104 tests passed after this work; screenshots /tmp/chummer-native-review/packs-authoring/25-packs-export.png rendered and visually inspected. Mount store and inventory screens in same directory also passed.
+
+Ongoing: LimitModifierRules.cs, LimitModifiersWindow and Overview button. Tests and screenshot harness added for condition/notes/identity/edit protection/persistence. Current test session 96072 writes /tmp/chummer-native-tests.log; current screenshot build session 18404 writes /tmp/chummer-packs-export-build.log and finished zero errors. Need run screenshot harness again to render new 26-limit-modifiers image and inspect it. Latest tiny pending-engine-mutations counter change in CharacterViewModel.Abilities.cs happened after that build; rebuild desktop/screens before final verification. All additional work is uncommitted.
+
+UI freeze audit further routes condition-monitor clicks and quiet dice-terminal Edge spends through RunRuleAsync. Store purchases now use a supplied executor through same gate. Attribute wrapper also shares RunRuleAsync. CanInteract disables sheet during mutations; pending mutation count keeps it disabled while operations queue.
+
+Remaining31 fixture export batch running from isolated /tmp/chummer-parity-runner, session3691, log /tmp/chummer-parity-other-exports.log, output /tmp/chummer-linux-parity-other-exports. Command bounded by timeout1800s. It has reached Tenshi (very slow). Additional English rendered mismatches Draught (C-Squared vs Crucible) and Spirit_Warden ('Ware Intolerance vs Dedicated Conjurer) are also Windows NLS vs Linux ICU punctuation collation; XML/JSON values match. Do not normalize away HTML differences. No full parity yet.
+
+Avoid parallel builds of the SAME configuration or repeated test commands sharing log paths: earlier overlapping test runs wrote stale results past truncated EOF, leaving NUL holes and an old failed footer. Latest confirmed session95566 exited0, 104pass, despite old footer. Subsequent session96072 is the current105-test run. Use completed session exit and unique fresh logs when uncertain. Sandbox SDK builds sometimes remain blocked; escalated nix builds finish and have approved prefixes. Source changes during compile can make test references stale; finish dependent edits before compiling.
+
+The user explicitly requires continuing until this is a full drop-in replacement. Do not stop at a merge, a green build, or the current partial implementation. Do not claim completion or invent a percentage. Work without conversational permission questions; mandatory sandbox escalation is still required by the environment. No subagents unless explicitly authorized by the user or applicable instructions.
+
+Repository `/home/audxius/Desktop/chummer5a`, branch `native`. Tested checkpoint **74676a282** has been committed and pushed to `fork/native`. It includes the six earlier merges and 91 further task files (10,465 added lines plus a compressed reference archive). User files `.claude/`, `Beggers.xml`, and `settings/Beggers.xml` remain untracked and untouched. The original character in `~/Documents/Chummer/Characters/Desperado.chum5` must never be a test target.
+
+## Completed since the original handoff
+
+See STATUS.md and feature-matrix.md. Implemented creation budgets/validation/career conversion, new runners/metatypes, Life Modules, traditions, custom improvements, device/vehicle damage, Master Index/PDF association, isolated character settings with books/custom-directory order, selected global preferences, character/data exports, Hero Lab portfolio reader/import flow, PACKS application, custom spell designer, equipment locations, XML amendment editor, launcher content fingerprinting, and incremental Windows-output verification.
+
+**98 non-golden tests pass.** Native/Screenshots builds with zero errors (existing warnings remain). Source engine coupling check passes. New screens were actually rendered and inspected. A significant native freeze was fixed: do not read locked engine properties from UI callbacks or synchronously bridge creation calculations during snapshots. CharacterViewModel now awaits background summaries, caches mode and equipment monitor properties, coalesces summary events, and serializes RunRuleAsync with snapshot readers through `_engineOperationGate`. Skills, inventory and Edge wrappers share RunRuleAsync. Other direct mutation wrappers still merit auditing (attribute RunAsync, condition-box Toggle, quiet Edge spend, purchases, career conversion).
+
+## Verification commands and environment
+
+No global dotnet/python. SDK executable:
+`/nix/store/5hmw3d794dnjk0ns1ln1g6fy6s67q1ik-dotnet-sdk-8.0.427/share/dotnet/dotnet`
+
+Build in sandbox with `--no-restore -c Release -m:1 -v q`; without `-m:1`, SDK IPC can fail silently. Engine sources must remain C# 7.3/net48-compatible. Use `AvaloniaXamlLoader.Load(this)` for new XAML views; the installed SDK is older than the Avalonia source generators.
+
+The already-approved escalated test command is:
+`nix shell nixpkgs#dotnet-sdk_8 -c dotnet test Chummer.Core.Tests --filter 'FullyQualifiedName!~ParityGoldenTests' --logger 'console;verbosity=minimal' > /tmp/chummer-native-tests.log 2>&1`
+
+Never run the old whole ParityGoldenTests suite; it takes hours. The new tools/native/ParityVerify console can run bounded subsets and retain all outputs. CLI usage is documented in Chummer.Parity/README.md.
+
+For headless screenshots use the built Screenshots DLL with:
+`XDG_CONFIG_HOME=/tmp/chummer-native-review/xdg`
+`LD_LIBRARY_PATH=/nix/store/hxbi1p1xhgkyjxg7zmyi9qwac5yc4i8j-fontconfig-2.18.3-lib/lib:/nix/store/zj7yb55h1zpmxmw6dp817n6y0370wji0-freetype-2.14.3/lib`
+The similarly named other font/freetype store variants may be 32-bit and fail.
+
+Modes: CHUMMER_REVIEW_CREATION=1, CHUMMER_REVIEW_PACKS=1 (also custom spells/locations), CHUMMER_REVIEW_XML_EDITOR=1; ordinary runner mode and CHUMMER_REVIEW_DIALOGS=1 use a scratch copy of Desperado. Screenshots under `/tmp/chummer-native-review/packs-locations`, `creation-snapshot-regression`, and `xml-editor` passed. Use view_image to inspect rendered artifacts.
+
+Do not rebuild binaries currently used by a long verification process. A snapshot of the verifier and its data is at `/tmp/chummer-parity-runner` (78 MB) so source/build work can continue safely. Refresh that directory only between verification runs.
+
+## Windows baseline and findings
+
+Downloaded run **42553325872**, harness commit `49a8cd9ec23a959bb61226866de65c9ad7addd13`, original engine tag `parity-baseline` at `fe6622b9fd34844fb2fd480b8687684275eee1a6`. Original capture produced **750 files for 34 fixtures**. They are bundled in `Chummer.Parity/windows-baseline-42553325872.tar.gz` with checksum and provenance in docs/native/parity-baseline.json. Extracted reference is `/tmp/chummer-windows-parity-42553325872`.
+
+IMPORTANT: the GitHub job and API step conclusions were green, but detailed `determinism.log` showed **9 passed, 2 failed** (ExportsEnglish and SheetsAllLanguages). The workflow allowed failure. All **443** files retained as nondeterministic are byte-identical to captured reference files. The harness incorrectly used File.ReadAllText, consuming a UTF-8 marker from captured transform strings. The shared harness and new verifier now preserve bytes via Encoding.UTF8.GetString(File.ReadAllBytes(...)). The workflow now fails after uploading artifacts if determinism failed.
+
+Checkpoint was pushed to start corrected Windows verification, but **repository Actions are disabled**. Explicit dispatch returned HTTP 422 “Actions has been disabled for this repository.” Do not falsely claim a fresh run passed. Local verification continues; do not stop the whole task for this external limitation.
+
+GitHub CLI installed at `/nix/store/ri8q81g024g6zkmljbnr6wylw8zs5c92-gh-2.103.3/bin/gh`; network requires escalation. Approved prefixes include this CLI's `api --method GET`, `run download`, `workflow run parity-baseline.yml`; git add/commit and git push fork native are also approved. Do not expose credentials. Git push in sandbox gives an SSH-config permission error, while the escalated command succeeds.
+
+### Actual local results
+
+- `/tmp/chummer-linux-parity-saves`: **all 68 sync/async saves compared with zero gameplay-value differences**. `/tmp/chummer-parity-saves-final.log` and report.json contain the result. Exact bytes differ in root attribute element order (NET48 vs NET8 hash enumeration), and sometimes carried-weight decimal scale (0 vs 0.0). SaveComparison permits only these tested equivalences and retains raw actuals. Other values, notes, GUID references and gameplay-list order remain significant.
+- `/tmp/chummer-linux-parity-english`: Bastion, Soma (Career), Wesson — **12 English print XML/JSON/Squad/default-sheet outputs pass** under the documented rules. Sheets and Squad files are byte-identical. XML/JSON keyed attributes can reorder; JSON portrait re-encoding is excluded like XML image blobs already were. Regression tests ensure changed ratings, notes, missing portraits and unrelated array order still fail.
+- `/tmp/chummer-linux-parity-languages`: `--mode all --characters 'Bastion|Soma (Career)|Wesson' --multi` completed with **412 comparisons, 43 differences**. Logs `/tmp/chummer-parity-languages.log`, report.json.
+  - 42 differences = 14 German sheets for each of the three fixtures. All show localized gear-name **collation**: Windows NLS puts `Mikrokamera` before `Mikro-Trideoprojektor`; Linux ICU puts the hyphenated name first. Values are unchanged. Do not silently ignore rendered output differences; investigate a precise compatibility fix or explicitly retain the gap.
+  - 1 multi-character print XML mismatch starts at keyed attribute ordering. ExportComparison currently applies only to `exports/*.xml|json`; applying the same narrowly tested XML policy to `multi/*.xml` is a reasonable next fix.
+  - All six languages' print XML and JSON in this representative batch otherwise pass; non-German sheets pass exactly after baseline normalization.
+  - 409 distinct outputs in this batch. Union with all 68 saves = 471/750 distinct outputs. Remaining 279 are the other 31 fixtures × (six print XML + JSON + Squad + default sheet). Do not imply full coverage.
+
+`--compare-existing` rechecks all retained Actual files without reloading characters. Every actual is retained, including matches. Reports list uncheckedReferenceOutputs. Batch reports cover that batch; aggregate outputs before asserting full coverage. Differences now have bounded snippets to avoid dumping megabytes of portrait base64. **Never run an unrestricted diff on JSON/HTML containing mugshots; truncate each output line or inspect bounded report entries.**
+
+The verifier reports `BuiltInOption=...` and other engine diagnostic lines during load; noisy but harmless. It copies only repository test fixtures and never saves over the originals.
+
+## Next gameplay work investigated, not yet implemented
+
+**Weapon mounts** is the next planned feature. Existing mounts are not even included in InventoryItemViewModel.FromVehicle's children; this needs a real nested mount view plus creation and weapon/mod attachment.
+
+Legacy spec: CreateWeaponMount.cs in Creation Forms (size/control/flexibility/visibility chooser, forbidden/required vehicle and mount details, costs, markup, free/BMQ, capacity), CharacterCreate around 7185 and CharacterCareer around 10873. Engine WeaponMount.CreateAsync and WeaponMountOption.CreateAsync already exist.
+
+Suggested rules DTO: size/control/flexibility/visibility IDs, free/BMQ, markup, optional variable cost. Catalog from vehicles.xml `/chummer/weaponmounts/weaponmount`, enabled books, category, `not(optionaldrone)` when non-drone and DroneMods enabled. Vehicle requirements use `GetNodeXPathAsync` and `ProcessFilterOperationNodeAsync` for required/forbidden vehicledetails. Option constraints use selected size's required/forbidden weaponmountdetails (also tolerate legacy direct control/flexibility/visibility children). WeaponMount.CreateAsync has no default-mod/improvement mutations, but can prompt for Variable cost: avoid prompts in previews by cloning its node and resolving the selected/minimum variable cost before Create.
+
+WeaponMount.GetTotalCostAsync includes options, weapons, mods and BMQ. Vehicle.GetTotalCostAsync is own cost + mods + mounts + gear, so a new mount's total cost equals the vehicle delta. PurchaseRules.StreetCostAsync is public and applies markup and restricted/forbidden cost multipliers. ChargeAsync is private but can be made internal and reused for `String_ExpensePurchaseVehicleWeaponMount` / `NuyenExpenseType.AddVehicleWeaponMount` (undo already implemented in ExpenseRules).
+
+Career capacity: after temporarily attaching, check EnforceCapacity; R5 enabled uses drone mod slots if drone+DroneMods, otherwise OverR5CapacityAsync("Weapons"); without R5, SlotsUsed > Slots. Roll back and dispose on failed capacity/affordability/cancellation, with no expenses or lost nuyen. Creation mode leaves final capacity validation to existing build validator, matching legacy. Parent ownership and source-book validation are needed. BMQ eligibility uses character.GenerateBlackMarketMappings on vehicles.xml weaponmountcategories; `Size` maps to Vehicles. Legacy selector has an apparent Parent==null temporary-attach bug; do not reproduce negative-nuyen purchases.
+
+Other major gaps remain in feature-matrix.md: PACKS authoring, custom drugs, cyberware suites, natural weapons, specialized ability operations/reapply, global settings, remaining inventory reordering/transfers/upgrades, limit modifiers, initiative/dice utilities, plugin audit and Nix packaging. Current global options expose only ~12 flags; do not blindly expose all reflected globals if their native behavior is not wired.

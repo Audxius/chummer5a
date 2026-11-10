@@ -38,10 +38,14 @@ namespace Chummer.Desktop.ViewModels
     {
         // ---------- shared ----------
 
+        private int _pendingEngineMutations;
+
         /// <summary>Runs an engine rule off the UI thread and refreshes the sheet when it changed the character.</summary>
         public async Task RunRuleAsync(Func<CancellationToken, Task<RuleResult>> funcRule)
         {
             RuleResult eResult;
+            Interlocked.Increment(ref _pendingEngineMutations);
+            IsMutatingModel = true;
             await _engineOperationGate.WaitAsync().ConfigureAwait(true);
             try
             {
@@ -51,7 +55,7 @@ namespace Chummer.Desktop.ViewModels
             {
                 return;
             }
-            finally { _engineOperationGate.Release(); }
+            finally { _engineOperationGate.Release(); IsMutatingModel = Interlocked.Decrement(ref _pendingEngineMutations) > 0; }
             if (eResult == RuleResult.Changed)
             {
                 MarkDirty();

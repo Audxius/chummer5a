@@ -161,7 +161,8 @@ internal static class Program
             { EquivalentSaves.Add(path); Console.WriteLine("EQUIVALENT " + path + " (attribute order / carried-weight decimal formatting; raw actual retained)"); return; }
             expected = canonicalExpected; actual = canonicalActual;
         }
-        else if (path.StartsWith("exports" + Path.DirectorySeparatorChar, StringComparison.Ordinal) && (path.EndsWith(".xml", StringComparison.Ordinal) || path.EndsWith(".json", StringComparison.Ordinal)))
+        else if ((path.StartsWith("exports" + Path.DirectorySeparatorChar, StringComparison.Ordinal) || path.StartsWith("multi" + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+                 && (path.EndsWith(".xml", StringComparison.Ordinal) || path.EndsWith(".json", StringComparison.Ordinal)))
         {
             bool json = path.EndsWith(".json", StringComparison.Ordinal);
             string canonicalExpected = json ? ExportComparison.CanonicalizeJson(expected) : ExportComparison.CanonicalizeXml(expected);

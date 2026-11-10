@@ -18,6 +18,10 @@ namespace Chummer.Desktop.ViewModels
         [ObservableProperty] private string _creationBudget = string.Empty;
         [ObservableProperty] private string _creationErrors = string.Empty;
         [ObservableProperty] private bool _isCheckingCreation;
+        [ObservableProperty] private bool _isMutatingModel;
+        public bool CanInteract => !IsCheckingCreation && !IsMutatingModel;
+        partial void OnIsCheckingCreationChanged(bool value) => OnPropertyChanged(nameof(CanInteract));
+        partial void OnIsMutatingModelChanged(bool value) => OnPropertyChanged(nameof(CanInteract));
         private int _creationKarma;
         private bool _careerMode;
         private bool _lifeModuleMode;

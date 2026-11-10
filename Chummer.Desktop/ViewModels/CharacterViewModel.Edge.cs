@@ -63,19 +63,16 @@ namespace Chummer.Desktop.ViewModels
         /// <summary>Spends one Edge point without prompting (used by the Dice Terminal when an Edge roll is copied). Returns false if none left.</summary>
         internal async Task<bool> TrySpendEdgeQuietlyAsync()
         {
-            bool blnSpent = await Task.Run(async () =>
+            bool blnSpent = false;
+            await RunRuleAsync(async token =>
             {
-                int intTotal = (await Character.GetAttributeAsync("EDG").ConfigureAwait(false)).TotalValue;
-                if (await Character.GetEdgeUsedAsync().ConfigureAwait(false) >= intTotal)
-                    return false;
-                await Character.ModifyEdgeUsedAsync(1).ConfigureAwait(false);
-                return true;
+                int intTotal = (await Character.GetAttributeAsync("EDG", token: token).ConfigureAwait(false)).TotalValue;
+                if (await Character.GetEdgeUsedAsync(token).ConfigureAwait(false) >= intTotal)
+                    return RuleResult.NotAllowed;
+                await Character.ModifyEdgeUsedAsync(1, token).ConfigureAwait(false);
+                blnSpent = true;
+                return RuleResult.Changed;
             }).ConfigureAwait(true);
-            if (blnSpent)
-            {
-                MarkDirty();
-                _ = Task.Run(RefreshSummary);
-            }
             return blnSpent;
         }
     }

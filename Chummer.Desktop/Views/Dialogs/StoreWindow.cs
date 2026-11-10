@@ -56,6 +56,7 @@ namespace Chummer.Desktop.Views.Dialogs
 
         private readonly Character _objCharacter;
         private readonly Func<PurchaseResult, Task> _funcPurchased;
+        private readonly Func<PurchaseRequest, Task<PurchaseResult>> _funcPurchase;
         private readonly IReadOnlyList<StoreSection> _lstSections;
         private readonly bool _blnCareer;
         private readonly string _strNuyenFormat;
@@ -128,11 +129,12 @@ namespace Chummer.Desktop.Views.Dialogs
 
         public int PurchaseCount { get; private set; }
 
-        private StoreWindow(Character objCharacter, IReadOnlyList<StoreSection> lstSections, Func<PurchaseResult, Task> funcPurchased)
+        private StoreWindow(Character objCharacter, IReadOnlyList<StoreSection> lstSections, Func<PurchaseResult, Task> funcPurchased, Func<PurchaseRequest, Task<PurchaseResult>> funcPurchase = null)
         {
             _objCharacter = objCharacter;
             _lstSections = lstSections;
             _funcPurchased = funcPurchased;
+            _funcPurchase = funcPurchase;
             _blnCareer = objCharacter.Created;
             _strNuyenFormat = objCharacter.Settings.NuyenFormat;
             _strNuyen = LanguageManager.GetString("String_NuyenSymbol");
@@ -156,9 +158,9 @@ namespace Chummer.Desktop.Views.Dialogs
         }
 
         /// <summary>Opens the store; <paramref name="funcPurchased"/> runs after every successful purchase.</summary>
-        public static async Task<int> ShowAsync(object owner, Character objCharacter, IReadOnlyList<StoreSection> lstSections, Func<PurchaseResult, Task> funcPurchased)
+        public static async Task<int> ShowAsync(object owner, Character objCharacter, IReadOnlyList<StoreSection> lstSections, Func<PurchaseResult, Task> funcPurchased, Func<PurchaseRequest, Task<PurchaseResult>> funcPurchase = null)
         {
-            StoreWindow objWindow = Create(objCharacter, lstSections, funcPurchased);
+            StoreWindow objWindow = Create(objCharacter, lstSections, funcPurchased, funcPurchase);
             Window objOwner = ModalHelper.ResolveOwner(owner);
             if (objOwner != null && objOwner.IsVisible)
                 await objWindow.ShowDialog(objOwner).ConfigureAwait(true);
@@ -173,9 +175,9 @@ namespace Chummer.Desktop.Views.Dialogs
         }
 
         /// <summary>Builds the window without showing it (the screenshot harness shows it non-modally).</summary>
-        public static StoreWindow Create(Character objCharacter, IReadOnlyList<StoreSection> lstSections, Func<PurchaseResult, Task> funcPurchased)
+        public static StoreWindow Create(Character objCharacter, IReadOnlyList<StoreSection> lstSections, Func<PurchaseResult, Task> funcPurchased, Func<PurchaseRequest, Task<PurchaseResult>> funcPurchase = null)
         {
-            StoreWindow objWindow = new StoreWindow(objCharacter, lstSections, funcPurchased);
+            StoreWindow objWindow = new StoreWindow(objCharacter, lstSections, funcPurchased, funcPurchase);
             objWindow.Opened += async (sender, args) =>
             {
                 await objWindow.SwitchSectionAsync(lstSections[0]).ConfigureAwait(true);
@@ -870,7 +872,8 @@ namespace Chummer.Desktop.Views.Dialogs
             PurchaseResult objResult;
             try
             {
-                objResult = await Task.Run(() => PurchaseRules.PurchaseAsync(_objCharacter, objRequest)).ConfigureAwait(true);
+                objResult = _funcPurchase != null ? await _funcPurchase(objRequest).ConfigureAwait(true)
+                    : await Task.Run(() => PurchaseRules.PurchaseAsync(_objCharacter, objRequest)).ConfigureAwait(true);
             }
             catch (OperationCanceledException)
             {

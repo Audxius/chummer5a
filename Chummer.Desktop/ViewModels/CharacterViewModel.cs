@@ -644,20 +644,8 @@ namespace Chummer.Desktop.ViewModels
                     : "Raising to " + (Value + 1).ToString(GlobalSettings.CultureInfo) + " costs " + ImproveCost.ToString(GlobalSettings.CultureInfo) + " karma (you have " + KarmaAvailable.ToString(GlobalSettings.CultureInfo) + ")"
             : "Raise by 1";
 
-        private async Task RunAsync(Func<System.Threading.CancellationToken, Task<Chummer.Rules.RuleResult>> funcRule)
-        {
-            Chummer.Rules.RuleResult eResult;
-            try
-            {
-                eResult = await Task.Run(() => funcRule(System.Threading.CancellationToken.None)).ConfigureAwait(true);
-            }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
-            if (eResult == Chummer.Rules.RuleResult.Changed)
-                _objOwner.Reload();
-        }
+        private Task RunAsync(Func<System.Threading.CancellationToken, Task<Chummer.Rules.RuleResult>> funcRule)
+            => _objOwner.RunRuleAsync(funcRule);
     }
 
 }
@@ -675,7 +663,7 @@ namespace Chummer.Desktop.ViewModels
             IsStun = blnStun;
             Index = intIndex;
             IsFilled = blnFilled;
-            ToggleCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(Toggle);
+            ToggleCommand = new CommunityToolkit.Mvvm.Input.AsyncRelayCommand(ToggleAsync);
         }
 
         public bool IsStun { get; }
@@ -685,15 +673,16 @@ namespace Chummer.Desktop.ViewModels
         public string Tip => "-" + (Index / 3).ToString(GlobalSettings.CultureInfo) + " wound modifier at this box";
         public CommunityToolkit.Mvvm.Input.IRelayCommand ToggleCommand { get; }
 
-        private void Toggle()
+        private Task ToggleAsync() => _objOwner.RunRuleAsync(async token =>
         {
             Character objCharacter = _objOwner.Character;
-            int intCurrent = IsStun ? objCharacter.StunCMFilled : objCharacter.PhysicalCMFilled;
+            int intCurrent = IsStun ? await objCharacter.GetStunCMFilledAsync(token).ConfigureAwait(false) : await objCharacter.GetPhysicalCMFilledAsync(token).ConfigureAwait(false);
             int intNew = intCurrent == Index ? Index - 1 : Index;
             if (IsStun)
-                objCharacter.StunCMFilled = intNew;
+                await objCharacter.SetStunCMFilledAsync(intNew, token).ConfigureAwait(false);
             else
-                objCharacter.PhysicalCMFilled = intNew;
-        }
+                await objCharacter.SetPhysicalCMFilledAsync(intNew, token).ConfigureAwait(false);
+            return Chummer.Rules.RuleResult.Changed;
+        });
     }
 }

@@ -7,6 +7,7 @@ using Avalonia.Headless;
 using Avalonia.Threading;
 using Chummer;
 using Chummer.Backend.Enums;
+using Chummer.Backend.Equipment;
 using Chummer.Desktop.ViewModels;
 using Chummer.Desktop.Views;
 using Chummer.Desktop.Views.Dialogs;
@@ -59,6 +60,42 @@ internal static class PacksScript
         await settle(); Save(window, output, "21c-packs-implants");
         await runner.RunRuleAsync(t => PacksRules.AddAsync(character, "Racing Bike Pack", "Vehicle Packs", t));
         await settle(); Save(window, output, "21d-packs-vehicle");
+        var vehicle = character.Vehicles.Single();
+        var mountPicker = new WeaponMountWindow(character, vehicle, _ => Task.FromResult(new PurchaseResult(RuleResult.Cancelled)));
+        mountPicker.Show(); await mountPicker.LoadAsync(); await settle();
+        if (mountPicker.Quote == null) throw new InvalidOperationException("Weapon mount preview was empty.");
+        var mountConfiguration = mountPicker.Configuration;
+        Save(mountPicker, output, "24a-weapon-mount-builder"); mountPicker.Close();
+        WeaponMount mount = null;
+        await runner.RunRuleAsync(async t =>
+        {
+            var purchase = await WeaponMountRules.PurchaseAsync(character, vehicle, mountConfiguration, t);
+            mount = purchase.Item as WeaponMount; return purchase.Result;
+        });
+        if (mount == null) throw new InvalidOperationException("Weapon mount purchase failed.");
+        await settle();
+        runner.SelectedInventoryItem = runner.InventoryGroups.SelectMany(x => x.Items).SelectMany(x => x.Children).First(x => x.IconKey == "Icon.Item.WeaponMount");
+        await settle(); Save(window, output, "24b-weapon-mount-inventory");
+        string pistol = character.LoadData("weapons.xml").SelectSingleNode("/chummer/weapons/weapon[name='Ares Predator V']/id").InnerText;
+        await runner.RunRuleAsync(async t => (await PurchaseRules.PurchaseAsync(character,
+            new PurchaseRequest { Kind = EquipmentKind.Weapon, ItemId = pistol, Parent = mount }, t)).Result);
+        await settle(); Save(window, output, "24c-mounted-weapon");
+        if (mount.Weapons.Count != 1) throw new InvalidOperationException("Mounted weapon was not attached.");
+        settings.BooksWritable.Add("R5"); settings.OnPropertyChanged(nameof(CharacterSettings.Books));
+        var modStore = StoreWindow.Create(character, new[] { new StoreSection(EquipmentKind.WeaponMountMod, "Mount modifications", mount) }, null);
+        modStore.Show(); await settle(); Save(modStore, output, "24d-mount-mod-store"); modStore.Close();
+        await runner.RunRuleAsync(async t => (await PurchaseRules.PurchaseAsync(character,
+            new PurchaseRequest { Kind = EquipmentKind.WeaponMountMod, ItemId = "6741d080-0e40-4941-a7b5-85ab3e1a9cb2", Parent = mount }, t)).Result);
+        await settle(); Save(window, output, "24e-mount-mod-inventory");
+        if (mount.Mods.Count != 1) throw new InvalidOperationException("Mount modification was not attached.");
+        var exporter = new PacksExportWindow(character); exporter.Show(); await exporter.GenerateAsync("Street starter kit"); await settle();
+        Save(exporter, output, "25-packs-export");
+        if (!exporter.Output.Contains("Street starter kit")) throw new InvalidOperationException("PACKS export was empty.");
+        exporter.Close();
+        var limits = new LimitModifiersWindow(runner); limits.Show(); await limits.ReloadAsync();
+        await limits.SaveAsync("Careful aim", "Physical", 2, "While aiming"); await settle();
+        Save(limits, output, "26-limit-modifiers"); limits.Close();
+        if (!character.LimitModifiers.Any(x => x.Name == "Careful aim")) throw new InvalidOperationException("Limit modifier was not saved.");
         if (character.Gear.Single(x => x.Name == "Ammo: Regular Ammo").Quantity != 100 || character.Vehicles.Count != 1)
             throw new InvalidOperationException("PACKS items were not granted correctly.");
         Console.WriteLine("PACKS grants verified: " + character.Gear.Count + " gear, " + character.Weapons.Count + " weapons, " + character.Cyberware.Count + " implants, " + character.Vehicles.Count + " vehicles.");

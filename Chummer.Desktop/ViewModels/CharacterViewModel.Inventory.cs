@@ -25,7 +25,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Chummer.Backend.Equipment;
 using Chummer.Rules;
+using Chummer.Selection;
 using Chummer.Desktop.Views;
+using Chummer.Desktop.Views.Dialogs;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -214,6 +216,30 @@ namespace Chummer.Desktop.ViewModels
 
         [RelayCommand]
         private Task RemoveItem() => RunItemRuleAsync((x, t) => InventoryRules.RemoveAsync(x, t));
+
+        [RelayCommand]
+        private async Task AddWeaponMount()
+        {
+            if (!(SelectedInventoryItem?.Item is Vehicle vehicle)) return;
+            var window = new WeaponMountWindow(Character, vehicle, async configuration =>
+            {
+                PurchaseResult result = null;
+                await RunRuleAsync(async token =>
+                {
+                    result = await WeaponMountRules.PurchaseAsync(Character, vehicle, configuration, token);
+                    return result.Result;
+                });
+                return result ?? new PurchaseResult(RuleResult.Cancelled);
+            });
+            await DialogHost.ShowModalAsync(window, null);
+        }
+
+        [RelayCommand]
+        private async Task AddMountedWeapon()
+        {
+            if (!(SelectedInventoryItem?.Item is WeaponMount mount)) return;
+            await StoreWindow.ShowAsync(null, Character, new[] { new StoreSection(EquipmentKind.Weapon, "Mounted weapons", mount) }, null, ExecuteStorePurchaseAsync);
+        }
 
         [RelayCommand]
         private async Task SetItemLocation()

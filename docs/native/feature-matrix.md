@@ -14,15 +14,15 @@ The generated [legacy event inventory](legacy-actions.tsv) records the source lo
 | Standard purchases | Weapons, armor, gear, cyber/bio, vehicles, drugs, lifestyles; modifications | Purchase and expense tests; specialized mount/suite/custom drug tools missing |
 | Inventory session actions | Equip/wireless/commlink, ammo, quantities, damage, notes, rename/sell/remove; locations | Engine tests and scratch screenshots; location movement/scope/persistence tested; reordering, transfers and upgrades incomplete |
 | PACKS application | Native kit search/category/contents picker; extracted legacy multi-section application | Equipment, nested plugin, ammo, implant and vehicle regression tests and rendered workflow pass |
-| PACKS authoring | Legacy export workflow | Missing native authoring tool |
+| PACKS authoring | Native section selection, XML preview and export using legacy serializer; appends to existing kit files and rejects duplicate names | Nested gear, quantities, accessory and section-filter tests and rendered workflow under verification; legacy skill export remains unsupported |
 | Custom spell creation | Native designer reproduces legacy modifiers, validation and drain | Five-category drain checks; career costs, expense undo and save/reload tested; designer and created-spell screens checked |
-| Weapon mount creation | Legacy CreateWeaponMount | Missing native builder |
+| Weapon mount creation | Native size/control/flexibility/visibility builder, mounted weapons and mount-mod store | Quote, career costs, capacity/funds rollback, ownership, expense undo and save/reload tests; builder/store/inventory rendered; editing existing mount options remains incomplete |
 | Custom drugs and cyberware suites | Legacy specialized creation tools | Missing native builders |
 | Qualities and abilities | Add/remove/levels; spells, powers, CFs, AI, martial arts, initiation | Rules tests and screenshots; reapply-improvement and specialized editing audit pending |
 | Traditions and streams | Standard/custom selection and mystic adept PP | Regression test and rendered editor |
 | Custom improvements | Type/target/value/options, edit, enable/disable, notes, delete | Attribute effect lifecycle and linked metadata tests; full type-by-type parity pending |
 | Contacts/spirits/pets | Editors and actions | Screen checks; comprehensive handler audit pending |
-| Limits | Displayed derived limits | Dedicated custom-limit editor audit pending |
+| Limits | Derived limits and custom-modifier manager with conditions/notes, add/edit/remove | Identity, metadata, save/reload and automatic-modifier edit protection tested; automatic improvement-only modifier presentation audit remains |
 | Ledger/calendar | Add/edit/undo and charts/calendar | Expense and calendar regression tests; screen checks |
 | Dice tools | Dice Terminal and roll lookup | Roll tests; legacy dice-roller/glitch and initiative-tool audit pending |
 | Character settings | Isolated editing, new presets, books, installed custom directories/order | Isolation and XML roundtrip assertions; complete legacy settings audit pending |

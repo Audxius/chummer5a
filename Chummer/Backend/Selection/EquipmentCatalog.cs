@@ -45,7 +45,8 @@ namespace Chummer.Selection
         WeaponAccessory,
         ArmorMod,
         GearPlugin,
-        VehicleMod
+        VehicleMod,
+        WeaponMountMod
     }
 
     /// <summary>A kind-specific list column (weapons: DV/AP/..., vehicles: handling/speed/...).</summary>
@@ -206,6 +207,10 @@ namespace Chummer.Selection
                     DataFile = "vehicles.xml";
                     _strItemXPath = "mods/mod";
                     break;
+                case EquipmentKind.WeaponMountMod:
+                    DataFile = "vehicles.xml";
+                    _strItemXPath = "weaponmountmods/mod";
+                    break;
                 case EquipmentKind.Drug:
                     DataFile = DrugsData.CatalogFileName;
                     _strItemXPath = "drugs/drug";
@@ -216,7 +221,7 @@ namespace Chummer.Selection
                     break;
             }
             _xmlRoot = objCharacter.LoadDataXPath(DataFile).SelectSingleNode("/chummer");
-            XPathNavigator xmlCategories = eKind == EquipmentKind.VehicleMod
+            XPathNavigator xmlCategories = eKind == EquipmentKind.VehicleMod || eKind == EquipmentKind.WeaponMountMod
                 ? _xmlRoot?.SelectSingleNode("modcategories")
                 : _xmlRoot;
             if (xmlCategories != null)
@@ -297,6 +302,7 @@ namespace Chummer.Selection
                     case EquipmentKind.Vehicle:
                         return new[] { new CatalogColumn("HAND", 52), new CatalogColumn("SPD", 44), new CatalogColumn("ACC", 44), new CatalogColumn("BOD", 40), new CatalogColumn("ARM", 40), new CatalogColumn("PIL", 36), new CatalogColumn("SENS", 44), new CatalogColumn("SEAT", 40) };
                     case EquipmentKind.VehicleMod:
+                    case EquipmentKind.WeaponMountMod:
                         return new[] { new CatalogColumn("SLOTS", 52), new CatalogColumn("RATING", 56) };
                     case EquipmentKind.WeaponAccessory:
                         return new[] { new CatalogColumn("MOUNT", 110), new CatalogColumn("RATING", 56) };
@@ -326,6 +332,7 @@ namespace Chummer.Selection
             {
                 case EquipmentKind.WeaponAccessory:
                 case EquipmentKind.Lifestyle:
+                case EquipmentKind.WeaponMountMod:
                     strCategoryXPath = null;
                     break;
                 case EquipmentKind.ArmorMod:
@@ -441,6 +448,8 @@ namespace Chummer.Selection
         {
             switch (Kind)
             {
+                case EquipmentKind.Weapon when Parent is WeaponMount mount:
+                    return WeaponMountRules.IsWeaponAllowed(mount, xmlItem);
                 case EquipmentKind.WeaponAccessory:
                     return Parent is Weapon objWeapon && objWeapon.CheckAccessoryRequirements(xmlItem)
                            && xmlItem.RequirementsMet(_objCharacter, objWeapon);
@@ -495,6 +504,8 @@ namespace Chummer.Selection
                     return xmlItem.RequirementsMet(_objCharacter, Parent);
                 case EquipmentKind.VehicleMod:
                     return xmlItem.SelectSingleNode("hide") == null && xmlItem.RequirementsMet(_objCharacter, Parent);
+                case EquipmentKind.WeaponMountMod:
+                    return Parent is WeaponMount mountParent && WeaponMountRules.IsModAllowed(_objCharacter, mountParent, xmlItem);
                 default:
                     return xmlItem.RequirementsMet(_objCharacter);
             }
@@ -527,6 +538,13 @@ namespace Chummer.Selection
             if (string.IsNullOrEmpty(strExpression))
                 return null;
             strExpression = strExpression.ProcessFixedValuesString(intRating);
+            if (Kind == EquipmentKind.WeaponMountMod && Parent is WeaponMount mount)
+            {
+                string slots = mount.CalculatedSlots.ToString(GlobalSettings.InvariantCultureInfo);
+                string cost = mount.OwnCost.ToString(GlobalSettings.InvariantCultureInfo);
+                strExpression = strExpression.Replace("{Parent Slots}", slots).Replace("Parent Slots", slots)
+                    .Replace("{Parent Cost}", cost).Replace("Parent Cost", cost);
+            }
             if (!strExpression.DoesNeedXPathProcessingToBeConvertedToNumber(out decimal decValue))
                 return decValue;
             string strRating = intRating.ToString(GlobalSettings.InvariantCultureInfo);
@@ -825,6 +843,7 @@ namespace Chummer.Selection
                     };
                 }
                 case EquipmentKind.VehicleMod:
+                case EquipmentKind.WeaponMountMod:
                     return new[] { RowStats(xmlItem, intRating, "slots"), RatingRange(xmlItem) };
                 case EquipmentKind.WeaponAccessory:
                     return new[] { Pretty((xmlItem.SelectSingleNode("mount")?.Value ?? string.Empty).Replace("/", " / ")), RatingRange(xmlItem) };
@@ -1013,6 +1032,7 @@ namespace Chummer.Selection
                     {
                         Weapon objWeapon = new Weapon(_objCharacter);
                         objTemp = objWeapon;
+                        if (Parent is WeaponMount mount) await objWeapon.SetParentMountAsync(mount, token).ConfigureAwait(false);
                         await objWeapon.CreateAsync(xmlItem, lstWeapons, true, false, true, blnForSelectForm: true, token: token).ConfigureAwait(false);
                         objWeapon.DiscountCost = objRequest.BlackMarket;
                         decCost = await objWeapon.GetTotalCostAsync(token).ConfigureAwait(false);
@@ -1137,6 +1157,20 @@ namespace Chummer.Selection
                         Stat("Threshold", Pretty(xmlNav.SelectSingleNode("threshold")?.Value));
                         if (objGrade != null)
                             Stat("Grade", objGrade.CurrentDisplayName);
+                        break;
+                    }
+                    case EquipmentKind.WeaponMountMod:
+                    {
+                        var mount = Parent as WeaponMount;
+                        if (mount == null) return null;
+                        var mod = new VehicleMod(_objCharacter);
+                        objTemp = mod;
+                        await mod.SetWeaponMountParentAsync(mount, token).ConfigureAwait(false);
+                        await mod.CreateAsync(xmlItem, intRating, mount.Parent, blnSkipSelectForms: true, token: token).ConfigureAwait(false);
+                        mod.DiscountCost = objRequest.BlackMarket && BlackMarketAllowedFor(objRequest.ItemId);
+                        decCost = await mod.GetTotalCostAsync(token).ConfigureAwait(false);
+                        objAvail = await mod.TotalAvailTupleAsync(token: token).ConfigureAwait(false);
+                        Stat("Slots", mod.CalculatedSlots.ToString(GlobalSettings.CultureInfo));
                         break;
                     }
                     case EquipmentKind.Lifestyle:

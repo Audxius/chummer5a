@@ -62,6 +62,8 @@ namespace Chummer.Desktop.ViewModels
                     return new StoreSection(EquipmentKind.GearPlugin, "Plugins", objGear);
                 case Vehicle objVehicle:
                     return new StoreSection(EquipmentKind.VehicleMod, "Vehicle mods", objVehicle);
+                case WeaponMount mount:
+                    return new StoreSection(EquipmentKind.WeaponMountMod, "Weapon mount modifications", mount);
                 case Cyberware objCyberware:
                     return new StoreSection(objCyberware.SourceType == Improvement.ImprovementSource.Bioware ? EquipmentKind.Bioware : EquipmentKind.Cyberware,
                                             "Subsystems", objCyberware);
@@ -73,7 +75,7 @@ namespace Chummer.Desktop.ViewModels
         /// <summary>Open the store for one inventory tab; the sheet refreshes after every purchase.</summary>
         public async Task PurchaseAsync(InvKind eKind)
         {
-            await StoreWindow.ShowAsync(null, Character, SectionsFor(eKind), OnPurchasedAsync).ConfigureAwait(true);
+            await StoreWindow.ShowAsync(null, Character, SectionsFor(eKind), null, ExecuteStorePurchaseAsync).ConfigureAwait(true);
         }
 
         /// <summary>Open the store for mods / accessories / plugins of an owned item (weapon, armor, gear, vehicle, cyberware).</summary>
@@ -82,7 +84,7 @@ namespace Chummer.Desktop.ViewModels
             StoreSection objSection = ModSectionFor(objParentItem);
             if (objSection == null)
                 return;
-            await StoreWindow.ShowAsync(null, Character, new[] { objSection }, OnPurchasedAsync).ConfigureAwait(true);
+            await StoreWindow.ShowAsync(null, Character, new[] { objSection }, null, ExecuteStorePurchaseAsync).ConfigureAwait(true);
         }
 
         /// <summary>Career: pay one more month of rent for a lifestyle (legacy cmdIncreaseLifestyleMonths_Click).</summary>
@@ -107,11 +109,15 @@ namespace Chummer.Desktop.ViewModels
             Reload();
         }
 
-        private Task OnPurchasedAsync(PurchaseResult objResult)
+        private async Task<PurchaseResult> ExecuteStorePurchaseAsync(PurchaseRequest request)
         {
-            MarkDirty();
-            Reload();
-            return Task.CompletedTask;
+            PurchaseResult result = null;
+            await RunRuleAsync(async token =>
+            {
+                result = await PurchaseRules.PurchaseAsync(Character, request, token);
+                return result.Result;
+            });
+            return result ?? new PurchaseResult(RuleResult.Cancelled);
         }
     }
 }

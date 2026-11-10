@@ -139,6 +139,8 @@ namespace Chummer.Rules
                     return PurchaseArmorModAsync(objCharacter, objRequest, token);
                 case EquipmentKind.VehicleMod:
                     return PurchaseVehicleModAsync(objCharacter, objRequest, token);
+                case EquipmentKind.WeaponMountMod:
+                    return WeaponMountRules.PurchaseModAsync(objCharacter, objRequest, token);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(objRequest));
             }
@@ -164,7 +166,7 @@ namespace Chummer.Rules
             return decCost;
         }
 
-        private static async Task<bool> CheckNuyenAsync(Character objCharacter, decimal decCost, CancellationToken token)
+        internal static async Task<bool> CheckNuyenAsync(Character objCharacter, decimal decCost, CancellationToken token)
         {
             if (decCost <= await objCharacter.GetNuyenAsync(token).ConfigureAwait(false))
                 return true;
@@ -175,7 +177,7 @@ namespace Chummer.Rules
             return false;
         }
 
-        private static async Task ShowCapacityReachedAsync(CancellationToken token)
+        internal static async Task ShowCapacityReachedAsync(CancellationToken token)
         {
             await MessageBoxes.ShowAsync(
                 await LanguageManager.GetStringAsync("Message_CapacityReached", token: token).ConfigureAwait(false),
@@ -184,7 +186,7 @@ namespace Chummer.Rules
         }
 
         /// <summary>The expense entry every legacy purchase handler writes: "&lt;String_ExpensePurchase…&gt; &lt;item&gt;", amount -cost, nuyen undo.</summary>
-        private static async Task<ExpenseLogEntry> ChargeAsync(Character objCharacter, decimal decCost, string strReasonKey, string strItemName,
+        internal static async Task<ExpenseLogEntry> ChargeAsync(Character objCharacter, decimal decCost, string strReasonKey, string strItemName,
                                                                NuyenExpenseType eUndoType, string strObjectId, decimal decQty, CancellationToken token)
         {
             ExpenseLogEntry objExpense = new ExpenseLogEntry(objCharacter);
@@ -397,6 +399,8 @@ namespace Chummer.Rules
         /// <summary>Legacy CharacterCareer.PickWeapon / CharacterCreate.PickWeapon.</summary>
         public static async Task<PurchaseResult> PurchaseWeaponAsync(Character objCharacter, PurchaseRequest objRequest, CancellationToken token = default)
         {
+            if (objRequest.Parent is WeaponMount mount)
+                return await WeaponMountRules.PurchaseWeaponAsync(objCharacter, mount, objRequest, token).ConfigureAwait(false);
             XmlNode xmlWeapon = DataNode(objCharacter, "weapons.xml", "/chummer/weapons/weapon", objRequest.ItemId);
             if (xmlWeapon == null)
                 return new PurchaseResult(RuleResult.NotAllowed);
