@@ -104,6 +104,15 @@ internal static class PacksScript
         if (!character.Weapons.Any(x => x.Name == "Talons")) throw new InvalidOperationException("Natural weapon was not saved.");
         var suites = new CyberwareSuiteWindow(runner); suites.Show(); await suites.LoadAsync(); await suites.CreateAsync("Combat eyes bundle"); await settle();
         Save(suites, output, "28-cyberware-suite"); suites.Close();
+        var recipe = new CustomDrugDesign { Name = "Clear thinker" };
+        recipe.Ingredients.Add(new CustomDrugIngredient { ComponentId = "Genius" });
+        recipe.Ingredients.Add(new CustomDrugIngredient { ComponentId = "Smoothtalk", Level = 1 });
+        var drugBuilder = new CustomDrugWindow(runner); drugBuilder.Show(); await drugBuilder.ConfigureAsync(recipe); await settle();
+        if (drugBuilder.Quote == null) throw new InvalidOperationException("Custom drug preview failed.");
+        Save(drugBuilder, output, "29a-custom-drug-builder"); await drugBuilder.PurchaseAsync(); await settle();
+        if (!character.Drugs.Any(x => x.Name == "Clear thinker")) throw new InvalidOperationException("Custom drug purchase failed.");
+        runner.SelectedInventoryItem = runner.InventoryGroups.SelectMany(x => x.Items).First(x => x.Name == "Clear thinker");
+        await settle(); Save(window, output, "29b-custom-drug-inventory");
         if (character.Gear.Single(x => x.Name == "Ammo: Regular Ammo").Quantity != 100 || character.Vehicles.Count != 1)
             throw new InvalidOperationException("PACKS items were not granted correctly.");
         Console.WriteLine("PACKS grants verified: " + character.Gear.Count + " gear, " + character.Weapons.Count + " weapons, " + character.Cyberware.Count + " implants, " + character.Vehicles.Count + " vehicles.");

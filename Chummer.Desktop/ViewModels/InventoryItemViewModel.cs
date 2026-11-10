@@ -136,6 +136,8 @@ namespace Chummer.Desktop.ViewModels
         public string Avail { get; private set; } = string.Empty;
         public string Source { get; private set; } = string.Empty;
         public string Notes { get; private set; } = string.Empty;
+        public string Description { get; private set; } = string.Empty;
+        public bool HasDescription => Description.Length > 0;
         public List<ItemStat> Stats { get; } = new List<ItemStat>();
         public List<string> Contents { get; } = new List<string>();
 
@@ -228,7 +230,7 @@ namespace Chummer.Desktop.ViewModels
         public bool HasQuantity { get; private set; }
         public decimal Quantity { get; private set; }
         public string QuantityText => Quantity.ToString("0.##", GlobalSettings.CultureInfo);
-        public bool CanAddQuantity => Item is Gear;
+        public bool CanAddQuantity => Item is Gear || Item is Drug;
         public bool IsConsumable { get; private set; }
 
         public bool CanRename { get; private set; }
@@ -651,6 +653,7 @@ namespace Chummer.Desktop.ViewModels
             objReturn.IsConsumable = true;
             objReturn.Quantity = objDrug.Quantity;
             objReturn.Headline = objDrug.Category;
+            objReturn.Description = objDrug.Description;
             objReturn.Stats.Add(new ItemStat("Doses", objDrug.Quantity.ToString("0.##", GlobalSettings.CultureInfo)));
             objReturn.Cost = Money(objCharacter, objDrug.TotalCost);
             objReturn.Notes = objDrug.Notes ?? string.Empty;

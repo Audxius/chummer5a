@@ -178,6 +178,7 @@ namespace Chummer.Desktop.ViewModels
         private Task AddQuantity()
             => RunItemRuleAsync((x, t) => x is Gear objGear
                                      ? InventoryRules.AddQuantityAsync(Character, objGear, objGear.CostFor > 0 ? objGear.CostFor : 1, t)
+                                     : x is Drug drug ? CustomDrugRules.BuyAdditionalDoseAsync(Character, drug, t)
                                      : Task.FromResult(RuleResult.NotAllowed));
 
         [RelayCommand]
@@ -222,6 +223,9 @@ namespace Chummer.Desktop.ViewModels
 
         [RelayCommand]
         private Task ManageCyberwareSuites() => DialogHost.ShowModalAsync(new CyberwareSuiteWindow(this), null);
+
+        [RelayCommand]
+        private Task CreateCustomDrug() => DialogHost.ShowModalAsync(new CustomDrugWindow(this), null);
 
         [RelayCommand]
         private async Task AddWeaponMount()

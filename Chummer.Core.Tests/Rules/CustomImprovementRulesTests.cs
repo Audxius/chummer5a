@@ -128,6 +128,113 @@ namespace Chummer.Tests.Rules
         }
 
         [TestMethod]
+        public async Task SameNameDrugRecipesKeepSeparateEffectsWhenOnePurchaseIsUndone()
+        {
+            await _character.SetCreatedAsync(true); await _character.SetNuyenAsync(10000);
+            var design = new CustomDrugDesign { Name = "Shared recipe name" };
+            design.Ingredients.Add(new CustomDrugIngredient { ComponentId = "Genius" });
+            var first = await CustomDrugRules.PurchaseAsync(_character, design);
+            var second = await CustomDrugRules.PurchaseAsync(_character, design);
+            string secondId = ((Drug)second.Item).InternalId;
+            int secondEffects = _character.Improvements.Count(x => x.SourceName == secondId);
+            Assert.IsTrue(secondEffects > 0);
+            var oldMessages = HostServices.Messages;
+            try
+            {
+                HostServices.Messages = new AcceptMessages();
+                Assert.AreEqual(RuleResult.Changed, await ExpenseRules.UndoExpenseAsync(_character, first.Expense));
+                Assert.AreEqual(secondId, _character.Drugs.Single().InternalId);
+                Assert.AreEqual(secondEffects, _character.Improvements.Count(x => x.SourceName == secondId));
+                Assert.AreEqual(RuleResult.Changed, await ExpenseRules.UndoExpenseAsync(_character, second.Expense));
+                Assert.AreEqual(0, _character.Drugs.Count); Assert.AreEqual(10000m, _character.Nuyen);
+                Assert.IsFalse(_character.Improvements.Any(x => x.ImproveSource == Improvement.ImprovementSource.Drug));
+            }
+            finally { HostServices.Messages = oldMessages; }
+        }
+
+        [TestMethod]
+        public async Task CustomDrugRecipeValidatesFoundationConflictsLevelsAndComponentLimits()
+        {
+            var design = new CustomDrugDesign { Name = "Recipe test" };
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => CustomDrugRules.QuoteAsync(_character, design));
+            design.Ingredients.Add(new CustomDrugIngredient { ComponentId = "Tank", Level = 0 });
+            design.Ingredients.Add(new CustomDrugIngredient { ComponentId = "Smoothtalk", Level = 2 });
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => CustomDrugRules.QuoteAsync(_character, design));
+            design.Ingredients[1].Level = 1;
+            var quote = await CustomDrugRules.QuoteAsync(_character, design); Assert.IsTrue(quote.Cost > 0);
+            design.Ingredients.Reverse(); design.Ingredients[0].Level = 2;
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => CustomDrugRules.QuoteAsync(_character, design));
+            design.Ingredients.Clear(); design.Ingredients.Add(new CustomDrugIngredient { ComponentId = "Genius" });
+            for (int i = 0; i < 4; i++) design.Ingredients.Add(new CustomDrugIngredient { ComponentId = "Speed Enhancer" });
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => CustomDrugRules.QuoteAsync(_character, design));
+            design.Ingredients.RemoveAt(4); Assert.IsNotNull(await CustomDrugRules.QuoteAsync(_character, design));
+            design.Ingredients[1].Level = 99;
+            await Assert.ThrowsExactlyAsync<ArgumentException>(() => CustomDrugRules.QuoteAsync(_character, design));
+            Assert.AreEqual(0, _character.Drugs.Count); Assert.AreEqual(0, _character.ExpenseEntries.Count);
+            design.Ingredients.Clear(); design.Ingredients.Add(new CustomDrugIngredient { ComponentId = "Genius" }); design.Free = true;
+            Assert.AreEqual(0m, (await CustomDrugRules.QuoteAsync(_character, design)).Cost);
+            Assert.AreEqual(RuleResult.Changed, (await CustomDrugRules.PurchaseAsync(_character, design)).Result);
+            Assert.AreEqual(0m, _character.Drugs.Single().TotalCost);
+            Assert.AreNotEqual("0", (await CustomDrugRules.ComponentsAsync(_character)).Single(x => x.Name == "Genius").Cost);
+        }
+
+        [TestMethod]
+        public async Task CustomDrugPurchaseSaveAndExpenseUndoRetainRecipeAndDoNotLeakEffects()
+        {
+            _settings.BooksWritable.Add("CF"); _settings.OnPropertyChanged(nameof(CharacterSettings.Books));
+            await _character.SetCreatedAsync(true); await _character.SetNuyenAsync(10000);
+            var design = new CustomDrugDesign { Name = "Clear thinker", Markup = 10, GradeId = "Pharmaceutical" };
+            design.Ingredients.Add(new CustomDrugIngredient { ComponentId = "Genius" });
+            design.Ingredients.Add(new CustomDrugIngredient { ComponentId = "Smoothtalk", Level = 1 });
+            int originalImprovements = _character.Improvements.Count;
+            var quote = await CustomDrugRules.QuoteAsync(_character, design);
+            Assert.AreEqual(originalImprovements, _character.Improvements.Count);
+            await _character.SetNuyenAsync(0);
+            var oldMessages = HostServices.Messages;
+            try
+            {
+                HostServices.Messages = new AcceptMessages();
+                Assert.AreEqual(RuleResult.NotEnoughNuyen, (await CustomDrugRules.PurchaseAsync(_character, design)).Result);
+                Assert.AreEqual(0, _character.Drugs.Count); Assert.AreEqual(originalImprovements, _character.Improvements.Count);
+                await _character.SetNuyenAsync(10000);
+                var result = await CustomDrugRules.PurchaseAsync(_character, design);
+                Assert.AreEqual(RuleResult.Changed, result.Result); Assert.AreEqual(quote.Cost, result.Cost);
+                Assert.AreEqual(10000m - quote.Cost, _character.Nuyen); Assert.AreEqual(NuyenExpenseType.AddDrug, result.Expense.Undo.NuyenType);
+                var drug = _character.Drugs.Single(); Assert.AreEqual(1m, drug.Quantity); Assert.AreEqual(2, drug.Components.Count);
+                decimal balance = _character.Nuyen;
+                await _character.SetNuyenAsync(0);
+                int ownedEffects = _character.Improvements.Count;
+                Assert.AreEqual(RuleResult.NotEnoughNuyen, (await CustomDrugRules.PurchaseAsync(_character, design)).Result);
+                Assert.AreEqual(ownedEffects, _character.Improvements.Count);
+                Assert.AreEqual(RuleResult.NotEnoughNuyen, await CustomDrugRules.BuyAdditionalDoseAsync(_character, drug));
+                Assert.AreEqual(1m, drug.Quantity); Assert.AreEqual(1, _character.ExpenseEntries.Count);
+                await _character.SetNuyenAsync(balance);
+                Assert.AreEqual(RuleResult.Changed, await CustomDrugRules.BuyAdditionalDoseAsync(_character, drug));
+                Assert.AreEqual(2m, drug.Quantity);
+                var additional = _character.ExpenseEntries.Single(x => !ReferenceEquals(x, result.Expense));
+                Assert.AreEqual(1m, additional.Undo.Qty);
+                Assert.AreEqual(RuleResult.Changed, await ExpenseRules.UndoExpenseAsync(_character, additional));
+                Assert.AreEqual(1m, drug.Quantity); Assert.AreEqual(balance, _character.Nuyen);
+                Assert.AreEqual(1, drug.Components.Single(x => x.Name == "Smoothtalk").Level);
+                Assert.IsTrue(_character.Improvements.Where(x => x.SourceName == drug.InternalId).All(x => !x.Enabled));
+                string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+                try
+                {
+                    Assert.IsTrue(await _character.SaveAsync(path, false, false));
+                    using var loaded = new Character(); loaded.FileName = path; Assert.IsTrue(await loaded.LoadAsync());
+                    var saved = loaded.Drugs.Single(); Assert.AreEqual(drug.InternalId, saved.InternalId); Assert.AreEqual("Clear thinker", saved.Name);
+                    Assert.AreEqual("Pharmaceutical", saved.Grade.Name);
+                    Assert.AreEqual(1, saved.Components.Single(x => x.Name == "Smoothtalk").Level);
+                    Assert.AreEqual(RuleResult.Changed, await ExpenseRules.UndoExpenseAsync(loaded, loaded.ExpenseEntries.Single()));
+                    Assert.AreEqual(0, loaded.Drugs.Count); Assert.AreEqual(10000m, loaded.Nuyen);
+                    Assert.IsFalse(loaded.Improvements.Any(x => x.SourceName == saved.InternalId));
+                }
+                finally { if (File.Exists(path)) File.Delete(path); }
+            }
+            finally { HostServices.Messages = oldMessages; }
+        }
+
+        [TestMethod]
         public async Task ArmorExportUsesWindowsZeroCapacityFormattingAcrossLanguages()
         {
             var armor = new Armor(_character) { Name = "Capacity test", ArmorCapacity = "8" };

@@ -37,6 +37,7 @@
         <StackPanel Orientation="Horizontal" Spacing="10">
           <Button Content="CREATE NATURAL WEAPON" Command="{Binding CreateNaturalWeaponCommand}" />
           <Button Content="CYBERWARE SUITES" Command="{Binding ManageCyberwareSuitesCommand}" />
+          <Button Content="CREATE CUSTOM DRUG" Command="{Binding CreateCustomDrugCommand}" />
         </StackPanel>
         <Border Classes="loadout" Padding="12,8,12,0" IsVisible="{Binding HasLoadout}">
           <DockPanel>
@@ -224,6 +225,7 @@
                       Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).DecreaseSelectedRentCommand}" />
             </WrapPanel>
             <TextBlock Text="STATS" Classes="section" />
+            <TextBlock Text="{Binding Description}" IsVisible="{Binding HasDescription}" TextWrapping="Wrap" />
             <ItemsControl ItemsSource="{Binding Stats}">
               <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>

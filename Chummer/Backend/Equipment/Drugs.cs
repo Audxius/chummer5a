@@ -2859,11 +2859,12 @@ namespace Chummer.Backend.Equipment
         private void RemoveDrugImprovementsAndQualities()
         {
             string strGroupName = GetImprovementGroupName();
+            HashSet<string> liveDrugIds = GetLiveDrugIds();
             ImprovementManager.RemoveImprovements(_objCharacter, Improvement.ImprovementSource.Drug, InternalId);
             // Fallback for character files loaded before Drug.guid was restored on Load (mismatched SourceName).
             // Scoped to this dose's group name so Drugs-tab and gland doses of the same drug do not wipe each other.
             List<Improvement> lstByGroup = _objCharacter.Improvements
-                .Where(x => x.ImproveSource == Improvement.ImprovementSource.Drug && x.CustomGroup == strGroupName)
+                .Where(x => x.ImproveSource == Improvement.ImprovementSource.Drug && x.CustomGroup == strGroupName && !liveDrugIds.Contains(x.SourceName))
                 .ToList();
             if (lstByGroup.Count > 0)
                 ImprovementManager.RemoveImprovements(_objCharacter, lstByGroup);
@@ -2880,13 +2881,14 @@ namespace Chummer.Backend.Equipment
         {
             token.ThrowIfCancellationRequested();
             string strGroupName = await GetImprovementGroupNameAsync(token).ConfigureAwait(false);
+            HashSet<string> liveDrugIds = await GetLiveDrugIdsAsync(token).ConfigureAwait(false);
             await ImprovementManager
                 .RemoveImprovementsAsync(_objCharacter, Improvement.ImprovementSource.Drug, InternalId, token)
                 .ConfigureAwait(false);
             // Fallback for character files loaded before Drug.guid was restored on Load (mismatched SourceName).
             // Scoped to this dose's group name so Drugs-tab and gland doses of the same drug do not wipe each other.
             List<Improvement> lstByGroup = await _objCharacter.Improvements.ToListAsync(
-                x => x.ImproveSource == Improvement.ImprovementSource.Drug && x.CustomGroup == strGroupName,
+                x => x.ImproveSource == Improvement.ImprovementSource.Drug && x.CustomGroup == strGroupName && !liveDrugIds.Contains(x.SourceName),
                 token: token).ConfigureAwait(false);
             if (lstByGroup.Count > 0)
                 await ImprovementManager.RemoveImprovementsAsync(_objCharacter, lstByGroup, token: token)
@@ -2898,6 +2900,48 @@ namespace Chummer.Backend.Equipment
                 && !await _objCharacter.Improvements.AnyAsync(x => x.CustomGroup == strGroupName, token: token)
                     .ConfigureAwait(false))
                 await lstGroups.RemoveAsync(strGroupName, token).ConfigureAwait(false);
+        }
+
+        // Old saves may need group-based cleanup, but another owned recipe of the same name
+        // has its own source id and must retain its improvements.
+        private HashSet<string> GetLiveDrugIds()
+        {
+            var ids = new HashSet<string>(_objCharacter.Drugs.Select(x => x.InternalId), StringComparer.Ordinal);
+            void Add(IEnumerable<Cyberware> implants)
+            {
+                foreach (var implant in implants)
+                {
+                    foreach (var drug in implant.DrugChildren) ids.Add(drug.InternalId);
+                    Add(implant.Children);
+                }
+            }
+            Add(_objCharacter.Cyberware);
+            foreach (var vehicle in _objCharacter.Vehicles)
+                foreach (var mod in vehicle.Mods.Concat(vehicle.WeaponMounts.SelectMany(x => x.Mods))) Add(mod.Cyberware);
+            return ids;
+        }
+
+        private async Task<HashSet<string>> GetLiveDrugIdsAsync(CancellationToken token)
+        {
+            var ids = new HashSet<string>((await _objCharacter.Drugs.ToListAsync(token).ConfigureAwait(false)).Select(x => x.InternalId), StringComparer.Ordinal);
+            async Task AddAsync(IEnumerable<Cyberware> implants)
+            {
+                foreach (var implant in implants)
+                {
+                    foreach (var drug in await implant.DrugChildren.ToListAsync(token).ConfigureAwait(false)) ids.Add(drug.InternalId);
+                    await AddAsync(await implant.Children.ToListAsync(token).ConfigureAwait(false)).ConfigureAwait(false);
+                }
+            }
+            await AddAsync(await _objCharacter.Cyberware.ToListAsync(token).ConfigureAwait(false)).ConfigureAwait(false);
+            foreach (var vehicle in await _objCharacter.Vehicles.ToListAsync(token).ConfigureAwait(false))
+            {
+                foreach (var mod in await vehicle.Mods.ToListAsync(token).ConfigureAwait(false))
+                    await AddAsync(await mod.Cyberware.ToListAsync(token).ConfigureAwait(false)).ConfigureAwait(false);
+                foreach (var mount in await vehicle.WeaponMounts.ToListAsync(token).ConfigureAwait(false))
+                    foreach (var mod in await mount.Mods.ToListAsync(token).ConfigureAwait(false))
+                        await AddAsync(await mod.Cyberware.ToListAsync(token).ConfigureAwait(false)).ConfigureAwait(false);
+            }
+            return ids;
         }
 
         private void RemoveOrphanedDrugQualities()

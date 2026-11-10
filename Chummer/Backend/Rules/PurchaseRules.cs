@@ -670,35 +670,51 @@ namespace Chummer.Rules
             if (objDrug == null)
                 return new PurchaseResult(RuleResult.NotAllowed);
             objDrug.DiscountCost = objRequest.BlackMarket;
-            bool blnCareer = await objCharacter.GetCreatedAsync(token).ConfigureAwait(false);
-            decimal decCost = 0;
-            if (blnCareer && !objRequest.Free)
-            {
-                // Black Market Pipeline is already included in Drug.Cost.
-                decCost = await StreetCostAsync(objCharacter, await objDrug.GetCostAsync(token).ConfigureAwait(false), objRequest.Markup,
-                                                (await objDrug.TotalAvailTupleAsync(token: token).ConfigureAwait(false)).Suffix, token).ConfigureAwait(false);
-                if (!await CheckNuyenAsync(objCharacter, decCost, token).ConfigureAwait(false))
-                {
-                    await objDrug.DisposeAsync().ConfigureAwait(false);
-                    return new PurchaseResult(RuleResult.NotEnoughNuyen);
-                }
-            }
+            return await PurchaseDrugInstanceAsync(objCharacter, objDrug, objRequest.Markup, objRequest.Free, token).ConfigureAwait(false);
+        }
+
+        internal static async Task<PurchaseResult> PurchaseDrugInstanceAsync(Character objCharacter, Drug objDrug, decimal markup, bool free, CancellationToken token)
+        {
+            if (objDrug == null || !ReferenceEquals(objDrug.CharacterObject, objCharacter)
+                || await objCharacter.Drugs.ContainsAsync(objDrug, token).ConfigureAwait(false)) return new PurchaseResult(RuleResult.NotAllowed);
+            bool committed = false;
+            bool effectsStarted = false;
             try
             {
+                bool blnCareer = await objCharacter.GetCreatedAsync(token).ConfigureAwait(false);
+                decimal decCost = 0;
+                if (blnCareer && !free)
+                {
+                    // Black Market Pipeline is already included in Drug.Cost.
+                    decCost = await StreetCostAsync(objCharacter, await objDrug.GetCostAsync(token).ConfigureAwait(false), markup,
+                        (await objDrug.TotalAvailTupleAsync(token: token).ConfigureAwait(false)).Suffix, token).ConfigureAwait(false);
+                    if (!await CheckNuyenAsync(objCharacter, decCost, token).ConfigureAwait(false))
+                        return new PurchaseResult(RuleResult.NotEnoughNuyen);
+                }
                 await objCharacter.Drugs.AddAsync(objDrug, token).ConfigureAwait(false);
+                effectsStarted = true;
+                await objDrug.GenerateImprovementsAsync(token).ConfigureAwait(false);
+                token.ThrowIfCancellationRequested();
+                ExpenseLogEntry objExpense = null;
+                if (blnCareer && !free)
+                    objExpense = await ChargeAsync(objCharacter, decCost, "String_ExpensePurchaseDrug",
+                        await objDrug.GetCurrentDisplayNameShortAsync(token).ConfigureAwait(false),
+                        NuyenExpenseType.AddDrug, objDrug.InternalId, objDrug.Quantity, CancellationToken.None).ConfigureAwait(false);
+                committed = true;
+                return new PurchaseResult(RuleResult.Changed, objDrug, decCost, objExpense);
             }
-            catch
+            finally
             {
-                await objDrug.DisposeAsync().ConfigureAwait(false);
-                throw;
+                if (!committed)
+                {
+                    if (effectsStarted) await objDrug.RemoveAsync(false, CancellationToken.None).ConfigureAwait(false);
+                    else
+                    {
+                        await objCharacter.Drugs.RemoveAsync(objDrug, CancellationToken.None).ConfigureAwait(false);
+                        await objDrug.DisposeAsync().ConfigureAwait(false);
+                    }
+                }
             }
-            await objDrug.GenerateImprovementsAsync(token).ConfigureAwait(false);
-            ExpenseLogEntry objExpense = null;
-            if (blnCareer && !objRequest.Free)
-                objExpense = await ChargeAsync(objCharacter, decCost, "String_ExpensePurchaseDrug",
-                                               await objDrug.GetCurrentDisplayNameShortAsync(token).ConfigureAwait(false),
-                                               NuyenExpenseType.AddDrug, objDrug.InternalId, objDrug.Quantity, token).ConfigureAwait(false);
-            return new PurchaseResult(RuleResult.Changed, objDrug, decCost, objExpense);
         }
 
         /// <summary>
