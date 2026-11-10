@@ -128,6 +128,111 @@ namespace Chummer.Tests.Rules
         }
 
         [TestMethod]
+        public async Task ArmorExportUsesWindowsZeroCapacityFormattingAcrossLanguages()
+        {
+            var armor = new Armor(_character) { Name = "Capacity test", ArmorCapacity = "8" };
+            var plugin = new Gear(_character) { Name = "Full capacity", ArmorCapacity = "[8]", Quantity = 1.0m };
+            await armor.GearChildren.AddAsync(plugin); await _character.Armor.AddAsync(armor);
+            Assert.AreEqual(0m, await armor.GetCapacityRemainingAsync());
+            foreach (string language in new[] { "en-us", "de-de" })
+            {
+                var exported = await _character.GenerateExportXml(System.Globalization.CultureInfo.GetCultureInfo(language), language);
+                Assert.AreEqual("0", exported.SelectSingleNode("/characters/character/armors/armor[name_english='Capacity test']/capacityremaining").InnerText);
+            }
+        }
+
+        [TestMethod]
+        public async Task AuthoredSuiteRetainsNestedImplantsAndSuiteFlagsThroughSave()
+        {
+            Assert.AreEqual(RuleResult.Changed, await PacksRules.AddAsync(_character, "Basic Combat Eyes Pack", "Cyber Packs"));
+            var source = Improvement.ImprovementSource.Cyberware;
+            var document = await CyberwareSuiteRules.ExportAsync(_character, "Combat eyes", source);
+            Assert.IsNotNull(document.SelectSingleNode("/chummer/suites/suite/cyberwares/cyberware/cyberwares/cyberware[name='Smartlink']"));
+            var suite = document.SelectSingleNode("/chummer/suites/suite");
+            var quote = await CyberwareSuiteRules.QuoteAsync(_character, suite, source);
+            Assert.IsTrue(quote.Items.Any(x => x.Contains("Smartlink"))); Assert.AreEqual(1, _character.Cyberware.Count);
+            Assert.AreEqual(RuleResult.Changed, await CyberwareSuiteRules.PurchaseAsync(_character, suite, source));
+            var installed = _character.Cyberware.Single(x => x.Suite);
+            Assert.IsTrue(installed.Children.Single(x => x.Name == "Smartlink").Suite);
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            try
+            {
+                Assert.IsTrue(await _character.SaveAsync(path, false, false));
+                using var loaded = new Character(); loaded.FileName = path; Assert.IsTrue(await loaded.LoadAsync());
+                var saved = loaded.Cyberware.Single(x => x.Suite);
+                Assert.AreEqual(installed.InternalId, saved.InternalId); Assert.IsTrue(saved.Children.Single(x => x.Name == "Smartlink").Suite);
+                Assert.AreEqual(quote.Cost, saved.TotalCost);
+            }
+            finally { if (File.Exists(path)) File.Delete(path); }
+        }
+
+        [TestMethod]
+        public async Task CyberwareSuiteQuoteDiscountPurchaseAndInsufficientFundsRollbackMatch()
+        {
+            var document = new XmlDocument(); document.LoadXml("<suite><name>Datajack bundle</name><grade>Standard</grade><cyberwares><cyberware><name>Datajack</name></cyberware></cyberwares></suite>");
+            var suite = document.DocumentElement; var source = Improvement.ImprovementSource.Cyberware;
+            int improvements = _character.Improvements.Count;
+            var quote = await CyberwareSuiteRules.QuoteAsync(_character, suite, source);
+            Assert.IsNotNull(quote); Assert.AreEqual(900m, quote.Cost); Assert.AreEqual(0.09m, quote.Essence);
+            Assert.AreEqual(0, _character.Cyberware.Count); Assert.AreEqual(improvements, _character.Improvements.Count);
+            await _character.SetCreatedAsync(true); await _character.SetNuyenAsync(1);
+            var oldMessages = HostServices.Messages;
+            try
+            {
+                HostServices.Messages = new AcceptMessages();
+                Assert.AreEqual(RuleResult.NotEnoughNuyen, await CyberwareSuiteRules.PurchaseAsync(_character, suite, source));
+                Assert.AreEqual(0, _character.Cyberware.Count); Assert.AreEqual(improvements, _character.Improvements.Count); Assert.AreEqual(1m, _character.Nuyen);
+                Assert.AreEqual(0, _character.ExpenseEntries.Count);
+                await _character.SetNuyenAsync(10000);
+                Assert.AreEqual(RuleResult.Changed, await CyberwareSuiteRules.PurchaseAsync(_character, suite, source));
+                Assert.IsTrue(_character.Cyberware.Single().Suite); Assert.AreEqual(quote.Cost, _character.Cyberware.Single().TotalCost);
+                Assert.AreEqual(9100m, _character.Nuyen); Assert.AreEqual(-900m, _character.ExpenseEntries.Single().Amount);
+                var exported = await CyberwareSuiteRules.ExportAsync(_character, "My bundle", source);
+                Assert.AreEqual("Datajack", exported.SelectSingleNode("/chummer/suites/suite/cyberwares/cyberware/name").InnerText);
+                Assert.AreEqual("Standard", exported.SelectSingleNode("/chummer/suites/suite/grade").InnerText);
+                var second = (XmlDocument)exported.CloneNode(true); second.SelectSingleNode("/chummer/suites/suite/name").InnerText = "Other bundle";
+                Assert.AreEqual(2, CyberwareSuiteRules.Append(exported, second).SelectNodes("/chummer/suites/suite").Count);
+                Assert.ThrowsExactly<ArgumentException>(() => CyberwareSuiteRules.Append(exported, exported));
+                Assert.AreEqual(1, exported.SelectNodes("/chummer/suites/suite").Count);
+                var bad = (XmlDocument)document.CloneNode(true);
+                var missing = bad.CreateElement("cyberware"); var missingName = bad.CreateElement("name"); missingName.InnerText = "Missing implant";
+                missing.AppendChild(missingName); bad.SelectSingleNode("/suite/cyberwares").AppendChild(missing);
+                int beforeBad = _character.Improvements.Count;
+                await Assert.ThrowsExactlyAsync<ArgumentException>(() => CyberwareSuiteRules.PurchaseAsync(_character, bad.DocumentElement, source));
+                Assert.AreEqual(1, _character.Cyberware.Count); Assert.AreEqual(9100m, _character.Nuyen);
+                Assert.AreEqual(beforeBad, _character.Improvements.Count); Assert.AreEqual(1, _character.ExpenseEntries.Count);
+            }
+            finally { HostServices.Messages = oldMessages; }
+        }
+
+        [TestMethod]
+        public async Task NaturalWeaponRetainsDamageSkillAndSourceThroughSaveAndRemoval()
+        {
+            int count = _character.Weapons.Count; decimal funds = _character.Nuyen;
+            var design = new NaturalWeaponDesign { Name = "Talons", DamageBase = "({STR})", DamageModifier = 2, ArmorPenetration = -3, Reach = 1 };
+            Assert.AreEqual(RuleResult.Changed, await NaturalWeaponRules.AddAsync(_character, design));
+            var weapon = _character.Weapons.Single(x => x.Name == "Talons");
+            Assert.AreEqual("({STR})+2P", weapon.Damage); Assert.AreEqual("-3", weapon.AP); Assert.AreEqual("1", weapon.Reach);
+            Assert.AreEqual("Physical", weapon.Accuracy); Assert.AreEqual("Unarmed Combat", weapon.UseSkill);
+            Assert.AreEqual(0m, weapon.TotalCost); Assert.AreEqual(funds, _character.Nuyen); Assert.AreEqual(0, _character.ExpenseEntries.Count);
+            design.Skill = "Hacking";
+            Assert.AreEqual(RuleResult.NotAllowed, await NaturalWeaponRules.AddAsync(_character, design));
+            design.Skill = "Unarmed Combat"; design.DamageBase = "{STR} + 1000";
+            Assert.AreEqual(RuleResult.NotAllowed, await NaturalWeaponRules.AddAsync(_character, design));
+            Assert.AreEqual(count + 1, _character.Weapons.Count);
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            try
+            {
+                Assert.IsTrue(await _character.SaveAsync(path, false, false));
+                using var loaded = new Character(); loaded.FileName = path; Assert.IsTrue(await loaded.LoadAsync());
+                var saved = loaded.Weapons.Single(x => x.Name == "Talons");
+                Assert.AreEqual(weapon.InternalId, saved.InternalId); Assert.AreEqual(weapon.Damage, saved.Damage); Assert.AreEqual(weapon.UseSkill, saved.UseSkill);
+                await saved.DeleteWeaponAsync(); Assert.AreEqual(count, loaded.Weapons.Count);
+            }
+            finally { if (File.Exists(path)) File.Delete(path); }
+        }
+
+        [TestMethod]
         public async Task CustomLimitModifiersPreserveIdentityNotesAndRejectAutomaticModifierEdits()
         {
             Assert.AreEqual(RuleResult.Changed, await LimitModifierRules.SaveAsync(_character, "Careful aim", "Physical", 2, "While aiming", "GM ruling"));

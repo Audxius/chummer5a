@@ -96,6 +96,14 @@ internal static class PacksScript
         await limits.SaveAsync("Careful aim", "Physical", 2, "While aiming"); await settle();
         Save(limits, output, "26-limit-modifiers"); limits.Close();
         if (!character.LimitModifiers.Any(x => x.Name == "Careful aim")) throw new InvalidOperationException("Limit modifier was not saved.");
+        var natural = new NaturalWeaponWindow(runner); natural.Show(); await natural.LoadAsync(); await settle();
+        if (natural.SelectedSkill != "Unarmed Combat") throw new InvalidOperationException("Default natural-weapon skill was not selected.");
+        Save(natural, output, "27a-natural-weapon-builder");
+        await natural.SaveAsync(new NaturalWeaponDesign { Name = "Talons", DamageBase = "({STR})", DamageModifier = 2, ArmorPenetration = -3, Reach = 1 });
+        await settle(); Save(window, output, "27b-natural-weapon-inventory");
+        if (!character.Weapons.Any(x => x.Name == "Talons")) throw new InvalidOperationException("Natural weapon was not saved.");
+        var suites = new CyberwareSuiteWindow(runner); suites.Show(); await suites.LoadAsync(); await suites.CreateAsync("Combat eyes bundle"); await settle();
+        Save(suites, output, "28-cyberware-suite"); suites.Close();
         if (character.Gear.Single(x => x.Name == "Ammo: Regular Ammo").Quantity != 100 || character.Vehicles.Count != 1)
             throw new InvalidOperationException("PACKS items were not granted correctly.");
         Console.WriteLine("PACKS grants verified: " + character.Gear.Count + " gear, " + character.Weapons.Count + " weapons, " + character.Cyberware.Count + " implants, " + character.Vehicles.Count + " vehicles.");

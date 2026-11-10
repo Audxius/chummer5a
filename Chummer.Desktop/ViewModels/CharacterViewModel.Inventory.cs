@@ -218,6 +218,12 @@ namespace Chummer.Desktop.ViewModels
         private Task RemoveItem() => RunItemRuleAsync((x, t) => InventoryRules.RemoveAsync(x, t));
 
         [RelayCommand]
+        private Task CreateNaturalWeapon() => DialogHost.ShowModalAsync(new NaturalWeaponWindow(this), null);
+
+        [RelayCommand]
+        private Task ManageCyberwareSuites() => DialogHost.ShowModalAsync(new CyberwareSuiteWindow(this), null);
+
+        [RelayCommand]
         private async Task AddWeaponMount()
         {
             if (!(SelectedInventoryItem?.Item is Vehicle vehicle)) return;

@@ -1353,7 +1353,10 @@ namespace Chummer.Backend.Equipment
                 await objWriter.WriteElementStringAsync("armor", await GetDisplayArmorValueAsync(token).ConfigureAwait(false), token).ConfigureAwait(false);
                 await objWriter.WriteElementStringAsync("totalarmorcapacity", await TotalArmorCapacityAsync(objCulture, token).ConfigureAwait(false), token).ConfigureAwait(false);
                 await objWriter.WriteElementStringAsync("calculatedcapacity", await CalculatedCapacityAsync(objCulture, token).ConfigureAwait(false), token).ConfigureAwait(false);
-                await objWriter.WriteElementStringAsync("capacityremaining", (await GetCapacityRemainingAsync(token).ConfigureAwait(false)).ToString(objCulture), token).ConfigureAwait(false);
+                // Decimal subtraction can retain a zero scale on .NET 8 that .NET Framework discarded.
+                // Preserve the Windows print schema's zero while retaining nonzero capacity formatting.
+                decimal decCapacityRemaining = await GetCapacityRemainingAsync(token).ConfigureAwait(false);
+                await objWriter.WriteElementStringAsync("capacityremaining", decCapacityRemaining == 0 ? "0" : decCapacityRemaining.ToString(objCulture), token).ConfigureAwait(false);
                 await objWriter.WriteElementStringAsync("avail", await TotalAvailAsync(objCulture, strLanguageToPrint, token).ConfigureAwait(false), token).ConfigureAwait(false);
                 string strNuyenFormat = await (await _objCharacter.GetSettingsAsync(token).ConfigureAwait(false)).GetNuyenFormatAsync(token).ConfigureAwait(false);
                 await objWriter.WriteElementStringAsync("cost", (await GetTotalCostAsync(token).ConfigureAwait(false)).ToString(strNuyenFormat, objCulture), token).ConfigureAwait(false);

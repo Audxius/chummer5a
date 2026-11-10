@@ -50,17 +50,17 @@ namespace Chummer
 
         public bool Equals(ListItem other)
         {
-            return Name == other.Name && Value == other.Value;
+            return Name == other.Name && object.Equals(Value, other.Value);
         }
 
         public override bool Equals(object obj)
         {
-            return Value.Equals(obj);
+            return obj is ListItem item ? Equals(item) : Value?.Equals(obj) == true;
         }
 
         public override int GetHashCode()
         {
-            return Value.GetHashCode();
+            return Value?.GetHashCode() ?? 0;
         }
 
         public int CompareTo(object obj)

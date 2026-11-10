@@ -34,6 +34,10 @@
           </ItemsControl.ItemTemplate>
         </ItemsControl>
         <!-- Loadout: what the runner has in hand / on them right now -->
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <Button Content="CREATE NATURAL WEAPON" Command="{Binding CreateNaturalWeaponCommand}" />
+          <Button Content="CYBERWARE SUITES" Command="{Binding ManageCyberwareSuitesCommand}" />
+        </StackPanel>
         <Border Classes="loadout" Padding="12,8,12,0" IsVisible="{Binding HasLoadout}">
           <DockPanel>
             <StackPanel DockPanel.Dock="Left" Width="74" VerticalAlignment="Center" Margin="0,0,8,8">

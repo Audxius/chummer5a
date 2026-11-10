@@ -17,7 +17,9 @@ The generated [legacy event inventory](legacy-actions.tsv) records the source lo
 | PACKS authoring | Native section selection, XML preview and export using legacy serializer; appends to existing kit files and rejects duplicate names | Nested gear, quantities, accessory and section-filter tests and rendered workflow under verification; legacy skill export remains unsupported |
 | Custom spell creation | Native designer reproduces legacy modifiers, validation and drain | Five-category drain checks; career costs, expense undo and save/reload tested; designer and created-spell screens checked |
 | Weapon mount creation | Native size/control/flexibility/visibility builder, mounted weapons and mount-mod store | Quote, career costs, capacity/funds rollback, ownership, expense undo and save/reload tests; builder/store/inventory rendered; editing existing mount options remains incomplete |
-| Custom drugs and cyberware suites | Legacy specialized creation tools | Missing native builders |
+| Cyberware suites | Author owned implants, preview nested contents/cost/essence, open suite XML, install with grade checks and discounts | Nested suite/save tests, malformed-item and insufficient-funds rollback tests; authoring screen rendered; original suite expense has no undo |
+| Natural weapons | Native combat-skill/damage/AP/reach designer matching legacy | Skill/input validation, zero cost and save/reload/removal tested; builder and created weapon rendered |
+| Custom drugs | Legacy specialized creation tool | Missing native builder |
 | Qualities and abilities | Add/remove/levels; spells, powers, CFs, AI, martial arts, initiation | Rules tests and screenshots; reapply-improvement and specialized editing audit pending |
 | Traditions and streams | Standard/custom selection and mystic adept PP | Regression test and rendered editor |
 | Custom improvements | Type/target/value/options, edit, enable/disable, notes, delete | Attribute effect lifecycle and linked metadata tests; full type-by-type parity pending |
@@ -34,6 +36,6 @@ The generated [legacy event inventory](legacy-actions.tsv) records the source lo
 | XML editor | Native amendment editor with base/result/change views, formatting, open/save and dirty-close handling | Real add/replace/remove operations and input isolation tested; rendered preview verified |
 | Plugins | Legacy plugin functionality | Compatibility/replacement audit pending |
 | Distribution | Source-based native launcher with content fingerprint | Fingerprint regression checks pass; reproducible Nix packaging pending |
-| Windows engine parity | Successful deterministic Windows capture; downloaded 750 reference outputs; incremental verifier | Linux save/export/sheet comparisons in progress; explicit save comparison policy retains raw differences |
+| Windows engine parity | Captured750 Windows outputs, all750 compared locally | All saves/XML/JSON/Squad pass explicit policies;49 rendered-sheet ordering differences remain; see parity-linux.md; corrected Windows rerun blocked by Actions disabled |
 
 Only mark a workflow fully verified after exercising its costs, prompts, cancellation, expenses/undo where applicable, and saved state against the legacy specification. Test fixtures must use scratch characters; the user's original character is never a test target.
