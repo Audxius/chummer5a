@@ -2302,6 +2302,17 @@ namespace Chummer.Backend.Equipment
                    + await Cyberware.SumAsync((x, t) => x.GetTotalCostAsync(t), token).ConfigureAwait(false);
         }
 
+        /// <summary>Price against a proposed mount without moving this owned modification during a preview.</summary>
+        internal async Task<decimal> GetTotalCostForMountAsync(int slots, decimal parentCost, CancellationToken token)
+        {
+            string expression = Cost.Replace("{Parent Slots}", slots.ToString(GlobalSettings.InvariantCultureInfo)).Replace("Parent Slots", slots.ToString(GlobalSettings.InvariantCultureInfo))
+                .Replace("{Parent Cost}", parentCost.ToString(GlobalSettings.InvariantCultureInfo)).Replace("Parent Cost", parentCost.ToString(GlobalSettings.InvariantCultureInfo));
+            decimal own = IncludedInVehicle ? 0 : (await ProcessRatingStringAsDecAsync(expression, GetRatingAsync, token).ConfigureAwait(false)).Item1;
+            if (DiscountCost) own *= 0.9m;
+            return own + await Weapons.SumAsync((x, t) => x.GetTotalCostAsync(t), token).ConfigureAwait(false)
+                + await Cyberware.SumAsync((x, t) => x.GetTotalCostAsync(t), token).ConfigureAwait(false);
+        }
+
         /// <summary>
         /// The cost of just the Vehicle Mod itself.
         /// </summary>

@@ -252,6 +252,19 @@ namespace Chummer.Desktop.ViewModels
         }
 
         [RelayCommand]
+        private async Task EditWeaponMount()
+        {
+            if (!(SelectedInventoryItem?.Item is WeaponMount mount) || mount.IncludedInVehicle) return;
+            var window = new WeaponMountWindow(Character, mount.Parent, async configuration =>
+            {
+                PurchaseResult result = null;
+                await RunRuleAsync(async token => { result = await WeaponMountRules.EditAsync(Character, mount, configuration, token); return result.Result; });
+                return result ?? new PurchaseResult(RuleResult.Cancelled);
+            }, mount);
+            await DialogHost.ShowModalAsync(window, null);
+        }
+
+        [RelayCommand]
         private async Task SetItemLocation()
         {
             object item = SelectedInventoryItem?.Item;

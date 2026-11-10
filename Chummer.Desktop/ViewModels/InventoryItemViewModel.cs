@@ -123,6 +123,7 @@ namespace Chummer.Desktop.ViewModels
 
         public bool CanAddMod => CharacterViewModel.ModSectionFor(Item) != null;
         public bool CanAddWeaponMount => Item is Vehicle;
+        public bool CanEditWeaponMount => Item is WeaponMount mount && !mount.IncludedInVehicle;
         public bool CanAddMountedWeapon { get; private set; }
         public bool IsLifestyle => Item is Lifestyle;
 

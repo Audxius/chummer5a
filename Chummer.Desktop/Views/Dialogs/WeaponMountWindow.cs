@@ -15,6 +15,8 @@ namespace Chummer.Desktop.Views.Dialogs
     {
         private readonly Character _character;
         private readonly Vehicle _vehicle;
+        private readonly WeaponMount _editing;
+        private WeaponMountConfiguration _initial;
         private readonly Func<WeaponMountConfiguration, Task<PurchaseResult>> _purchase;
         private readonly ComboBox _size = new ComboBox { MinWidth = 250 };
         private readonly ComboBox _control = new ComboBox { MinWidth = 250 };
@@ -35,9 +37,10 @@ namespace Chummer.Desktop.Views.Dialogs
         public WeaponMountQuote Quote { get; private set; }
         public WeaponMountConfiguration Configuration => Input();
 
-        public WeaponMountWindow(Character character, Vehicle vehicle, Func<WeaponMountConfiguration, Task<PurchaseResult>> purchase)
+        public WeaponMountWindow(Character character, Vehicle vehicle, Func<WeaponMountConfiguration, Task<PurchaseResult>> purchase, WeaponMount editing = null)
         {
-            _character = character; _vehicle = vehicle; _purchase = purchase;
+            _character = character; _vehicle = vehicle; _purchase = purchase; _editing = editing;
+            if (editing != null) { _add.Content = "SAVE CHANGES"; _another.IsVisible = false; }
             _career = character.Created; _currency = character.Settings.NuyenFormat;
             Title = "Vehicle weapon mount"; Width = 1000; Height = 730; MinWidth = 800; MinHeight = 550;
             var root = new DockPanel { Margin = new Thickness(24) };
@@ -69,6 +72,14 @@ namespace Chummer.Desktop.Views.Dialogs
             Opened += async (_, _) => await LoadAsync(); Closed += (_, _) => ++_version;
         }
         public Task LoadAsync() => _load ??= InitializeAsync();
+        public async Task ConfigureAsync(WeaponMountConfiguration configuration)
+        {
+            await LoadAsync(); _initial = configuration; _changing = true;
+            Populate(_size, ((IEnumerable<WeaponMountChoice>)_size.ItemsSource).ToList(), configuration.SizeId);
+            _free.IsChecked = configuration.Free; _blackMarket.IsChecked = configuration.BlackMarket; _markup.Value = configuration.Markup;
+            _changing = false; await LoadOptionsAsync();
+        }
+        public Task SaveAsync() => PurchaseAsync();
         private async Task InitializeAsync()
         {
             try
@@ -76,14 +87,20 @@ namespace Chummer.Desktop.Views.Dialogs
                 _status.Text = "Loading mounts…";
                 var sizes = await Task.Run(() => WeaponMountRules.OptionsAsync(_character, _vehicle, "Size"));
                 bool blackMarket = await Task.Run(() => WeaponMountRules.CanBlackMarketAsync(_character));
-                _changing = true; Populate(_size, sizes); _blackMarket.IsVisible = blackMarket; _changing = false;
+                if (_editing != null) _initial = await Task.Run(() => new WeaponMountConfiguration { SizeId = _editing.SourceIDString,
+                    ControlId = _editing.WeaponMountOptions.FirstOrDefault(x => x.Category == "Control")?.SourceIDString,
+                    FlexibilityId = _editing.WeaponMountOptions.FirstOrDefault(x => x.Category == "Flexibility")?.SourceIDString,
+                    VisibilityId = _editing.WeaponMountOptions.FirstOrDefault(x => x.Category == "Visibility")?.SourceIDString,
+                    Free = _editing.FreeCost, BlackMarket = _editing.DiscountCost });
+                _changing = true; Populate(_size, sizes, _initial?.SizeId); _blackMarket.IsVisible = blackMarket || _initial?.BlackMarket == true;
+                _free.IsChecked = _initial?.Free ?? false; _blackMarket.IsChecked = _initial?.BlackMarket ?? false; _changing = false;
                 await LoadOptionsAsync();
             }
             catch (Exception ex) { _changing = false; _status.Text = ex.Message; }
         }
-        private static void Populate(ComboBox combo, IReadOnlyList<WeaponMountChoice> options)
+        private static void Populate(ComboBox combo, IReadOnlyList<WeaponMountChoice> options, string desired = null)
         {
-            string selected = (combo.SelectedItem as WeaponMountChoice)?.Id;
+            string selected = desired ?? (combo.SelectedItem as WeaponMountChoice)?.Id;
             combo.ItemsSource = options; combo.SelectedItem = options.FirstOrDefault(x => x.Id == selected) ?? options.FirstOrDefault();
         }
         private async Task LoadOptionsAsync()
@@ -98,7 +115,7 @@ namespace Chummer.Desktop.Views.Dialogs
                     await WeaponMountRules.OptionsAsync(_character, _vehicle, "Flexibility", size),
                     await WeaponMountRules.OptionsAsync(_character, _vehicle, "Visibility", size) });
                 if (version != _version) return;
-                _changing = true; Populate(_control, options[0]); Populate(_flexibility, options[1]); Populate(_visibility, options[2]); _changing = false;
+                _changing = true; Populate(_control, options[0], _initial?.ControlId); Populate(_flexibility, options[1], _initial?.FlexibilityId); Populate(_visibility, options[2], _initial?.VisibilityId); _initial = null; _changing = false;
                 await RefreshQuoteAsync();
             }
             catch (Exception ex) { _changing = false; if (version == _version) _status.Text = ex.Message; }
@@ -114,10 +131,11 @@ namespace Chummer.Desktop.Views.Dialogs
             if (input.ControlId == null || input.FlexibilityId == null || input.VisibilityId == null) { _status.Text = "Choose a compatible mount configuration."; return; }
             try
             {
-                var quote = await Task.Run(() => WeaponMountRules.QuoteAsync(_character, _vehicle, input));
+                var quote = await Task.Run(() => _editing == null ? WeaponMountRules.QuoteAsync(_character, _vehicle, input) : WeaponMountRules.QuoteEditAsync(_character, _editing, input));
                 if (version != _version) return;
                 Quote = quote; _add.IsEnabled = quote != null && quote.CanAfford;
-                _details.Text = quote == null ? "This combination is unavailable." : (quote.VariableCost ? "FROM " : "TOTAL ") + quote.Cost.ToString(_currency, GlobalSettings.CultureInfo) + "¥\n\n"
+                string costLabel = _editing == null ? (quote?.VariableCost == true ? "FROM " : "TOTAL ") : "CHANGE ";
+                _details.Text = quote == null ? "This combination is unavailable or cannot hold the mounted weapons." : costLabel + quote.Cost.ToString(_currency, GlobalSettings.CultureInfo) + "¥\n\n"
                     + "Slots: " + quote.Slots + "   Availability: " + quote.Availability + "   Weapon capacity: " + quote.WeaponCapacity
                     + "\n\nAllowed weapons: " + quote.AllowedWeapons + (quote.VariableCost ? "\n\nVariable component costs are chosen before purchase." : "");
                 _status.Text = quote != null && !quote.CanAfford ? "Insufficient funds for this mount." : "";

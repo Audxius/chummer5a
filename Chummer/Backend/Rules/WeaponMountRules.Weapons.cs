@@ -16,6 +16,8 @@ namespace Chummer.Rules
         {
             if (mount == null || definition == null || mount.IsWeaponsFull) return false;
             string category = definition.SelectSingleNode("category")?.Value ?? "";
+            string name = definition.SelectSingleNode("name")?.Value ?? "";
+            if (!string.IsNullOrEmpty(mount.AllowedWeapons) && !mount.AllowedWeapons.Split(',').Any(x => x.Trim() == name)) return false;
             if (!string.IsNullOrEmpty(mount.AllowedWeaponCategories) && !mount.AllowedWeaponCategories.Split(',').Any(x => x.Trim() == category)) return false;
             return string.IsNullOrEmpty(mount.WeaponFilter) || definition.SelectSingleNode("self::*[(" + mount.WeaponFilter + ")]") != null;
         }

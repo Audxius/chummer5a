@@ -88,6 +88,17 @@ internal static class PacksScript
             new PurchaseRequest { Kind = EquipmentKind.WeaponMountMod, ItemId = "6741d080-0e40-4941-a7b5-85ab3e1a9cb2", Parent = mount }, t)).Result);
         await settle(); Save(window, output, "24e-mount-mod-inventory");
         if (mount.Mods.Count != 1) throw new InvalidOperationException("Mount modification was not attached.");
+        var retrofit = new WeaponMountWindow(character, vehicle, async configuration =>
+        {
+            PurchaseResult result = null;
+            await runner.RunRuleAsync(async t => { result = await WeaponMountRules.EditAsync(character, mount, configuration, t); return result.Result; });
+            return result;
+        }, mount);
+        retrofit.Show(); await retrofit.LoadAsync();
+        var retrofitInput = retrofit.Configuration; retrofitInput.ControlId = "70f99fae-470f-442c-a607-ef3465e27f37";
+        await retrofit.ConfigureAsync(retrofitInput); await settle();
+        if (retrofit.Quote?.Cost != -500m) throw new InvalidOperationException("Mount retrofit did not quote the expected downgrade difference.");
+        Save(retrofit, output, "30a-mount-retrofit"); await retrofit.SaveAsync(); await settle(); Save(window, output, "30b-retrofitted-mount");
         var exporter = new PacksExportWindow(character); exporter.Show(); await exporter.GenerateAsync("Street starter kit"); await settle();
         Save(exporter, output, "25-packs-export");
         if (!exporter.Output.Contains("Street starter kit")) throw new InvalidOperationException("PACKS export was empty.");

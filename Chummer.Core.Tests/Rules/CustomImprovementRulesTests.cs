@@ -128,6 +128,129 @@ namespace Chummer.Tests.Rules
         }
 
         [TestMethod]
+        public async Task FactoryMountCanReplaceItsNamedUnderbarrelWeaponWithoutOfferingUnrelatedWeapons()
+        {
+            var vehicle = new Vehicle(_character) { Name = "Factory drone" }; await _character.Vehicles.AddAsync(vehicle);
+            var mount = new WeaponMount(_character, vehicle) { AllowedWeapons = "Underbarrel Grenade Launcher", IncludedInVehicle = true };
+            await vehicle.WeaponMounts.AddAsync(mount);
+            var catalog = new EquipmentCatalog(_character, EquipmentKind.Weapon, mount);
+            var listing = catalog.GetListing(new CatalogQuery());
+            Assert.IsTrue(listing.Rows.Any(x => x.Name == "Underbarrel Grenade Launcher"));
+            Assert.IsTrue(listing.Rows.All(x => x.Name == "Underbarrel Grenade Launcher"));
+            var request = new PurchaseRequest { Kind = EquipmentKind.Weapon, Parent = mount, ItemId = listing.Rows.First().Id };
+            var purchase = await PurchaseRules.PurchaseAsync(_character, request);
+            Assert.AreEqual(RuleResult.Changed, purchase.Result); Assert.AreSame(mount, ((Weapon)purchase.Item).ParentMount);
+        }
+
+        [TestMethod]
+        public async Task MountRetrofitRejectsIncompatibleWeaponsAndKeepsSavedOwnershipAndNotes()
+        {
+            var vehicle = new Vehicle(_character) { Name = "Gun truck", Body = 12 }; await _character.Vehicles.AddAsync(vehicle); _settings.EnforceCapacity = false;
+            var input = new WeaponMountConfiguration { SizeId = "a567c5d3-38b8-496a-add8-1e176384e935", ControlId = "70f99fae-470f-442c-a607-ef3465e27f37",
+                FlexibilityId = "4a020775-9258-486a-a03f-7a48dd5c3bf9", VisibilityId = "582c31e0-1374-4ebb-b201-a20cb815d6dd" };
+            var mount = (WeaponMount)(await WeaponMountRules.PurchaseAsync(_character, vehicle, input)).Item; mount.Notes = "Truck mount notes";
+            string heavyId = _character.LoadData("weapons.xml").SelectSingleNode("/chummer/weapons/weapon[category='Heavy Machine Guns' and source='SR5']/id").InnerText;
+            Assert.AreEqual(RuleResult.Changed, (await PurchaseRules.PurchaseAsync(_character, new PurchaseRequest { Kind = EquipmentKind.Weapon, Parent = mount, ItemId = heavyId })).Result);
+            var gun = mount.Weapons.Single(); mount.AllowedWeapons = gun.Name;
+            input.SizeId = "079a5c61-aee6-4383-81b7-32540f7a0a0b";
+            Assert.IsNull(await WeaponMountRules.QuoteEditAsync(_character, mount, input));
+            Assert.AreEqual(RuleResult.NotAllowed, (await WeaponMountRules.EditAsync(_character, mount, input)).Result);
+            Assert.AreSame(gun, mount.Weapons.Single()); Assert.AreSame(mount, gun.ParentMount);
+            input.SizeId = mount.SourceIDString; input.ControlId = "741bb6e2-0c6b-4af2-82b0-0c4b14c60367";
+            Assert.AreEqual(RuleResult.Changed, (await WeaponMountRules.EditAsync(_character, mount, input)).Result);
+            Assert.AreEqual(gun.Name, mount.AllowedWeapons); Assert.AreEqual("Truck mount notes", mount.Notes);
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            try
+            {
+                Assert.IsTrue(await _character.SaveAsync(path, false, false));
+                using var loaded = new Character(); loaded.FileName = path; Assert.IsTrue(await loaded.LoadAsync());
+                var saved = loaded.Vehicles.Single().WeaponMounts.Single();
+                Assert.AreEqual(mount.InternalId, saved.InternalId); Assert.AreEqual("Truck mount notes", saved.Notes);
+                Assert.AreEqual(gun.InternalId, saved.Weapons.Single().InternalId); Assert.AreSame(saved, saved.Weapons.Single().ParentMount);
+                Assert.IsTrue(saved.WeaponMountOptions.Any(x => x.SourceIDString == input.ControlId));
+            }
+            finally { if (File.Exists(path)) File.Delete(path); }
+        }
+
+        [TestMethod]
+        public async Task MountRetrofitChargesDifferencePreservesAttachmentsAndRefundsDowngrade()
+        {
+            var vehicle = new Vehicle(_character) { Name = "Van", Body = 10 }; await _character.Vehicles.AddAsync(vehicle);
+            _settings.EnforceCapacity = false; _settings.MultiplyForbiddenCost = false; _settings.MultiplyRestrictedCost = false;
+            await _character.SetCreatedAsync(true); await _character.SetNuyenAsync(100000);
+            var input = new WeaponMountConfiguration { SizeId = "079a5c61-aee6-4383-81b7-32540f7a0a0b", ControlId = "70f99fae-470f-442c-a607-ef3465e27f37",
+                FlexibilityId = "4a020775-9258-486a-a03f-7a48dd5c3bf9", VisibilityId = "582c31e0-1374-4ebb-b201-a20cb815d6dd" };
+            var mount = (WeaponMount)(await WeaponMountRules.PurchaseAsync(_character, vehicle, input)).Item;
+            string id = mount.InternalId; mount.Notes = "Keep this note";
+            var weapon = _character.LoadData("weapons.xml").SelectSingleNode("/chummer/weapons/weapon[name='Ares Predator V']/id").InnerText;
+            await PurchaseRules.PurchaseAsync(_character, new PurchaseRequest { Kind = EquipmentKind.Weapon, ItemId = weapon, Parent = mount });
+            var gun = mount.Weapons.Single();
+            _settings.BooksWritable.Add("R5"); _settings.OnPropertyChanged(nameof(CharacterSettings.Books));
+            await PurchaseRules.PurchaseAsync(_character, new PurchaseRequest { Kind = EquipmentKind.WeaponMountMod, ItemId = "6741d080-0e40-4941-a7b5-85ab3e1a9cb2", Parent = mount });
+            var mod = mount.Mods.Single(); decimal balance = _character.Nuyen;
+            input.ControlId = "741bb6e2-0c6b-4af2-82b0-0c4b14c60367"; input.Markup = 20;
+            var quote = await WeaponMountRules.QuoteEditAsync(_character, mount, input);
+            Assert.AreEqual(600m, quote.Cost); Assert.AreEqual(balance, _character.Nuyen);
+            var edit = await WeaponMountRules.EditAsync(_character, mount, input);
+            Assert.AreEqual(RuleResult.Changed, edit.Result); Assert.AreEqual(600m, edit.Cost); Assert.AreEqual(balance - 600, _character.Nuyen);
+            Assert.AreEqual(NuyenExpenseType.ModifyVehicleWeaponMount, edit.Expense.Undo.NuyenType);
+            Assert.AreEqual(id, mount.InternalId); Assert.AreSame(gun, mount.Weapons.Single()); Assert.AreSame(mod, mount.Mods.Single());
+            Assert.AreSame(mount, mod.WeaponMountParent); Assert.AreEqual("Keep this note", mount.Notes);
+            input.ControlId = "70f99fae-470f-442c-a607-ef3465e27f37"; input.Markup = 0;
+            Assert.AreEqual(-500m, (await WeaponMountRules.QuoteEditAsync(_character, mount, input)).Cost);
+            Assert.AreEqual(-500m, (await WeaponMountRules.EditAsync(_character, mount, input)).Cost);
+            Assert.AreEqual(balance - 100, _character.Nuyen);
+        }
+
+        [TestMethod]
+        public async Task MountRetrofitRejectsFundsAndCapacityWithoutChangingConfiguration()
+        {
+            var vehicle = new Vehicle(_character) { Name = "Small van", Body = 4 }; await _character.Vehicles.AddAsync(vehicle);
+            _settings.EnforceCapacity = true; await _character.SetCreatedAsync(true); await _character.SetNuyenAsync(100000);
+            var input = new WeaponMountConfiguration { SizeId = "079a5c61-aee6-4383-81b7-32540f7a0a0b", ControlId = "70f99fae-470f-442c-a607-ef3465e27f37",
+                FlexibilityId = "4a020775-9258-486a-a03f-7a48dd5c3bf9", VisibilityId = "582c31e0-1374-4ebb-b201-a20cb815d6dd" };
+            var mount = (WeaponMount)(await WeaponMountRules.PurchaseAsync(_character, vehicle, input)).Item;
+            var oldOptions = mount.WeaponMountOptions.ToArray(); string size = mount.SourceIDString;
+            var messages = HostServices.Messages;
+            try
+            {
+                HostServices.Messages = new AcceptMessages(); await _character.SetNuyenAsync(0);
+                input.ControlId = "741bb6e2-0c6b-4af2-82b0-0c4b14c60367";
+                Assert.AreEqual(RuleResult.NotEnoughNuyen, (await WeaponMountRules.EditAsync(_character, mount, input)).Result);
+                CollectionAssert.AreEqual(oldOptions, mount.WeaponMountOptions.ToArray()); Assert.AreEqual(size, mount.SourceIDString);
+                await _character.SetNuyenAsync(100000); input.SizeId = "a567c5d3-38b8-496a-add8-1e176384e935";
+                Assert.AreEqual(RuleResult.NotAllowed, (await WeaponMountRules.EditAsync(_character, mount, input)).Result);
+                CollectionAssert.AreEqual(oldOptions, mount.WeaponMountOptions.ToArray()); Assert.AreEqual(size, mount.SourceIDString);
+                Assert.AreEqual(100000m, _character.Nuyen); Assert.AreEqual(1, _character.ExpenseEntries.Count);
+                mount.IncludedInVehicle = true;
+                Assert.IsNull(await WeaponMountRules.QuoteEditAsync(_character, mount, input));
+                Assert.AreEqual(RuleResult.NotAllowed, (await WeaponMountRules.EditAsync(_character, mount, input)).Result);
+            }
+            finally { HostServices.Messages = messages; }
+        }
+
+        [TestMethod]
+        public async Task MountRetrofitQuoteIncludesParentSlotDependentModCostWithoutMovingIt()
+        {
+            var node = _character.LoadData("vehicles.xml").SelectSingleNode("/chummer/vehicles/vehicle[contains(category,'Drones') and source='SR5']");
+            var vehicle = new Vehicle(_character); await vehicle.CreateAsync(node, blnCreateChildren: false, blnCreateImprovements: false, blnSkipSelectForms: true);
+            await _character.Vehicles.AddAsync(vehicle); _settings.EnforceCapacity = false; _settings.DroneMods = true;
+            var input = new WeaponMountConfiguration { SizeId = "079a5c61-aee6-4383-81b7-32540f7a0a0b", ControlId = "70f99fae-470f-442c-a607-ef3465e27f37",
+                FlexibilityId = "4a020775-9258-486a-a03f-7a48dd5c3bf9", VisibilityId = "582c31e0-1374-4ebb-b201-a20cb815d6dd" };
+            var mount = (WeaponMount)(await WeaponMountRules.PurchaseAsync(_character, vehicle, input)).Item;
+            _settings.BooksWritable.Add("R5"); _settings.OnPropertyChanged(nameof(CharacterSettings.Books));
+            var purchase = await PurchaseRules.PurchaseAsync(_character, new PurchaseRequest { Kind = EquipmentKind.WeaponMountMod, Parent = mount, ItemId = "dd03dc64-64e1-49a7-8836-d932cd4cb95b" });
+            var mod = (VehicleMod)purchase.Item; Assert.IsNotNull(mod);
+            input.SizeId = "a567c5d3-38b8-496a-add8-1e176384e935";
+            var quote = await WeaponMountRules.QuoteEditAsync(_character, mount, input);
+            Assert.AreEqual(7, quote.Slots); Assert.AreEqual(2800m, quote.Cost);
+            Assert.AreEqual(4, mount.CalculatedSlots); Assert.AreSame(mount, mod.WeaponMountParent);
+            var result = await WeaponMountRules.EditAsync(_character, mount, input);
+            Assert.AreEqual(RuleResult.Changed, result.Result); Assert.AreEqual(quote.Cost, result.Cost);
+            Assert.AreEqual(7, mount.CalculatedSlots); Assert.AreEqual(700m, mod.TotalCost);
+        }
+
+        [TestMethod]
         public async Task SameNameDrugRecipesKeepSeparateEffectsWhenOnePurchaseIsUndone()
         {
             await _character.SetCreatedAsync(true); await _character.SetNuyenAsync(10000);

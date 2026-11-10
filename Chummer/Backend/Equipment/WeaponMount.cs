@@ -75,6 +75,20 @@ namespace Chummer.Backend.Equipment
 
         public Character CharacterObject => _objCharacter;
 
+        internal void CopyConfigurationFrom(WeaponMount configuration)
+        {
+            SourceID = configuration.SourceID;
+            _strName = configuration._strName; _strCategory = configuration._strCategory;
+            _strLimit = configuration._strLimit; _intSlots = configuration._intSlots;
+            _strAllowedWeaponCategories = configuration._strAllowedWeaponCategories;
+            _strAllowedWeapons = configuration._strAllowedWeapons; _strWeaponFilter = configuration._strWeaponFilter;
+            _intWeaponCapacity = configuration._intWeaponCapacity;
+            _strCost = configuration._strCost; _strAvail = configuration._strAvail;
+            _strSource = configuration._strSource; _strPage = configuration._strPage;
+            _blnDiscountCost = configuration._blnDiscountCost; _blnFreeCost = configuration._blnFreeCost;
+            _objCachedSourceDetail = default; _objCachedBackupSourceDetail = default;
+        }
+
         #region Constructor, Create, Save, Load, and Print Methods
 
         public WeaponMount(Character character, Vehicle vehicle)

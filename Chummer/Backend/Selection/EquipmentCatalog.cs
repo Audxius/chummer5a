@@ -422,7 +422,8 @@ namespace Chummer.Selection
                     break;
                 case EquipmentKind.Weapon:
                     // Legacy SelectWeapon: no cyberweapons, nothing that needs a mount (underbarrels) at top level.
-                    sbdFilter.Append(" and not(cyberware = \"True\") and not(mount) and not(extramount)");
+                    sbdFilter.Append(" and not(cyberware = \"True\")");
+                    if (!(Parent is WeaponMount)) sbdFilter.Append(" and not(mount) and not(extramount)");
                     break;
                 case EquipmentKind.Cyberware:
                 case EquipmentKind.Bioware:
