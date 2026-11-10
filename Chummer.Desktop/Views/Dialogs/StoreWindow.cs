@@ -610,7 +610,8 @@ namespace Chummer.Desktop.Views.Dialogs
 
         private CatalogQuery CurrentQuery() => new CatalogQuery
         {
-            Category = (_lstCategories.SelectedItem as ListItem?)?.Value?.ToString() ?? string.Empty,
+            Category = !GlobalSettings.SearchInCategoryOnly && !string.IsNullOrWhiteSpace(_txtSearch.Text)
+                ? string.Empty : (_lstCategories.SelectedItem as ListItem?)?.Value?.ToString() ?? string.Empty,
             Search = _txtSearch.Text ?? string.Empty,
             OnlyAffordable = _chkAffordable.IsChecked == true,
             HideOverAvailLimit = _chkHideOverAvail.IsChecked == true,

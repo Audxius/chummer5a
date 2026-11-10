@@ -18,6 +18,7 @@
  */
 
 using System;
+using System.Xml;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -230,7 +231,13 @@ namespace Chummer.Desktop.Services
                     Character objCharacter = objMartialArt.ConstructorArguments.FirstOrDefault() as Character;
                     if (objCharacter == null)
                         return DialogOutcome.Cancel;
-                    string strId = await BrowseIdAsync(owner, DataBrowser.MartialArt(objCharacter)).ConfigureAwait(true);
+                    string strId;
+                    if (!string.IsNullOrEmpty(objMartialArt.ForcedValue))
+                    {
+                        var data = await objCharacter.LoadDataXPathAsync("martialarts.xml").ConfigureAwait(true);
+                        strId = data.TryGetNodeByNameOrId("/chummer/martialarts/martialart", objMartialArt.ForcedValue)?.SelectSingleNode("id")?.Value;
+                    }
+                    else strId = await BrowseIdAsync(owner, DataBrowser.MartialArt(objCharacter)).ConfigureAwait(true);
                     if (strId == null)
                         return DialogOutcome.Cancel;
                     objMartialArt.SetResult(nameof(SelectMartialArtRequest.SelectedMartialArt), strId);

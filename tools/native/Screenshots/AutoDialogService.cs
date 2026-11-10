@@ -16,6 +16,16 @@ internal sealed class AutoDialogService : IDialogService
     public async Task<DialogOutcome> ShowAsync(DialogRequest objRequest, object owner = null, CancellationToken token = default)
     {
         Console.WriteLine("[dialog] " + objRequest.DialogName);
+        if (Environment.GetEnvironmentVariable("CHUMMER_REVIEW_PACKS") == "1" && objRequest is SelectWeaponCategoryRequest)
+        {
+            objRequest.SetResult(nameof(SelectWeaponCategoryRequest.SelectedCategory), "Light Pistols");
+            return DialogOutcome.OK;
+        }
+        if (Environment.GetEnvironmentVariable("CHUMMER_REVIEW_PACKS") == "1" && objRequest is SelectTextRequest)
+        {
+            objRequest.SetResult(nameof(SelectTextRequest.SelectedValue), "Seattle");
+            return DialogOutcome.OK;
+        }
         if (objRequest.Opacity == 0)
             return DialogOutcome.OK;
         if (objRequest is SelectBuildMethodRequest && objRequest.ConstructorArguments.FirstOrDefault() is Character objCharacter)

@@ -119,3 +119,8 @@ jobs:
         name: parity-logs
         path: ref/*.log
         if-no-files-found: ignore
+
+    # Preserve artifacts above, then make a failed comparison visible in the job result.
+    - name: Fail when determinism verification failed
+      if: always() && steps.determinism.outcome == 'failure'
+      run: exit 1

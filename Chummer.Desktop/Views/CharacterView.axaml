@@ -9,8 +9,9 @@
 
   <UserControl.KeyBindings>
     <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveAsCommand}" />
+    <KeyBinding Gesture="Ctrl+E" Command="{Binding ExportCharacterCommand}" />
   </UserControl.KeyBindings>
-  <DockPanel>
+  <DockPanel IsEnabled="{Binding !IsCheckingCreation}">
     <!-- Header -->
     <Border DockPanel.Dock="Top" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="0,0,0,1" Padding="28,20,28,0">
@@ -73,7 +74,13 @@
                 <TextBlock Text="{Binding Essence}" Classes="value" />
               </StackPanel>
             </Border>
-            <Button Classes="ghost" Command="{Binding PrintCommand}" VerticalAlignment="Stretch" HotKey="Ctrl+P" ToolTip.Tip="Print / export character sheet (Ctrl+P)">
+            <Button Classes="ghost" Command="{Binding PrintCommand}" VerticalAlignment="Stretch" HotKey="Ctrl+P" ToolTip.Tip="Print (Ctrl+P). Right-click for JSON/XML export (Ctrl+E) or printing all open runners.">
+              <Button.ContextFlyout>
+                <MenuFlyout>
+                  <MenuItem Header="Export JSON / XML / Squad Manager…" Command="{Binding ExportCharacterCommand}" />
+                  <MenuItem Header="Print all open runners…" Command="{Binding PrintAllOpenCommand}" />
+                </MenuFlyout>
+              </Button.ContextFlyout>
               <StackPanel Spacing="4" HorizontalAlignment="Center">
                 <PathIcon Data="{StaticResource Icon.Notes}" Width="18" Height="18" />
                 <TextBlock Text="PRINT" />
@@ -93,6 +100,21 @@
           </StackPanel>
         </Grid>
 
+        <StackPanel IsVisible="{Binding IsCreateMode}" Margin="0,14,0,0" Spacing="8" IsEnabled="{Binding !IsCheckingCreation}">
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+            <TextBlock Text="{Binding CreationBudget}" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{StaticResource CyanBrush}" />
+            <Button Grid.Column="1" Content="CHECK BUILD" Command="{Binding ValidateCreationCommand}" />
+            <Button Grid.Column="2" Content="FINISH → CAREER" Command="{Binding FinishCreationCommand}" Classes="primary" />
+          </Grid>
+          <ScrollViewer MaxHeight="160" IsVisible="{Binding HasCreationErrors}">
+            <TextBlock Text="{Binding CreationErrors}" TextWrapping="Wrap" />
+          </ScrollViewer>
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <Button Content="METATYPE / PRIORITIES" Command="{Binding ChangeCreationPrioritiesCommand}" />
+            <Button Content="KARMA → NUYEN" Command="{Binding BuyCreationNuyenCommand}" />
+            <Button Content="ADD PACKS KIT" Command="{Binding AddPacksKitCommand}" />
+          </StackPanel>
+        </StackPanel>
         <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
           <ToggleButton Classes="section" Content="OVERVIEW" IsChecked="{Binding IsOverview, Mode=OneWay}"
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Overview}" />
@@ -112,6 +134,8 @@
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Notes}" />
           <ToggleButton Classes="section" Content="LEDGER" IsChecked="{Binding IsLedger, Mode=OneWay}" IsVisible="{Binding Ledger.IsCareer}"
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Ledger}" />
+          <ToggleButton Classes="section" Content="IMPROVEMENTS" IsChecked="{Binding IsImprovements, Mode=OneWay}"
+                        Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Improvements}" />
         </StackPanel>
       </StackPanel>
     </Border>
@@ -135,6 +159,7 @@
       <sections:NotesSectionView IsVisible="{Binding IsNotes}" />
 
       <sections:LedgerSectionView IsVisible="{Binding IsLedger}" />
+      <sections:ImprovementsSectionView IsVisible="{Binding IsImprovements}" />
     </Grid>
   </DockPanel>
 </UserControl>

@@ -156,6 +156,17 @@ namespace Chummer.Desktop.ViewModels
             int intKarma = objCharacter.Karma;
             List<AbilityGroupViewModel> lstReturn = new List<AbilityGroupViewModel>();
 
+            if (objCharacter.ShouldHaveTradition)
+            {
+                var tradition = new AbilityGroupViewModel(objCharacter.RESEnabled ? "STREAM" : "TRADITION", "Icon.Spell", Array.Empty<AbilityCardViewModel>())
+                {
+                    Summary = objCharacter.MagicTradition.CurrentDisplayName,
+                    EmptyText = objCharacter.MagicTradition.Type == TraditionType.None ? "Choose a tradition or stream." : "Drain: " + objCharacter.MagicTradition.DrainExpression
+                };
+                tradition.Actions.Add(new AbilityAction("CHOOSE", "Set the runner's magical tradition or resonance stream", new AsyncRelayCommand(objOwner.ChooseTraditionAsync)));
+                lstReturn.Add(tradition);
+            }
+
             // ----- spells -----
             List<Spell> lstSpellObjects = objCharacter.Spells.ToList();
             if (objCharacter.MagicianEnabled || lstSpellObjects.Count > 0 || (objCharacter.AdeptEnabled && objCharacter.AllowFreeSpells().Item1))
@@ -185,6 +196,7 @@ namespace Chummer.Desktop.ViewModels
                     : lstSpellObjects.Count(x => !x.Alchemical && x.Category != "Rituals").ToString(C) + " / " + (objCharacter.GetAttribute("MAG").TotalValue * 2).ToString(C) + " spells known";
                 objGroup.Actions.Add(new AbilityAction("LEARN SPELL", blnCareer ? "Learn a new spell for " + intCost.ToString(C) + " karma" : "Add a spell",
                                                        new AsyncRelayCommand(objOwner.LearnSpellAsync), true, "primary"));
+                objGroup.Actions.Add(new AbilityAction("CREATE SPELL", "Design a custom spell", objOwner.CreateCustomSpellCommand));
                 lstReturn.Add(objGroup);
             }
 
@@ -219,6 +231,9 @@ namespace Chummer.Desktop.ViewModels
                 decimal decUsed = objCharacter.PowerPointsUsed;
                 objGroup.Summary = (decTotal - decUsed).ToString("0.##", C) + " of " + decTotal.ToString("0.##", C) + " power points free";
                 objGroup.Actions.Add(new AbilityAction("ADD POWER", "Add an adept power (paid with power points)", new AsyncRelayCommand(objOwner.AddPowerAsync), true, "primary"));
+                if (!blnCareer && objCharacter.UseMysticAdeptPPs)
+                    objGroup.Actions.Add(new AbilityAction("ALLOCATE PP", "Choose mystic adept power points; their karma cost is included in the build budget",
+                        new AsyncRelayCommand(objOwner.AllocateMysticPowerPointsAsync)));
                 lstReturn.Add(objGroup);
             }
 

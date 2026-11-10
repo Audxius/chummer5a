@@ -154,7 +154,7 @@
   </Style>
 
   <!-- Navigation rail entries -->
-  <Style Selector="ToggleButton.nav">
+  <Style Selector="ToggleButton.nav, Button.nav">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
     <Setter Property="BorderThickness" Value="3,0,0,0" />
@@ -163,13 +163,16 @@
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="HorizontalContentAlignment" Value="Left" />
     <Setter Property="Padding" Value="14,10" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="LetterSpacing" Value="1.5" />
   </Style>
   <Style Selector="ToggleButton.nav:checked /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />
     <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
     <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
   </Style>
-  <Style Selector="ToggleButton.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+  <Style Selector="ToggleButton.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
     <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
   </Style>

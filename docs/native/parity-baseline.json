@@ -1,0 +1,29 @@
+{
+  "repository": "Audxius/chummer5a",
+  "workflow": ".github/workflows/parity-baseline.yml",
+  "runId": 42553325872,
+  "runUrl": "https://github.com/Audxius/chummer5a/actions/runs/42553325872",
+  "trigger": "push",
+  "harnessCommit": "49a8cd9ec23a959bb61226866de65c9ad7addd13",
+  "referenceEngineRef": "parity-baseline",
+  "referenceEngineCommit": "fe6622b9fd34844fb2fd480b8687684275eee1a6",
+  "captureConclusion": "success",
+  "freshProcessDeterminismConclusion": "failed (allowed failure made the workflow green)",
+  "determinismTestsPassed": 9,
+  "determinismTestsFailed": 2,
+  "determinismFailures": ["ExportsEnglish", "SheetsAllLanguages"],
+  "determinismDiagnostic": "Rendering comparisons consumed a leading UTF-8 marker when reading expected strings. All 443 retained rendering outputs are byte-identical to their captured references; the harness read is corrected locally. A fresh Windows rerun remains pending.",
+  "retainedWindowsRenderingFilesCompared": 443,
+  "retainedWindowsRenderingByteDifferences": 0,
+  "artifact": {
+    "name": "parity-golden",
+    "id": 13652986953,
+    "createdAt": "2026-11-09T05:57:52Z",
+    "compressedBytes": 9843619,
+    "digest": "sha256:b43686aac27cf763c2864f7e3a2f2793cdaa8978a320cfd8b712963734cc6232",
+    "outputFiles": 750,
+    "characterFixtures": 34,
+    "bundledArchive": "Chummer.Parity/windows-baseline-42553325872.tar.gz",
+    "bundledArchiveSha256": "c84bd664b165b1015e6a76eb4808bab43de94e732ad95c519327fb14f27ce471"
+  }
+}

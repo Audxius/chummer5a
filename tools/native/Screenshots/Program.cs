@@ -30,6 +30,27 @@ internal static class Program
                 MainWindowViewModel objViewModel = new MainWindowViewModel();
                 MainWindow objWindow = new MainWindow { DataContext = objViewModel, Width = 1440, Height = 900 };
                 objWindow.Show();
+                if (Environment.GetEnvironmentVariable("CHUMMER_REVIEW_XML_EDITOR") == "1")
+                {
+                    var editor = new Chummer.Desktop.Views.Dialogs.XmlDataWindow();
+                    await editor.LoadContentAsync("gear.xml",
+                        "<chummer><gears><gear><name>Flashlight</name><cost>25</cost></gear></gears></chummer>",
+                        "<chummer><gears><gear><name>Flashlight</name><cost amendoperation='replace'>50</cost></gear></gears></chummer>");
+                    editor.Show(); await Settle();
+                    if (!editor.Result.Contains(">50<")) throw new InvalidOperationException("XML amendment preview was incorrect.");
+                    AvaloniaHeadlessPlatform.ForceRenderTimerTick(); editor.CaptureRenderedFrame()?.Save(Path.Combine(strOut, "23-xml-amendment-editor.png"));
+                    Console.WriteLine("XML amendment preview verified."); editor.Close(); return 0;
+                }
+                if (Environment.GetEnvironmentVariable("CHUMMER_REVIEW_PACKS") == "1")
+                {
+                    await PacksScript.RunAsync(objWindow, objViewModel, strOut, Settle);
+                    return 0;
+                }
+                if (Environment.GetEnvironmentVariable("CHUMMER_REVIEW_CREATION") == "1")
+                {
+                    await CreationScript.RunAsync(objWindow, objViewModel, strOut, Settle);
+                    return 0;
+                }
                 for (int i = 1; i < args.Length; ++i)
                     await GlobalSettings.MostRecentlyUsedCharacters.InsertAsync(0, Path.GetFullPath(args[i]));
                 await objViewModel.Roster.RefreshAsync();
@@ -40,6 +61,68 @@ internal static class Program
                     await objViewModel.OpenCharacterFileAsync(Path.GetFullPath(args[1]));
                     await Settle();
                     Save(objWindow, strOut, "02-overview");
+                    if (Environment.GetEnvironmentVariable("CHUMMER_REVIEW_DIALOGS") == "1" && objViewModel.CurrentPage is CharacterViewModel review)
+                    {
+                        Console.WriteLine("opening rules editor");
+                        using (var editor = await Task.Run(() => CharacterSettingsEditorViewModel.CreateAsync(review.Character.Settings)))
+                        {
+                            Console.WriteLine("rules editor model ready");
+                            int original = review.Character.Settings.KarmaAttribute;
+                            editor.SetValue("KarmaAttribute", original + 1);
+                            if (review.Character.Settings.KarmaAttribute != original || editor.Settings.KarmaAttribute != original + 1)
+                                throw new InvalidOperationException("Rules editor must isolate changes from the runner until saved.");
+                            editor.SetValue("KarmaAttribute", original);
+                            var sourceBooks = review.Character.Settings.Books.OrderBy(x => x).ToArray();
+                            var editableBook = editor.SourceBooksOption.Flags.FirstOrDefault(x => x.IsEnabled);
+                            if (editableBook != null)
+                            {
+                                bool enabled = editableBook.Value;
+                                editableBook.Value = !enabled;
+                                if (!sourceBooks.SequenceEqual(review.Character.Settings.Books.OrderBy(x => x)))
+                                    throw new InvalidOperationException("Source book edits changed the original preset.");
+                                editableBook.Value = enabled;
+                            }
+                            int originalDirectories = review.Character.Settings.CustomDataDirectoryKeys.Count;
+                            var directory = editor.CustomDirectoriesOption.Directories.FirstOrDefault(x => !string.IsNullOrEmpty(x.Path));
+                            if (directory != null)
+                            {
+                                bool enabled = directory.Value;
+                                directory.Value = true;
+                                if (!editor.Settings.EnabledCustomDataDirectoryPaths.Contains(directory.Path))
+                                    throw new InvalidOperationException("Enabled custom data path was not rebuilt.");
+                                directory.Value = enabled;
+                            }
+                            if (review.Character.Settings.CustomDataDirectoryKeys.Count != originalDirectories)
+                                throw new InvalidOperationException("Custom data edits changed the original preset.");
+                            await Task.Run(async () =>
+                            {
+                                using var stream = new MemoryStream();
+                                if (!await editor.Settings.SaveAsync(stream)) throw new InvalidOperationException("Settings serialization failed.");
+                                stream.Position = 0;
+                                var document = new System.Xml.XmlDocument { XmlResolver = null }; document.Load(stream);
+                                using var restored = new CharacterSettings();
+                                if (!restored.Load(document.DocumentElement.CreateNavigator())
+                                    || !restored.Books.OrderBy(x => x).SequenceEqual(editor.Settings.Books.OrderBy(x => x))
+                                    || restored.KarmaAttribute != editor.Settings.KarmaAttribute)
+                                    throw new InvalidOperationException("Edited settings did not survive serialization.");
+                            });
+                            var settings = new Chummer.Desktop.Views.Dialogs.CharacterSettingsWindow(editor, _ => Task.FromResult(false));
+                            await SaveDialog(settings, strOut, "12-character-rules");
+                            var books = new Chummer.Desktop.Views.Dialogs.CharacterSettingsWindow(editor, _ => Task.FromResult(false));
+                            books.Search("source books"); await SaveDialog(books, strOut, "12c-source-books");
+                            var directories = new Chummer.Desktop.Views.Dialogs.CharacterSettingsWindow(editor, _ => Task.FromResult(false));
+                            directories.Search("custom data"); await SaveDialog(directories, strOut, "12d-custom-data");
+                        }
+                        await SaveDialog(new Chummer.Desktop.Views.Dialogs.GlobalOptionsWindow(), strOut, "12b-global-options");
+                        using (var draft = new Character { SettingsKey = review.Character.SettingsKey })
+                        {
+                            var selector = await Task.Run(() => new Chummer.Selection.MetatypeSelector(draft));
+                            var wizard = new Chummer.Desktop.Views.Dialogs.MetatypeWindow(selector);
+                            await SaveDialog(wizard, strOut, "13-new-runner");
+                        }
+                        await StoreHarness.RunAsync(review, strOut, Settle);
+                        return 0;
+                    }
                     if (objViewModel.CurrentPage is CharacterViewModel objDamaged && objDamaged.PhysicalBoxes.Count > 3)
                     {
                         objDamaged.PhysicalBoxes[3].ToggleCommand.Execute(null);

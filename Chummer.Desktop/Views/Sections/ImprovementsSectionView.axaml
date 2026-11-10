@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Chummer.Desktop.ViewModels"
+             x:Class="Chummer.Desktop.Views.Sections.ImprovementsSectionView"
+             x:DataType="vm:CharacterViewModel">
+  <DockPanel Margin="28,18,28,24">
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" ColumnSpacing="16" Margin="0,0,0,16">
+      <TextBox Text="{Binding ImprovementFilter}" PlaceholderText="Search custom improvements, groups and effects…" />
+      <Button Grid.Column="1" Content="+ CUSTOM IMPROVEMENT" Command="{Binding AddCustomImprovementCommand}" Classes="primary" />
+    </Grid>
+    <ScrollViewer>
+      <ItemsControl ItemsSource="{Binding CustomImprovements}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:CustomImprovementRow">
+            <Border Classes="panel" Padding="16" Margin="0,0,0,12">
+              <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Group}" Classes="label" />
+                    <TextBlock Text="{Binding Name}" FontSize="17" FontWeight="Bold" Foreground="{StaticResource CyanBrush}" />
+                    <TextBlock Text="{Binding Effect}" TextWrapping="Wrap" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Content="{Binding ToggleLabel}" Command="{Binding ToggleCommand}" />
+                  <Button Grid.Column="2" Content="EDIT" Command="{Binding EditCommand}" />
+                  <Button Grid.Column="3" Content="REMOVE" Command="{Binding RemoveCommand}" />
+                </Grid>
+                <Expander Header="Notes">
+                  <StackPanel Spacing="8">
+                    <TextBox Text="{Binding NotesDraft}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70" MaxHeight="180" />
+                    <Button Content="SAVE NOTES" Command="{Binding SaveNotesCommand}" HorizontalAlignment="Right" />
+                  </StackPanel>
+                </Expander>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

@@ -24,6 +24,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -45,7 +46,8 @@ namespace Chummer.Desktop.ViewModels
         Abilities,
         Network,
         Notes,
-        Ledger
+        Ledger,
+        Improvements
     }
 
     /// <summary>
@@ -53,6 +55,10 @@ namespace Chummer.Desktop.ViewModels
     /// </summary>
     public sealed partial class CharacterViewModel : ViewModelBase
     {
+        private int _summaryRefreshPending;
+        private int _summaryRefreshRunning;
+        private volatile bool _isCharacterDisposed;
+        private readonly SemaphoreSlim _engineOperationGate = new SemaphoreSlim(1, 1);
         private CharacterViewModel(Character objCharacter)
         {
             Character = objCharacter;
@@ -178,6 +184,7 @@ namespace Chummer.Desktop.ViewModels
             OnPropertyChanged(nameof(IsAbilities));
             OnPropertyChanged(nameof(IsNetwork));
             OnPropertyChanged(nameof(IsLedger));
+            OnPropertyChanged(nameof(IsImprovements));
         }
 
         // ---------- sections ----------
@@ -206,55 +213,75 @@ namespace Chummer.Desktop.ViewModels
         /// <summary>Re-reads every section from the engine (after an edit).</summary>
         internal void Reload() => _ = Task.Run(LoadSnapshot);
 
-        private void LoadSnapshot()
+        private async Task LoadSnapshot()
         {
-            RefreshSummary();
-            List<AttributeViewModel> lstAttributes = Character.AttributeSection.AttributeList.ToList().Select(x => new AttributeViewModel(this, x)).ToList();
-            bool blnMag = Character.MAGEnabled;
-            bool blnMysAd = blnMag && Character.IsMysticAdept;
-            bool blnRes = Character.RESEnabled;
-            bool blnDep = Character.DEPEnabled;
-            // Like the legacy sheet: only the special attributes the runner actually has (essence is in the header).
-            List<AttributeViewModel> lstSpecial = Character.AttributeSection.SpecialAttributeList.ToList()
-                .Where(x => x.Abbrev == "EDG" || (x.Abbrev == "MAG" && blnMag) || (x.Abbrev == "MAGAdept" && blnMysAd) || (x.Abbrev == "RES" && blnRes) || (x.Abbrev == "DEP" && blnDep))
-                .Select(x => new AttributeViewModel(this, x)).ToList();
-            SkillsSnapshot objSkills = BuildSkillsSnapshot();
-            List<QualityViewModel> lstQualities = QualityViewModel.FromCharacter(this);
-            string strConcept = Character.Concept.RtfToPlainText();
-            string strDescription = Character.Description.RtfToPlainText();
-            string strBackground = Character.Background.RtfToPlainText();
-            string strNotes = Character.Notes.RtfToPlainText();
-            List<InventoryItemViewModel> lstInventory = InventoryItemViewModel.FromCharacter(Character).ToList();
-            List<AbilityGroupViewModel> lstAbilitySections = AbilityCards.Abilities(this);
-            List<InventoryGroupViewModel> lstAbilities = lstAbilitySections.Select(x => x.ToInventoryGroup()).ToList();
-            List<InventoryGroupViewModel> lstNetwork = AbilityCards.Network(Character);
-            List<ContactCardViewModel> lstContacts = Character.Contacts.ToList().Select(x => new ContactCardViewModel(this, x))
-                                                              .OrderByDescending(x => x.Connection + x.Loyalty).ThenBy(x => x.Name, StringComparer.CurrentCulture).ToList();
-            Ledger.Load();
-            OnUi(() =>
+            await _engineOperationGate.WaitAsync().ConfigureAwait(false);
+            try
             {
-                Reset(Attributes, lstAttributes);
-                Reset(SpecialAttributes, lstSpecial);
-                ApplySkillsSnapshot(objSkills);
-                Reset(PositiveQualities, lstQualities.Where(x => x.IsPositive));
-                Reset(NegativeQualities, lstQualities.Where(x => !x.IsPositive));
-                RefreshQualitySummary(lstQualities);
-                Concept = strConcept;
-                Description = strDescription;
-                Background = strBackground;
-                Notes = strNotes;
-                _lstAllInventory = lstInventory;
-                RefreshInventoryKinds();
-                ApplyInventoryFilter();
-                _lstAllAbilities = lstAbilities;
-                _lstAllNetwork = lstNetwork;
-                _lstAllContacts = lstContacts;
-                ApplyContactFilter();
-                OnPropertyChanged(nameof(HasAbilities));
-                _lstAllAbilitySections = lstAbilitySections;
-                ApplyAbilityFilter();
-                FilterCards(_lstAllNetwork, NetworkGroups, NetworkFilter);
-            });
+                if (_isCharacterDisposed) return;
+                await RefreshSummaryCore().ConfigureAwait(false);
+                bool careerMode = Character.Created;
+                bool lifeModuleMode = !careerMode && Character.EffectiveBuildMethod == Chummer.Backend.Enums.CharacterBuildMethod.LifeModule;
+                List<AttributeViewModel> lstAttributes = Character.AttributeSection.AttributeList.ToList().Select(x => new AttributeViewModel(this, x)).ToList();
+                bool blnMag = Character.MAGEnabled;
+                bool blnMysAd = blnMag && Character.IsMysticAdept;
+                bool blnRes = Character.RESEnabled;
+                bool blnDep = Character.DEPEnabled;
+                // Like the legacy sheet: only the special attributes the runner actually has (essence is in the header).
+                List<AttributeViewModel> lstSpecial = Character.AttributeSection.SpecialAttributeList.ToList()
+                    .Where(x => x.Abbrev == "EDG" || (x.Abbrev == "MAG" && blnMag) || (x.Abbrev == "MAGAdept" && blnMysAd) || (x.Abbrev == "RES" && blnRes) || (x.Abbrev == "DEP" && blnDep))
+                    .Select(x => new AttributeViewModel(this, x)).ToList();
+                SkillsSnapshot objSkills = BuildSkillsSnapshot();
+                List<QualityViewModel> lstQualities = QualityViewModel.FromCharacter(this);
+                var qualitySummary = ReadQualitySummary(lstQualities);
+                string strConcept = Character.Concept.RtfToPlainText();
+                string strDescription = Character.Description.RtfToPlainText();
+                string strBackground = Character.Background.RtfToPlainText();
+                string strNotes = Character.Notes.RtfToPlainText();
+                List<InventoryItemViewModel> lstInventory = InventoryItemViewModel.FromCharacter(Character).ToList();
+                List<AbilityGroupViewModel> lstAbilitySections = AbilityCards.Abilities(this);
+                List<InventoryGroupViewModel> lstAbilities = lstAbilitySections.Select(x => x.ToInventoryGroup()).ToList();
+                List<InventoryGroupViewModel> lstNetwork = AbilityCards.Network(Character);
+                List<ContactCardViewModel> lstContacts = Character.Contacts.ToList().Select(x => new ContactCardViewModel(this, x))
+                                                                  .OrderByDescending(x => x.Connection + x.Loyalty).ThenBy(x => x.Name, StringComparer.CurrentCulture).ToList();
+                Ledger.Load();
+                List<CustomImprovementRow> customImprovements = BuildCustomImprovements();
+                OnUi(() =>
+                {
+                    _careerMode = careerMode;
+                    _lifeModuleMode = lifeModuleMode;
+                    OnPropertyChanged(nameof(IsCreateMode));
+                    OnPropertyChanged(nameof(IsCareerMode));
+                    OnPropertyChanged(nameof(IsLifeModuleBuild));
+                    Reset(Attributes, lstAttributes);
+                    _allCustomImprovements = customImprovements;
+                    FilterCustomImprovements();
+                    Reset(SpecialAttributes, lstSpecial);
+                    ApplySkillsSnapshot(objSkills);
+                    Reset(PositiveQualities, lstQualities.Where(x => x.Type == QualityType.Positive));
+                    Reset(NegativeQualities, lstQualities.Where(x => x.Type == QualityType.Negative));
+                    Reset(LifeModuleQualities, lstQualities.Where(x => x.Type == QualityType.LifeModule));
+                    PositiveQualitySummary = qualitySummary.Positive;
+                    NegativeQualitySummary = qualitySummary.Negative;
+                    QualityHint = qualitySummary.Hint;
+                    Concept = strConcept;
+                    Description = strDescription;
+                    Background = strBackground;
+                    Notes = strNotes;
+                    _lstAllInventory = lstInventory;
+                    RefreshInventoryKinds();
+                    ApplyInventoryFilter();
+                    _lstAllAbilities = lstAbilities;
+                    _lstAllNetwork = lstNetwork;
+                    _lstAllContacts = lstContacts;
+                    ApplyContactFilter();
+                    OnPropertyChanged(nameof(HasAbilities));
+                    _lstAllAbilitySections = lstAbilitySections;
+                    ApplyAbilityFilter();
+                    FilterCards(_lstAllNetwork, NetworkGroups, NetworkFilter);
+                });
+            }
+            finally { _engineOperationGate.Release(); }
         }
 
         private static void Reset<T>(ObservableCollection<T> lstTarget, IEnumerable<T> lstItems)
@@ -264,7 +291,14 @@ namespace Chummer.Desktop.ViewModels
                 lstTarget.Add(objItem);
         }
 
-        private void RefreshSummary()
+        private async Task RefreshSummary()
+        {
+            await _engineOperationGate.WaitAsync().ConfigureAwait(false);
+            try { if (!_isCharacterDisposed) await RefreshSummaryCore().ConfigureAwait(false); }
+            finally { _engineOperationGate.Release(); }
+        }
+
+        private async Task RefreshSummaryCore()
         {
             string strName = !string.IsNullOrWhiteSpace(Character.Alias)
                 ? Character.Alias
@@ -274,6 +308,8 @@ namespace Chummer.Desktop.ViewModels
             string strMode = Tr.Get(Character.Created ? "Title_CareerMode" : "Title_CreateMode").ToUpper(GlobalSettings.CultureInfo);
             string strKarma = Character.DisplayKarma;
             string strNuyen = Character.DisplayNuyen;
+            if (!Character.Created)
+                (strKarma, strNuyen) = await ReadCreationBudget().ConfigureAwait(false);
             string strEssence = Character.DisplayEssence;
             int intPhysical = Character.PhysicalCM;
             int intPhysicalFilled = Character.PhysicalCMFilled;
@@ -397,8 +433,9 @@ namespace Chummer.Desktop.ViewModels
         {
             InventoryKinds.Clear();
             InventoryKinds.Add(new InventoryFilterOption(null, "ALL", "Icon.Gear", _lstAllInventory.Count, this));
-            foreach (IGrouping<InventoryKind, InventoryItemViewModel> objGroup in _lstAllInventory.GroupBy(x => x.Kind).OrderBy(x => x.Key))
-                InventoryKinds.Add(new InventoryFilterOption(objGroup.Key, InventoryGroupViewModel.Title(objGroup.Key), objGroup.First().IconKey, objGroup.Count(), this));
+            foreach (InventoryKind kind in Enum.GetValues<InventoryKind>())
+                InventoryKinds.Add(new InventoryFilterOption(kind, InventoryGroupViewModel.Title(kind),
+                    _lstAllInventory.FirstOrDefault(x => x.Kind == kind)?.IconKey ?? "Icon.Gear", _lstAllInventory.Count(x => x.Kind == kind), this));
         }
 
         private void ApplyInventoryFilter()
@@ -406,12 +443,11 @@ namespace Chummer.Desktop.ViewModels
             string[] astrWords = (InventoryFilter ?? string.Empty).ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             InventoryGroups.Clear();
             int intShown = 0;
-            foreach (IGrouping<InventoryKind, InventoryItemViewModel> objGroup in _lstAllInventory
-                         .Where(x => InventoryKind == null || x.Kind == InventoryKind.Value)
-                         .Where(x => astrWords.All(w => x.SearchText.Contains(w)))
-                         .GroupBy(x => x.Kind).OrderBy(x => x.Key))
+            foreach (InventoryKind kind in Enum.GetValues<InventoryKind>().Where(x => InventoryKind == null || x == InventoryKind.Value))
             {
-                InventoryGroupViewModel objViewModel = new InventoryGroupViewModel(objGroup.Key, objGroup.OrderBy(x => x.Category, StringComparer.CurrentCulture).ThenBy(x => x.Name, StringComparer.CurrentCulture));
+                var items = _lstAllInventory.Where(x => x.Kind == kind && astrWords.All(w => x.SearchText.Contains(w))).ToList();
+                if (items.Count == 0 && astrWords.Length > 0) continue;
+                InventoryGroupViewModel objViewModel = new InventoryGroupViewModel(kind, items.OrderBy(x => x.Category, StringComparer.CurrentCulture).ThenBy(x => x.Name, StringComparer.CurrentCulture));
                 intShown += objViewModel.Items.Count;
                 InventoryGroups.Add(objViewModel);
             }
@@ -425,7 +461,35 @@ namespace Chummer.Desktop.ViewModels
         {
             OnUi(() => IsDirty = true);
             // Summary values are cheap to recompute; sections refresh when the user next opens them.
-            _ = Task.Run(RefreshSummary);
+            QueueSummaryRefresh();
+        }
+
+        private void QueueSummaryRefresh()
+        {
+            if (_isCharacterDisposed) return;
+            Interlocked.Exchange(ref _summaryRefreshPending, 1);
+            if (Interlocked.CompareExchange(ref _summaryRefreshRunning, 1, 0) != 0) return;
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    do
+                    {
+                        // A single equipment grant raises many dependent properties.
+                        // Coalesce them instead of calculating a full build budget for each.
+                        await Task.Delay(25).ConfigureAwait(false);
+                        Interlocked.Exchange(ref _summaryRefreshPending, 0);
+                        if (_isCharacterDisposed) return;
+                        await RefreshSummary().ConfigureAwait(false);
+                    } while (Volatile.Read(ref _summaryRefreshPending) != 0 && !_isCharacterDisposed);
+                }
+                catch (ObjectDisposedException) when (_isCharacterDisposed) { }
+                finally
+                {
+                    Interlocked.Exchange(ref _summaryRefreshRunning, 0);
+                    if (Volatile.Read(ref _summaryRefreshPending) != 0 && !_isCharacterDisposed) QueueSummaryRefresh();
+                }
+            });
         }
 
         // ---------- commands ----------
@@ -441,6 +505,11 @@ namespace Chummer.Desktop.ViewModels
         [RelayCommand]
         private async Task Save()
         {
+            if (string.IsNullOrEmpty(Character.FileName))
+            {
+                await SaveAs();
+                return;
+            }
             if (await Character.SaveAsync().ConfigureAwait(true))
                 IsDirty = false;
         }
@@ -455,7 +524,8 @@ namespace Chummer.Desktop.ViewModels
             switch (eResult)
             {
                 case MessageResult.Yes:
-                    return await Character.SaveAsync().ConfigureAwait(true);
+                    await Save();
+                    return !IsDirty;
                 case MessageResult.No:
                     return true;
                 default:
@@ -465,6 +535,7 @@ namespace Chummer.Desktop.ViewModels
 
         public async Task DisposeCharacterAsync()
         {
+            _isCharacterDisposed = true;
             Character.PropertyChanged -= CharacterOnPropertyChanged;
             if (await CharacterRegistry.OpenCharacters.ContainsAsync(Character).ConfigureAwait(false))
                 await CharacterRegistry.OpenCharacters.RemoveAsync(Character).ConfigureAwait(false);

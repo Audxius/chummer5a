@@ -149,7 +149,7 @@ namespace Chummer.Desktop.ViewModels
                 }
                 if (objSection.HasKnowledgePoints)
                     lstBudget.Add(new ItemStat("KNOWLEDGE POINTS", objSection.KnowledgeSkillPointsRemain.ToString(objCulture) + " / " + objSection.KnowledgeSkillPoints.ToString(objCulture)));
-                lstBudget.Add(new ItemStat("KARMA LEFT", Character.Karma.ToString(objCulture)));
+                lstBudget.Add(new ItemStat("KARMA LEFT", _creationKarma.ToString(objCulture)));
             }
             return new SkillsSnapshot { Career = blnCareer, Skills = lstSkills, Groups = lstGroups, Budget = lstBudget };
         }
@@ -218,23 +218,7 @@ namespace Chummer.Desktop.ViewModels
         // ---------- edits ----------
 
         /// <summary>Runs a rule off the UI thread and re-reads the sheet when it changed something.</summary>
-        public async Task RunSkillRuleAsync(Func<CancellationToken, Task<RuleResult>> funcRule)
-        {
-            RuleResult eResult;
-            try
-            {
-                eResult = await Task.Run(() => funcRule(CancellationToken.None)).ConfigureAwait(true);
-            }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
-            if (eResult == RuleResult.Changed)
-            {
-                MarkDirty();
-                Reload();
-            }
-        }
+        public Task RunSkillRuleAsync(Func<CancellationToken, Task<RuleResult>> funcRule) => RunRuleAsync(funcRule);
 
         [RelayCommand]
         private Task AddKnowledgeSkill() => RunSkillRuleAsync(async t =>

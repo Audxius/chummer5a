@@ -657,7 +657,7 @@ namespace Chummer.Rules
 
         // ---------- shared ----------
 
-        private static async Task AddKarmaExpenseAsync(Character objCharacter, int intCost, string strReasonKey, string strName, KarmaExpenseType eUndoType,
+        internal static async Task AddKarmaExpenseAsync(Character objCharacter, int intCost, string strReasonKey, string strName, KarmaExpenseType eUndoType,
                                                        string strObjectId, CancellationToken token)
         {
             ExpenseLogEntry objExpense = new ExpenseLogEntry(objCharacter);

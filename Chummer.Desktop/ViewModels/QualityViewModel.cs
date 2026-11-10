@@ -104,6 +104,7 @@ namespace Chummer.Desktop.ViewModels
         public bool HasExtra => Extra.Length > 0;
         public QualityType Type { get; }
         public bool IsPositive { get; }
+        public bool IsNegative => Type == QualityType.Negative;
         public bool IsCareer { get; }
         public string Source { get; }
         public string SourceTip { get; }
@@ -151,7 +152,7 @@ namespace Chummer.Desktop.ViewModels
                     : "Buy off for " + RemovalCost.ToString(GlobalSettings.CultureInfo) + " karma"
                 : "Remove";
 
-        public string KarmaTip => IsCareer
+        public string KarmaTip => Type == QualityType.LifeModule ? "Life module cost: " + Math.Abs(Karma).ToString(GlobalSettings.CultureInfo) + " karma" : IsCareer
             ? (IsPositive ? "Karma value " : "Bonus karma ") + Math.Abs(Karma).ToString(GlobalSettings.CultureInfo) + (CanRemove && !IsPositive ? "  //  buy-off " + RemovalCost.ToString(GlobalSettings.CultureInfo) + " karma" : string.Empty)
             : (IsPositive ? "Costs " : "Gives ") + Math.Abs(Karma).ToString(GlobalSettings.CultureInfo) + " karma at creation";
 

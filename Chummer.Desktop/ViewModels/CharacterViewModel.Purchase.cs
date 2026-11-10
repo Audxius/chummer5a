@@ -7,6 +7,7 @@ using Chummer.Desktop.Views.Dialogs;
 using Chummer.Rules;
 using Chummer.Selection;
 using InvKind = Chummer.Desktop.ViewModels.InventoryKind;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Chummer.Desktop.ViewModels
 {
@@ -17,6 +18,15 @@ namespace Chummer.Desktop.ViewModels
     /// </summary>
     public sealed partial class CharacterViewModel
     {
+        [RelayCommand]
+        private Task AddSelectedMod() => AddModAsync(SelectedInventoryItem?.Item);
+
+        [RelayCommand]
+        private Task PaySelectedRent() => PayRentAsync(SelectedInventoryItem?.Item);
+
+        [RelayCommand]
+        private Task DecreaseSelectedRent() => DecreaseRentAsync(SelectedInventoryItem?.Item);
+
         /// <summary>Store sections opened for an inventory tab.</summary>
         public static IReadOnlyList<StoreSection> SectionsFor(InvKind eKind)
         {

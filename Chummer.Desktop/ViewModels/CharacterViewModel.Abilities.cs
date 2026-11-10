@@ -42,6 +42,7 @@ namespace Chummer.Desktop.ViewModels
         public async Task RunRuleAsync(Func<CancellationToken, Task<RuleResult>> funcRule)
         {
             RuleResult eResult;
+            await _engineOperationGate.WaitAsync().ConfigureAwait(true);
             try
             {
                 eResult = await Task.Run(() => funcRule(CancellationToken.None)).ConfigureAwait(true);
@@ -50,6 +51,7 @@ namespace Chummer.Desktop.ViewModels
             {
                 return;
             }
+            finally { _engineOperationGate.Release(); }
             if (eResult == RuleResult.Changed)
             {
                 MarkDirty();
@@ -59,31 +61,63 @@ namespace Chummer.Desktop.ViewModels
 
         private static Task<T> OffUi<T>(Func<Task<T>> funcRun) => Task.Run(funcRun);
 
+        [RelayCommand]
+        private async Task CreateCustomSpell()
+        {
+            var picker = new CustomSpellWindow();
+            await DialogHost.ShowModalAsync(picker, null);
+            if (picker.SelectedDesign == null) return;
+            RuleResult result = RuleResult.Cancelled;
+            await RunRuleAsync(async t => result = await CustomSpellRules.AddAsync(Character, picker.SelectedDesign, t));
+            if (result == RuleResult.NotAllowed)
+                await MessageBoxes.ShowAsync("The creation spell limit is reached. Raise Spellcasting or Ritual Spellcasting before adding another spell.", "Create spell");
+        }
+
+        internal async Task ChooseTraditionAsync()
+        {
+            var options = await Task.Run(() => TraditionRules.Options(Character));
+            var window = new TraditionWindow(Character, options);
+            await DialogHost.ShowModalAsync(window, null);
+            if (window.Selected != null)
+                await RunRuleAsync(t => TraditionRules.SetAsync(Character, window.Selected.Id, window.CustomName, window.CustomDrain, window.CustomSpirits, t));
+        }
+
+        internal async Task AllocateMysticPowerPointsAsync()
+        {
+            decimal? value = await PromptWindow.AskNumberAsync(null, "Mystic adept power points (creation)", 0, Character.MAG.TotalValue, true);
+            if (value == null) return;
+            await RunRuleAsync(async t =>
+            {
+                if (Character.Created || !Character.UseMysticAdeptPPs) return RuleResult.NotAllowed;
+                await Character.SetMysticAdeptPowerPointsAsync((int)value.Value, t);
+                return RuleResult.Changed;
+            });
+        }
+
         // ---------- qualities ----------
 
         [ObservableProperty] private string _positiveQualitySummary = string.Empty;
         [ObservableProperty] private string _negativeQualitySummary = string.Empty;
         [ObservableProperty] private string _qualityHint = string.Empty;
 
-        private void RefreshQualitySummary(List<QualityViewModel> lstQualities)
+        private (string Positive, string Negative, string Hint) ReadQualitySummary(List<QualityViewModel> lstQualities)
         {
             int intPositive = lstQualities.Where(x => x.IsPositive).Sum(x => x.Karma);
-            int intNegative = -lstQualities.Where(x => !x.IsPositive).Sum(x => x.Karma);
+            int intNegative = -lstQualities.Where(x => x.Type == QualityType.Negative).Sum(x => x.Karma);
             int intLimit = Character.Settings.QualityKarmaLimit;
             if (Character.Created)
             {
-                PositiveQualitySummary = intPositive.ToString(GlobalSettings.CultureInfo) + " karma";
-                NegativeQualitySummary = intNegative.ToString(GlobalSettings.CultureInfo) + " karma";
-                QualityHint = "Career mode: new positive qualities cost "
+                string hint = "Career mode: new positive qualities cost "
                               + (Character.Settings.DontDoubleQualityPurchases ? "their" : "twice their")
                               + " karma value; buying off a negative quality costs "
                               + (Character.Settings.DontDoubleQualityRefunds ? "its" : "twice its") + " value.";
+                return (intPositive.ToString(GlobalSettings.CultureInfo) + " karma", intNegative.ToString(GlobalSettings.CultureInfo) + " karma", hint);
             }
             else
             {
-                PositiveQualitySummary = Character.PositiveQualityLimitKarma.ToString(GlobalSettings.CultureInfo) + " / " + intLimit.ToString(GlobalSettings.CultureInfo) + " karma";
-                NegativeQualitySummary = (-Character.NegativeQualityLimitKarma).ToString(GlobalSettings.CultureInfo) + " / " + intLimit.ToString(GlobalSettings.CultureInfo) + " karma";
-                QualityHint = "Creation: up to " + intLimit.ToString(GlobalSettings.CultureInfo) + " karma each of positive and negative qualities.";
+                return (Character.PositiveQualityLimitKarma.ToString(GlobalSettings.CultureInfo) + " / " + intLimit.ToString(GlobalSettings.CultureInfo) + " karma",
+                    (-Character.NegativeQualityLimitKarma).ToString(GlobalSettings.CultureInfo) + " / " + intLimit.ToString(GlobalSettings.CultureInfo) + " karma",
+                    "Creation: up to " + intLimit.ToString(GlobalSettings.CultureInfo) + " karma each of positive and negative qualities.");
             }
         }
 

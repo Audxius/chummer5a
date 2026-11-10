@@ -29,6 +29,14 @@ namespace Chummer
     /// </summary>
     public static class HostServices
     {
+        static HostServices()
+        {
+#if NET8_0_OR_GREATER
+            // Legacy portfolio ZIPs use the Windows/DOS code-page encodings available by default on net48.
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+#endif
+        }
+
         /// <summary>
         /// Placeholder owner meaning "the application's main window", for engine code that has no UI element of its own.
         /// </summary>

@@ -21,7 +21,7 @@ namespace Chummer.Desktop.ViewModels
         public string EdgePoolText => EdgeRemainingValue.ToString(GlobalSettings.CultureInfo) + " / " + EdgeTotal.ToString(GlobalSettings.CultureInfo);
         public bool CanSpendEdge => EdgeRemainingValue > 0;
         public bool CanRegainEdge => EdgeUsed > 0;
-        public bool IsCareerMode => Character.Created;
+        public bool IsCareerMode => _careerMode;
 
         partial void OnEdgeTotalChanged(int value) => NotifyEdge();
         partial void OnEdgeUsedChanged(int value) => NotifyEdge();
@@ -57,15 +57,8 @@ namespace Chummer.Desktop.ViewModels
         [RelayCommand]
         private Task RefreshEdgePool() => RunEdgeAsync(EdgeRules.RefreshAsync);
 
-        private async Task RunEdgeAsync(Func<Character, System.Threading.CancellationToken, Task<RuleResult>> funcRule)
-        {
-            RuleResult eResult = await Task.Run(() => funcRule(Character, System.Threading.CancellationToken.None)).ConfigureAwait(true);
-            if (eResult == RuleResult.Changed)
-            {
-                MarkDirty();
-                _ = Task.Run(RefreshSummary);
-            }
-        }
+        private Task RunEdgeAsync(Func<Character, System.Threading.CancellationToken, Task<RuleResult>> funcRule)
+            => RunRuleAsync(t => funcRule(Character, t));
 
         /// <summary>Spends one Edge point without prompting (used by the Dice Terminal when an Edge roll is copied). Returns false if none left.</summary>
         internal async Task<bool> TrySpendEdgeQuietlyAsync()

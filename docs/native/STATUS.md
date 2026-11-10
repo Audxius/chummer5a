@@ -18,17 +18,31 @@ It builds on first run and whenever the sources change. Custom character setting
 | Roster, open file, MRU, save / dirty prompt | ✅ |
 | **Overview** | ✅ Condition monitors you can click (mark or heal damage), initiative (click initiative, soak, composure, judge intentions, memory or lift/carry to roll them), armor, Edge, movement, limits, derived stats, attributes, qualities. |
 | **Attributes** | ✅ Raise with karma in career mode (same cost, confirmation and expense-log entry as legacy), burn Edge; priority/karma +/- in create mode. |
-| **Skills** | ✅ Grouped, icons, search. Click a skill (or its magenta specialization pool) to roll it in the Dice Terminal. Raising skills: not yet. |
-| Qualities, Notes | ✅ View only |
-| **Inventory** | ✅ Icon grid for weapons, armor, cyber/bioware, gear, vehicles, drugs and lifestyles. Category chips, search, and hover cards with stats, contents, cost, availability and source. View only. |
-| **Abilities** | ✅ Spells, adept powers, complex forms, AI programs, martial arts, critter powers, initiation and metamagic. View only. |
+| **Skills** | Sort by dice pool, name, rating or category; optional category grouping. Roll skills and specializations, advance skills/groups with karma, add specializations, knowledge/language and exotic skills, edit creation allocations. |
+| **Qualities** | Add qualities with ratings/free options; remove or buy off, change levels, edit notes. Career costs use the extracted legacy rules. |
+| **Inventory** | Item-specific icons, slot grid, equipped loadout, selection details, equip/wireless/commlink toggles, weapon ammunition, quantity, armor damage, notes, rename, sell and remove. Empty categories also have add buttons. Clickable vehicle physical and equipment matrix damage monitors. |
+| **Store** | Buy weapons, armor, gear, cyber/bioware, vehicles, drugs and lifestyles. Ratings, grades, quantities, availability/affordability filters and markup. Add owned-item mods/accessories/plugins and pay lifestyle rent from inventory details. |
+| **Abilities** | Add/remove spells, adept powers, complex forms, AI programs, martial arts and techniques; initiation/submersion and metamagic/echo selection. Choose magical traditions and resonance streams; edit custom traditions and allocate mystic adept power points during creation. Specialized editing is still incomplete; see remaining work below. |
+| **Custom spells** | Native designer with category modifiers, restrictions, type/range/duration, area, limited spells and calculated drain. Creation limits, career spending, expense undo and save/reload covered by tests. |
+| **PACKS kits** | Search/category/contents picker during creation. Legacy application of qualities, martial arts, forms/programs/spells, spirits, lifestyles, funds and nested equipment. Equipment, implants and vehicle workflows tested and rendered. Kit authoring remains unfinished. |
+| **Equipment locations** | Assign/clear, create, rename and delete locations for top-level gear, armor, weapons, vehicles and vehicle gear. Scope checks protect plugins and other equipment categories. Movement and save/reload tested; native details show location and management actions. |
+| **XML amendment editor** | Load base data and amendment files, edit/format, apply with the game amendment engine, inspect result and named changes, save amendments and handle unsaved edits. Replace/add/remove and input isolation tested; rendered preview checked. |
 | **Contacts** | ✅ Dossier cards: role, location, connection/loyalty bars with +/-, type, metatype, payment, vice, personal life, family/blackmail/group tags, notes. Enemies and pets separate; spirits and sprites below. |
 | **Global search (Ctrl+K)** | ✅ Searches every open runner's items, abilities, skills, contacts and qualities, plus every roll, and jumps straight to it. |
 | **Dice Terminal (Ctrl+R)** | ✅ Details below. |
 | Engine prompts | ✅ Native for item, number, text, attribute, limit, side, build method, skill (including exotic specifics), skill group, spell / weapon category, optional power, dice hits, metamagic / echo, art / enhancement / enchantment / ritual, martial art, mentor spirit / paragon, adept power, complex form, AI program and spell. Option lists are lifted from the original forms into `Chummer/Backend/Selection`. |
 | Remaining prompts | ⏳ Metatype (priority / karma) belongs to the creation wizard, and armor mods arrive with editing. Until then these say "not available yet" and cancel. |
-| Creating and editing characters (buy gear, raise skills, karma) | ⏳ Not yet. Phases 2, 6–10 in the plan. Use legacy Chummer for these for now. |
-| Settings, print / sheets / PDF export | ⏳ Phases 11–12 |
+| **Ledger** | Career karma/nuyen entries, edit, undo, expense charts and calendar. |
+| **Info & Notes** | Editable identity, appearance, background, description, notes and GM notes. Portrait set/remove in the header. |
+| **New runner (Ctrl+N)** | Priority, Sum-to-Ten, karma and Life Module profiles; metatype/talent selection, editable priorities, karma-to-nuyen allocation, calculated build budgets and legacy build checks. Life Module picker includes stages, nested versions, requirements and inherited engine bonuses. Finish into career mode with carryover confirmations, lifestyle starting cash, starting expenses and essence modifier preservation. Complete Windows parity remains unverified. |
+| **Custom Improvements** | Dedicated tab: add/edit engine-defined improvement types, name/group/target/value/range options, enable/disable linked effects, notes and removal. Attribute effects, edit state and metadata have regression tests; not every improvement type has an individual parity test. |
+| **Master Index** | Search entries from the legacy index's 29 source data files; book/type filters, notes and page references, link a source PDF, adjust page offset and open it using the configured or system reader. |
+| **Character rules** | Searchable editor for creation options, karma costs and house rules, including custom presets such as Beggers.xml. Source-book selection and custom-directory activation/loading order. Edits use an isolated copy, then save a new preset and apply it to the current runner. |
+| **Global options** | Staged preferences for karma/delete confirmations, expense dates, conversion backups, store filtering, printed skills/expenses/notes and custom-data behavior. Save persists through the native JSON settings store. Other legacy global options are not exposed yet. |
+| **Print / export (Ctrl+P)** | XSLT sheets, browser preview, save HTML and PDF via headless Chromium. Save As: Ctrl+Shift+S. |
+| **Character export (Ctrl+E)** | JSON, print XML and installed export XSLT formats, including Squad Manager; language selection, preview, copy and save. |
+| **Game data export** | ZIP of selected preset and merged game XML, including enabled custom data. |
+| **Hero Lab import** | Read portfolio character list and import with the existing engine into a chosen preset. ZIP reader tested; real portfolio end-to-end parity remains unverified. |
 
 ## Dice Terminal
 
@@ -53,6 +67,16 @@ Rolls come from two places:
 
 ## Safety net
 
-- **Parity baseline:** a CI workflow (`.github/workflows/parity-baseline.yml`) captures golden output from the *original* Windows engine so the port can be diffed against it. The latest capture run was still in progress when this file was written.
-- **Engine and roll tests:** `nix shell nixpkgs#dotnet-sdk_8 -c dotnet test Chummer.Core.Tests`
+- **Parity baseline:** Run `42553325872` captured 750 Windows reference outputs, now bundled with [provenance](parity-baseline.json). Its detailed determinism log shows 9 passed and 2 rendering tests failed despite a green workflow; a UTF-8 marker comparison bug is corrected locally. Linux comparison covers all 68 saves with no gameplay-value differences under the documented policy. Exports/sheets remain under verification; no full parity claim yet.
+- **Engine and roll tests:** `nix shell nixpkgs#dotnet-sdk_8 -c dotnet test Chummer.Core.Tests --filter 'FullyQualifiedName!~ParityGoldenTests'` (98 passed, including creation/career, Life Modules, custom improvements/spells, PACKS, locations, amendments, equipment damage, exports and conservative save/export comparison checks).
 - **Screenshots of every screen:** `tools/native/Screenshots`, which runs headless.
+
+## Recovery from the November 9 handoff
+
+All six saved worktree branches have been merged into `native`. Integration fixes retain the newer skills and attribute layouts, connect inventory add buttons to the store, expose mod/rent controls, and keep empty categories purchasable. The missing store screenshot harness is restored. Character rules and initial metatype selection now have native windows.
+
+Headless checks use a scratch copy of Desperado, never the original. Screenshots exercised skills sorting and karma advancement, equipment toggles, store sections, qualities and abilities, ledger entries/undo and calendar changes. These checks do not establish full Windows engine parity or full feature parity.
+
+Remaining major work: additional specialized creation workflows; remaining global settings; PACKS authoring, weapon mounts, custom drugs and suites; remaining equipment/ability operations; real Hero Lab portfolio verification; parity baseline artifacts and Linux verification; Nix packaging. This is still **not a complete drop-in replacement** for legacy Chummer. No reliable percentage of feature completion has been established. The [workflow checklist](feature-matrix.md) and [generated legacy event inventory](legacy-actions.tsv) track the audit scope.
+
+The creation budget and validator are extracted from `CharacterCreate.CalculateBPandRefreshBPDisplays` and `CheckCharacterValidity`. The career transition follows `ValidateCharacter` and `SaveCharacterAsCreated`; tests cover spending, rejected builds, cancellation, carryovers, ledger entries and save/reload. New runners now enter Save As when first saved or saved from the close prompt. Headless creation scenarios use synthetic runners under `/tmp`, and never modify a real character.

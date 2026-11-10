@@ -16,6 +16,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="../Chummer.Tests/Parity/*.cs" Link="Parity/%(Filename)%(Extension)" />
+    <Compile Include="../tools/native/ParityVerify/SaveComparison.cs" Link="Parity/SaveComparison.cs" />
+    <Compile Include="../tools/native/ParityVerify/ExportComparison.cs" Link="Parity/ExportComparison.cs" />
     <Compile Include="../Chummer.Tests/Services/*.cs" Link="Services/%(Filename)%(Extension)" />
   </ItemGroup>
   <ItemGroup>

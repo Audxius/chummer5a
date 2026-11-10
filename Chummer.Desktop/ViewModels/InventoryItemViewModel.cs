@@ -113,6 +113,16 @@ namespace Chummer.Desktop.ViewModels
 
         /// <summary>Engine object behind the slot (Weapon, Gear, Armor...); null for ability cards.</summary>
         internal object Item { get; private set; }
+        internal int PhysicalConditionMax { get; private set; }
+        internal int PhysicalConditionFilled { get; private set; }
+        internal int MatrixConditionMax { get; private set; }
+        internal int MatrixConditionFilled { get; private set; }
+        public bool CanSetLocation { get; private set; }
+        public string LocationName { get; private set; } = "";
+        public bool HasLocation => LocationName.Length > 0;
+
+        public bool CanAddMod => CharacterViewModel.ModSectionFor(Item) != null;
+        public bool IsLifestyle => Item is Lifestyle;
 
         /// <summary>Engine InternalId, used to keep the selection across reloads.</summary>
         public string Id { get; private set; } = string.Empty;
@@ -239,6 +249,19 @@ namespace Chummer.Desktop.ViewModels
             Item = objItem;
             Id = strId ?? string.Empty;
             IsCareer = objCharacter.Created;
+            CanSetLocation = EquipmentLocationRules.LocationsFor(objCharacter, objItem) != null;
+            LocationName = (objItem as IHasLocation)?.Location?.Name ?? "";
+            if (LocationName.Length > 0) Stats.Add(new ItemStat("Location", LocationName));
+            if (objItem is Vehicle vehicle)
+            {
+                PhysicalConditionMax = vehicle.PhysicalCM;
+                PhysicalConditionFilled = vehicle.PhysicalCMFilled;
+            }
+            if (objItem is IHasMatrixAttributes device)
+            {
+                MatrixConditionMax = device.MatrixCM;
+                MatrixConditionFilled = device.MatrixCMFilled;
+            }
             CanEquip = InventoryRules.CanChangeEquipped(objItem);
             if (objItem is IHasWirelessBonus objWireless)
             {

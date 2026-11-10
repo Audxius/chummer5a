@@ -19,11 +19,13 @@
 
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Chummer.Backend.Equipment;
 using Chummer.Rules;
+using Chummer.Desktop.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -46,6 +48,12 @@ namespace Chummer.Desktop.ViewModels
         public bool HasSelectedInventoryItem => SelectedInventoryItem != null;
         public bool HasNoSelectedInventoryItem => SelectedInventoryItem == null;
         public bool IsNotesDraftChanged => SelectedInventoryItem != null && (InventoryNotesDraft ?? string.Empty) != SelectedInventoryItem.Notes;
+        public ObservableCollection<EquipmentDamageBox> EquipmentPhysicalBoxes { get; } = new ObservableCollection<EquipmentDamageBox>();
+        public ObservableCollection<EquipmentDamageBox> EquipmentMatrixBoxes { get; } = new ObservableCollection<EquipmentDamageBox>();
+        public bool HasEquipmentPhysicalMonitor => EquipmentPhysicalBoxes.Count > 0;
+        public bool HasEquipmentMatrixMonitor => EquipmentMatrixBoxes.Count > 0;
+        public string EquipmentPhysicalLabel => "PHYSICAL DAMAGE " + EquipmentPhysicalBoxes.Count(x => x.IsFilled) + " / " + EquipmentPhysicalBoxes.Count;
+        public string EquipmentMatrixLabel => "MATRIX DAMAGE " + EquipmentMatrixBoxes.Count(x => x.IsFilled) + " / " + EquipmentMatrixBoxes.Count;
 
         partial void OnSelectedInventoryItemChanged(InventoryItemViewModel oldValue, InventoryItemViewModel newValue)
         {
@@ -58,6 +66,16 @@ namespace Chummer.Desktop.ViewModels
             OnPropertyChanged(nameof(HasSelectedInventoryItem));
             OnPropertyChanged(nameof(HasNoSelectedInventoryItem));
             OnPropertyChanged(nameof(IsNotesDraftChanged));
+            EquipmentPhysicalBoxes.Clear(); EquipmentMatrixBoxes.Clear();
+            if (newValue != null)
+            {
+                for (int i = 1; i <= newValue.PhysicalConditionMax; ++i)
+                    EquipmentPhysicalBoxes.Add(new EquipmentDamageBox(this, true, i, i <= newValue.PhysicalConditionFilled));
+                for (int i = 1; i <= newValue.MatrixConditionMax; ++i)
+                    EquipmentMatrixBoxes.Add(new EquipmentDamageBox(this, false, i, i <= newValue.MatrixConditionFilled));
+            }
+            OnPropertyChanged(nameof(HasEquipmentPhysicalMonitor)); OnPropertyChanged(nameof(HasEquipmentMatrixMonitor));
+            OnPropertyChanged(nameof(EquipmentPhysicalLabel)); OnPropertyChanged(nameof(EquipmentMatrixLabel));
         }
 
         partial void OnInventoryNotesDraftChanged(string value) => OnPropertyChanged(nameof(IsNotesDraftChanged));
@@ -100,26 +118,17 @@ namespace Chummer.Desktop.ViewModels
 
         // ---------- session actions on the selected item ----------
 
-        private async Task RunItemRuleAsync(Func<object, CancellationToken, Task<RuleResult>> funcRule)
+        private Task RunItemRuleAsync(Func<object, CancellationToken, Task<RuleResult>> funcRule)
         {
             object objItem = SelectedInventoryItem?.Item;
-            if (objItem == null)
-                return;
-            RuleResult eResult;
-            try
-            {
-                eResult = await Task.Run(() => funcRule(objItem, CancellationToken.None)).ConfigureAwait(true);
-            }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
-            if (eResult == RuleResult.Changed)
-            {
-                MarkDirty();
-                Reload();
-            }
+            return objItem == null ? Task.CompletedTask : RunRuleAsync(t => funcRule(objItem, t));
         }
+
+        internal Task MarkEquipmentDamageAsync(bool physical, int index) => RunItemRuleAsync((item, _) =>
+        {
+            int current = physical ? (item as Vehicle)?.PhysicalCMFilled ?? 0 : (item as IHasMatrixAttributes)?.MatrixCMFilled ?? 0;
+            return Task.FromResult(EquipmentConditionRules.SetDamage(item, physical, current == index ? index - 1 : index));
+        });
 
         [RelayCommand]
         private Task ToggleEquipped()
@@ -205,5 +214,58 @@ namespace Chummer.Desktop.ViewModels
 
         [RelayCommand]
         private Task RemoveItem() => RunItemRuleAsync((x, t) => InventoryRules.RemoveAsync(x, t));
+
+        [RelayCommand]
+        private async Task SetItemLocation()
+        {
+            object item = SelectedInventoryItem?.Item;
+            if (item == null) return;
+            var locations = await Task.Run(() => EquipmentLocationRules.LocationsFor(Character, item)?.ToList());
+            if (locations == null) return;
+            var options = new List<ListItem> { new ListItem("", "No location"), new ListItem("new", "Create a new location…") };
+            options.AddRange(locations.Select(x => new ListItem(x.InternalId, x.Name)));
+            string current = (item as IHasLocation)?.Location?.InternalId ?? "";
+            var choice = await PromptWindow.ChooseAsync(null, "Item location", options, current);
+            if (!choice.HasValue) return;
+            string selected = choice.Value.Value?.ToString() ?? "";
+            if (selected == "new")
+            {
+                string name = await PromptWindow.AskTextAsync(null, "New location name", "");
+                if (string.IsNullOrWhiteSpace(name)) return;
+                await RunRuleAsync(async t =>
+                {
+                    var location = await EquipmentLocationRules.CreateAsync(Character, item, name, t);
+                    return location == null ? RuleResult.NotAllowed : await EquipmentLocationRules.AssignAsync(Character, item, location, t);
+                });
+            }
+            else await RunRuleAsync(t => EquipmentLocationRules.AssignAsync(Character, item, locations.FirstOrDefault(x => x.InternalId == selected), t));
+        }
+
+        [RelayCommand]
+        private async Task RenameItemLocation()
+        {
+            object item = SelectedInventoryItem?.Item;
+            var location = (item as IHasLocation)?.Location;
+            if (location == null) return;
+            string name = await PromptWindow.AskTextAsync(null, "Rename location", location.Name);
+            if (string.IsNullOrWhiteSpace(name)) return;
+            await RunRuleAsync(_ => Task.FromResult(EquipmentLocationRules.Rename(Character, item, location, name)));
+        }
+
+        [RelayCommand]
+        private Task RemoveItemLocation() => RunItemRuleAsync((item, t) => EquipmentLocationRules.RemoveAsync(Character, item, (item as IHasLocation)?.Location, t));
+    }
+
+    public sealed class EquipmentDamageBox
+    {
+        public EquipmentDamageBox(CharacterViewModel owner, bool physical, int index, bool filled)
+        {
+            Index = index; IsFilled = filled;
+            ToggleCommand = new AsyncRelayCommand(() => owner.MarkEquipmentDamageAsync(physical, index));
+        }
+        public int Index { get; }
+        public bool IsFilled { get; }
+        public string Tip => "Mark " + Index + " damage boxes; click the last filled box to heal one.";
+        public IAsyncRelayCommand ToggleCommand { get; }
     }
 }

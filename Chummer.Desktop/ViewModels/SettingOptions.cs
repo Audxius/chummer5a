@@ -377,12 +377,14 @@ namespace Chummer.Desktop.ViewModels
         private readonly Func<bool> _funcGet;
         private readonly Action<bool> _funcSet;
         private bool _blnRefreshing;
+        private readonly bool _canEdit;
 
-        public FlagItem(string strLabel, Func<bool> funcGet, Action<bool> funcSet)
+        public FlagItem(string strLabel, Func<bool> funcGet, Action<bool> funcSet, bool canEdit = true)
         {
             Label = strLabel;
             _funcGet = funcGet;
             _funcSet = funcSet;
+            _canEdit = canEdit;
         }
 
         public string Label { get; }
@@ -401,7 +403,7 @@ namespace Chummer.Desktop.ViewModels
             _blnRefreshing = true;
             try
             {
-                IsEnabled = blnEditable;
+                IsEnabled = blnEditable && _canEdit;
                 Value = _funcGet();
             }
             finally

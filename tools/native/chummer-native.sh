@@ -6,7 +6,10 @@ set -euo pipefail
 repo="$(cd "$(dirname "$(readlink -f "$0")")/../.." && pwd)"
 out="$repo/Chummer.Desktop/bin/Release/net8.0"
 stamp="$out/.built-from"
-rev="$(git -C "$repo" rev-parse HEAD 2>/dev/null || echo unknown)$(git -C "$repo" status --porcelain 2>/dev/null | md5sum | cut -c1-8)"
+# Hash the source contents, including new files. A hash of `git status` misses edits to files
+# that were already modified when the last build ran.
+source "$repo/tools/native/source-fingerprint.sh"
+rev="$(chummer_source_fingerprint "$repo")"
 
 pkgs="fontconfig.lib freetype libglvnd mesa wayland libxkbcommon libX11 libICE libSM libXcursor libXext libXi libXrandr libXrender"
 libpath=""

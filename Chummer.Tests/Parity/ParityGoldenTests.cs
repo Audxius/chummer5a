@@ -295,7 +295,9 @@ namespace Chummer.Tests.Parity
                 return;
             }
 
-            string strExpected = File.ReadAllText(strGoldenPath, Encoding.UTF8);
+            // A transform can emit U+FEFF as part of its captured string. StreamReader
+            // would silently consume those bytes as a file preamble on verification.
+            string strExpected = Encoding.UTF8.GetString(File.ReadAllBytes(strGoldenPath));
             if (string.Equals(strExpected, strNormalized, StringComparison.Ordinal))
                 return;
 

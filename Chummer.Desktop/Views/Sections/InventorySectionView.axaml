@@ -191,6 +191,34 @@
             </WrapPanel>
 
             <!-- stats -->
+            <StackPanel Spacing="4" Margin="0,12,0,0" IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).HasEquipmentPhysicalMonitor}">
+              <TextBlock Text="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EquipmentPhysicalLabel}" Classes="label" />
+              <ItemsControl ItemsSource="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EquipmentPhysicalBoxes}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:EquipmentDamageBox">
+                  <Button Classes="cm" Command="{Binding ToggleCommand}" ToolTip.Tip="{Binding Tip}" BorderBrush="{StaticResource RedBrush}"
+                          Background="{Binding IsFilled, Converter={x:Static conv:BoolBrushConverter.Red}}" />
+                </DataTemplate></ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+            <StackPanel Spacing="4" Margin="0,12,0,0" IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).HasEquipmentMatrixMonitor}">
+              <TextBlock Text="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EquipmentMatrixLabel}" Classes="label" />
+              <ItemsControl ItemsSource="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EquipmentMatrixBoxes}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:EquipmentDamageBox">
+                  <Button Classes="cm" Command="{Binding ToggleCommand}" ToolTip.Tip="{Binding Tip}" BorderBrush="{StaticResource CyanBrush}"
+                          Background="{Binding IsFilled, Converter={x:Static conv:BoolBrushConverter.Cyan}}" />
+                </DataTemplate></ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+            <WrapPanel Margin="0,8,0,0">
+              <Button Classes="act" Content="+ MOD / ACCESSORY" IsVisible="{Binding CanAddMod}"
+                      Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddSelectedModCommand}" />
+              <Button Classes="act money" Content="PAY RENT" IsVisible="{Binding IsLifestyle}"
+                      Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).PaySelectedRentCommand}" />
+              <Button Classes="act" Content="− RENT PERIOD" IsVisible="{Binding IsLifestyle}"
+                      Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).DecreaseSelectedRentCommand}" />
+            </WrapPanel>
             <TextBlock Text="STATS" Classes="section" />
             <ItemsControl ItemsSource="{Binding Stats}">
               <ItemsControl.ItemsPanel>
@@ -250,6 +278,9 @@
             <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,16,0,12" />
             <WrapPanel>
               <Button Classes="act" Content="RENAME" IsVisible="{Binding CanRename}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RenameItemCommand}" />
+              <Button Classes="act" Content="LOCATION…" IsVisible="{Binding CanSetLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).SetItemLocationCommand}" />
+              <Button Classes="act" Content="RENAME LOCATION" IsVisible="{Binding HasLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RenameItemLocationCommand}" />
+              <Button Classes="act" Content="DELETE LOCATION" IsVisible="{Binding HasLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RemoveItemLocationCommand}" ToolTip.Tip="Remove this location and leave its items unassigned" />
               <Button Classes="act money" Content="SELL" IsVisible="{Binding CanSellNow}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).OpenSellPromptCommand}"
                       ToolTip.Tip="Sell for a share of its cost (logged as income)" />
               <Button Classes="act danger" Content="REMOVE" IsVisible="{Binding CanRemove}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RemoveItemCommand}"

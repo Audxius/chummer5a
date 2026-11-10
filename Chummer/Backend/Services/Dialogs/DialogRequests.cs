@@ -288,6 +288,7 @@ namespace Chummer
         private static readonly string[] s_astrResults = { nameof(SelectedMartialArt), nameof(AddAgain) };
         public SelectMartialArtRequest(Character objCharacter) : base(objCharacter) { }
         public override string DialogName => "SelectMartialArt";
+        public string ForcedValue { get => Get<string>(); set => Set(value); }
         public override IReadOnlyCollection<string> ResultNames => s_astrResults;
         public bool AddAgain => Get<bool>();
         public string SelectedMartialArt => Get<string>();

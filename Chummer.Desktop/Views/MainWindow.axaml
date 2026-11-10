@@ -20,6 +20,21 @@
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,12">
+          <Button Classes="nav" Command="{Binding EditXmlDataCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.SkillKnowledge}" Width="18" Height="18" /><TextBlock Text="XML AMENDMENT EDITOR" VerticalAlignment="Center" /></StackPanel>
+          </Button>
+          <Button Classes="nav" Command="{Binding ImportHeroLabCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.Roster}" Width="18" Height="18" /><TextBlock Text="IMPORT HEROLAB" VerticalAlignment="Center" /></StackPanel>
+          </Button>
+          <Button Classes="nav" Command="{Binding ExportGameDataCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.Save}" Width="18" Height="18" /><TextBlock Text="EXPORT GAME DATA" VerticalAlignment="Center" /></StackPanel>
+          </Button>
+          <Button Classes="nav" Command="{Binding GlobalOptionsCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.Settings}" Width="18" Height="18" /><TextBlock Text="GLOBAL OPTIONS" VerticalAlignment="Center" /></StackPanel>
+          </Button>
+          <Button Classes="nav" Command="{Binding EditCharacterSettingsCommand}" ToolTip.Tip="Edit rules for the current runner or a preset">
+            <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.SkillKnowledge}" Width="18" Height="18" /><TextBlock Text="CHARACTER RULES" VerticalAlignment="Center" /></StackPanel>
+          </Button>
           <ToggleButton Classes="nav" IsChecked="{Binding IsDiceActive, Mode=OneWay}" Command="{Binding ShowDiceCommand}"
                         HotKey="Ctrl+R" ToolTip.Tip="Dice Terminal (Ctrl+R)">
             <StackPanel Orientation="Horizontal" Spacing="12">
@@ -30,6 +45,12 @@
         </StackPanel>
 
         <StackPanel Spacing="2">
+          <Button Classes="nav" Command="{Binding MasterIndexCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.SkillKnowledge}" Width="18" Height="18" /><TextBlock Text="MASTER INDEX" VerticalAlignment="Center" /></StackPanel>
+          </Button>
+          <Button Classes="nav" Command="{Binding NewRunnerCommand}" HotKey="Ctrl+N">
+            <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.Roster}" Width="18" Height="18" /><TextBlock Text="+ NEW RUNNER" VerticalAlignment="Center" /></StackPanel>
+          </Button>
           <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="17,10" Margin="10,0,10,10"
                   Command="{Binding Palette.OpenCommand}" HotKey="Ctrl+K" BorderThickness="1" BorderBrush="{StaticResource BorderBrush}">
             <Grid ColumnDefinitions="Auto,*,Auto">
