@@ -8,19 +8,31 @@
   <DockPanel Margin="28,22,28,0">
     <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,16">
       <TextBlock Text="Contacts" FontSize="24" FontWeight="SemiBold" />
-      <TextBlock Text="Your network, enemies and companions" Classes="muted" />
+      <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,10,0,0">
+        <ToggleButton Classes="section" Content="Contacts" IsChecked="{Binding !ShowCompanions, Mode=OneWay}" Command="{Binding ShowContactsPageCommand}" />
+        <ToggleButton Classes="section" Content="Pets &amp; cohorts" IsChecked="{Binding ShowCompanions, Mode=OneWay}" Command="{Binding ShowCompanionsPageCommand}" />
+      </StackPanel>
     </StackPanel>
     <Grid DockPanel.Dock="Top" Margin="0,0,0,14" ColumnDefinitions="*,Auto">
       <TextBox Text="{Binding NetworkFilter}" PlaceholderText="Search contacts by name, role, location, payment, vice, notes… or spirits and sprites" Padding="40,9,10,9" />
       <PathIcon Data="{StaticResource Icon.Search}" Width="15" Height="15" HorizontalAlignment="Left" Margin="14,0,0,0" Classes="muted" IsHitTestVisible="False" />
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="12,0,0,0">
-        <Button Classes="primary" Content="+ CONTACT" Command="{Binding AddContactCommand}" />
-        <Button Classes="hot" Content="+ ENEMY" Command="{Binding AddEnemyCommand}" />
-        <Button Classes="ghost" Content="+ PET" Command="{Binding AddPetCommand}" />
+        <Button Classes="primary" Content="Add contact…" IsVisible="{Binding !ShowCompanions}"><Button.Flyout><MenuFlyout>
+          <MenuItem Header="New contact…" Command="{Binding AddContactCommand}" />
+          <MenuItem Header="Contact from character file…" Command="{Binding AddContactFromFileCommand}" />
+          <Separator />
+          <MenuItem Header="New enemy…" Command="{Binding AddEnemyCommand}" />
+          <MenuItem Header="Enemy from character file…" Command="{Binding AddEnemyFromFileCommand}" />
+        </MenuFlyout></Button.Flyout></Button>
+        <Button Classes="primary" Content="Add pet or cohort…" IsVisible="{Binding ShowCompanions}"><Button.Flyout><MenuFlyout>
+          <MenuItem Header="New pet or cohort…" Command="{Binding AddPetCommand}" />
+          <MenuItem Header="Pet or cohort from character file…" Command="{Binding AddPetFromFileCommand}" />
+        </MenuFlyout></Button.Flyout></Button>
       </StackPanel>
     </Grid>
     <ScrollViewer>
       <StackPanel Margin="0,0,0,22" Spacing="6">
+        <StackPanel IsVisible="{Binding !ShowCompanions}" Spacing="6">
         <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding HasContactCards}">
           <TextBlock Text="CONTACTS" Classes="h2" />
           <TextBlock Text="{Binding ContactCountText}" Classes="muted" VerticalAlignment="Center" />
@@ -33,10 +45,14 @@
         <ItemsControl ItemsSource="{Binding EnemyCards}" ItemTemplate="{StaticResource ContactCard}" IsVisible="{Binding HasEnemyCards}">
           <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
         </ItemsControl>
-        <TextBlock Text="PETS" Classes="h2" IsVisible="{Binding HasPetCards}" Margin="0,8,0,0" />
+        </StackPanel>
+        <StackPanel IsVisible="{Binding ShowCompanions}" Spacing="6">
+        <TextBlock Text="Pets &amp; cohorts" Classes="h2" Margin="0,8,0,0" />
+        <TextBlock Text="No pets or cohorts. Add one here, or import a character sheet to keep its full stats linked." Classes="muted" TextWrapping="Wrap" IsVisible="{Binding !HasPetCards}" />
         <ItemsControl ItemsSource="{Binding PetCards}" ItemTemplate="{StaticResource ContactCard}" IsVisible="{Binding HasPetCards}">
           <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
         </ItemsControl>
+        </StackPanel>
         <ItemsControl ItemsSource="{Binding NetworkGroups}" ItemTemplate="{StaticResource CardGroup}" Margin="0,8,0,0" />
       </StackPanel>
     </ScrollViewer>

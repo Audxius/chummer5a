@@ -50,6 +50,9 @@ namespace Chummer.Desktop.ViewModels
         [ObservableProperty] private SkillSortMode _skillSort = SkillSortMode.DicePool;
         [ObservableProperty] private bool _skillSortDescending = true;
         [ObservableProperty] private bool _groupSkillsByCategory;
+        [ObservableProperty] private bool _isSkillGroupsPage;
+        [RelayCommand] private void ShowSkillsPage() => IsSkillGroupsPage = false;
+        [RelayCommand] private void ShowGroupsPage() => IsSkillGroupsPage = true;
         [ObservableProperty] private bool _isSkillsCareer;
         [ObservableProperty] private string _skillCountText = string.Empty;
         [ObservableProperty] private IReadOnlyList<ItemStat> _skillBudget = Array.Empty<ItemStat>();
@@ -188,7 +191,7 @@ namespace Chummer.Desktop.ViewModels
             else
                 lstRows.AddRange(lstSorted);
             Reset(SkillRows, lstRows);
-            Reset(SkillGroups, _lstAllSkillGroups.Where(x => blnShowAll || x.Rating > 0 || !IsSkillsCareer)
+            Reset(SkillGroups, _lstAllSkillGroups
                                                  .Where(x => strFilter.Length == 0 || x.SearchText.IndexOf(strFilter, StringComparison.CurrentCultureIgnoreCase) >= 0)
                                                  .OrderByDescending(x => x.Rating).ThenBy(x => x.Name, StringComparer.CurrentCulture));
             OnPropertyChanged(nameof(HasSkillGroups));

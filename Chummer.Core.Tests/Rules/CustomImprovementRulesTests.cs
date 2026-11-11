@@ -1277,6 +1277,56 @@ namespace Chummer.Tests.Rules
         }
 
         [TestMethod]
+        public async Task ContactFileImportsPreserveLegacyTypesAndLinkedCharacterStats()
+        {
+            string linkedPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            string parentPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            using var linked = new Character { SettingsKey = _key, Name = "Companion" };
+            try
+            {
+                await linked.SetFileNameAsync(linkedPath);
+                Assert.IsTrue(await linked.SaveAsync(linkedPath));
+                await CharacterRegistry.OpenCharacters.AddAsync(linked);
+                foreach (var type in new[] { ContactType.Contact, ContactType.Enemy, ContactType.Pet })
+                    Assert.AreEqual(RuleResult.Changed, await ContactRules.AddFromFileAsync(_character, linkedPath, type));
+                Assert.AreEqual(3, _character.Contacts.Count);
+                Assert.IsTrue(_character.Contacts.All(x => ReferenceEquals(linked, x.LinkedCharacter)));
+                Assert.IsTrue(await _character.SaveAsync(parentPath));
+                using var restored = new Character(); Assert.IsTrue(await restored.LoadAsync(parentPath));
+                CollectionAssert.AreEquivalent(new[] { ContactType.Contact, ContactType.Enemy, ContactType.Pet }, restored.Contacts.Select(x => x.EntityType).ToArray());
+                Assert.IsTrue(restored.Contacts.All(x => x.FileName == linkedPath && ReferenceEquals(x.LinkedCharacter, linked)));
+                Assert.AreEqual(linked.BOD.TotalValue, restored.Contacts.Single(x => x.EntityType == ContactType.Pet).LinkedCharacter.BOD.TotalValue);
+            }
+            finally
+            {
+                foreach (var contact in _character.Contacts.ToArray()) await contact.SetFileNameAsync(string.Empty);
+                await CharacterRegistry.OpenCharacters.RemoveAsync(linked);
+                File.Delete(linkedPath); File.Delete(parentPath);
+            }
+        }
+
+        [TestMethod]
+        public async Task ContactFileLinkRejectsForeignOwnershipMissingFilesSelfAndCancellation()
+        {
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            var contact = new Contact(_character); await _character.Contacts.AddAsync(contact);
+            await _character.SetFileNameAsync(path);
+            Assert.IsTrue(await _character.SaveAsync(path));
+            try
+            {
+                Assert.AreEqual(RuleResult.NotAllowed, await ContactRules.AddFromFileAsync(_character, path, ContactType.Pet));
+                Assert.AreEqual(RuleResult.NotAllowed, await ContactRules.LinkAsync(_character, contact, path));
+                Assert.AreEqual(RuleResult.NotAllowed, await ContactRules.LinkAsync(_character, contact, path + ".missing"));
+                using var foreign = new Character();
+                Assert.AreEqual(RuleResult.NotAllowed, await ContactRules.LinkAsync(foreign, contact, path));
+                using var cancelled = new System.Threading.CancellationTokenSource(); cancelled.Cancel();
+                await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => ContactRules.AddFromFileAsync(_character, path, ContactType.Pet, cancelled.Token));
+                Assert.AreEqual(1, _character.Contacts.Count); Assert.AreEqual(string.Empty, contact.FileName);
+            }
+            finally { File.Delete(path); }
+        }
+
+        [TestMethod]
         public async Task NotebookUsesOnlyLegacyNotesFieldAcrossCharacterSaveAndReload()
         {
             var pages = new[] { new NotebookPageData(Guid.NewGuid(), "Sessions", "Meet the fixer."), new NotebookPageData(Guid.NewGuid(), "Clues", "A blue van.") };

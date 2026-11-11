@@ -12,7 +12,7 @@
       </ResourceDictionary.MergedDictionaries>
       <!-- One quality: type-coloured edge, name / extra, origin and source chips, level stepper, karma value, remove. -->
       <DataTemplate x:Key="QualityCard" x:DataType="vm:QualityViewModel">
-        <Border Classes="qcard" Classes.negative="{Binding IsNegative}" Margin="0,0,0,8" ToolTip.Placement="Right" ToolTip.ShowDelay="300">
+        <Border Classes="qcard" Classes.negative="{Binding IsNegative}" Margin="0,0,0,8" ToolTip.Placement="Pointer" ToolTip.ShowDelay="300">
           <ToolTip.Tip>
             <StackPanel Width="340" Spacing="6">
               <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="15" TextWrapping="Wrap" />

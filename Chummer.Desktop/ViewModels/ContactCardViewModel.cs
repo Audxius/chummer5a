@@ -35,6 +35,7 @@ namespace Chummer.Desktop.ViewModels
     {
         private readonly CharacterViewModel _objOwner;
         private readonly Contact _objContact;
+        private readonly byte[] _portraitData;
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ExpansionLabel))]
         [NotifyPropertyChangedFor(nameof(ExpansionTip))]
@@ -53,6 +54,7 @@ namespace Chummer.Desktop.ViewModels
             var mugshot = objContact.MainMugshot;
             if (mugshot != null)
             {
+                _portraitData = mugshot.EncodedBytes;
                 try
                 {
                     Portrait = mugshot.HostImage as Bitmap;
@@ -97,12 +99,18 @@ namespace Chummer.Desktop.ViewModels
             AddFact("Hobby / vice", objContact.DisplayHobbiesVice);
             AddFact("Personal life", objContact.DisplayPersonalLife);
             Facts = lstFacts;
+            LinkedFile = !string.IsNullOrEmpty(objContact.FileName) ? objContact.FileName : objContact.RelativeFileName;
+            var linked = objContact.LinkedCharacter;
+            LinkedStats = linked == null ? Array.Empty<ItemStat>() : linked.AttributeSection.AttributeList
+                .Select(x => new ItemStat(x.DisplayNameLong(GlobalSettings.Language), x.DisplayValue)).ToArray();
+            LinkedSkills = linked == null ? Array.Empty<ItemStat>() : linked.SkillsSection.Skills.Where(x => x.Rating > 0)
+                .Select(x => new ItemStat(x.CurrentDisplayName, x.Rating.ToString(GlobalSettings.CultureInfo))).ToArray();
 
             List<string> lstTags = new List<string>();
             if (IsEnemy)
                 lstTags.Add("ENEMY");
             if (IsPet)
-                lstTags.Add("PET");
+                lstTags.Add("PET / COHORT");
             if (objContact.IsGroup)
                 lstTags.Add("GROUP");
             if (objContact.Family)
@@ -118,6 +126,20 @@ namespace Chummer.Desktop.ViewModels
         }
 
         public string Name { get; }
+        public string LinkedFile { get; }
+        public IReadOnlyList<ItemStat> LinkedStats { get; }
+        public IReadOnlyList<ItemStat> LinkedSkills { get; }
+        internal Task<ContactCardViewModel> RefreshProfileAsync() => _objOwner.ReadModelAsync(() => Task.FromResult(new ContactCardViewModel(_objOwner, _objContact)));
+        internal Task<bool> ExistsAsync() => _objOwner.ReadModelAsync(() => Task.FromResult(_objOwner.Character.Contacts.Contains(_objContact)));
+        internal Task<Bitmap> LoadFullPortraitAsync() => Task.Run(() =>
+        {
+            if (_portraitData == null) return null;
+            using var stream = new MemoryStream(_portraitData);
+            return new Bitmap(stream);
+        });
+        internal Task LinkProfileAsync(string file) => _objOwner.LinkContactAsync(_objContact, file);
+        [RelayCommand]
+        private Task OpenProfile(object owner) => Views.Dialogs.DialogHost.ShowModalAsync(new Views.Dialogs.ContactProfileWindow(this), owner);
         public string Id => _objContact.InternalId;
         public string Role { get; }
         public string Location { get; }
@@ -156,7 +178,7 @@ namespace Chummer.Desktop.ViewModels
         public string SearchText => string.Join(" ", new[] { Name, Role, Location, Notes }.Concat(Facts.Select(x => x.Value)).Concat(Tags));
 
         [RelayCommand]
-        private Task Edit() => _objOwner.EditContactAsync(_objContact);
+        private Task Edit(object owner) => _objOwner.EditContactAsync(_objContact, owner);
 
         [RelayCommand]
         private Task Delete() => _objOwner.DeleteContactAsync(_objContact);

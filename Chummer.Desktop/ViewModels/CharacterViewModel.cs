@@ -545,6 +545,9 @@ namespace Chummer.Desktop.ViewModels
             await FlushInfoEditsAsync();
             _isCharacterDisposed = true;
             Character.PropertyChanged -= CharacterOnPropertyChanged;
+            bool referenced = await CharacterRegistry.OpenCharacters.AnyAsync(async other => !ReferenceEquals(other, Character)
+                && (await other.GetLinkedCharactersAsync().ConfigureAwait(false)).Contains(Character)).ConfigureAwait(false);
+            if (referenced) return; // Linked contacts still own this character; reopening must reuse it.
             if (await CharacterRegistry.OpenCharacters.ContainsAsync(Character).ConfigureAwait(false))
                 await CharacterRegistry.OpenCharacters.RemoveAsync(Character).ConfigureAwait(false);
             await Character.DisposeAsync().ConfigureAwait(false);
@@ -589,7 +592,10 @@ namespace Chummer.Desktop.ViewModels
             Display = objAttribute.DisplayValue;
             LongName = objAttribute.DisplayNameLong(GlobalSettings.Language);
             Minimum = objAttribute.TotalMinimum;
+            MetatypeLimitsText = "Metatype " + objAttribute.MetatypeMinimum.ToString(GlobalSettings.CultureInfo) + "–" + objAttribute.MetatypeMaximum.ToString(GlobalSettings.CultureInfo);
             AugmentedMaximum = objAttribute.TotalAugmentedMaximum;
+            LimitsText = MetatypeLimitsText + " · Aug. max " + AugmentedMaximum.ToString(GlobalSettings.CultureInfo)
+                + (Minimum != objAttribute.MetatypeMinimum || Maximum != objAttribute.MetatypeMaximum ? " · Current " + Minimum.ToString(GlobalSettings.CultureInfo) + "–" + Maximum.ToString(GlobalSettings.CultureInfo) : string.Empty);
             IsPhysical = Abbrev == "BOD" || Abbrev == "AGI" || Abbrev == "REA" || Abbrev == "STR";
             Breakdown = objAttribute.ToolTip;
             IconKey = "Icon." + (Abbrev == "MAGAdept" ? "MAG" : Abbrev);
@@ -610,6 +616,8 @@ namespace Chummer.Desktop.ViewModels
         public string MaximumText => "/ " + Maximum.ToString(GlobalSettings.CultureInfo);
         public string LongName { get; }
         public int Minimum { get; }
+        public string MetatypeLimitsText { get; }
+        public string LimitsText { get; }
         public int AugmentedMaximum { get; }
         public bool IsPhysical { get; }
         public string Breakdown { get; } = string.Empty;

@@ -65,6 +65,9 @@
   <!-- Keep tooltip rendering and pointer ownership in the same window. Native popup
        surfaces can steal hover from their owner on Wayland. Tooltips are informational. -->
   <Style Selector=":is(Control)">
+    <Setter Property="ToolTip.Placement" Value="Pointer" />
+    <Setter Property="ToolTip.HorizontalOffset" Value="12" />
+    <Setter Property="ToolTip.VerticalOffset" Value="18" />
     <Setter Property="ToolTip.ShouldUseOverlayLayer" Value="True" />
     <Setter Property="ToolTip.BetweenShowDelay" Value="-1" />
   </Style>
@@ -75,6 +78,10 @@
     <Setter Property="Background" Value="{StaticResource BaseBrush}" />
     <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
     <Setter Property="FontSize" Value="14" />
+  </Style>
+  <Style Selector="Button.contactCard:pointerover">
+    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
   </Style>
 
   <!-- Typography -->

@@ -96,9 +96,9 @@ namespace Chummer.Desktop.Views.Dialogs
             MaxHeight = 900;
         }
 
-        public static async Task<bool> EditAsync(object owner, Character objCharacter, ContactFields objFields, string strTitle, bool blnGroupEnabled, bool blnFreeEnabled, bool blnLoyaltyEnabled, int intMaxConnection)
+        public static async Task<bool> EditAsync(object owner, Character objCharacter, ContactFields objFields, string strTitle, bool blnGroupEnabled, bool blnFreeEnabled, bool blnLoyaltyEnabled, int intMaxConnection, bool includeCritters = false)
         {
-            Dictionary<string, List<string>> dicLists = await Task.Run(() => LoadLists(objCharacter)).ConfigureAwait(true);
+            Dictionary<string, List<string>> dicLists = await Task.Run(() => LoadLists(objCharacter, includeCritters)).ConfigureAwait(true);
             ContactEditorWindow objWindow = new ContactEditorWindow(strTitle);
 
             Grid grdFields = new Grid
@@ -226,7 +226,7 @@ namespace Chummer.Desktop.Views.Dialogs
         }
 
         // Same sources as legacy ContactControl.LoadContactList: data/contacts.xml lists and metatypes.xml (with metavariants).
-        private static Dictionary<string, List<string>> LoadLists(Character objCharacter)
+        private static Dictionary<string, List<string>> LoadLists(Character objCharacter, bool includeCritters)
         {
             Dictionary<string, List<string>> dicReturn = new Dictionary<string, List<string>>();
             XPathNavigator xmlContacts = objCharacter.LoadDataXPath("contacts.xml").SelectSingleNode("/chummer");
@@ -253,12 +253,13 @@ namespace Chummer.Desktop.Views.Dialogs
             Fill("vice", "hobbiesvices/hobbyvice");
             Fill("personal", "personallives/personallife");
             List<string> lstMetatypes = new List<string>();
-            foreach (XPathNavigator xmlMetatype in objCharacter.LoadDataXPath("metatypes.xml").Select("/chummer/metatypes/metatype"))
+            foreach (string file in includeCritters ? new[] { "metatypes.xml", "critters.xml" } : new[] { "metatypes.xml" })
+            foreach (XPathNavigator xmlMetatype in objCharacter.LoadDataXPath(file).Select("/chummer/metatypes/metatype"))
             {
                 string strName = xmlMetatype.SelectSingleNode("name")?.Value;
                 if (string.IsNullOrEmpty(strName))
                     continue;
-                lstMetatypes.Add(strName);
+                if (!lstMetatypes.Contains(strName)) lstMetatypes.Add(strName);
                 foreach (XPathNavigator xmlVariant in xmlMetatype.Select("metavariants/metavariant/name"))
                 {
                     if (!lstMetatypes.Contains(xmlVariant.Value))
@@ -266,6 +267,7 @@ namespace Chummer.Desktop.Views.Dialogs
                 }
             }
             dicReturn["metatype"] = lstMetatypes;
+            lstMetatypes.Sort(StringComparer.CurrentCulture);
             return dicReturn;
         }
     }

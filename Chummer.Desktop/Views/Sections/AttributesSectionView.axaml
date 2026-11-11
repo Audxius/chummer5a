@@ -14,7 +14,7 @@
           <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="20" Height="20" VerticalAlignment="Center" />
           <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
             <TextBlock Text="{Binding LongName}" FontWeight="SemiBold" FontSize="15" TextTrimming="CharacterEllipsis" />
-            <TextBlock Text="{Binding Abbrev}" Classes="muted" FontSize="11" ToolTip.Tip="{Binding RangeText}" />
+            <TextBlock Text="{Binding LimitsText}" Classes="muted" FontSize="11" TextWrapping="Wrap" ToolTip.Tip="{Binding RangeText}" />
           </StackPanel>
           <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right" VerticalAlignment="Center">
             <TextBlock Text="{Binding ValueText}" FontSize="24" FontWeight="Black" />

@@ -12,10 +12,23 @@ using Avalonia.VisualTree;
 using Chummer;
 using Chummer.Desktop.ViewModels;
 using Chummer.Desktop.Views;
+using Chummer.Desktop.Views.Dialogs;
 using Chummer.Rules;
 
 internal static class PageReviewScript
 {
+    public static async Task CheckPetEditorAsync(MainWindow window, CharacterViewModel runner, string output, Func<Task> settle)
+    {
+        var fields = new ContactFields { Name = "Review companion", Metatype = "Dog" };
+        var editing = ContactEditorWindow.EditAsync(window, runner.Character, fields, "New pet or cohort", true, true, true, runner.Character.MaxContactConnection, true);
+        await settle();
+        var editor = window.OwnedWindows.OfType<ContactEditorWindow>().Single();
+        if (!editor.GetVisualDescendants().OfType<AutoCompleteBox>().Any(box => box.ItemsSource?.Cast<string>().Contains("Dog") == true && box.ItemsSource.Cast<string>().Contains("Human")))
+            throw new InvalidOperationException("Pet/cohort editor is missing critter and metahuman species.");
+        Save(editor, output, "50-pet-cohort-editor"); editor.Close();
+        if (await editing) throw new InvalidOperationException("Closing the pet editor unexpectedly accepted the record.");
+        Console.WriteLine("Pet/cohort species suggestions and editor cancellation passed.");
+    }
     public static async Task RunAsync(MainWindow window, CharacterViewModel runner, string output, Func<Task> settle)
     {
         foreach (var section in new[] { CharacterSection.Overview, CharacterSection.Attributes, CharacterSection.Skills, CharacterSection.Inventory, CharacterSection.Network, CharacterSection.Notes, CharacterSection.Ledger })
@@ -37,6 +50,10 @@ internal static class PageReviewScript
         if (!runner.SortIsName) throw new InvalidOperationException("Pointer click did not select name sorting.");
         Save(window, output, "41-skills-hover-and-sort");
         Console.WriteLine("Repeated pointer moves preserved navigation/filter hit targets and bounds; pointer click sorted skills.");
+        runner.ShowGroupsPageCommand.Execute(null); await settle();
+        if (!runner.IsSkillGroupsPage || !runner.SkillGroups.Any(x => x.Rating == 0)) throw new InvalidOperationException("Untrained/broken skill groups remain hidden.");
+        Save(window, output, "41-skill-groups");
+        runner.ShowSkillsPageCommand.Execute(null); await settle();
 
         runner.ShowSectionCommand.Execute(CharacterSection.Notes); await settle();
         var notesTabs = window.GetVisualDescendants().OfType<TabControl>().Single(x => x.DataContext is CharacterInfoViewModel);
@@ -102,21 +119,80 @@ internal static class PageReviewScript
         runner.ShowSectionCommand.Execute(CharacterSection.Network); await settle();
         if (Environment.GetEnvironmentVariable("CHUMMER_REVIEW_CONTACT_ART") == "1" && (runner.ContactCards.Count != 10 || runner.ContactCards.Any(x => !x.HasPortrait)))
             throw new InvalidOperationException("Not all ten contact portraits loaded.");
-        if (runner.ContactCards.Any(x => x.IsExpanded)) throw new InvalidOperationException("Contacts were not collapsed initially.");
         Save(window, output, "42-contacts-collapsed");
         var first = runner.ContactCards.First(); string id = first.Id;
-        var expand = window.GetVisualDescendants().OfType<ToggleButton>().Single(x => ReferenceEquals(x.DataContext, first) && x.Classes.Contains("contactExpand"));
-        Click(window, expand); await settle();
-        if (!first.IsExpanded) throw new InvalidOperationException("Expand did not reveal the contact.");
-        Save(window, output, "43-contact-expanded");
+        var card = window.GetVisualDescendants().OfType<Button>().Single(x => ReferenceEquals(x.DataContext, first) && x.Classes.Contains("contactCard"));
+        Click(window, card); await settle();
+        var profile = window.OwnedWindows.OfType<ContactProfileWindow>().Single();
+        var profileArt = profile.GetVisualDescendants().OfType<Image>().Single(x => x.Name == "ContactProfileArtwork");
+        if (profileArt.Bounds.Width < 250 || first.HasPortrait && ((Avalonia.Media.Imaging.Bitmap)profileArt.Source).PixelSize.Width <= 256)
+            throw new InvalidOperationException("Contact profile does not show large original artwork.");
+        Save(profile, output, "43-contact-profile");
+        if (first.IsEditable)
+        {
+            Click(profile, profile.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == "Edit profile…")); await settle();
+            var editor = profile.OwnedWindows.Single();
+            if (!editor.Title.StartsWith("Edit ", StringComparison.Ordinal)) throw new InvalidOperationException("Contact editor did not belong to its profile window.");
+            editor.Close(); await settle();
+            if (profile.Profile.Connection != first.Connection) throw new InvalidOperationException("Cancelling contact editing changed its rating.");
+        }
         if (first.IsEditable)
         {
             int expected = first.Connection < first.MaxConnection ? first.Connection + 1 : first.Connection - 1;
-            await (first.Connection < first.MaxConnection ? first.ConnectionUpCommand : first.ConnectionDownCommand).ExecuteAsync(null);
+            var change = profile.GetVisualDescendants().OfType<Button>().First(x => x.Content as string == (first.Connection < first.MaxConnection ? "+" : "−"));
+            Click(profile, change);
             await settle();
             var refreshed = runner.ContactCards.Single(x => x.Id == id);
-            if (!refreshed.IsExpanded || refreshed.Connection != expected) throw new InvalidOperationException("Rating change lost contact expansion or the new rating.");
+            if (refreshed.Connection != expected || profile.Profile.Connection != expected) throw new InvalidOperationException("Profile rating change did not refresh both views.");
         }
+        profile.Close(); await settle();
+        runner.ShowCompanionsPageCommand.Execute(null); await settle(); Save(window, output, "43-pets-and-cohorts");
+        if (!runner.ShowCompanions) throw new InvalidOperationException("Pets and cohorts view failed to open.");
+        using (var companion = new Character { SettingsKey = runner.Character.SettingsKey, Name = "Review cohort" })
+        {
+            string companionPath = Path.Combine(output, "review-cohort.chum5");
+            await companion.SetFileNameAsync(companionPath);
+            if (!await Task.Run(() => companion.SaveAsync(companionPath))) throw new InvalidOperationException("Could not prepare cohort fixture.");
+            await CharacterRegistry.OpenCharacters.AddAsync(companion);
+            try
+            {
+                await runner.RunRuleAsync(t => ContactRules.AddFromFileAsync(runner.Character, companionPath, Chummer.Backend.Enums.ContactType.Pet, t));
+                await settle();
+                var cohort = runner.PetCards.Single(x => x.LinkedFile == companionPath);
+                var cohortCard = window.GetVisualDescendants().OfType<Button>().Single(x => ReferenceEquals(x.DataContext, cohort) && x.Classes.Contains("contactCard"));
+                Click(window, cohortCard); await settle();
+                var cohortProfile = window.OwnedWindows.OfType<ContactProfileWindow>().Single();
+                if (cohortProfile.Profile.LinkedStats.Count != companion.AttributeSection.AttributeList.Count)
+                    throw new InvalidOperationException("Linked cohort attributes missing from profile.");
+                Save(cohortProfile, output, "43-linked-cohort-profile");
+                Click(cohortProfile, cohortProfile.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == "Open full character sheet")); await settle();
+                var main = MainWindowViewModel.Current;
+                if (main.CurrentPage is not CharacterViewModel linkedView || !ReferenceEquals(linkedView.Character, companion))
+                    throw new InvalidOperationException("Opening the linked sheet duplicated the character.");
+                await main.CloseCharacterCommand.ExecuteAsync(linkedView); await settle();
+                if (companion.IsDisposed || !CharacterRegistry.OpenCharacters.Contains(companion))
+                    throw new InvalidOperationException("Closing a linked sheet discarded the character still owned by its contact.");
+                await main.OpenCharacterFileAsync(companionPath); await settle();
+                if (main.CurrentPage is not CharacterViewModel reopened || !ReferenceEquals(reopened.Character, companion))
+                    throw new InvalidOperationException("Reopening the linked sheet did not reuse the live character.");
+                await main.CloseCharacterCommand.ExecuteAsync(reopened); main.CurrentPage = runner; await settle();
+                await runner.SaveCommand.ExecuteAsync(null);
+                using var restored = new Character();
+                if (!await Task.Run(() => restored.LoadAsync(savePath)) || !restored.Contacts.Any(x => x.EntityType == Chummer.Backend.Enums.ContactType.Pet && x.FileName == companionPath))
+                    throw new InvalidOperationException("Cohort file link was not preserved by character save/reload.");
+            }
+            finally
+            {
+                await runner.RunRuleAsync(async t =>
+                {
+                    foreach (var item in runner.Character.Contacts.Where(x => x.FileName == companionPath).ToArray())
+                    { await item.SetFileNameAsync(""); await runner.Character.Contacts.RemoveAsync(item); await item.DisposeAsync(); }
+                    return RuleResult.Changed;
+                });
+                await CharacterRegistry.OpenCharacters.RemoveAsync(companion);
+            }
+        }
+        runner.ShowContactsPageCommand.Execute(null); await settle();
 
         window.Width = 1920; window.Height = 1080; await settle();
         foreach (var section in new[] { CharacterSection.Attributes, CharacterSection.Overview, CharacterSection.Ledger })
@@ -161,11 +237,15 @@ internal static class PageReviewScript
         }
         var tooltip = window.GetVisualDescendants().OfType<ToolTip>().Single(x => x.IsVisible);
         if (tooltip.IsHitTestVisible) throw new InvalidOperationException("Tooltip can intercept pointer input.");
+        var pointerPoint = qualityCard.TranslatePoint(new Point(20, 20), window)!.Value;
+        var tipOrigin = tooltip.TranslatePoint(default, window)!.Value;
+        if (Math.Abs(tipOrigin.X - pointerPoint.X) > 50 || Math.Abs(tipOrigin.Y - pointerPoint.Y) > 50)
+            throw new InvalidOperationException("Quality tooltip is not anchored near the hovered point.");
         var tipPoint = tooltip.TranslatePoint(new Point(tooltip.Bounds.Width / 2, tooltip.Bounds.Height / 2), window)!.Value;
         if (window.InputHitTest(tipPoint) is Visual hit && (ReferenceEquals(hit, tooltip) || hit.GetVisualAncestors().Contains(tooltip)))
             throw new InvalidOperationException("Tooltip blocks underlying page hit testing.");
         Save(window, output, "49-quality-hover");
-        Console.WriteLine("Page layout, compact contacts, saved expansion, and full-width ledger checks passed.");
+        Console.WriteLine("Page layout, contact profiles, linked cohorts, skill groups, pointer tooltips and full-width ledger checks passed.");
     }
 
     private static async Task CheckHoverAsync(MainWindow window, Button button)
@@ -182,7 +262,7 @@ internal static class PageReviewScript
             }
         window.MouseMove(new Point(1, 1), RawInputModifiers.None);
     }
-    private static void Click(MainWindow window, Control control)
+    private static void Click(Window window, Control control)
     {
         var point = control.TranslatePoint(new Point(control.Bounds.Width / 2, control.Bounds.Height / 2), window) ?? throw new InvalidOperationException("No click coordinates.");
         window.MouseMove(point, RawInputModifiers.None); window.MouseDown(point, MouseButton.Left, RawInputModifiers.None); window.MouseUp(point, MouseButton.Left, RawInputModifiers.None);
@@ -193,7 +273,7 @@ internal static class PageReviewScript
         var body = window.GetVisualDescendants().OfType<Control>().Single(x => x.Name == name);
         if (body.Bounds.Width < (window.ClientSize.Width - 232) * 0.9) throw new InvalidOperationException(name + " did not fill the available width.");
     }
-    private static void Save(MainWindow window, string output, string name)
+    private static void Save(Window window, string output, string name)
     {
         Dispatcher.UIThread.RunJobs(); AvaloniaHeadlessPlatform.ForceRenderTimerTick();
         window.CaptureRenderedFrame()?.Save(Path.Combine(output, name + ".png")); Console.WriteLine("saved " + name);
