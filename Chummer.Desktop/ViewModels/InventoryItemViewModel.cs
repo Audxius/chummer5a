@@ -128,6 +128,9 @@ namespace Chummer.Desktop.ViewModels
         public bool CanEditImplant { get; private set; }
         public int SortOrder { get; private set; }
         public bool CanReorder { get; private set; }
+        public string RowStatus => string.Join(" · ", new[] { HasQuantity ? "×" + QuantityText : "", ShowEquippedMarker ? "Equipped" : "" }.Where(x => x.Length > 0));
+        public bool CanModifyEquipment => CanAddMod || CanEditImplant || CanAddWeaponMount || CanAddMountedWeapon || CanEditWeaponMount || IsLifestyle;
+        public bool CanOrganizeEquipment => CanRename || CanReorder || CanSetLocation || HasLocation;
         public bool IsLifestyle => Item is Lifestyle;
 
         /// <summary>Engine InternalId, used to keep the selection across reloads.</summary>
@@ -249,6 +252,8 @@ namespace Chummer.Desktop.ViewModels
 
         private void Finish()
         {
+            var ordered = Children.GroupBy(x => x.Item?.GetType()).SelectMany(g => g.OrderBy(x => x.SortOrder)).ToList();
+            Children.Clear(); Children.AddRange(ordered);
             SearchText = (Name + " " + Category + " " + KindLabel + " " + Headline + " " + string.Join(" ", Contents) + " " + Notes).ToLowerInvariant();
         }
 
@@ -256,7 +261,7 @@ namespace Chummer.Desktop.ViewModels
         {
             Item = objItem;
             SortOrder = (objItem as ICanSort)?.SortOrder ?? 0;
-            CanReorder = InventoryOrderRules.CanOrder(objCharacter, objItem);
+            CanReorder = objItem is ICanSort;
             Id = strId ?? string.Empty;
             IsCareer = objCharacter.Created;
             CanEditImplant = objItem is Cyberware implant && implant.ParentVehicle == null && implant.SourceID != Cyberware.EssenceHoleGUID && implant.SourceID != Cyberware.EssenceAntiHoleGUID

@@ -27,6 +27,7 @@ namespace Chummer.Desktop.Views.Dialogs
         private Task _load;
         private int _version;
         private bool _changing;
+        public string PreviewText => _preview.Text ?? "";
         private Improvement.ImprovementSource Source => _type.SelectedIndex == 1 ? Improvement.ImprovementSource.Bioware : Improvement.ImprovementSource.Cyberware;
         public CyberwareSuiteWindow(CharacterViewModel owner)
         {
@@ -55,7 +56,7 @@ namespace Chummer.Desktop.Views.Dialogs
         {
             var source = Source;
             _toolbar.IsEnabled = false;
-            try { SetDocument(await Task.Run(() => _owner.Character.LoadDataAsync(source == Improvement.ImprovementSource.Cyberware ? "cyberware.xml" : "bioware.xml"))); await PreviewAsync(); }
+            try { SetDocument(await _owner.ReadModelAsync(() => _owner.Character.LoadDataAsync(source == Improvement.ImprovementSource.Cyberware ? "cyberware.xml" : "bioware.xml"))); await PreviewAsync(); }
             catch (Exception ex) { _status.Text = ex.Message; }
             finally { _toolbar.IsEnabled = true; }
         }
@@ -71,7 +72,7 @@ namespace Chummer.Desktop.Views.Dialogs
         {
             if (name != null) _name.Text = name; string suiteName = _name.Text; var source = Source;
             _toolbar.IsEnabled = false; _buy.IsEnabled = false; ++_version;
-            try { SetDocument(await Task.Run(() => CyberwareSuiteRules.ExportAsync(_owner.Character, suiteName, source))); await PreviewAsync(); }
+            try { SetDocument(await _owner.ReadModelAsync(() => CyberwareSuiteRules.ExportAsync(_owner.Character, suiteName, source))); await PreviewAsync(); }
             catch (Exception ex) { _status.Text = ex.Message; }
             finally { _toolbar.IsEnabled = true; }
         }
@@ -83,7 +84,7 @@ namespace Chummer.Desktop.Views.Dialogs
             _status.Text = "Calculating suite…";
             try
             {
-                var quote = await Task.Run(() => CyberwareSuiteRules.QuoteAsync(_owner.Character, suite, source));
+                var quote = await _owner.ReadModelAsync(() => CyberwareSuiteRules.QuoteAsync(_owner.Character, suite, source));
                 if (version != _version) return;
                 if (quote == null) { _status.Text = "This suite is unavailable for this character or grade."; return; }
                 _preview.Text = quote.Name + "\nGrade: " + quote.Grade + "\nCost: " + quote.Cost.ToString("N2") + "¥\nEssence: " + quote.Essence.ToString("0.##") + "\n\n" + string.Join("\n", quote.Items);

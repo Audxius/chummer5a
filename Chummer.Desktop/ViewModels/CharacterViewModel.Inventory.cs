@@ -40,6 +40,9 @@ namespace Chummer.Desktop.ViewModels
     {
         [ObservableProperty] private InventoryItemViewModel _selectedInventoryItem;
         [ObservableProperty] private string _inventoryNotesDraft = string.Empty;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasInventorySelectionPath))]
+        private string _inventorySelectionPath = string.Empty;
         [ObservableProperty] private bool _isSellPromptOpen;
         [ObservableProperty] private decimal _sellPercent = 50;
 
@@ -48,6 +51,12 @@ namespace Chummer.Desktop.ViewModels
 
         public bool HasLoadout => LoadoutSlots.Count > 0;
         public bool HasSelectedInventoryItem => SelectedInventoryItem != null;
+        public bool HasInventorySelectionPath => InventorySelectionPath.Length > 0;
+        public InventoryFilterOption SelectedInventoryKind
+        {
+            get => InventoryKinds.FirstOrDefault(x => x.IsSelected);
+            set { if (value != null) InventoryKind = value.Kind; }
+        }
         public bool HasNoSelectedInventoryItem => SelectedInventoryItem == null;
         public bool IsNotesDraftChanged => SelectedInventoryItem != null && (InventoryNotesDraft ?? string.Empty) != SelectedInventoryItem.Notes;
         public ObservableCollection<EquipmentDamageBox> EquipmentPhysicalBoxes { get; } = new ObservableCollection<EquipmentDamageBox>();
@@ -64,6 +73,14 @@ namespace Chummer.Desktop.ViewModels
             if (newValue != null)
                 newValue.IsSelected = true;
             InventoryNotesDraft = newValue?.Notes ?? string.Empty;
+            var path = new List<string>();
+            var ancestor = newValue;
+            while (ancestor != null)
+            {
+                ancestor = _lstAllInventory.SelectMany(x => x.SelfAndDescendants()).FirstOrDefault(x => x.Children.Contains(ancestor));
+                if (ancestor != null) path.Insert(0, ancestor.Name);
+            }
+            InventorySelectionPath = string.Join(" › ", path);
             IsSellPromptOpen = false;
             OnPropertyChanged(nameof(HasSelectedInventoryItem));
             OnPropertyChanged(nameof(HasNoSelectedInventoryItem));
@@ -85,6 +102,7 @@ namespace Chummer.Desktop.ViewModels
         /// <summary>Called after the grid is rebuilt: refresh the loadout strip and keep the same item selected.</summary>
         private void OnInventoryRefreshed()
         {
+            OnPropertyChanged(nameof(SelectedInventoryKind));
             LoadoutSlots.Clear();
             foreach (InventoryItemViewModel objItem in _lstAllInventory.Where(x => x.Kind == Chummer.Desktop.ViewModels.InventoryKind.Weapon && x.CanEquip && x.IsEquipped))
                 LoadoutSlots.Add(objItem);
@@ -239,9 +257,11 @@ namespace Chummer.Desktop.ViewModels
         {
             var selected = SelectedInventoryItem;
             if (selected?.CanReorder != true) return;
-            var items = _lstAllInventory.Where(x => x.Kind == selected.Kind)
-                .OrderBy(x => x.SortOrder).ThenBy(x => x.Category, StringComparer.CurrentCulture)
-                .ThenBy(x => x.Name, StringComparer.CurrentCulture).ToList();
+            var parent = _lstAllInventory.SelectMany(x => x.SelfAndDescendants()).FirstOrDefault(x => x.Children.Contains(selected));
+            var items = parent != null
+                ? parent.Children.Where(x => x.Item?.GetType() == selected.Item?.GetType()).ToList()
+                : _lstAllInventory.Where(x => x.Kind == selected.Kind).OrderBy(x => x.SortOrder)
+                    .ThenBy(x => x.Category, StringComparer.CurrentCulture).ThenBy(x => x.Name, StringComparer.CurrentCulture).ToList();
             int index = items.IndexOf(selected), target = index + direction;
             if (index < 0 || target < 0 || target >= items.Count) return;
             items.RemoveAt(index); items.Insert(target, selected);

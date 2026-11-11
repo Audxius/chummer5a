@@ -10,11 +10,12 @@
   <UserControl.KeyBindings>
     <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveAsCommand}" />
     <KeyBinding Gesture="Ctrl+E" Command="{Binding ExportCharacterCommand}" />
+    <KeyBinding Gesture="Ctrl+P" Command="{Binding PrintCommand}" />
   </UserControl.KeyBindings>
   <DockPanel IsEnabled="{Binding CanInteract}">
     <!-- Header -->
     <Border DockPanel.Dock="Top" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
-            BorderThickness="0,0,0,1" Padding="28,20,28,0">
+            BorderThickness="0,0,0,1" Padding="24,18,24,0">
       <StackPanel>
         <Grid ColumnDefinitions="Auto,*,Auto">
           <Button Classes="portrait" Padding="0" BorderThickness="0" Background="Transparent" Cursor="Hand"
@@ -25,8 +26,8 @@
                 <MenuItem Header="Remove portrait" Command="{Binding RemovePortraitCommand}" IsEnabled="{Binding HasPortrait}" />
               </MenuFlyout>
             </Button.Flyout>
-            <Border Width="88" Height="88" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource CyanBrush}"
-                    BorderThickness="1" ClipToBounds="True" BoxShadow="0 0 16 0 #3300E5FF">
+            <Border Width="64" Height="64" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource CyanBrush}"
+                    BorderThickness="1" ClipToBounds="True" >
               <Grid>
                 <StackPanel IsVisible="{Binding !HasPortrait}" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="4">
                   <PathIcon Data="{StaticResource Icon.Overview}" Width="36" Height="36" Classes="muted" />
@@ -36,8 +37,8 @@
               </Grid>
             </Border>
           </Button>
-          <StackPanel Grid.Column="1" Margin="20,2,0,0" Spacing="4">
-            <TextBlock Text="{Binding Name}" Classes="h1" />
+          <StackPanel Grid.Column="1" Margin="20,2,0,0" Spacing="4" ClipToBounds="True">
+            <TextBlock Text="{Binding Name}" Classes="h1" TextTrimming="CharacterEllipsis" />
             <StackPanel Orientation="Horizontal" Spacing="10">
               <TextBlock Text="{Binding Metatype}" Foreground="{StaticResource TextBrush}" />
               <TextBlock Text="{Binding RealName}" Classes="muted" />
@@ -74,17 +75,20 @@
                 <TextBlock Text="{Binding Essence}" Classes="value" />
               </StackPanel>
             </Border>
-            <Button Classes="ghost" Command="{Binding PrintCommand}" VerticalAlignment="Stretch" HotKey="Ctrl+P" ToolTip.Tip="Print (Ctrl+P). Right-click for JSON/XML export (Ctrl+E) or printing all open runners.">
-              <Button.ContextFlyout>
+            <Button Classes="ghost" VerticalAlignment="Stretch" ToolTip.Tip="Print, export, create a PACKS kit, or save a copy">
+              <Button.Flyout>
                 <MenuFlyout>
+                  <MenuItem Header="Print character…" Command="{Binding PrintCommand}" />
                   <MenuItem Header="Export JSON / XML / Squad Manager…" Command="{Binding ExportCharacterCommand}" />
                   <MenuItem Header="Create PACKS kit…" Command="{Binding ExportPacksKitCommand}" />
                   <MenuItem Header="Print all open runners…" Command="{Binding PrintAllOpenCommand}" />
+                  <Separator />
+                  <MenuItem Header="Save a copy…" Command="{Binding SaveAsCommand}" />
                 </MenuFlyout>
-              </Button.ContextFlyout>
+              </Button.Flyout>
               <StackPanel Spacing="4" HorizontalAlignment="Center">
                 <PathIcon Data="{StaticResource Icon.Notes}" Width="18" Height="18" />
-                <TextBlock Text="PRINT" />
+                <TextBlock Text="Output ▾" />
               </StackPanel>
             </Button>
             <Button Classes="primary" Command="{Binding SaveCommand}" VerticalAlignment="Stretch" HotKey="Ctrl+S" ToolTip.Tip="Save (Ctrl+S). Right-click for Save As (Ctrl+Shift+S)">
@@ -102,21 +106,23 @@
         </Grid>
 
         <StackPanel IsVisible="{Binding IsCreateMode}" Margin="0,14,0,0" Spacing="8" IsEnabled="{Binding !IsCheckingCreation}">
-          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+          <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
             <TextBlock Text="{Binding CreationBudget}" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{StaticResource CyanBrush}" />
-            <Button Grid.Column="1" Content="CHECK BUILD" Command="{Binding ValidateCreationCommand}" />
-            <Button Grid.Column="2" Content="FINISH → CAREER" Command="{Binding FinishCreationCommand}" Classes="primary" />
+            <Button Grid.Column="1" Content="Creation tools ▾"><Button.Flyout><MenuFlyout>
+              <MenuItem Header="Metatype and priorities…" Command="{Binding ChangeCreationPrioritiesCommand}" />
+              <MenuItem Header="Convert Karma to nuyen…" Command="{Binding BuyCreationNuyenCommand}" />
+              <MenuItem Header="Add PACKS kit…" Command="{Binding AddPacksKitCommand}" />
+            </MenuFlyout></Button.Flyout></Button>
+            <Button Grid.Column="2" Content="Check build" Command="{Binding ValidateCreationCommand}" />
+            <Button Grid.Column="3" Content="Finish creation" Command="{Binding FinishCreationCommand}" Classes="primary" />
           </Grid>
           <ScrollViewer MaxHeight="160" IsVisible="{Binding HasCreationErrors}">
             <TextBlock Text="{Binding CreationErrors}" TextWrapping="Wrap" />
           </ScrollViewer>
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <Button Content="METATYPE / PRIORITIES" Command="{Binding ChangeCreationPrioritiesCommand}" />
-            <Button Content="KARMA → NUYEN" Command="{Binding BuyCreationNuyenCommand}" />
-            <Button Content="ADD PACKS KIT" Command="{Binding AddPacksKitCommand}" />
-          </StackPanel>
+
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,12,0,0">
+        <StackPanel Orientation="Horizontal">
           <ToggleButton Classes="section" Content="OVERVIEW" IsChecked="{Binding IsOverview, Mode=OneWay}"
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Overview}" />
           <ToggleButton Classes="section" Content="{loc:Tr Label_Attributes, Case=upper}" IsChecked="{Binding IsAttributes, Mode=OneWay}"
@@ -138,6 +144,7 @@
           <ToggleButton Classes="section" Content="IMPROVEMENTS" IsChecked="{Binding IsImprovements, Mode=OneWay}"
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Improvements}" />
         </StackPanel>
+        </ScrollViewer>
       </StackPanel>
     </Border>
 

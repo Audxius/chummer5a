@@ -1,14 +1,42 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:Chummer.Desktop.ViewModels"
-             xmlns:loc="using:Chummer.Desktop.Localization"
-             xmlns:conv="using:Chummer.Desktop.Converters"
-             x:Class="Chummer.Desktop.Views.Sections.InventorySectionView"
-             x:DataType="vm:CharacterViewModel">
-  <Grid ColumnDefinitions="*,400" Margin="28,22,20,0">
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:Chummer.Desktop.ViewModels" xmlns:loc="using:Chummer.Desktop.Localization" xmlns:conv="using:Chummer.Desktop.Converters" x:Class="Chummer.Desktop.Views.Sections.InventorySectionView" x:DataType="vm:CharacterViewModel">
+  <UserControl.Resources>
+    <DataTemplate x:Key="InventoryRow" x:DataType="vm:InventoryItemViewModel">
+      <Button Classes="inventoryRow" Classes.selected="{Binding IsSelected}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).SelectInventoryItemCommand}" CommandParameter="{Binding}">
+        <Grid ColumnDefinitions="40,*,80" ColumnSpacing="12">
+          <Border Background="{StaticResource PanelRaisedBrush}" CornerRadius="6" Width="38" Height="38">
+            <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="23" Height="23" Foreground="{Binding AccentBrush}" />
+          </Border>
+          <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+            <TextBlock Text="{Binding Category}" Classes="muted" FontSize="11" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+          <StackPanel Grid.Column="2" Spacing="3" VerticalAlignment="Center" HorizontalAlignment="Right">
+            <TextBlock Text="{Binding Cost}" FontSize="12" HorizontalAlignment="Right" />
+            <TextBlock Text="{Binding RowStatus}" Classes="muted" FontSize="10" HorizontalAlignment="Right" />
+          </StackPanel>
+        </Grid>
+      </Button>
+    </DataTemplate>
+  </UserControl.Resources>
+  <Grid x:Name="InventoryLayout" ColumnDefinitions="*,370" ColumnSpacing="20" Margin="24,20,24,0">
     <!-- ===== left: search, category tabs, loadout strip and the slot grid ===== -->
     <DockPanel>
       <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,12">
+        <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
+          <StackPanel Spacing="3">
+            <TextBlock Text="Inventory" FontSize="22" FontWeight="SemiBold" />
+            <TextBlock Text="Equipment, attachments and carried supplies" Classes="muted" FontSize="12" TextWrapping="Wrap" />
+          </StackPanel>
+          <Button Grid.Column="1" Content="Inventory tools ▾" Classes="ghost" VerticalAlignment="Center">
+            <Button.Flyout>
+              <MenuFlyout>
+                <MenuItem Header="Create natural weapon…" Command="{Binding CreateNaturalWeaponCommand}" />
+                <MenuItem Header="Cyberware suites…" Command="{Binding ManageCyberwareSuitesCommand}" />
+                <MenuItem Header="Create custom drug…" Command="{Binding CreateCustomDrugCommand}" />
+              </MenuFlyout>
+            </Button.Flyout>
+          </Button>
+        </Grid>
         <Grid ColumnDefinitions="*,Auto">
           <Grid>
             <TextBox Text="{Binding InventoryFilter}" PlaceholderText="Search inventory… (smartgun, armor, commlink, medkit)" Padding="40,9,10,9" />
@@ -16,7 +44,10 @@
           </Grid>
           <TextBlock Grid.Column="1" Text="{Binding InventorySummary}" Classes="label" VerticalAlignment="Center" Margin="14,0,0,0" />
         </Grid>
-        <ItemsControl ItemsSource="{Binding InventoryKinds}">
+        <ComboBox x:Name="InventoryCategorySelector" Classes="compactInventoryFilter" IsVisible="False" ItemsSource="{Binding InventoryKinds}" SelectedItem="{Binding SelectedInventoryKind, Mode=TwoWay}" HorizontalAlignment="Stretch">
+          <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:InventoryFilterOption"><TextBlock Text="{Binding Label}" /></DataTemplate></ComboBox.ItemTemplate>
+        </ComboBox>
+        <ItemsControl x:Name="InventoryCategoryTabs" ItemsSource="{Binding InventoryKinds}">
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
               <WrapPanel />
@@ -34,28 +65,25 @@
           </ItemsControl.ItemTemplate>
         </ItemsControl>
         <!-- Loadout: what the runner has in hand / on them right now -->
-        <StackPanel Orientation="Horizontal" Spacing="10">
-          <Button Content="CREATE NATURAL WEAPON" Command="{Binding CreateNaturalWeaponCommand}" />
-          <Button Content="CYBERWARE SUITES" Command="{Binding ManageCyberwareSuitesCommand}" />
-          <Button Content="CREATE CUSTOM DRUG" Command="{Binding CreateCustomDrugCommand}" />
-        </StackPanel>
-        <Border Classes="loadout" Padding="12,8,12,0" IsVisible="{Binding HasLoadout}">
-          <DockPanel>
-            <StackPanel DockPanel.Dock="Left" Width="74" VerticalAlignment="Center" Margin="0,0,8,8">
-              <TextBlock Text="LOADOUT" Classes="section" Margin="0" Foreground="{StaticResource CyanBrush}" />
-              <TextBlock Text="equipped" Classes="label" FontSize="10" />
-            </StackPanel>
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-              <ItemsControl ItemsSource="{Binding LoadoutSlots}" ItemTemplate="{StaticResource InventoryMiniSlot}">
-                <ItemsControl.ItemsPanel>
-                  <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal" />
-                  </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-              </ItemsControl>
-            </ScrollViewer>
-          </DockPanel>
-        </Border>
+        <Expander Header="Equipped loadout" IsVisible="{Binding HasLoadout}" HorizontalAlignment="Stretch">
+          <Border Classes="loadout" Padding="12,8,12,0">
+            <DockPanel>
+              <StackPanel DockPanel.Dock="Left" Width="74" VerticalAlignment="Center" Margin="0,0,8,8">
+                <TextBlock Text="LOADOUT" Classes="section" Margin="0" Foreground="{StaticResource CyanBrush}" />
+                <TextBlock Text="equipped" Classes="label" FontSize="10" />
+              </StackPanel>
+              <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding LoadoutSlots}" ItemTemplate="{StaticResource InventoryMiniSlot}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                </ItemsControl>
+              </ScrollViewer>
+            </DockPanel>
+          </Border>
+        </Expander>
       </StackPanel>
       <ScrollViewer>
         <ItemsControl ItemsSource="{Binding InventoryGroups}" Margin="0,0,10,22">
@@ -68,254 +96,268 @@
                   <TextBlock Grid.Column="2" Text="{Binding CountText}" Classes="label" VerticalAlignment="Center" Margin="10,0,12,0" />
                   <Border Grid.Column="3" Height="1" Background="{StaticResource BorderBrush}" VerticalAlignment="Center" />
                   <!-- "+ ADD": buying is wired up through CharacterViewModel.AddItemCommand (parameter: InventoryKind) -->
-                  <Button Grid.Column="4" Classes="act" Margin="12,0,10,0" Padding="10,3"
-                          Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddItemCommand}" CommandParameter="{Binding Kind}"
-                          ToolTip.Tip="Add a new item to this category">
+                  <Button Grid.Column="4" Classes="act" Margin="12,0,10,0" Padding="10,3" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddItemCommand}" CommandParameter="{Binding Kind}" ToolTip.Tip="Add a new item to this category">
                     <StackPanel Orientation="Horizontal" Spacing="5">
                       <TextBlock Text="+" FontSize="14" FontWeight="Black" VerticalAlignment="Center" />
                       <TextBlock Text="ADD" VerticalAlignment="Center" />
                     </StackPanel>
                   </Button>
                 </Grid>
-                <ItemsControl ItemsSource="{Binding Items}" ItemTemplate="{StaticResource InventorySlot}">
-                    <ItemsControl.ItemsPanel>
-                      <ItemsPanelTemplate>
-                        <WrapPanel />
-                      </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                  </ItemsControl>
+                <ItemsControl ItemsSource="{Binding Items}" ItemTemplate="{StaticResource InventoryRow}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                </ItemsControl>
               </StackPanel>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
       </ScrollViewer>
     </DockPanel>
-
-    <!-- ===== right: detail panel of the selected slot ===== -->
     <Border Grid.Column="1" Classes="detail" Margin="0,0,0,18">
-      <Grid>
-        <StackPanel IsVisible="{Binding HasNoSelectedInventoryItem}" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
-          <PathIcon Data="{StaticResource Icon.Item.Backpack}" Width="56" Height="56" Classes="muted" />
-          <TextBlock Text="Select a slot to inspect it" Classes="muted" />
+      <Grid RowDefinitions="Auto,*">
+        <StackPanel Grid.RowSpan="2" IsVisible="{Binding HasNoSelectedInventoryItem}" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
+          <PathIcon Data="{StaticResource Icon.Item.Backpack}" Width="42" Height="42" Classes="muted" />
+          <TextBlock Text="Select an item to inspect it" Classes="muted" />
         </StackPanel>
-        <ScrollViewer IsVisible="{Binding HasSelectedInventoryItem}">
-          <StackPanel Margin="18,16,18,18" DataContext="{Binding SelectedInventoryItem}" x:DataType="vm:InventoryItemViewModel">
-            <!-- header -->
-            <Grid ColumnDefinitions="Auto,*">
-              <Grid Width="92" Height="92" Margin="0,0,14,0" VerticalAlignment="Top">
-                <Border Classes="well" Background="{Binding AccentFill}" BorderBrush="{Binding AccentBrush}" BoxShadow="{Binding AccentGlow}" />
-                <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="60" Height="60" Foreground="{Binding AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <Border Classes="badge" IsVisible="{Binding HasRatingBadge}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4">
-                  <TextBlock Text="{Binding RatingBadge}" Foreground="{Binding AccentBrush}" />
-                </Border>
-                <Border Classes="badge" IsVisible="{Binding HasQuantityBadge}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="4">
-                  <TextBlock Text="{Binding QuantityBadge}" Foreground="{StaticResource TextBrush}" />
-                </Border>
-              </Grid>
-              <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
-                <TextBlock Text="{Binding KindLabel}" FontSize="10" FontWeight="Bold" LetterSpacing="2" Foreground="{Binding AccentBrush}" />
-                <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="Bold" TextWrapping="Wrap" />
-                <TextBlock Text="{Binding Category}" Classes="label" TextWrapping="Wrap" />
-                <WrapPanel Margin="0,4,0,0">
-                  <Border Classes="chip" IsVisible="{Binding ShowEquippedMarker}" Margin="0,0,4,4" BorderBrush="#8839FF88">
-                    <TextBlock Text="EQUIPPED" FontSize="9" FontWeight="Bold" Foreground="{StaticResource GreenBrush}" />
-                  </Border>
-                  <Border Classes="chip" IsVisible="{Binding ShowWirelessBadge}" Margin="0,0,4,4">
-                    <TextBlock Text="WIRELESS" FontSize="9" FontWeight="Bold" Foreground="{StaticResource CyanBrush}" />
-                  </Border>
-                  <Border Classes="chip" IsVisible="{Binding IsActiveCommlink}" Margin="0,0,4,4">
-                    <TextBlock Text="ACTIVE COMMLINK" FontSize="9" FontWeight="Bold" Foreground="{StaticResource YellowBrush}" />
-                  </Border>
-                </WrapPanel>
-              </StackPanel>
+        <StackPanel Margin="18" IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).HasSelectedInventoryItem}" DataContext="{Binding SelectedInventoryItem}" x:DataType="vm:InventoryItemViewModel">
+          <TextBlock Text="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).InventorySelectionPath}" IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).HasInventorySelectionPath}" Classes="muted" FontSize="11" TextTrimming="CharacterEllipsis" Margin="0,0,0,10" ToolTip.Tip="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).InventorySelectionPath}" />
+          <Grid ColumnDefinitions="Auto,*">
+            <Grid Width="56" Height="56" Margin="0,0,14,0" VerticalAlignment="Top">
+              <Border Classes="well" Background="{Binding AccentFill}" BorderBrush="{Binding AccentBrush}"  />
+              <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="32" Height="32" Foreground="{Binding AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <Border Classes="badge" IsVisible="{Binding HasRatingBadge}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4">
+                <TextBlock Text="{Binding RatingBadge}" Foreground="{Binding AccentBrush}" />
+              </Border>
+              <Border Classes="badge" IsVisible="{Binding HasQuantityBadge}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="4">
+                <TextBlock Text="{Binding QuantityBadge}" Foreground="{StaticResource TextBrush}" />
+              </Border>
             </Grid>
-
-            <!-- weapon: ammo, fire modes, reload -->
-            <StackPanel IsVisible="{Binding UsesAmmo}">
-              <TextBlock Text="AMMUNITION" Classes="section" />
-              <Grid ColumnDefinitions="*,Auto">
-                <StackPanel>
-                  <TextBlock Text="{Binding AmmoText}" FontSize="24" FontWeight="Black" Foreground="{Binding AccentBrush}" />
-                  <TextBlock Text="{Binding AmmoLoadedName}" Classes="label" TextTrimming="CharacterEllipsis" />
+            <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+              <TextBlock Text="{Binding KindLabel}" FontSize="10" FontWeight="Bold" LetterSpacing="2" Foreground="{Binding AccentBrush}" />
+              <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="Bold" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding Category}" Classes="label" TextWrapping="Wrap" />
+              <WrapPanel Margin="0,4,0,0">
+                <Border Classes="chip" IsVisible="{Binding ShowEquippedMarker}" Margin="0,0,4,4" BorderBrush="#8839FF88">
+                  <TextBlock Text="EQUIPPED" FontSize="9" FontWeight="Bold" Foreground="{StaticResource GreenBrush}" />
+                </Border>
+                <Border Classes="chip" IsVisible="{Binding ShowWirelessBadge}" Margin="0,0,4,4">
+                  <TextBlock Text="WIRELESS" FontSize="9" FontWeight="Bold" Foreground="{StaticResource CyanBrush}" />
+                </Border>
+                <Border Classes="chip" IsVisible="{Binding IsActiveCommlink}" Margin="0,0,4,4">
+                  <TextBlock Text="ACTIVE COMMLINK" FontSize="9" FontWeight="Bold" Foreground="{StaticResource YellowBrush}" />
+                </Border>
+              </WrapPanel>
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+        <TabControl Grid.Row="1" Margin="10,0,10,12" IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).HasSelectedInventoryItem}" DataContext="{Binding SelectedInventoryItem}" x:DataType="vm:InventoryItemViewModel">
+          <TabItem>
+            <TabItem.Header>
+              <TextBlock Text="Details" FontSize="13" FontWeight="SemiBold" />
+            </TabItem.Header>
+            <ScrollViewer>
+              <StackPanel Margin="8,12,8,8">
+                <StackPanel IsVisible="{Binding UsesAmmo}">
+                  <TextBlock Text="AMMUNITION" Classes="section" />
+                  <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel>
+                      <TextBlock Text="{Binding AmmoText}" FontSize="24" FontWeight="Black" Foreground="{Binding AccentBrush}" />
+                      <TextBlock Text="{Binding AmmoLoadedName}" Classes="label" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                  </Grid>
+                  <Grid Height="6" Margin="0,6,0,10" HorizontalAlignment="Left" Width="200">
+                    <Border Background="{StaticResource BorderBrush}" CornerRadius="3" />
+                    <Border Background="{Binding AccentBrush}" CornerRadius="3" HorizontalAlignment="Left" Width="{Binding AmmoBarWidth}" />
+                  </Grid>
+                  <WrapPanel IsVisible="{Binding CanFire}">
+                    <Button Classes="act fire" Content="Fire" ToolTip.Tip="Fire using the weapon's first available mode (single shot, else burst)" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).FireWeaponCommand}" />
+                    <ItemsControl ItemsSource="{Binding AllowedFireModes}">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <WrapPanel />
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:FireModeOption">
+                          <Button Classes="act" Content="{Binding ShortLabel}" ToolTip.Tip="{Binding Label}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).FireWeaponCommand}" CommandParameter="{Binding}" />
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Classes="act" Content="Reload" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ReloadWeaponCommand}" ToolTip.Tip="Load ammunition you carry" />
+                    <Button Classes="act" Content="Unload" IsVisible="{Binding CanUnload}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).UnloadWeaponCommand}" ToolTip.Tip="Put the loaded rounds back with your gear" />
+                  </WrapPanel>
                 </StackPanel>
-              </Grid>
-              <Grid Height="6" Margin="0,6,0,10" HorizontalAlignment="Left" Width="200">
-                <Border Background="{StaticResource BorderBrush}" CornerRadius="3" />
-                <Border Background="{Binding AccentBrush}" CornerRadius="3" HorizontalAlignment="Left" Width="{Binding AmmoBarWidth}" />
-              </Grid>
-              <WrapPanel IsVisible="{Binding CanFire}">
-                <Button Classes="act fire" Content="FIRE" ToolTip.Tip="Fire using the weapon's first available mode (single shot, else burst)"
-                        Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).FireWeaponCommand}" />
-                <ItemsControl ItemsSource="{Binding AllowedFireModes}">
+                <!-- quantity / consumables -->
+                <StackPanel IsVisible="{Binding HasQuantity}">
+                  <TextBlock Text="QUANTITY" Classes="section" />
+                  <WrapPanel>
+                    <TextBlock Text="{Binding QuantityText}" FontSize="22" FontWeight="Black" MinWidth="54" VerticalAlignment="Center" Margin="0,0,10,6" />
+                    <Button Classes="act" Content="−" ToolTip.Tip="Remove some" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ReduceQuantityCommand}" />
+                    <Button Classes="act" Content="+" IsVisible="{Binding CanAddQuantity}" ToolTip.Tip="Buy more of the same (career: pays nuyen)" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddQuantityCommand}" />
+                    <Button Classes="act on" Content="USE 1" IsVisible="{Binding IsConsumable}" ToolTip.Tip="Use up one" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).UseOneCommand}" />
+                  </WrapPanel>
+                </StackPanel>
+                <!-- armor damage -->
+                <StackPanel IsVisible="{Binding CanDamageArmor}">
+                  <TextBlock Text="ARMOR DAMAGE" Classes="section" />
+                  <WrapPanel>
+                    <TextBlock Text="{Binding ArmorDamageText}" FontSize="22" FontWeight="Black" MinWidth="54" VerticalAlignment="Center" Margin="0,0,10,6" />
+                    <Button Classes="act" Content="Repair" ToolTip.Tip="Remove one point of armor damage" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RepairArmorCommand}" />
+                    <Button Classes="act danger" Content="Damage" ToolTip.Tip="The armor takes one point of damage" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).DamageArmorCommand}" />
+                  </WrapPanel>
+                </StackPanel>
+                <!-- state toggles -->
+                <WrapPanel Margin="0,14,0,0">
+                  <Button Classes="act" Classes.on="{Binding IsEquipped}" IsVisible="{Binding CanEquip}" Content="{Binding EquipLabel}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ToggleEquippedCommand}" />
+                  <Button Classes="act" Classes.on="{Binding IsWirelessOn}" IsVisible="{Binding HasWireless}" Content="{Binding WirelessLabel}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ToggleWirelessCommand}" />
+                  <Button Classes="act" Classes.on="{Binding IsActiveCommlink}" IsVisible="{Binding IsCommlink}" Content="{Binding CommlinkLabel}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ToggleActiveCommlinkCommand}" />
+                </WrapPanel>
+                <StackPanel Spacing="4" Margin="0,12,0,0" IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).HasEquipmentPhysicalMonitor}">
+                  <TextBlock Text="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EquipmentPhysicalLabel}" Classes="label" />
+                  <ItemsControl ItemsSource="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EquipmentPhysicalBoxes}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:EquipmentDamageBox">
+                        <Button Classes="cm" Command="{Binding ToggleCommand}" ToolTip.Tip="{Binding Tip}" BorderBrush="{StaticResource RedBrush}" Background="{Binding IsFilled, Converter={x:Static conv:BoolBrushConverter.Red}}" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+                <StackPanel Spacing="4" Margin="0,12,0,0" IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).HasEquipmentMatrixMonitor}">
+                  <TextBlock Text="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EquipmentMatrixLabel}" Classes="label" />
+                  <ItemsControl ItemsSource="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EquipmentMatrixBoxes}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:EquipmentDamageBox">
+                        <Button Classes="cm" Command="{Binding ToggleCommand}" ToolTip.Tip="{Binding Tip}" BorderBrush="{StaticResource CyanBrush}" Background="{Binding IsFilled, Converter={x:Static conv:BoolBrushConverter.Cyan}}" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+                <TextBlock Text="Specifications" Classes="section" />
+                <TextBlock Text="{Binding Description}" IsVisible="{Binding HasDescription}" TextWrapping="Wrap" />
+                <ItemsControl ItemsSource="{Binding Stats}">
                   <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                      <WrapPanel />
+                      <StackPanel />
                     </ItemsPanelTemplate>
                   </ItemsControl.ItemsPanel>
                   <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:FireModeOption">
-                      <Button Classes="act" Content="{Binding ShortLabel}" ToolTip.Tip="{Binding Label}"
-                              Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).FireWeaponCommand}" CommandParameter="{Binding}" />
+                    <DataTemplate x:DataType="vm:ItemStat">
+                      <Border Margin="0,0,0,1" Padding="0,8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                        <Grid ColumnDefinitions="110,*" ColumnSpacing="10">
+                          <TextBlock Text="{Binding Label}" Classes="muted" FontSize="12" TextWrapping="Wrap" />
+                          <TextBlock Grid.Column="1" Text="{Binding Value}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        </Grid>
+                      </Border>
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <Button Classes="act" Content="RELOAD" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ReloadWeaponCommand}" ToolTip.Tip="Load ammunition you carry" />
-                <Button Classes="act" Content="UNLOAD" IsVisible="{Binding CanUnload}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).UnloadWeaponCommand}" ToolTip.Tip="Put the loaded rounds back with your gear" />
-              </WrapPanel>
-            </StackPanel>
-
-            <!-- quantity / consumables -->
-            <StackPanel IsVisible="{Binding HasQuantity}">
-              <TextBlock Text="QUANTITY" Classes="section" />
-              <WrapPanel>
-                <TextBlock Text="{Binding QuantityText}" FontSize="22" FontWeight="Black" MinWidth="54" VerticalAlignment="Center" Margin="0,0,10,6" />
-                <Button Classes="act" Content="−" ToolTip.Tip="Remove some" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ReduceQuantityCommand}" />
-                <Button Classes="act" Content="+" IsVisible="{Binding CanAddQuantity}" ToolTip.Tip="Buy more of the same (career: pays nuyen)" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddQuantityCommand}" />
-                <Button Classes="act on" Content="USE 1" IsVisible="{Binding IsConsumable}" ToolTip.Tip="Use up one" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).UseOneCommand}" />
-              </WrapPanel>
-            </StackPanel>
-
-            <!-- armor damage -->
-            <StackPanel IsVisible="{Binding CanDamageArmor}">
-              <TextBlock Text="ARMOR DAMAGE" Classes="section" />
-              <WrapPanel>
-                <TextBlock Text="{Binding ArmorDamageText}" FontSize="22" FontWeight="Black" MinWidth="54" VerticalAlignment="Center" Margin="0,0,10,6" />
-                <Button Classes="act" Content="REPAIR" ToolTip.Tip="Remove one point of armor damage" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RepairArmorCommand}" />
-                <Button Classes="act danger" Content="DAMAGE" ToolTip.Tip="The armor takes one point of damage" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).DamageArmorCommand}" />
-              </WrapPanel>
-            </StackPanel>
-
-            <!-- state toggles -->
-            <WrapPanel Margin="0,14,0,0">
-              <Button Classes="act" Classes.on="{Binding IsEquipped}" IsVisible="{Binding CanEquip}" Content="{Binding EquipLabel}"
-                      Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ToggleEquippedCommand}" />
-              <Button Classes="act" Classes.on="{Binding IsWirelessOn}" IsVisible="{Binding HasWireless}" Content="{Binding WirelessLabel}"
-                      Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ToggleWirelessCommand}" />
-              <Button Classes="act" Classes.on="{Binding IsActiveCommlink}" IsVisible="{Binding IsCommlink}" Content="{Binding CommlinkLabel}"
-                      Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ToggleActiveCommlinkCommand}" />
-            </WrapPanel>
-
-            <!-- stats -->
-            <StackPanel Spacing="4" Margin="0,12,0,0" IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).HasEquipmentPhysicalMonitor}">
-              <TextBlock Text="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EquipmentPhysicalLabel}" Classes="label" />
-              <ItemsControl ItemsSource="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EquipmentPhysicalBoxes}">
-                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:EquipmentDamageBox">
-                  <Button Classes="cm" Command="{Binding ToggleCommand}" ToolTip.Tip="{Binding Tip}" BorderBrush="{StaticResource RedBrush}"
-                          Background="{Binding IsFilled, Converter={x:Static conv:BoolBrushConverter.Red}}" />
-                </DataTemplate></ItemsControl.ItemTemplate>
-              </ItemsControl>
-            </StackPanel>
-            <StackPanel Spacing="4" Margin="0,12,0,0" IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).HasEquipmentMatrixMonitor}">
-              <TextBlock Text="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EquipmentMatrixLabel}" Classes="label" />
-              <ItemsControl ItemsSource="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EquipmentMatrixBoxes}">
-                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:EquipmentDamageBox">
-                  <Button Classes="cm" Command="{Binding ToggleCommand}" ToolTip.Tip="{Binding Tip}" BorderBrush="{StaticResource CyanBrush}"
-                          Background="{Binding IsFilled, Converter={x:Static conv:BoolBrushConverter.Cyan}}" />
-                </DataTemplate></ItemsControl.ItemTemplate>
-              </ItemsControl>
-            </StackPanel>
-            <WrapPanel Margin="0,8,0,0">
-              <Button Classes="act" Content="+ MOD / ACCESSORY" IsVisible="{Binding CanAddMod}"
-                      Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddSelectedModCommand}" />
-              <Button Classes="act" Content="EDIT / UPGRADE IMPLANT" IsVisible="{Binding CanEditImplant}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EditImplantCommand}" />
-              <Button Classes="act" Content="MOVE UP" IsVisible="{Binding CanReorder}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).MoveInventoryUpCommand}" />
-              <Button Classes="act" Content="MOVE DOWN" IsVisible="{Binding CanReorder}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).MoveInventoryDownCommand}" />
-              <Button Classes="act money" Content="PAY RENT" IsVisible="{Binding IsLifestyle}"
-                      Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).PaySelectedRentCommand}" />
-              <Button Classes="act" Content="− RENT PERIOD" IsVisible="{Binding IsLifestyle}"
-                      Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).DecreaseSelectedRentCommand}" />
-            </WrapPanel>
-            <TextBlock Text="STATS" Classes="section" />
-            <TextBlock Text="{Binding Description}" IsVisible="{Binding HasDescription}" TextWrapping="Wrap" />
-            <ItemsControl ItemsSource="{Binding Stats}">
-              <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                  <WrapPanel />
-                </ItemsPanelTemplate>
-              </ItemsControl.ItemsPanel>
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="vm:ItemStat">
-                  <Border Width="112" Margin="0,0,6,6" Padding="8,5" Background="#0DFFFFFF" CornerRadius="3">
-                    <StackPanel>
-                      <TextBlock Text="{Binding Label}" Classes="label" FontSize="9" />
-                      <TextBlock Text="{Binding Value}" FontWeight="SemiBold" Foreground="{StaticResource CyanBrush}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Value}" />
+                <Grid ColumnDefinitions="*,*,*" Margin="0,6,0,0">
+                  <StackPanel>
+                    <TextBlock Text="COST" Classes="label" FontSize="9" />
+                    <TextBlock Text="{Binding Cost}" Foreground="{StaticResource YellowBrush}" FontWeight="SemiBold" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" IsVisible="{Binding HasAvail}">
+                    <TextBlock Text="AVAIL" Classes="label" FontSize="9" />
+                    <TextBlock Text="{Binding Avail}" FontWeight="SemiBold" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="2" IsVisible="{Binding HasSource}">
+                    <TextBlock Text="SOURCE" Classes="label" FontSize="9" />
+                    <TextBlock Text="{Binding Source}" FontWeight="SemiBold" />
+                  </StackPanel>
+                </Grid>
+                <!-- mods / accessories / contents as nested slots -->
+                <StackPanel IsVisible="{Binding HasChildren}">
+                  <TextBlock Text="MODS &amp; CONTENTS" Classes="section" />
+                  <ItemsControl ItemsSource="{Binding Children}" ItemTemplate="{StaticResource InventoryMiniSlot}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                  </ItemsControl>
+                </StackPanel>
+              </StackPanel>
+            </ScrollViewer>
+          </TabItem>
+          <TabItem>
+            <TabItem.Header>
+              <TextBlock Text="Manage" FontSize="13" FontWeight="SemiBold" />
+            </TabItem.Header>
+            <ScrollViewer>
+              <StackPanel Margin="8,12,8,8">
+                <StackPanel IsVisible="{Binding CanModifyEquipment}">
+                  <TextBlock Text="Modify equipment" Classes="section" />
+                  <WrapPanel>
+                    <Button Classes="act" Content="Add modification…" IsVisible="{Binding CanAddMod}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddSelectedModCommand}" />
+                    <Button Classes="act" Content="Edit / upgrade implant" IsVisible="{Binding CanEditImplant}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EditImplantCommand}" />
+                    <Button Classes="act money" Content="Pay rent" IsVisible="{Binding IsLifestyle}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).PaySelectedRentCommand}" />
+                    <Button Classes="act" Content="− RENT PERIOD" IsVisible="{Binding IsLifestyle}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).DecreaseSelectedRentCommand}" />
+                    <Button Classes="act" Content="Add weapon mount" IsVisible="{Binding CanAddWeaponMount}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddWeaponMountCommand}" />
+                    <Button Classes="act" Content="Add mounted weapon" IsVisible="{Binding CanAddMountedWeapon}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddMountedWeaponCommand}" />
+                    <Button Classes="act" Content="Edit weapon mount" IsVisible="{Binding CanEditWeaponMount}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EditWeaponMountCommand}" />
+                  </WrapPanel>
+                </StackPanel>
+                <StackPanel IsVisible="{Binding CanOrganizeEquipment}">
+                  <TextBlock Text="Organize" Classes="section" />
+                  <WrapPanel>
+                    <Button Classes="act" Content="Move up" IsVisible="{Binding CanReorder}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).MoveInventoryUpCommand}" />
+                    <Button Classes="act" Content="Move down" IsVisible="{Binding CanReorder}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).MoveInventoryDownCommand}" />
+                    <Button Classes="act" Content="Rename" IsVisible="{Binding CanRename}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RenameItemCommand}" />
+                    <Button Classes="act" Content="LOCATION…" IsVisible="{Binding CanSetLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).SetItemLocationCommand}" />
+                    <Button Classes="act" Content="Rename location" IsVisible="{Binding HasLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RenameItemLocationCommand}" />
+                    <Button Classes="act" Content="Delete location" IsVisible="{Binding HasLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RemoveItemLocationCommand}" ToolTip.Tip="Remove this location and leave its items unassigned" />
+                  </WrapPanel>
+                </StackPanel>
+                <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,18,0,12" />
+                <WrapPanel>
+                  <Button Classes="act money" Content="Sell" IsVisible="{Binding CanSellNow}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).OpenSellPromptCommand}" ToolTip.Tip="Sell for a share of its cost (logged as income)" />
+                  <Button Classes="act danger" Content="Remove" IsVisible="{Binding CanRemove}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RemoveItemCommand}" ToolTip.Tip="Remove without a refund" />
+                </WrapPanel>
+                <Border Classes="chip" Padding="12,10" Margin="0,4,0,0" BorderBrush="#88F3E600" IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).IsSellPromptOpen}">
+                  <StackPanel Spacing="8">
+                    <TextBlock Text="SELL ITEM FOR" Classes="label" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <NumericUpDown Value="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).SellPercent}" Minimum="0" Maximum="9999.99" Increment="5" FormatString="0.##" Width="130" />
+                      <TextBlock Text="% of" VerticalAlignment="Center" Classes="label" />
+                      <TextBlock Text="{Binding Cost}" VerticalAlignment="Center" Foreground="{StaticResource YellowBrush}" />
                     </StackPanel>
-                  </Border>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <Grid ColumnDefinitions="*,*,*" Margin="0,6,0,0">
-              <StackPanel>
-                <TextBlock Text="COST" Classes="label" FontSize="9" />
-                <TextBlock Text="{Binding Cost}" Foreground="{StaticResource YellowBrush}" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal">
+                      <Button Classes="act money" Content="Sell" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ConfirmSellCommand}" />
+                      <Button Classes="act" Content="Cancel" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).CancelSellCommand}" />
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
               </StackPanel>
-              <StackPanel Grid.Column="1" IsVisible="{Binding HasAvail}">
-                <TextBlock Text="AVAIL" Classes="label" FontSize="9" />
-                <TextBlock Text="{Binding Avail}" FontWeight="SemiBold" />
-              </StackPanel>
-              <StackPanel Grid.Column="2" IsVisible="{Binding HasSource}">
-                <TextBlock Text="SOURCE" Classes="label" FontSize="9" />
-                <TextBlock Text="{Binding Source}" FontWeight="SemiBold" />
-              </StackPanel>
-            </Grid>
-
-            <!-- mods / accessories / contents as nested slots -->
-            <StackPanel IsVisible="{Binding HasChildren}">
-              <TextBlock Text="MODS &amp; CONTENTS" Classes="section" />
-              <ItemsControl ItemsSource="{Binding Children}" ItemTemplate="{StaticResource InventoryMiniSlot}">
-                <ItemsControl.ItemsPanel>
-                  <ItemsPanelTemplate>
-                    <WrapPanel />
-                  </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-              </ItemsControl>
-            </StackPanel>
-
-            <!-- notes -->
-            <StackPanel IsVisible="{Binding CanEditNotes}">
-              <TextBlock Text="NOTES" Classes="section" />
-              <TextBox Text="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).InventoryNotesDraft}" AcceptsReturn="True" TextWrapping="Wrap"
-                       MinHeight="60" MaxHeight="160" PlaceholderText="Notes for this item…" />
-              <Button Classes="act" Content="SAVE NOTES" HorizontalAlignment="Right" Margin="0,6,0,0"
-                      IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).IsNotesDraftChanged}"
-                      Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).SaveItemNotesCommand}" />
-            </StackPanel>
-
-            <!-- rename / sell / remove -->
-            <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,16,0,12" />
-            <WrapPanel>
-              <Button Classes="act" Content="RENAME" IsVisible="{Binding CanRename}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RenameItemCommand}" />
-              <Button Classes="act" Content="ADD WEAPON MOUNT" IsVisible="{Binding CanAddWeaponMount}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddWeaponMountCommand}" />
-              <Button Classes="act" Content="ADD MOUNTED WEAPON" IsVisible="{Binding CanAddMountedWeapon}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddMountedWeaponCommand}" />
-              <Button Classes="act" Content="EDIT WEAPON MOUNT" IsVisible="{Binding CanEditWeaponMount}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EditWeaponMountCommand}" />
-              <Button Classes="act" Content="LOCATION…" IsVisible="{Binding CanSetLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).SetItemLocationCommand}" />
-              <Button Classes="act" Content="RENAME LOCATION" IsVisible="{Binding HasLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RenameItemLocationCommand}" />
-              <Button Classes="act" Content="DELETE LOCATION" IsVisible="{Binding HasLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RemoveItemLocationCommand}" ToolTip.Tip="Remove this location and leave its items unassigned" />
-              <Button Classes="act money" Content="SELL" IsVisible="{Binding CanSellNow}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).OpenSellPromptCommand}"
-                      ToolTip.Tip="Sell for a share of its cost (logged as income)" />
-              <Button Classes="act danger" Content="REMOVE" IsVisible="{Binding CanRemove}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RemoveItemCommand}"
-                      ToolTip.Tip="Remove without a refund" />
-            </WrapPanel>
-            <Border Classes="chip" Padding="12,10" Margin="0,4,0,0" BorderBrush="#88F3E600"
-                    IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).IsSellPromptOpen}">
-              <StackPanel Spacing="8">
-                <TextBlock Text="SELL ITEM FOR" Classes="label" />
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                  <NumericUpDown Value="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).SellPercent}" Minimum="0" Maximum="9999.99" Increment="5"
-                                 FormatString="0.##" Width="130" />
-                  <TextBlock Text="% of" VerticalAlignment="Center" Classes="label" />
-                  <TextBlock Text="{Binding Cost}" VerticalAlignment="Center" Foreground="{StaticResource YellowBrush}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                  <Button Classes="act money" Content="SELL" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ConfirmSellCommand}" />
-                  <Button Classes="act" Content="CANCEL" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).CancelSellCommand}" />
+            </ScrollViewer>
+          </TabItem>
+          <TabItem IsVisible="{Binding CanEditNotes}">
+            <TabItem.Header>
+              <TextBlock Text="Notes" FontSize="13" FontWeight="SemiBold" />
+            </TabItem.Header>
+            <ScrollViewer>
+              <StackPanel Margin="8,12,8,8">
+                <StackPanel IsVisible="{Binding CanEditNotes}">
+                  <TextBlock Text="NOTES" Classes="section" />
+                  <TextBox Text="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).InventoryNotesDraft}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" MaxHeight="160" PlaceholderText="Notes for this item…" />
+                  <Button Classes="act" Content="Save notes" HorizontalAlignment="Right" Margin="0,6,0,0" IsVisible="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).IsNotesDraftChanged}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).SaveItemNotesCommand}" />
                 </StackPanel>
               </StackPanel>
-            </Border>
-          </StackPanel>
-        </ScrollViewer>
+            </ScrollViewer>
+          </TabItem>
+        </TabControl>
       </Grid>
     </Border>
   </Grid>

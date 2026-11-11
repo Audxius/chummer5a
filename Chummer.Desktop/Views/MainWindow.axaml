@@ -20,20 +20,15 @@
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,12">
-          <Button Classes="nav" Command="{Binding EditXmlDataCommand}">
-            <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.SkillKnowledge}" Width="18" Height="18" /><TextBlock Text="XML AMENDMENT EDITOR" VerticalAlignment="Center" /></StackPanel>
-          </Button>
-          <Button Classes="nav" Command="{Binding ImportHeroLabCommand}">
-            <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.Roster}" Width="18" Height="18" /><TextBlock Text="IMPORT HEROLAB" VerticalAlignment="Center" /></StackPanel>
-          </Button>
-          <Button Classes="nav" Command="{Binding ExportGameDataCommand}">
-            <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.Save}" Width="18" Height="18" /><TextBlock Text="EXPORT GAME DATA" VerticalAlignment="Center" /></StackPanel>
-          </Button>
-          <Button Classes="nav" Command="{Binding GlobalOptionsCommand}">
-            <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.Settings}" Width="18" Height="18" /><TextBlock Text="GLOBAL OPTIONS" VerticalAlignment="Center" /></StackPanel>
-          </Button>
-          <Button Classes="nav" Command="{Binding EditCharacterSettingsCommand}" ToolTip.Tip="Edit rules for the current runner or a preset">
-            <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.SkillKnowledge}" Width="18" Height="18" /><TextBlock Text="CHARACTER RULES" VerticalAlignment="Center" /></StackPanel>
+          <Button Classes="nav" Content="Tools &amp; settings ▾">
+            <Button.Flyout><MenuFlyout>
+              <MenuItem Header="Character rules…" Command="{Binding EditCharacterSettingsCommand}" />
+              <MenuItem Header="Preferences…" Command="{Binding GlobalOptionsCommand}" />
+              <Separator />
+              <MenuItem Header="Import Hero Lab portfolio…" Command="{Binding ImportHeroLabCommand}" />
+              <MenuItem Header="Export game data…" Command="{Binding ExportGameDataCommand}" />
+              <MenuItem Header="XML amendment editor…" Command="{Binding EditXmlDataCommand}" />
+            </MenuFlyout></Button.Flyout>
           </Button>
           <ToggleButton Classes="nav" IsChecked="{Binding IsDiceActive, Mode=OneWay}" Command="{Binding ShowDiceCommand}"
                         HotKey="Ctrl+R" ToolTip.Tip="Dice Terminal (Ctrl+R)">

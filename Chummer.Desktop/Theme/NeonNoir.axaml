@@ -57,13 +57,13 @@
   <Style Selector="TextBlock.h1">
     <Setter Property="FontSize" Value="26" />
     <Setter Property="FontWeight" Value="Bold" />
-    <Setter Property="LetterSpacing" Value="2" />
+    <Setter Property="LetterSpacing" Value="0" />
     <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
   </Style>
   <Style Selector="TextBlock.h2">
     <Setter Property="FontSize" Value="13" />
     <Setter Property="FontWeight" Value="SemiBold" />
-    <Setter Property="LetterSpacing" Value="3" />
+    <Setter Property="LetterSpacing" Value="1" />
     <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
   </Style>
   <Style Selector="TextBlock.label">
@@ -112,22 +112,23 @@
   <!-- Buttons: neon outline that lights up -->
   <Style Selector="Button">
     <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Foreground" Value="{StaticResource CyanBrush}" />
-    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="2" />
-    <Setter Property="Padding" Value="14,7" />
+    <Setter Property="CornerRadius" Value="5" />
+    <Setter Property="Padding" Value="14,8" />
     <Setter Property="FontWeight" Value="SemiBold" />
-    <Setter Property="LetterSpacing" Value="1" />
+    <Setter Property="LetterSpacing" Value="0" />
   </Style>
   <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />
     <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
     <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-    <Setter Property="BoxShadow" Value="0 0 12 0 #6600E5FF" />
+    <Setter Property="BoxShadow" Value="none" />
   </Style>
   <Style Selector="Button.primary">
     <Setter Property="Background" Value="{StaticResource CyanBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
     <Setter Property="Foreground" Value="{StaticResource BaseBrush}" />
   </Style>
   <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">

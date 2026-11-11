@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Chummer;
 using Chummer.Backend.Enums;
 using Chummer.Backend.Equipment;
@@ -113,7 +114,10 @@ internal static class PacksScript
         await natural.SaveAsync(new NaturalWeaponDesign { Name = "Talons", DamageBase = "({STR})", DamageModifier = 2, ArmorPenetration = -3, Reach = 1 });
         await settle(); Save(window, output, "27b-natural-weapon-inventory");
         if (!character.Weapons.Any(x => x.Name == "Talons")) throw new InvalidOperationException("Natural weapon was not saved.");
-        var suites = new CyberwareSuiteWindow(runner); suites.Show(); await suites.LoadAsync(); await suites.CreateAsync("Combat eyes bundle"); await settle();
+        Console.WriteLine("loading suite dialog");
+        var suites = new CyberwareSuiteWindow(runner); suites.Show(); await suites.LoadAsync();
+        Console.WriteLine("authoring suite"); await suites.CreateAsync("Combat eyes bundle"); await settle();
+        if (!suites.PreviewText.Contains("Combat eyes bundle")) throw new InvalidOperationException("Authored suite preview was empty.");
         Save(suites, output, "28-cyberware-suite"); suites.Close();
         var recipe = new CustomDrugDesign { Name = "Clear thinker" };
         recipe.Ingredients.Add(new CustomDrugIngredient { ComponentId = "Genius" });
@@ -152,6 +156,42 @@ internal static class PacksScript
             throw new InvalidOperationException("Inventory ordering did not persist or retain the selection.");
         runner.InventoryFilter = ""; runner.InventoryKind = InventoryKind.Gear; await settle();
         Save(window, output, "33-inventory-order");
+        string flareId = character.LoadData("cyberware.xml").SelectSingleNode("/chummer/cyberwares/cyberware[name='Flare Compensation']/id").InnerText;
+        await runner.RunRuleAsync(async t => (await PurchaseRules.PurchaseAsync(character, new PurchaseRequest {
+            Kind = EquipmentKind.Cyberware, ItemId = flareId, Parent = eyes, GradeId = eyes.Grade.SourceIDString }, t)).Result);
+        await settle();
+        runner.InventoryKind = InventoryKind.Cyberware;
+        var eyeCard = runner.InventoryGroups.SelectMany(x => x.Items).Single(x => x.Id == eyesId);
+        var implantChildren = eyeCard.Children.Where(x => eyes.Children.Any(c => c.InternalId == x.Id)).ToList();
+        if (implantChildren.Count < 2) throw new InvalidOperationException("Nested ordering fixture needs two implant attachments.");
+        string movedChild = implantChildren[0].Id, nextChild = implantChildren[1].Id;
+        runner.SelectedInventoryItem = implantChildren[0];
+        await runner.MoveInventoryDownCommand.ExecuteAsync(null); await settle();
+        if (eyes.Children.Single(x => x.InternalId == movedChild).SortOrder <= eyes.Children.Single(x => x.InternalId == nextChild).SortOrder)
+            throw new InvalidOperationException("Nested order was not persisted.");
+        var refreshedEyes = runner.InventoryGroups.SelectMany(x => x.Items).Single(x => x.Id == eyesId);
+        if (refreshedEyes.Children.First(x => eyes.Children.Any(c => c.InternalId == x.Id)).Id != nextChild || runner.SelectedInventoryItem.Id != movedChild)
+            throw new InvalidOperationException("Nested order was not displayed or selection was lost.");
+        var inspector = window.GetVisualDescendants().OfType<TabControl>().Single(x => x.Items.OfType<TabItem>().Any(i => (i.Header as TextBlock)?.Text == "Manage"));
+        inspector.SelectedIndex = 1; await settle(); Save(window, output, "34-nested-inventory-manage");
+        runner.SelectedInventoryItem = refreshedEyes; inspector.SelectedIndex = 0; await settle(); Save(window, output, "35-inventory-details");
+        window.Width = 980; window.Height = 720; await settle();
+        var compactFilter = window.GetVisualDescendants().OfType<ComboBox>().Single(x => x.Classes.Contains("compactInventoryFilter"));
+        if (!compactFilter.IsVisible) throw new InvalidOperationException("Compact category selector was not shown.");
+        compactFilter.SelectedItem = runner.InventoryKinds.Single(x => x.Kind == InventoryKind.Gear); await settle();
+        if (runner.InventoryKind != InventoryKind.Gear) throw new InvalidOperationException("Compact category selector did not filter inventory.");
+        compactFilter.SelectedItem = runner.InventoryKinds.Single(x => x.Kind == InventoryKind.Cyberware); await settle();
+        Save(window, output, "36-inventory-compact");
+        window.Width = 1440; window.Height = 900; await settle();
+        foreach (string label in new[] { "Inventory tools ▾", "Creation tools ▾", "Tools & settings ▾", "Output ▾" })
+        {
+            var button = window.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == label
+                || x.Content is Panel panel && panel.Children.OfType<TextBlock>().Any(t => t.Text == label));
+            var menu = button.Flyout as MenuFlyout ?? throw new InvalidOperationException(label + " has no menu.");
+            menu.ShowAt(button); await settle();
+            if (menu.Items.OfType<MenuItem>().Any(x => x.Command == null)) throw new InvalidOperationException(label + " contains an unbound action.");
+            menu.Hide();
+        }
         if (character.Gear.Single(x => x.Name == "Ammo: Regular Ammo").Quantity != 100 || character.Vehicles.Count != 1)
             throw new InvalidOperationException("PACKS items were not granted correctly.");
         Console.WriteLine("PACKS grants verified: " + character.Gear.Count + " gear, " + character.Weapons.Count + " weapons, " + character.Cyberware.Count + " implants, " + character.Vehicles.Count + " vehicles.");

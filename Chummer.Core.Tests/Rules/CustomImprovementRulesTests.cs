@@ -1214,6 +1214,38 @@ namespace Chummer.Tests.Rules
         }
 
         [TestMethod]
+        public async Task NestedInventoryOrderPreservesContainersAndSavedAttachments()
+        {
+            var bag = new Gear(_character) { Name = "Bag" };
+            var other = new Gear(_character) { Name = "Other bag" };
+            var first = new Gear(_character) { Name = "First plugin" };
+            var second = new Gear(_character) { Name = "Second plugin", Quantity = 3 };
+            var cousin = new Gear(_character) { Name = "Other plugin" };
+            var nested = new Gear(_character) { Name = "Deep plugin" };
+            await _character.Gear.AddAsync(bag); await _character.Gear.AddAsync(other);
+            await bag.Children.AddAsync(first); await bag.Children.AddAsync(second);
+            await other.Children.AddAsync(cousin); await first.Children.AddAsync(nested);
+            Assert.IsTrue(InventoryOrderRules.CanOrder(_character, nested));
+            Assert.AreEqual(RuleResult.NotAllowed, await InventoryOrderRules.ReorderAsync(_character, new object[] { first, cousin }));
+            Assert.AreEqual(RuleResult.NotAllowed, await InventoryOrderRules.ReorderAsync(_character, new object[] { first }));
+            Assert.AreEqual(RuleResult.Changed, await InventoryOrderRules.ReorderAsync(_character, new object[] { second, first }));
+            Assert.AreSame(bag, first.Parent); Assert.AreSame(bag, second.Parent);
+            Assert.AreEqual(3m, second.Quantity); Assert.AreSame(nested, first.Children.Single());
+            Assert.AreEqual(0, cousin.SortOrder); Assert.AreEqual(0, nested.SortOrder);
+            Assert.AreEqual(0, _character.ExpenseEntries.Count);
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            try
+            {
+                Assert.IsTrue(await _character.SaveAsync(path));
+                using var loaded = new Character(); Assert.IsTrue(await loaded.LoadAsync(path));
+                var restored = loaded.Gear.Single(x => x.InternalId == bag.InternalId);
+                CollectionAssert.AreEqual(new[] { second.InternalId, first.InternalId }, restored.Children.OrderBy(x => x.SortOrder).Select(x => x.InternalId).ToArray());
+                Assert.AreEqual(nested.InternalId, restored.Children.Single(x => x.InternalId == first.InternalId).Children.Single().InternalId);
+            }
+            finally { File.Delete(path); }
+        }
+
+        [TestMethod]
         public async Task TraditionSelectionUpdatesDrainAndCustomTraditionRejectsInvalidInput()
         {
             _character.MAGEnabled = true;

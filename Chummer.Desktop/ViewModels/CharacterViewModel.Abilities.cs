@@ -40,6 +40,14 @@ namespace Chummer.Desktop.ViewModels
 
         private int _pendingEngineMutations;
 
+        /// <summary>Serialize multi-step dialog reads with sheet snapshots and engine mutations.</summary>
+        internal async Task<T> ReadModelAsync<T>(Func<Task<T>> read)
+        {
+            await _engineOperationGate.WaitAsync().ConfigureAwait(false);
+            try { return await Task.Run(read).ConfigureAwait(false); }
+            finally { _engineOperationGate.Release(); }
+        }
+
         /// <summary>Runs an engine rule off the UI thread and refreshes the sheet when it changed the character.</summary>
         public async Task RunRuleAsync(Func<CancellationToken, Task<RuleResult>> funcRule)
         {

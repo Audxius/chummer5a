@@ -60,7 +60,26 @@ internal static class Program
                 {
                     await objViewModel.OpenCharacterFileAsync(Path.GetFullPath(args[1]));
                     await Settle();
+                    if (!(objViewModel.CurrentPage is CharacterViewModel))
+                        throw new InvalidOperationException("The screenshot character did not open: " + Path.GetFileName(args[1]));
                     Save(objWindow, strOut, "02-overview");
+                    if (Environment.GetEnvironmentVariable("CHUMMER_REVIEW_LAYOUT") == "1" && objViewModel.CurrentPage is CharacterViewModel layoutReview)
+                    {
+                        layoutReview.ShowSectionCommand.Execute(CharacterSection.Inventory); await Settle();
+                        layoutReview.SelectedInventoryItem = layoutReview.InventoryGroups.SelectMany(x => x.Items).FirstOrDefault(x => x.HasChildren)
+                            ?? layoutReview.InventoryGroups.SelectMany(x => x.Items).FirstOrDefault();
+                        await Settle(); Save(objWindow, strOut, "37-career-inventory");
+                        if (layoutReview.SelectedInventoryItem?.HasChildren == true)
+                        {
+                            string parentName = layoutReview.SelectedInventoryItem.Name;
+                            layoutReview.SelectedInventoryItem = layoutReview.SelectedInventoryItem.Children.First(); await Settle();
+                            if (layoutReview.InventorySelectionPath != parentName) throw new InvalidOperationException("The attachment inspector lost its parent context.");
+                            Save(objWindow, strOut, "39-career-attachment");
+                        }
+                        objWindow.Width = 980; objWindow.Height = 720; await Settle();
+                        Save(objWindow, strOut, "38-career-compact");
+                        Console.WriteLine("Layout review complete."); return 0;
+                    }
                     if (Environment.GetEnvironmentVariable("CHUMMER_REVIEW_DIALOGS") == "1" && objViewModel.CurrentPage is CharacterViewModel review)
                     {
                         Console.WriteLine("opening rules editor");

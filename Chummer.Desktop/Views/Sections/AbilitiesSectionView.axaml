@@ -21,10 +21,10 @@
       <Setter Property="Background" Value="{StaticResource PanelBrush}" />
       <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
       <Setter Property="BorderThickness" Value="1,1,1,2" />
+      <Setter Property="CornerRadius" Value="6" />
     </Style>
     <Style Selector="Border.acard:pointerover">
       <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
-      <Setter Property="BoxShadow" Value="0 0 14 0 #4400E5FF" />
     </Style>
     <Style Selector="Button.icon">
       <Setter Property="Width" Value="26" />
@@ -50,7 +50,13 @@
     </Style>
   </UserControl.Styles>
   <DockPanel Margin="28,22,28,0">
-    <Button DockPanel.Dock="Top" Content="SUSTAINED EFFECTS" Command="{Binding ManageSustainedEffectsCommand}" HorizontalAlignment="Left" Margin="0,0,0,12" />
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+      <StackPanel Spacing="3">
+        <TextBlock Text="Abilities" FontSize="22" FontWeight="SemiBold" />
+        <TextBlock Text="Spells, powers and learned techniques" Classes="muted" FontSize="12" />
+      </StackPanel>
+      <Button Grid.Column="1" Content="Sustained effects…" Command="{Binding ManageSustainedEffectsCommand}" VerticalAlignment="Center" />
+    </Grid>
     <Grid DockPanel.Dock="Top" Margin="0,0,0,14">
       <TextBox Text="{Binding AbilityFilter}" PlaceholderText="Search spells, powers, forms, techniques, spirits…" Padding="40,9,10,9" />
       <PathIcon Data="{StaticResource Icon.Search}" Width="15" Height="15" HorizontalAlignment="Left" Margin="14,0,0,0" Classes="muted" IsHitTestVisible="False" />
