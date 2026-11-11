@@ -153,6 +153,17 @@ internal static class PageReviewScript
         window.MouseMove(qualityCard.TranslatePoint(new Point(20, 20), window)!.Value, RawInputModifiers.None);
         await Task.Delay(650); Dispatcher.UIThread.RunJobs();
         if (!ToolTip.GetIsOpen(qualityCard)) throw new InvalidOperationException("Hover did not open the quality explanation.");
+        if (!ToolTip.GetShouldUseOverlayLayer(qualityCard)) throw new InvalidOperationException("Quality tooltip still uses a native popup surface.");
+        for (int i = 0; i < 12; ++i)
+        {
+            AvaloniaHeadlessPlatform.ForceRenderTimerTick(); await Task.Delay(40); Dispatcher.UIThread.RunJobs();
+            if (!qualityCard.IsPointerOver || !ToolTip.GetIsOpen(qualityCard)) throw new InvalidOperationException("Stationary quality hover flickered during rendering.");
+        }
+        var tooltip = window.GetVisualDescendants().OfType<ToolTip>().Single(x => x.IsVisible);
+        if (tooltip.IsHitTestVisible) throw new InvalidOperationException("Tooltip can intercept pointer input.");
+        var tipPoint = tooltip.TranslatePoint(new Point(tooltip.Bounds.Width / 2, tooltip.Bounds.Height / 2), window)!.Value;
+        if (window.InputHitTest(tipPoint) is Visual hit && (ReferenceEquals(hit, tooltip) || hit.GetVisualAncestors().Contains(tooltip)))
+            throw new InvalidOperationException("Tooltip blocks underlying page hit testing.");
         Save(window, output, "49-quality-hover");
         Console.WriteLine("Page layout, compact contacts, saved expansion, and full-width ledger checks passed.");
     }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Launch Chummer Native on NixOS: builds Chummer.Desktop when sources changed, then runs it with the native libraries
 # Avalonia needs (Wayland/X11, EGL/GL, fontconfig, xkbcommon) on the library path.
-#   CHUMMER_BACKEND=x11 ./chummer-native.sh   # force X11 (XWayland) instead of native Wayland
+#   CHUMMER_BACKEND=wayland ./chummer-native.sh   # opt into experimental native Wayland
 set -euo pipefail
 repo="$(cd "$(dirname "$(readlink -f "$0")")/../.." && pwd)"
 out="$repo/Chummer.Desktop/bin/Release/net8.0"

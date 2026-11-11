@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 // Prepare a separate character copy, touching only contact portrait XML. Never overwrite the input.
-if (args.Length != 3) throw new ArgumentException("Usage: ContactArt input.chum5 artwork-directory output.chum5");
+if (args.Length < 3 || args.Length > 4) throw new ArgumentException("Usage: ContactArt input.chum5 artwork-directory output.chum5 [previous-artwork-directory | --replace-main]");
 string input = Path.GetFullPath(args[0]), directory = Path.GetFullPath(args[1]), output = Path.GetFullPath(args[2]);
 if (input == output || File.Exists(output)) throw new IOException("Choose a new output file; existing characters are never overwritten.");
 byte[] originalBytes = File.ReadAllBytes(input);
@@ -20,14 +20,27 @@ string result = Regex.Replace(original, @"<contact>.*?</contact>", match =>
     if (!applied.Add(id)) throw new InvalidDataException("Duplicate contact identifier: " + id);
     byte[] portrait = File.ReadAllBytes(Path.Combine(directory, slug + ".png"));
     if (!portrait.AsSpan().StartsWith(new byte[] {137,80,78,71,13,10,26,10})) throw new InvalidDataException("Not a PNG: " + slug);
-    int oldCount = contact.Element("mugshots")?.Elements("mugshot").Count() ?? 0;
+    var oldImages = contact.Element("mugshots")?.Elements("mugshot").ToArray() ?? Array.Empty<XElement>();
+    string encoded = Convert.ToBase64String(portrait);
+    int selected = Array.FindIndex(oldImages, image => image.Value == encoded);
+    bool replaceMain = args.Length == 4 && args[3] == "--replace-main";
+    string previousPath = args.Length == 4 && !replaceMain ? Path.Combine(Path.GetFullPath(args[3]), slug + ".png") : "";
+    int replace = selected < 0 && File.Exists(previousPath)
+        ? Array.FindIndex(oldImages, image => image.Value == Convert.ToBase64String(File.ReadAllBytes(previousPath))) : -1;
+    if (selected < 0 && replaceMain && int.TryParse(contact.Element("mainmugshotindex")?.Value, out int main) && main >= 0 && main < oldImages.Length) replace = main;
+    if (selected < 0) selected = replace >= 0 ? replace : oldImages.Length;
     string block = match.Value;
-    string node = "<mugshot>" + Convert.ToBase64String(portrait) + "</mugshot>";
-    if (Regex.IsMatch(block, @"<mugshots\s*/>")) block = Regex.Replace(block, @"<mugshots\s*/>", "<mugshots>" + node + "</mugshots>");
+    string node = "<mugshot>" + encoded + "</mugshot>";
+    if (replace >= 0) block = block.Replace(oldImages[replace].ToString(SaveOptions.DisableFormatting), node, StringComparison.Ordinal);
+    else if (selected < oldImages.Length) { /* Already installed: retain the existing image. */ }
+    else if (Regex.IsMatch(block, @"<mugshots\s*/>")) block = Regex.Replace(block, @"<mugshots\s*/>", "<mugshots>" + node + "</mugshots>");
     else if (block.Contains("</mugshots>", StringComparison.Ordinal)) block = block.Replace("</mugshots>", node + "</mugshots>", StringComparison.Ordinal);
     else block = block.Replace("</contact>", "<mugshots>" + node + "</mugshots></contact>", StringComparison.Ordinal);
-    if (Regex.IsMatch(block, @"<mainmugshotindex\b")) block = Regex.Replace(block, @"<mainmugshotindex(?:\s*/>|>.*?</mainmugshotindex>)", "<mainmugshotindex>" + oldCount + "</mainmugshotindex>");
-    else block = block.Replace("</contact>", "<mainmugshotindex>" + oldCount + "</mainmugshotindex></contact>", StringComparison.Ordinal);
+    if (Regex.IsMatch(block, @"<mainmugshotindex\b")) block = Regex.Replace(block, @"<mainmugshotindex(?:\s*/>|>.*?</mainmugshotindex>)", "<mainmugshotindex>" + selected + "</mainmugshotindex>");
+    else block = block.Replace("</contact>", "<mainmugshotindex>" + selected + "</mainmugshotindex></contact>", StringComparison.Ordinal);
+    var updated = XElement.Parse(block);
+    if (updated.Element("mugshots")?.Elements("mugshot").ElementAt(selected).Value != encoded)
+        throw new InvalidDataException("Portrait replacement failed: " + slug);
     Console.WriteLine(contact.Element("name")?.Value + " → " + slug);
     return block;
 }, RegexOptions.Singleline);

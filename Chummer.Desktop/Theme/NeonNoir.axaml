@@ -62,6 +62,15 @@
   </Styles.Resources>
 
   <!-- Base -->
+  <!-- Keep tooltip rendering and pointer ownership in the same window. Native popup
+       surfaces can steal hover from their owner on Wayland. Tooltips are informational. -->
+  <Style Selector=":is(Control)">
+    <Setter Property="ToolTip.ShouldUseOverlayLayer" Value="True" />
+    <Setter Property="ToolTip.BetweenShowDelay" Value="-1" />
+  </Style>
+  <Style Selector=":is(Button) /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Transitions"><Transitions /></Setter>
+  </Style>
   <Style Selector="Window">
     <Setter Property="Background" Value="{StaticResource BaseBrush}" />
     <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
@@ -252,6 +261,7 @@
 
   <!-- Tooltips as HUD cards -->
   <Style Selector="ToolTip">
+    <Setter Property="IsHitTestVisible" Value="False" />
     <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
     <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
     <Setter Property="BorderThickness" Value="1" />

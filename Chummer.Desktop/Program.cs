@@ -36,8 +36,9 @@ namespace Chummer.Desktop
         }
 
         /// <summary>
-        /// Native Wayland when running in a Wayland session (niri, KDE Plasma Wayland, ...), X11 otherwise.
-        /// CHUMMER_BACKEND=x11 forces X11 (via XWayland) if a compositor misbehaves.
+        /// Use Avalonia's supported desktop backend (X11/XWayland on Linux).
+        /// CHUMMER_BACKEND=wayland opts into the experimental native Wayland backend.
+        /// Wayland-only sessions without XWayland still use native Wayland automatically.
         /// </summary>
         public static AppBuilder BuildAvaloniaApp()
         {
@@ -54,7 +55,8 @@ namespace Chummer.Desktop
             string strForced = Environment.GetEnvironmentVariable("CHUMMER_BACKEND");
             if (!string.IsNullOrEmpty(strForced))
                 return string.Equals(strForced, "wayland", StringComparison.OrdinalIgnoreCase);
-            return !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WAYLAND_DISPLAY"));
+            return string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DISPLAY"))
+                && !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WAYLAND_DISPLAY"));
         }
     }
 }
