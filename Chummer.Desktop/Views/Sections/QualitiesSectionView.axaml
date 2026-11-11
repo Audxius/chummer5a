@@ -18,6 +18,8 @@
               <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="15" TextWrapping="Wrap" />
               <TextBlock Text="{Binding Extra}" IsVisible="{Binding HasExtra}" Classes="accent" TextWrapping="Wrap" />
               <TextBlock Text="{Binding TypeLabel}" Classes="label" />
+              <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding EffectSummary}" IsVisible="{Binding HasEffectSummary}" TextWrapping="Wrap" Foreground="{StaticResource CyanBrush}" />
               <TextBlock Text="{Binding KarmaTip}" TextWrapping="Wrap" />
               <TextBlock Text="{Binding Origin}" IsVisible="{Binding HasOrigin}" Classes="muted" TextWrapping="Wrap" />
               <TextBlock Text="{Binding SourceTip}" IsVisible="{Binding HasSource}" Classes="muted" TextWrapping="Wrap" />

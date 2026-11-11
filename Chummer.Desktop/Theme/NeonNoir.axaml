@@ -8,10 +8,10 @@
       <Color x:Key="NeonBase">#FF07090D</Color>
       <Color x:Key="NeonSurface">#FF0C1118</Color>
       <Color x:Key="NeonPanel">#FF101823</Color>
-      <Color x:Key="NeonPanelRaised">#FF16212F</Color>
-      <Color x:Key="NeonBorder">#FF1F2C3D</Color>
+      <Color x:Key="NeonPanelRaised">#FF2D5876</Color>
+      <Color x:Key="NeonBorder">#FF60768F</Color>
       <Color x:Key="NeonText">#FFD8E4F5</Color>
-      <Color x:Key="NeonMuted">#FF7C8CA6</Color>
+      <Color x:Key="NeonMuted">#FFA6B8CF</Color>
       <Color x:Key="NeonCyan">#FF00E5FF</Color>
       <Color x:Key="NeonMagenta">#FFFF2E88</Color>
       <Color x:Key="NeonYellow">#FFF3E600</Color>
@@ -30,8 +30,8 @@
       <SolidColorBrush x:Key="YellowBrush" Color="{StaticResource NeonYellow}" />
       <SolidColorBrush x:Key="GreenBrush" Color="{StaticResource NeonGreen}" />
       <SolidColorBrush x:Key="RedBrush" Color="{StaticResource NeonRed}" />
-      <SolidColorBrush x:Key="CyanDimBrush" Color="#3300E5FF" />
-      <SolidColorBrush x:Key="MagentaDimBrush" Color="#33FF2E88" />
+      <SolidColorBrush x:Key="CyanDimBrush" Color="#5500E5FF" />
+      <SolidColorBrush x:Key="MagentaDimBrush" Color="#55FF2E88" />
 
       <LinearGradientBrush x:Key="HeaderGradient" StartPoint="0%,0%" EndPoint="100%,0%">
         <GradientStop Offset="0" Color="#FF00E5FF" />
@@ -52,7 +52,7 @@
         <Setter Property="Template">
           <ControlTemplate>
             <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
-              <ContentPresenter Name="StableContent" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Padding="{TemplateBinding Padding}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True" />
+              <ContentPresenter Name="StableContent" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Padding="{TemplateBinding Padding}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True" IsHitTestVisible="False" />
             </Border>
           </ControlTemplate>
         </Setter>

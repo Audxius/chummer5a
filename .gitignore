@@ -212,3 +212,6 @@ FakesAssemblies/
 
 # Mac Specific Generated Files
 .DS_Store
+
+# Private, character-specific generated art and character backups.
+/output/contact-art/

@@ -1277,6 +1277,37 @@ namespace Chummer.Tests.Rules
         }
 
         [TestMethod]
+        public async Task NotebookUsesOnlyLegacyNotesFieldAcrossCharacterSaveAndReload()
+        {
+            var pages = new[] { new NotebookPageData(Guid.NewGuid(), "Sessions", "Meet the fixer."), new NotebookPageData(Guid.NewGuid(), "Clues", "A blue van.") };
+            string text = NotebookCodec.Serialize(pages); _character.Notes = text;
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            try
+            {
+                Assert.IsTrue(await _character.SaveAsync(path));
+                var xml = new XmlDocument(); xml.Load(path);
+                Assert.AreEqual(text, xml.SelectSingleNode("/character/notes")?.InnerText);
+                Assert.AreEqual(0, xml.SelectNodes("//notebook").Count);
+                using var restored = new Character(); Assert.IsTrue(await restored.LoadAsync(path));
+                var loaded = NotebookCodec.Parse(restored.Notes);
+                CollectionAssert.AreEqual(pages.Select(x => x.Id).ToArray(), loaded.Select(x => x.Id).ToArray());
+                Assert.AreEqual("A blue van.", loaded[1].Body);
+            }
+            finally { File.Delete(path); }
+        }
+
+        [TestMethod]
+        public async Task QualityHoverUsesDescriptionAndActualConditionalModifiers()
+        {
+            string id = _character.LoadData("qualities.xml").SelectSingleNode("/chummer/qualities/quality[name='First Impression']/id").InnerText;
+            Assert.AreEqual(RuleResult.Changed, await QualityRules.AddAsync(_character, id, 1, true));
+            var quality = _character.Qualities.Single(x => x.Name == "First Impression");
+            Assert.IsTrue(QualityDescriptionRules.Description(quality).Contains("first time"));
+            string modifiers = QualityDescriptionRules.Modifiers(_character, quality);
+            Assert.IsTrue(modifiers.Contains("+2")); Assert.IsTrue(modifiers.Contains("Meeting people the first time"));
+        }
+
+        [TestMethod]
         public async Task TraditionSelectionUpdatesDrainAndCustomTraditionRejectsInvalidInput()
         {
             _character.MAGEnabled = true;

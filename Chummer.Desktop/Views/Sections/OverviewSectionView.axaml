@@ -98,7 +98,8 @@
               <ItemsControl ItemsSource="{Binding PositiveQualities}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="vm:QualityViewModel">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,5" ToolTip.Tip="{Binding Source}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,5" ToolTip.ShowDelay="300">
+                      <ToolTip.Tip><StackPanel Width="340" Spacing="6"><TextBlock Text="{Binding Name}" FontWeight="Bold" TextWrapping="Wrap" /><TextBlock Text="{Binding Description}" TextWrapping="Wrap" /><TextBlock Text="{Binding EffectSummary}" IsVisible="{Binding HasEffectSummary}" Foreground="{StaticResource CyanBrush}" TextWrapping="Wrap" /><TextBlock Text="{Binding Source}" Classes="muted" /></StackPanel></ToolTip.Tip>
                       <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
                       <TextBlock Grid.Column="1" Text="{Binding KarmaText}" Foreground="{StaticResource GreenBrush}" />
                     </Grid>
@@ -108,7 +109,8 @@
               <ItemsControl ItemsSource="{Binding NegativeQualities}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="vm:QualityViewModel">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,5" ToolTip.Tip="{Binding Source}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,5" ToolTip.ShowDelay="300">
+                      <ToolTip.Tip><StackPanel Width="340" Spacing="6"><TextBlock Text="{Binding Name}" FontWeight="Bold" TextWrapping="Wrap" /><TextBlock Text="{Binding Description}" TextWrapping="Wrap" /><TextBlock Text="{Binding EffectSummary}" IsVisible="{Binding HasEffectSummary}" Foreground="{StaticResource CyanBrush}" TextWrapping="Wrap" /><TextBlock Text="{Binding Source}" Classes="muted" /></StackPanel></ToolTip.Tip>
                       <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
                       <TextBlock Grid.Column="1" Text="{Binding KarmaText}" Foreground="{StaticResource RedBrush}" />
                     </Grid>

@@ -45,26 +45,6 @@
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
-        <!-- Loadout: what the runner has in hand / on them right now -->
-        <Expander Header="Equipped loadout" IsVisible="{Binding HasLoadout}" HorizontalAlignment="Stretch">
-          <Border Classes="loadout" Padding="12,8,12,0">
-            <DockPanel>
-              <StackPanel DockPanel.Dock="Left" Width="74" VerticalAlignment="Center" Margin="0,0,8,8">
-                <TextBlock Text="LOADOUT" Classes="section" Margin="0" Foreground="{StaticResource CyanBrush}" />
-                <TextBlock Text="equipped" Classes="label" FontSize="10" />
-              </StackPanel>
-              <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                <ItemsControl ItemsSource="{Binding LoadoutSlots}" ItemTemplate="{StaticResource InventoryMiniSlot}">
-                  <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                      <StackPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                  </ItemsControl.ItemsPanel>
-                </ItemsControl>
-              </ScrollViewer>
-            </DockPanel>
-          </Border>
-        </Expander>
       </StackPanel>
       <ScrollViewer>
         <ItemsControl ItemsSource="{Binding InventoryGroups}" Margin="0,0,10,22">

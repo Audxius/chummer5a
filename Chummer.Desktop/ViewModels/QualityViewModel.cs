@@ -52,6 +52,8 @@ namespace Chummer.Desktop.ViewModels
             Source = objSource.ToString();
             SourceTip = objSource.LanguageBookTooltip;
             Notes = (objQuality.Notes ?? string.Empty).Trim();
+            Description = QualityDescriptionRules.Description(objQuality);
+            EffectSummary = QualityDescriptionRules.Modifiers(objCharacter, objQuality);
             int intKarmaQuality = objCharacter.Settings.KarmaQuality;
             Karma = objQuality.ContributeToBP ? objQuality.BP * intKarmaQuality * Levels : 0;
             MaximumLevels = QualityRules.GetMaximumLevelsAsync(objQuality).GetAwaiter().GetResult();
@@ -110,6 +112,9 @@ namespace Chummer.Desktop.ViewModels
         public string SourceTip { get; }
         public bool HasSource => !string.IsNullOrEmpty(Source);
         public string Notes { get; }
+        public string Description { get; }
+        public string EffectSummary { get; }
+        public bool HasEffectSummary => EffectSummary.Length > 0;
         public bool HasNotes => Notes.Length > 0;
         public string Origin { get; } = string.Empty;
         public bool HasOrigin => Origin.Length > 0;

@@ -12,19 +12,17 @@ namespace Chummer.Desktop.Views.Sections
         {
             AvaloniaXamlLoader.Load(this);
             var ratings = this.FindControl<Grid>("AttributeRatings");
-            var session = this.FindControl<Grid>("AttributeSession");
             var mental = this.FindControl<Border>("MentalPanel");
-            var edge = this.FindControl<Border>("SessionEdgePanel");
             SizeChanged += (_, _) =>
             {
                 bool compact = Bounds.Width < 1000;
-                foreach (var grid in new[] { ratings, session })
+                foreach (var grid in new[] { ratings })
                 {
                     grid.ColumnDefinitions[1].Width = compact ? new GridLength(0) : new GridLength(1, GridUnitType.Star);
                     grid.ColumnSpacing = compact ? 0 : 24;
                     grid.RowSpacing = compact ? 20 : 0;
                 }
-                foreach (var panel in new[] { mental, edge })
+                foreach (var panel in new[] { mental })
                 {
                     Grid.SetColumn(panel, compact ? 0 : 1); Grid.SetRow(panel, compact ? 1 : 0);
                 }

@@ -6,7 +6,7 @@
   <!-- Edge points for the session: filled diamonds are points left. -->
   <StackPanel Spacing="6">
     <Grid ColumnDefinitions="*,Auto">
-      <TextBlock Text="EDGE" Classes="label" VerticalAlignment="Center" />
+      <TextBlock Text="Available Edge" Classes="label" VerticalAlignment="Center" />
       <TextBlock Grid.Column="1" Text="{Binding EdgePoolText}" FontWeight="Bold" Foreground="{StaticResource MagentaBrush}" />
     </Grid>
     <ItemsControl ItemsSource="{Binding EdgePips}">

@@ -22,6 +22,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
+using Avalonia.Media.Imaging;
 using Chummer.Backend.Enums;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -35,8 +37,12 @@ namespace Chummer.Desktop.ViewModels
         private readonly Contact _objContact;
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ExpansionLabel))]
+        [NotifyPropertyChangedFor(nameof(ExpansionTip))]
         private bool _isExpanded;
-        public string ExpansionLabel => IsExpanded ? "Collapse" : "Expand";
+        public string ExpansionLabel => IsExpanded ? "⌃" : "⌄";
+        public string ExpansionTip => IsExpanded ? "Collapse contact" : "Show full contact";
+        public Bitmap Portrait { get; }
+        public bool HasPortrait => Portrait != null;
         public string SummaryDescription => HasNotes ? Notes : Subtitle;
 
         public ContactCardViewModel(CharacterViewModel objOwner, Contact objContact)
@@ -44,6 +50,21 @@ namespace Chummer.Desktop.ViewModels
             _objOwner = objOwner;
             _objContact = objContact;
             _isExpanded = objOwner.ExpandedContactIds.ContainsKey(objContact.InternalId);
+            var mugshot = objContact.MainMugshot;
+            if (mugshot != null)
+            {
+                try
+                {
+                    Portrait = mugshot.HostImage as Bitmap;
+                    if (Portrait == null)
+                    {
+                        using var stream = new MemoryStream(mugshot.EncodedBytes);
+                        Portrait = Bitmap.DecodeToWidth(stream, 256);
+                        mugshot.HostImage = Portrait;
+                    }
+                }
+                catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException || ex is IOException) { }
+            }
             CultureInfo objCulture = GlobalSettings.CultureInfo;
             Name = string.IsNullOrWhiteSpace(objContact.Name) ? "(unnamed)" : objContact.Name;
             Role = objContact.DisplayRole ?? string.Empty;

@@ -42,7 +42,7 @@ internal static class PageReviewScript
         var notesTabs = window.GetVisualDescendants().OfType<TabControl>().Single(x => x.DataContext is CharacterInfoViewModel);
         notesTabs.SelectedIndex = 4; await settle(); Save(window, output, "41-notes-editor");
         var notesPanel = ((TabItem)notesTabs.SelectedItem).Content as Control;
-        var notesEditor = notesPanel.GetVisualDescendants().OfType<TextBox>().Single();
+        var notesEditor = notesPanel.GetVisualDescendants().OfType<TextBox>().Single(x => x.Name == "NotebookBody");
         if (notesEditor.Bounds.Height < 250) throw new InvalidOperationException("Notes editor did not fill its available height.");
         string originalNotes = notesEditor.Text ?? "";
         string savePath = Path.Combine(output, "notes-roundtrip.chum5");
@@ -71,6 +71,26 @@ internal static class PageReviewScript
         }
         Console.WriteLine("Focused Notes editor Ctrl+S save/reload passed.");
 
+        var notebook = runner.Info.Notebook;
+        notebook.AddPageCommand.Execute(null);
+        notebook.SelectedPage.Title = "Seattle leads";
+        notebook.SelectedPage.Body = "Meet the fixer.\nBring the deck.";
+        var pageId = notebook.SelectedPage.Id;
+        notebook.MoveUpCommand.Execute(null);
+        notebook.AddPageCommand.Execute(null);
+        await notebook.DeletePageCommand.ExecuteAsync(null);
+        await settle();
+        await runner.SaveCommand.ExecuteAsync(null);
+        using (var restored = new Character())
+        {
+            if (!await Task.Run(() => restored.LoadAsync(savePath))) throw new InvalidOperationException("Notebook save failed to reload.");
+            var pages = NotebookCodec.Parse(restored.Notes);
+            if (pages.Count != 2 || pages[0].Id != pageId || pages[0].Title != "Seattle leads" || pages[0].Body != "Meet the fixer.\nBring the deck." || pages[1].Body != originalNotes + " UI roundtrip note CtrlS")
+                throw new InvalidOperationException("Notebook add, rename, reorder or delete lost page content.");
+        }
+        Save(window, output, "41-notebook-pages");
+        Console.WriteLine("Notebook page creation, renaming, reordering, deletion and legacy Notes save/reload passed.");
+
         if (runner.ContactCards.Count == 0)
         {
             await runner.RunRuleAsync(async t =>
@@ -80,10 +100,12 @@ internal static class PageReviewScript
             }); await settle();
         }
         runner.ShowSectionCommand.Execute(CharacterSection.Network); await settle();
+        if (Environment.GetEnvironmentVariable("CHUMMER_REVIEW_CONTACT_ART") == "1" && (runner.ContactCards.Count != 10 || runner.ContactCards.Any(x => !x.HasPortrait)))
+            throw new InvalidOperationException("Not all ten contact portraits loaded.");
         if (runner.ContactCards.Any(x => x.IsExpanded)) throw new InvalidOperationException("Contacts were not collapsed initially.");
         Save(window, output, "42-contacts-collapsed");
         var first = runner.ContactCards.First(); string id = first.Id;
-        var expand = window.GetVisualDescendants().OfType<ToggleButton>().Single(x => ReferenceEquals(x.DataContext, first) && x.Content as string == "Expand");
+        var expand = window.GetVisualDescendants().OfType<ToggleButton>().Single(x => ReferenceEquals(x.DataContext, first) && x.Classes.Contains("contactExpand"));
         Click(window, expand); await settle();
         if (!first.IsExpanded) throw new InvalidOperationException("Expand did not reveal the contact.");
         Save(window, output, "43-contact-expanded");
@@ -123,6 +145,15 @@ internal static class PageReviewScript
         Save(window, output, "48-compact-nuyen");
         account.SelectedIndex = 0; await settle();
         if (nuyenPane.IsVisible) throw new InvalidOperationException("Compact Ledger account switch did not hide Nuyen.");
+
+        runner.ShowSectionCommand.Execute(CharacterSection.Qualities); await settle();
+        var qualityCard = window.GetVisualDescendants().OfType<Border>().First(x => x.Classes.Contains("qcard") && x.DataContext is QualityViewModel);
+        if (qualityCard.DataContext is not QualityViewModel quality || string.IsNullOrWhiteSpace(quality.Description))
+            throw new InvalidOperationException("Quality explanation missing.");
+        window.MouseMove(qualityCard.TranslatePoint(new Point(20, 20), window)!.Value, RawInputModifiers.None);
+        await Task.Delay(650); Dispatcher.UIThread.RunJobs();
+        if (!ToolTip.GetIsOpen(qualityCard)) throw new InvalidOperationException("Hover did not open the quality explanation.");
+        Save(window, output, "49-quality-hover");
         Console.WriteLine("Page layout, compact contacts, saved expansion, and full-width ledger checks passed.");
     }
 

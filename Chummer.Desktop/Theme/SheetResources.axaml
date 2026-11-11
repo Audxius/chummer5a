@@ -7,9 +7,12 @@
     <DataTemplate x:Key="ContactCard" x:DataType="vm:ContactCardViewModel">
       <Border Classes="dossier" Classes.enemy="{Binding IsEnemy}" Margin="0,0,0,10" Padding="18,14" CornerRadius="6">
         <StackPanel Spacing="10">
-          <Grid ColumnDefinitions="44,*,74,74,90" ColumnSpacing="12">
-            <Border Classes="avatar" Width="40" Height="40" CornerRadius="20" VerticalAlignment="Top">
-              <TextBlock Text="{Binding Initials}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          <Grid ColumnDefinitions="96,*,74,74,40" ColumnSpacing="14">
+            <Border Classes="avatar" Width="92" Height="92" CornerRadius="46" ClipToBounds="True" VerticalAlignment="Top">
+              <Grid>
+                <TextBlock Text="{Binding Initials}" IsVisible="{Binding !HasPortrait}" FontWeight="SemiBold" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Image Source="{Binding Portrait}" Stretch="UniformToFill" />
+              </Grid>
             </Border>
             <StackPanel Grid.Column="1" Spacing="5">
               <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />
@@ -17,7 +20,7 @@
             </StackPanel>
             <StackPanel Grid.Column="2" Spacing="3"><TextBlock Text="Connection" Classes="muted" FontSize="11" /><TextBlock Text="{Binding ConnectionText}" FontWeight="SemiBold" FontSize="20" /></StackPanel>
             <StackPanel Grid.Column="3" Spacing="3"><TextBlock Text="Loyalty" Classes="muted" FontSize="11" /><TextBlock Text="{Binding LoyaltyText}" FontWeight="SemiBold" FontSize="20" /></StackPanel>
-            <ToggleButton Grid.Column="4" Classes="contactExpand" Content="{Binding ExpansionLabel}" IsChecked="{Binding IsExpanded, Mode=TwoWay}" VerticalAlignment="Top" Padding="10,6" />
+            <ToggleButton Grid.Column="4" Classes="contactExpand" Content="{Binding ExpansionLabel}" ToolTip.Tip="{Binding ExpansionTip}" IsChecked="{Binding IsExpanded, Mode=TwoWay}" VerticalAlignment="Top" Padding="6" FontSize="24" />
           </Grid>
           <StackPanel IsVisible="{Binding IsExpanded}" Spacing="12">
             <Border Height="1" Background="{StaticResource BorderBrush}" />

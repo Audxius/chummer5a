@@ -17,7 +17,17 @@ namespace Chummer.Desktop.ViewModels
         private readonly Character _objCharacter;
         private bool _blnLoading;
         private Task _pendingWrites = Task.CompletedTask;
-        internal Task FlushAsync() => _pendingWrites;
+        private NotebookViewModel _notebook;
+        private bool _notebookWrite;
+        public NotebookViewModel Notebook => _notebook ??= new NotebookViewModel(this);
+        internal Task FlushAsync() { _notebook?.CommitPending(); return _pendingWrites; }
+        internal void MarkNotebookDirty() => _objOwner.MarkDirty();
+        internal void SetNotebookNotes(string value)
+        {
+            _notebookWrite = true;
+            try { Notes = value; }
+            finally { _notebookWrite = false; }
+        }
 
         public CharacterInfoViewModel(CharacterViewModel objOwner)
         {
@@ -79,7 +89,11 @@ namespace Chummer.Desktop.ViewModels
         partial void OnConceptChanged(string value) => Write(x => x.Concept = value);
         partial void OnDescriptionChanged(string value) => Write(x => x.Description = value);
         partial void OnBackgroundChanged(string value) => Write(x => x.Background = value);
-        partial void OnNotesChanged(string value) => Write(x => x.Notes = value);
+        partial void OnNotesChanged(string value)
+        {
+            if (!_notebookWrite) _notebook?.Load(value);
+            Write(x => x.Notes = value);
+        }
         partial void OnGameNotesChanged(string value) => Write(x => x.GameNotes = value);
 
         private void Write(Action<Character> funcWrite)

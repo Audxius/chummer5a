@@ -103,6 +103,7 @@
       <Setter Property="LetterSpacing" Value="1.5" />
     </Style>
     <Style Selector="ToggleButton.section:checked">
+      <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />
       <Setter Property="BorderBrush" Value="{StaticResource MagentaBrush}" />
       <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
     </Style>
