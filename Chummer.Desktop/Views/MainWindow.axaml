@@ -12,14 +12,14 @@
     <!-- Navigation rail -->
     <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource SurfaceBrush}"
             BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
-      <DockPanel>
-        <StackPanel DockPanel.Dock="Top" Margin="18,20,18,18" Spacing="2">
+      <Grid RowDefinitions="Auto,*,Auto">
+        <StackPanel Grid.Row="0" Margin="18,20,18,18" Spacing="2">
           <TextBlock Text="CHUMMER" FontSize="24" FontWeight="Black" LetterSpacing="4"
                      Foreground="{StaticResource HeaderGradient}" />
           <TextBlock Text="// NATIVE" Classes="label" Foreground="{StaticResource MagentaBrush}" />
         </StackPanel>
 
-        <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,12">
+        <StackPanel Grid.Row="2" Margin="0,0,0,12">
           <Button Classes="nav" Content="Tools &amp; settings ▾">
             <Button.Flyout><MenuFlyout>
               <MenuItem Header="Character rules…" Command="{Binding EditCharacterSettingsCommand}" />
@@ -30,15 +30,16 @@
               <MenuItem Header="XML amendment editor…" Command="{Binding EditXmlDataCommand}" />
             </MenuFlyout></Button.Flyout>
           </Button>
-          <ToggleButton Classes="nav" IsChecked="{Binding IsDiceActive, Mode=OneWay}" Command="{Binding ShowDiceCommand}"
-                        HotKey="Ctrl+R" ToolTip.Tip="Dice Terminal (Ctrl+R)">
+          <ToggleButton x:Name="DiceNavigation" Classes="nav" IsChecked="{Binding IsDiceActive, Mode=OneWay}" Command="{Binding ShowDiceCommand}"
+                        HotKey="Ctrl+R" ToolTip.Tip="Roll picker (Ctrl+R)">
             <StackPanel Orientation="Horizontal" Spacing="12">
               <PathIcon Data="{StaticResource Icon.Dice}" Width="18" Height="18" Classes="hot" />
-              <TextBlock Text="DICE TERMINAL" LetterSpacing="1.5" FontSize="12" VerticalAlignment="Center" />
+              <TextBlock Text="ROLL PICKER" LetterSpacing="1.5" FontSize="12" VerticalAlignment="Center" />
             </StackPanel>
           </ToggleButton>
         </StackPanel>
 
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Spacing="2">
           <Button Classes="nav" Command="{Binding MasterIndexCommand}">
             <StackPanel Orientation="Horizontal" Spacing="12"><PathIcon Data="{StaticResource Icon.SkillKnowledge}" Width="18" Height="18" /><TextBlock Text="MASTER INDEX" VerticalAlignment="Center" /></StackPanel>
@@ -90,7 +91,8 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
         </StackPanel>
-      </DockPanel>
+        </ScrollViewer>
+      </Grid>
     </Border>
 
     <!-- Current page -->

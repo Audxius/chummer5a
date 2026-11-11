@@ -63,6 +63,7 @@ namespace Chummer.Desktop.ViewModels
         public RollCatalog Catalog => _objCatalog;
 
         private Task _objLoadTask = Task.CompletedTask;
+        public Task WaitForCatalogAsync() => _objLoadTask;
 
         /// <summary>
         /// Opens the terminal on a roll by name for one runner (clicked on a skill or stat of the character sheet) and copies its formula.
@@ -104,6 +105,22 @@ namespace Chummer.Desktop.ViewModels
         public ObservableCollection<CharacterViewModel> Characters => _objShell.OpenCharacters;
 
         public ObservableCollection<RollItemViewModel> Results { get; } = new ObservableCollection<RollItemViewModel>();
+        public ObservableCollection<RollItemViewModel> RollChoices { get; } = new ObservableCollection<RollItemViewModel>();
+        private bool _syncPicker;
+        [ObservableProperty] private RollItemViewModel _pickerRoll;
+        partial void OnPickerRollChanged(RollItemViewModel value)
+        { if (!_syncPicker && value != null) SelectedRoll = value; }
+        private void RefreshRollChoices()
+        {
+            _syncPicker = true;
+            try
+            {
+                Reset(RollChoices, _objCatalog == null ? Enumerable.Empty<RollItemViewModel>() : _objCatalog.Actions.Where(x => x.IsRollable)
+                    .OrderBy(x => x.DisplayName, StringComparer.CurrentCulture).Select(x => new RollItemViewModel(x, _setFavorites.Contains(x.Name))));
+                PickerRoll = RollChoices.FirstOrDefault(x => x.Action.Name == SelectedRoll?.Action.Name);
+            }
+            finally { _syncPicker = false; }
+        }
         public ObservableCollection<RollItemViewModel> Recent { get; } = new ObservableCollection<RollItemViewModel>();
 
         public ObservableCollection<ContextOption> Weapons { get; } = new ObservableCollection<ContextOption>();
@@ -159,14 +176,17 @@ namespace Chummer.Desktop.ViewModels
 
         // ---------- lifecycle ----------
 
-        public void Activate()
+        public void Activate(CharacterViewModel preferred = null)
         {
-            if (SelectedCharacter == null || !Characters.Contains(SelectedCharacter))
-                SelectedCharacter = _objShell.CurrentPage as CharacterViewModel ?? Characters.FirstOrDefault();
+            var current = preferred ?? _objShell.CurrentPage as CharacterViewModel;
+            if (current != null && !ReferenceEquals(current, SelectedCharacter)) SelectedCharacter = current;
+            else if (SelectedCharacter == null || !Characters.Contains(SelectedCharacter))
+                SelectedCharacter = current ?? Characters.FirstOrDefault();
             else
             {
                 // Stats may have changed (damage taken, gear bought) since the last visit.
                 _objCatalog?.RefreshCharacterRolls(SelectedCharacter.Character);
+                RefreshRollChoices();
                 _ = SearchAsync();
                 Evaluate();
             }
@@ -185,6 +205,7 @@ namespace Chummer.Desktop.ViewModels
 
         partial void OnSelectedCharacterChanged(CharacterViewModel value)
         {
+            _objSearchCancel?.Cancel();
             OnPropertyChanged(nameof(HasCharacter));
             OnPropertyChanged(nameof(HasNoCharacter));
             _objLoadTask = LoadCharacterAsync(value);
@@ -192,9 +213,12 @@ namespace Chummer.Desktop.ViewModels
 
         private async Task LoadCharacterAsync(CharacterViewModel objViewModel)
         {
+            SelectedRoll = null;
+            RefreshRollChoices();
             Results.Clear();
             Recent.Clear();
             _objCatalog = null;
+            RollChoices.Clear();
             if (objViewModel == null)
                 return;
             Character objCharacter = objViewModel.Character;
@@ -202,12 +226,14 @@ namespace Chummer.Desktop.ViewModels
             if (!_dicCatalogs.TryGetValue(objCharacter, out objCatalog))
             {
                 objCatalog = await Task.Run(() => RollCatalog.Load(objCharacter)).ConfigureAwait(true);
+                if (!ReferenceEquals(SelectedCharacter, objViewModel)) return;
                 _dicCatalogs[objCharacter] = objCatalog;
             }
             if (!ReferenceEquals(SelectedCharacter, objViewModel))
                 return;
             _objCatalog = objCatalog;
             List<ContextOption>[] alstOptions = await Task.Run(() => BuildContextOptions(objCharacter)).ConfigureAwait(true);
+            if (!ReferenceEquals(SelectedCharacter, objViewModel)) return;
             _blnSuppressEvaluate = true;
             try
             {
@@ -234,6 +260,7 @@ namespace Chummer.Desktop.ViewModels
                     Recent.Add(new RollItemViewModel(objAction, _setFavorites.Contains(objAction.Name)));
             }
             OnPropertyChanged(nameof(HasRecent));
+            RefreshRollChoices();
             await SearchAsync().ConfigureAwait(true);
         }
 
@@ -321,6 +348,9 @@ namespace Chummer.Desktop.ViewModels
 
         partial void OnSelectedRollChanged(RollItemViewModel value)
         {
+            _syncPicker = true;
+            try { PickerRoll = RollChoices.FirstOrDefault(x => x.Action.Name == value?.Action.Name); }
+            finally { _syncPicker = false; }
             _blnEdgeSpentForSelection = false;
             OnPropertyChanged(nameof(HasSelection));
             OnPropertyChanged(nameof(NeedsWeapon));

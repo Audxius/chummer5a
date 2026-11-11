@@ -5,7 +5,8 @@
              xmlns:conv="using:Chummer.Desktop.Converters"
              x:Class="Chummer.Desktop.Views.Sections.ContactsSectionView"
              x:DataType="vm:CharacterViewModel">
-  <DockPanel Margin="28,22,28,0">
+  <Grid Margin="28,22,28,0">
+  <DockPanel IsVisible="{Binding !HasContactProfile}">
     <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,16">
       <TextBlock Text="Contacts" FontSize="24" FontWeight="SemiBold" />
       <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,10,0,0">
@@ -57,4 +58,6 @@
       </StackPanel>
     </ScrollViewer>
   </DockPanel>
+  <ContentControl x:Name="ContactProfileHost" IsVisible="{Binding HasContactProfile}" />
+  </Grid>
 </UserControl>

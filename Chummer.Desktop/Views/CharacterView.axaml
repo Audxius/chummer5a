@@ -121,7 +121,8 @@
           </ScrollViewer>
 
         </StackPanel>
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,12,0,0">
+        <Grid ColumnDefinitions="*,Auto" Margin="0,12,0,0">
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,10,0">
         <StackPanel Orientation="Horizontal">
           <ToggleButton Classes="section" Content="OVERVIEW" IsChecked="{Binding IsOverview, Mode=OneWay}"
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Overview}" />
@@ -145,6 +146,8 @@
                         Command="{Binding ShowSectionCommand}" CommandParameter="{x:Static vm:CharacterSection.Improvements}" />
         </StackPanel>
         </ScrollViewer>
+        <Button x:Name="CharacterRollPicker" Grid.Column="1" Content="Roll picker" Command="{Binding OpenRollPickerCommand}" VerticalAlignment="Center" ToolTip.Tip="Choose a roll for this character (Ctrl+R)" />
+        </Grid>
       </StackPanel>
     </Border>
 

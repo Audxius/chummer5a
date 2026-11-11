@@ -139,7 +139,7 @@ namespace Chummer.Desktop.ViewModels
         });
         internal Task LinkProfileAsync(string file) => _objOwner.LinkContactAsync(_objContact, file);
         [RelayCommand]
-        private Task OpenProfile(object owner) => Views.Dialogs.DialogHost.ShowModalAsync(new Views.Dialogs.ContactProfileWindow(this), owner);
+        private void OpenProfile() => _objOwner.SelectedContactProfile = this;
         public string Id => _objContact.InternalId;
         public string Role { get; }
         public string Location { get; }

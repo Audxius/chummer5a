@@ -59,8 +59,8 @@
         <StackPanel Orientation="Horizontal" Spacing="14">
           <PathIcon Data="{StaticResource Icon.Dice}" Width="34" Height="34" Classes="hot" />
           <StackPanel>
-            <TextBlock Text="DICE TERMINAL" Classes="h1" />
-            <TextBlock Text="search a roll  //  click it  //  paste into Roll20" Classes="label" />
+            <TextBlock Text="Roll picker" Classes="h1" />
+            <TextBlock Text="Choose an action, inspect its pool, and copy the roll" Classes="muted" />
           </StackPanel>
         </StackPanel>
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
@@ -83,7 +83,7 @@
       <TextBlock Text="Rolls are computed from the runner's attributes, skills, gear and modifiers." Classes="muted" HorizontalAlignment="Center" />
     </StackPanel>
 
-    <Grid Grid.Row="1" ColumnDefinitions="*,440" IsVisible="{Binding HasCharacter}">
+    <Grid x:Name="RollWorkspace" Grid.Row="1" ColumnDefinitions="*,440" IsVisible="{Binding HasCharacter}">
       <!-- Search + results -->
       <DockPanel Margin="28,20,14,20">
         <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,12">
@@ -136,12 +136,12 @@
                       <Grid ColumnDefinitions="30,*,Auto">
                         <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="18" Height="18" />
                         <StackPanel Grid.Column="1" Spacing="2" Margin="4,0,12,0">
-                          <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextBrush}" FontWeight="SemiBold" />
-                          <Grid ColumnDefinitions="Auto,Auto,*">
-                            <TextBlock Text="{Binding Tag}" Classes="label" Classes.house="{Binding IsHouseRule}" Margin="0,0,10,0" />
-                            <TextBlock Grid.Column="1" Text="{Binding Category}" Classes="label" Margin="0,0,10,0" />
-                            <TextBlock Grid.Column="2" Text="{Binding Dice}" Classes="muted" FontSize="11" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextBrush}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding Tag}" Classes="label" Classes.house="{Binding IsHouseRule}" FontSize="10" LetterSpacing="0" TextTrimming="CharacterEllipsis" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding Category}" Classes="label" FontSize="9" LetterSpacing="0" />
                           </Grid>
+                          <TextBlock Text="{Binding Dice}" Classes="muted" FontSize="11" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6">
                           <TextBlock Text="!" IsVisible="{Binding IsIncomplete}" Foreground="{StaticResource YellowBrush}" FontWeight="Bold" VerticalAlignment="Center"
@@ -167,16 +167,22 @@
 
       <!-- Selected roll -->
       <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0">
-        <Grid>
-          <StackPanel IsVisible="{Binding !HasSelection}" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8" Margin="24">
+        <Grid RowDefinitions="Auto,*">
+          <StackPanel Spacing="6" Margin="24,20,24,0">
+            <TextBlock Text="Choose a roll" Classes="muted" />
+            <ComboBox x:Name="RollPicker" ItemsSource="{Binding RollChoices}" SelectedItem="{Binding PickerRoll, Mode=TwoWay}" HorizontalAlignment="Stretch" MaxDropDownHeight="420" PlaceholderText="Action or skill…">
+              <ComboBox.ItemTemplate><DataTemplate x:DataType="vm:RollItemViewModel"><TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" /></DataTemplate></ComboBox.ItemTemplate>
+            </ComboBox>
+          </StackPanel>
+          <StackPanel Grid.Row="1" IsVisible="{Binding !HasSelection}" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8" Margin="24">
             <PathIcon Data="{StaticResource Icon.Dice}" Width="40" Height="40" Classes="muted" />
-            <TextBlock Text="Click a roll to copy it." Classes="muted" HorizontalAlignment="Center" />
+            <TextBlock Text="Choose an action or skill." Classes="muted" HorizontalAlignment="Center" />
             <TextBlock Text="Its breakdown and options show up here." Classes="muted" HorizontalAlignment="Center" />
           </StackPanel>
-          <ScrollViewer IsVisible="{Binding HasSelection}">
+          <ScrollViewer Grid.Row="1" IsVisible="{Binding HasSelection}">
             <StackPanel Margin="24,22" Spacing="14">
               <StackPanel Spacing="4">
-                <TextBlock Text="{Binding SelectedRoll.Tag}" Classes="label" Classes.house="{Binding SelectedRoll.IsHouseRule}" />
+                <TextBlock Text="{Binding SelectedRoll.Tag}" Classes="label" Classes.house="{Binding SelectedRoll.IsHouseRule}" TextWrapping="Wrap" />
                 <TextBlock Text="{Binding SelectedRoll.Name}" Classes="h1" TextWrapping="Wrap" />
               </StackPanel>
 

@@ -16,6 +16,10 @@ namespace Chummer.Desktop.ViewModels
     /// <summary>Adding, editing and deleting contacts / enemies / pets (legacy CharacterShared.AddContact / DeleteContact, ContactControl).</summary>
     public sealed partial class CharacterViewModel
     {
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasContactProfile))]
+        private ContactCardViewModel _selectedContactProfile;
+        public bool HasContactProfile => SelectedContactProfile != null;
         [ObservableProperty] private bool _showCompanions;
         [RelayCommand] private void ShowContactsPage() => ShowCompanions = false;
         [RelayCommand] private void ShowCompanionsPage() => ShowCompanions = true;

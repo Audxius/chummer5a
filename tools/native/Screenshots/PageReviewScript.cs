@@ -13,6 +13,7 @@ using Chummer;
 using Chummer.Desktop.ViewModels;
 using Chummer.Desktop.Views;
 using Chummer.Desktop.Views.Dialogs;
+using Chummer.Desktop.Views.Sections;
 using Chummer.Rules;
 
 internal static class PageReviewScript
@@ -123,15 +124,16 @@ internal static class PageReviewScript
         var first = runner.ContactCards.First(); string id = first.Id;
         var card = window.GetVisualDescendants().OfType<Button>().Single(x => ReferenceEquals(x.DataContext, first) && x.Classes.Contains("contactCard"));
         Click(window, card); await settle();
-        var profile = window.OwnedWindows.OfType<ContactProfileWindow>().Single();
+        var profile = window.GetVisualDescendants().OfType<ContactProfileView>().Single();
+        if (window.OwnedWindows.Any()) throw new InvalidOperationException("Contact profile opened another window.");
         var profileArt = profile.GetVisualDescendants().OfType<Image>().Single(x => x.Name == "ContactProfileArtwork");
         if (profileArt.Bounds.Width < 250 || first.HasPortrait && ((Avalonia.Media.Imaging.Bitmap)profileArt.Source).PixelSize.Width <= 256)
             throw new InvalidOperationException("Contact profile does not show large original artwork.");
-        Save(profile, output, "43-contact-profile");
+        Save(window, output, "43-contact-profile");
         if (first.IsEditable)
         {
-            Click(profile, profile.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == "Edit profile…")); await settle();
-            var editor = profile.OwnedWindows.Single();
+            Click(window, profile.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == "Edit profile…")); await settle();
+            var editor = window.OwnedWindows.Single();
             if (!editor.Title.StartsWith("Edit ", StringComparison.Ordinal)) throw new InvalidOperationException("Contact editor did not belong to its profile window.");
             editor.Close(); await settle();
             if (profile.Profile.Connection != first.Connection) throw new InvalidOperationException("Cancelling contact editing changed its rating.");
@@ -140,12 +142,12 @@ internal static class PageReviewScript
         {
             int expected = first.Connection < first.MaxConnection ? first.Connection + 1 : first.Connection - 1;
             var change = profile.GetVisualDescendants().OfType<Button>().First(x => x.Content as string == (first.Connection < first.MaxConnection ? "+" : "−"));
-            Click(profile, change);
+            Click(window, change);
             await settle();
             var refreshed = runner.ContactCards.Single(x => x.Id == id);
             if (refreshed.Connection != expected || profile.Profile.Connection != expected) throw new InvalidOperationException("Profile rating change did not refresh both views.");
         }
-        profile.Close(); await settle();
+        Click(window, profile.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == "← Contacts")); await settle();
         runner.ShowCompanionsPageCommand.Execute(null); await settle(); Save(window, output, "43-pets-and-cohorts");
         if (!runner.ShowCompanions) throw new InvalidOperationException("Pets and cohorts view failed to open.");
         using (var companion = new Character { SettingsKey = runner.Character.SettingsKey, Name = "Review cohort" })
@@ -161,11 +163,11 @@ internal static class PageReviewScript
                 var cohort = runner.PetCards.Single(x => x.LinkedFile == companionPath);
                 var cohortCard = window.GetVisualDescendants().OfType<Button>().Single(x => ReferenceEquals(x.DataContext, cohort) && x.Classes.Contains("contactCard"));
                 Click(window, cohortCard); await settle();
-                var cohortProfile = window.OwnedWindows.OfType<ContactProfileWindow>().Single();
+                var cohortProfile = window.GetVisualDescendants().OfType<ContactProfileView>().Single();
                 if (cohortProfile.Profile.LinkedStats.Count != companion.AttributeSection.AttributeList.Count)
                     throw new InvalidOperationException("Linked cohort attributes missing from profile.");
-                Save(cohortProfile, output, "43-linked-cohort-profile");
-                Click(cohortProfile, cohortProfile.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == "Open full character sheet")); await settle();
+                Save(window, output, "43-linked-cohort-profile");
+                Click(window, cohortProfile.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == "Open full character sheet")); await settle();
                 var main = MainWindowViewModel.Current;
                 if (main.CurrentPage is not CharacterViewModel linkedView || !ReferenceEquals(linkedView.Character, companion))
                     throw new InvalidOperationException("Opening the linked sheet duplicated the character.");
@@ -183,6 +185,7 @@ internal static class PageReviewScript
             }
             finally
             {
+                runner.SelectedContactProfile = null;
                 await runner.RunRuleAsync(async t =>
                 {
                     foreach (var item in runner.Character.Contacts.Where(x => x.FileName == companionPath).ToArray())
@@ -248,17 +251,73 @@ internal static class PageReviewScript
         Console.WriteLine("Page layout, contact profiles, linked cohorts, skill groups, pointer tooltips and full-width ledger checks passed.");
     }
 
+    public static async Task CheckInlineProfilesAndRollsAsync(MainWindow window, CharacterViewModel runner, string output, Func<Task> settle)
+    {
+        runner.ShowSectionCommand.Execute(CharacterSection.Skills); await settle();
+        foreach (var button in window.GetVisualDescendants().OfType<Button>().Where(x => (x.Classes.Contains("nav") || x.Classes.Contains("section") || x.Classes.Contains("seg"))
+            && x.IsVisible && x.GetVisualAncestors().OfType<Control>().All(c => c.IsVisible)).ToArray()) await CheckHoverAsync(window, button);
+        runner.ShowSectionCommand.Execute(CharacterSection.Network); await settle();
+        var card = window.GetVisualDescendants().OfType<Button>().First(x => x.Classes.Contains("contactCard") && x.IsVisible);
+        Click(window, card); await settle();
+        var profile = window.GetVisualDescendants().OfType<ContactProfileView>().Single();
+        if (window.OwnedWindows.Any() || !runner.HasContactProfile) throw new InvalidOperationException("Profile did not stay inside the character page.");
+        Save(window, output, "60-inline-profile");
+        var art = profile.GetVisualDescendants().OfType<Image>().Single(x => x.Name == "ContactProfileArtwork");
+        if (art.Source is not Avalonia.Media.Imaging.Bitmap bitmap || bitmap.PixelSize.Width <= 256) throw new InvalidOperationException("Original contact art was not loaded.");
+        Click(window, profile.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == "Enlarge artwork")); await settle();
+        if (window.OwnedWindows.Any() || !profile.GetVisualDescendants().OfType<Image>().Any(x => x.Name == "ContactArtworkViewer")) throw new InvalidOperationException("Artwork inspection opened another window.");
+        Save(window, output, "61-inline-artwork");
+        Click(window, profile.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == "← Back to profile")); await settle();
+        Click(window, profile.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == "← Contacts")); await settle();
+        if (runner.HasContactProfile) throw new InvalidOperationException("Back did not restore the contact list.");
+        window.Width = 980; window.Height = 620; await settle();
+        var navigation = window.GetVisualDescendants().OfType<ToggleButton>().Single(x => x.Name == "DiceNavigation");
+        var navPoint = navigation.TranslatePoint(new Point(1, navigation.Bounds.Height - 1), window)!.Value;
+        if (navPoint.Y > window.ClientSize.Height - 26 || navigation.Bounds.Height < 20) throw new InvalidOperationException("Roll picker navigation is clipped at minimum window height.");
+        Click(window, window.GetVisualDescendants().OfType<Button>().Single(x => x.Name == "CharacterRollPicker"));
+        var main = MainWindowViewModel.Current; var dice = main.Dice; await dice.WaitForCatalogAsync(); await settle();
+        if (!ReferenceEquals(main.CurrentPage, dice) || !ReferenceEquals(dice.SelectedCharacter, runner)) throw new InvalidOperationException("Sheet roll picker opened the wrong runner.");
+        var picker = window.GetVisualDescendants().OfType<ComboBox>().Single(x => x.Name == "RollPicker");
+        if (!picker.IsVisible || picker.Bounds.Height < 20 || dice.RollChoices.Count < 30) throw new InvalidOperationException("Dice action picker is missing or empty.");
+        int edge = runner.Character.EdgeUsed;
+        picker.SelectedItem = dice.RollChoices.Single(x => x.Action.Name == Chummer.Rolls.RollCatalog.ComposureRoll); await settle();
+        if (dice.Pool != runner.Character.CHA.TotalValue + runner.Character.WIL.TotalValue || dice.SelectedRoll?.Action.Name != Chummer.Rolls.RollCatalog.ComposureRoll)
+            throw new InvalidOperationException("Picker did not evaluate the selected action for this runner.");
+        if (runner.Character.EdgeUsed != edge) throw new InvalidOperationException("Merely selecting a roll spent Edge.");
+        Save(window, output, "62-roll-picker-compact");
+        using var other = new Character { SettingsKey = runner.Character.SettingsKey, Name = "Other runner" };
+        await CharacterRegistry.OpenCharacters.AddAsync(other);
+        await main.OpenCharacterAsync(other); var otherView = (CharacterViewModel)main.CurrentPage;
+        otherView.OpenRollPickerCommand.Execute(null); await dice.WaitForCatalogAsync(); await settle();
+        if (!ReferenceEquals(dice.SelectedCharacter, otherView)) throw new InvalidOperationException("Roll picker retained the previously selected runner.");
+        await main.CloseCharacterCommand.ExecuteAsync(otherView); await dice.WaitForCatalogAsync();
+        main.CurrentPage = runner; runner.OpenRollPickerCommand.Execute(null); await dice.WaitForCatalogAsync(); await settle();
+        if (!ReferenceEquals(dice.SelectedCharacter, runner)) throw new InvalidOperationException("Returning to the runner did not restore its roll catalog.");
+        main.CurrentPage = runner; window.Width = 1440; window.Height = 900; await settle();
+        runner.SelectedContactProfile = runner.ContactCards.First(); await settle(); Save(window, output, "63-inline-profile-wide");
+        Console.WriteLine("Inline contact/artwork navigation, visible dice access, action selection, correct pools, no Edge spending and runner switching passed.");
+    }
+
     private static async Task CheckHoverAsync(MainWindow window, Button button)
     {
         if (button.Bounds.Width < 1 || button.Bounds.Height < 1) return;
         Rect bounds = button.Bounds;
-        foreach (double x in new[] { button.Bounds.Width / 2, 0.5, button.Bounds.Width - 0.5 })
+        var origin = button.TranslatePoint(default, window) ?? throw new InvalidOperationException("No pointer coordinates.");
+        Rect visible = new Rect(origin, bounds.Size).Intersect(new Rect(window.ClientSize));
+        foreach (var ancestor in button.GetVisualAncestors().Where(x => x.ClipToBounds))
+        {
+            var ancestorOrigin = ancestor.TranslatePoint(default, window);
+            if (ancestorOrigin.HasValue) visible = visible.Intersect(new Rect(ancestorOrigin.Value, ancestor.Bounds.Size));
+        }
+        // Scrollable navigation intentionally clips offscreen tabs. Probe only the exposed area,
+        // including its edges, while still requiring stable control bounds and pointer ownership.
+        if (visible.Width < 1 || visible.Height < 1) return;
+        foreach (double x in new[] { visible.Center.X, visible.Left + 0.5, visible.Right - 0.5 })
             for (int i = 0; i < 6; ++i)
             {
-                var point = button.TranslatePoint(new Point(x, button.Bounds.Height / 2), window);
-                if (!point.HasValue) throw new InvalidOperationException("No pointer coordinates for navigation control.");
-                window.MouseMove(point.Value, RawInputModifiers.None); Dispatcher.UIThread.RunJobs(); await Task.Delay(15);
-                if (!button.IsPointerOver || button.Bounds != bounds) throw new InvalidOperationException("Hover moved or lost a navigation/filter hit target.");
+                var point = new Point(x, visible.Center.Y);
+                window.MouseMove(point, RawInputModifiers.None); Dispatcher.UIThread.RunJobs(); await Task.Delay(15);
+                if (!button.IsPointerOver || button.Bounds != bounds) throw new InvalidOperationException($"Hover lost {button.Content} ({button.CommandParameter}) at {point}, exposed {visible}, bounds {bounds}.");
             }
         window.MouseMove(new Point(1, 1), RawInputModifiers.None);
     }

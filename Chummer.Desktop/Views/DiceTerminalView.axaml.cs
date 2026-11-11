@@ -10,6 +10,7 @@ namespace Chummer.Desktop.Views
         public DiceTerminalView()
         {
             AvaloniaXamlLoader.Load(this);
+            SizeChanged += (_, _) => this.FindControl<Grid>("RollWorkspace").ColumnDefinitions[1].Width = new GridLength(Bounds.Width < 1000 ? 360 : 440);
         }
     }
 }
