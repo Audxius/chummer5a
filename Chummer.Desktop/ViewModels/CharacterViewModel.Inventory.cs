@@ -228,6 +228,27 @@ namespace Chummer.Desktop.ViewModels
         private Task CreateCustomDrug() => DialogHost.ShowModalAsync(new CustomDrugWindow(this), null);
 
         [RelayCommand]
+        private Task EditImplant() => SelectedInventoryItem?.Item is Cyberware implant ? DialogHost.ShowModalAsync(new ImplantUpgradeWindow(this, implant), null) : Task.CompletedTask;
+
+        [RelayCommand]
+        private Task MoveInventoryUp() => MoveInventoryAsync(-1);
+        [RelayCommand]
+        private Task MoveInventoryDown() => MoveInventoryAsync(1);
+
+        private async Task MoveInventoryAsync(int direction)
+        {
+            var selected = SelectedInventoryItem;
+            if (selected?.CanReorder != true) return;
+            var items = _lstAllInventory.Where(x => x.Kind == selected.Kind)
+                .OrderBy(x => x.SortOrder).ThenBy(x => x.Category, StringComparer.CurrentCulture)
+                .ThenBy(x => x.Name, StringComparer.CurrentCulture).ToList();
+            int index = items.IndexOf(selected), target = index + direction;
+            if (index < 0 || target < 0 || target >= items.Count) return;
+            items.RemoveAt(index); items.Insert(target, selected);
+            await RunRuleAsync(t => InventoryOrderRules.ReorderAsync(Character, items.Select(x => x.Item).ToList(), t));
+        }
+
+        [RelayCommand]
         private async Task AddWeaponMount()
         {
             if (!(SelectedInventoryItem?.Item is Vehicle vehicle)) return;

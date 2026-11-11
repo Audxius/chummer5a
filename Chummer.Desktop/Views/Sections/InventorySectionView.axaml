@@ -219,6 +219,9 @@
             <WrapPanel Margin="0,8,0,0">
               <Button Classes="act" Content="+ MOD / ACCESSORY" IsVisible="{Binding CanAddMod}"
                       Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).AddSelectedModCommand}" />
+              <Button Classes="act" Content="EDIT / UPGRADE IMPLANT" IsVisible="{Binding CanEditImplant}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).EditImplantCommand}" />
+              <Button Classes="act" Content="MOVE UP" IsVisible="{Binding CanReorder}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).MoveInventoryUpCommand}" />
+              <Button Classes="act" Content="MOVE DOWN" IsVisible="{Binding CanReorder}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).MoveInventoryDownCommand}" />
               <Button Classes="act money" Content="PAY RENT" IsVisible="{Binding IsLifestyle}"
                       Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).PaySelectedRentCommand}" />
               <Button Classes="act" Content="− RENT PERIOD" IsVisible="{Binding IsLifestyle}"

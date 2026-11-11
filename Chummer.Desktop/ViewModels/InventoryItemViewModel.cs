@@ -125,6 +125,9 @@ namespace Chummer.Desktop.ViewModels
         public bool CanAddWeaponMount => Item is Vehicle;
         public bool CanEditWeaponMount => Item is WeaponMount mount && !mount.IncludedInVehicle;
         public bool CanAddMountedWeapon { get; private set; }
+        public bool CanEditImplant { get; private set; }
+        public int SortOrder { get; private set; }
+        public bool CanReorder { get; private set; }
         public bool IsLifestyle => Item is Lifestyle;
 
         /// <summary>Engine InternalId, used to keep the selection across reloads.</summary>
@@ -252,8 +255,12 @@ namespace Chummer.Desktop.ViewModels
         private void Bind(Character objCharacter, object objItem, string strId)
         {
             Item = objItem;
+            SortOrder = (objItem as ICanSort)?.SortOrder ?? 0;
+            CanReorder = InventoryOrderRules.CanOrder(objCharacter, objItem);
             Id = strId ?? string.Empty;
             IsCareer = objCharacter.Created;
+            CanEditImplant = objItem is Cyberware implant && implant.ParentVehicle == null && implant.SourceID != Cyberware.EssenceHoleGUID && implant.SourceID != Cyberware.EssenceAntiHoleGUID
+                && !(implant.Capacity == "[*]" && implant.Parent != null);
             CanAddMountedWeapon = objItem is WeaponMount mount && !mount.IsWeaponsFull;
             CanSetLocation = EquipmentLocationRules.LocationsFor(objCharacter, objItem) != null;
             LocationName = (objItem as IHasLocation)?.Location?.Name ?? "";

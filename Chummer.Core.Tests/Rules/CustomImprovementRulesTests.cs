@@ -128,6 +128,119 @@ namespace Chummer.Tests.Rules
         }
 
         [TestMethod]
+        public async Task CreationImplantEditsUpdateGradeRatingAndEffectsWithoutCareerCharges()
+        {
+            foreach (var entry in new[] { (Kind: EquipmentKind.Cyberware, File: "cyberware.xml", Path: "/chummer/cyberwares/cyberware", Name: "Reaction Enhancers", Attribute: "REA"),
+                (Kind: EquipmentKind.Bioware, File: "bioware.xml", Path: "/chummer/biowares/bioware", Name: "Muscle Toner", Attribute: "AGI") })
+            {
+                var source = entry.Kind == EquipmentKind.Cyberware ? Improvement.ImprovementSource.Cyberware : Improvement.ImprovementSource.Bioware;
+                var grades = await _character.GetGradesListAsync(source); string standard = grades.First(x => x.Name == "Standard").SourceIDString;
+                string alpha = grades.First(x => x.Name == "Alphaware").SourceIDString;
+                string id = _character.LoadData(entry.File).SelectSingleNode(entry.Path + "[name='" + entry.Name + "']/id").InnerText;
+                var purchase = await PurchaseRules.PurchaseAsync(_character, new PurchaseRequest { Kind = entry.Kind, ItemId = id, GradeId = standard, Rating = 1 });
+                Assert.AreEqual(RuleResult.Changed, purchase.Result); var implant = (Cyberware)purchase.Item; string instance = implant.InternalId;
+                int before = _character.GetAttribute(entry.Attribute).TotalValue; decimal nuyen = _character.Nuyen;
+                var quote = await ImplantUpgradeRules.QuoteAsync(_character, implant, alpha, 2, 0.5m, false);
+                Assert.IsTrue(quote.CanApply); Assert.AreEqual(0m, quote.Cost);
+                var edit = await ImplantUpgradeRules.ApplyAsync(_character, implant, alpha, 2, 0.5m, false);
+                Assert.AreEqual(RuleResult.Changed, edit.Result); Assert.AreEqual(instance, implant.InternalId);
+                Assert.AreEqual("Alphaware", implant.Grade.Name); Assert.AreEqual(2, implant.Rating);
+                Assert.AreEqual(await implant.GetCalculatedESSPrototypeInvariantAsync(), quote.NewEssence, "The preview must use the proposed rating.");
+                Assert.IsTrue(quote.NewEssence > quote.OldEssence, "Doubling the rating must outweigh the Alphaware discount for these implants.");
+                Assert.AreEqual(before + 1, _character.GetAttribute(entry.Attribute).TotalValue);
+                Assert.AreEqual(nuyen, _character.Nuyen); Assert.AreEqual(0m, _character.EssenceHole); Assert.AreEqual(0, _character.ExpenseEntries.Count);
+            }
+        }
+
+        [TestMethod]
+        public async Task ImplantUpgradeRejectsGradesThatRequireMissingSpecialEffects()
+        {
+            _settings.BooksWritable.Add("SG"); _settings.OnPropertyChanged(nameof(CharacterSettings.Books));
+            var grades = await _character.GetGradesListAsync(Improvement.ImprovementSource.Cyberware);
+            var restricted = grades.Where(x => x.Adapsin || x.Burnout || x.Name == "None").ToList();
+            Assert.IsTrue(restricted.Any(x => x.Adapsin)); Assert.IsTrue(restricted.Any(x => x.Burnout));
+            string id = _character.LoadData("cyberware.xml").SelectSingleNode("/chummer/cyberwares/cyberware[name='Datajack']/id").InnerText;
+            var implant = (Cyberware)(await PurchaseRules.PurchaseAsync(_character, new PurchaseRequest { Kind = EquipmentKind.Cyberware, ItemId = id,
+                GradeId = grades.First(x => x.Name == "Standard").SourceIDString })).Item;
+            var options = await ImplantUpgradeRules.OptionsAsync(_character, implant);
+            foreach (var grade in restricted)
+            {
+                Assert.IsFalse(options.Grades.Any(x => x.Value?.ToString() == grade.SourceIDString));
+                Assert.IsNull(await ImplantUpgradeRules.QuoteAsync(_character, implant, grade.SourceIDString, 0, 0.5m, false));
+            }
+        }
+
+        [TestMethod]
+        public async Task CareerImplantUpgradeAppliesTradeInAndEssenceHoleAndRejectsLegacyGearUndo()
+        {
+            var grades = await _character.GetGradesListAsync(Improvement.ImprovementSource.Cyberware);
+            string standard = grades.First(x => x.Name == "Standard").SourceIDString, alpha = grades.First(x => x.Name == "Alphaware").SourceIDString;
+            string id = _character.LoadData("cyberware.xml").SelectSingleNode("/chummer/cyberwares/cyberware[name='Datajack']/id").InnerText;
+            var implant = (Cyberware)(await PurchaseRules.PurchaseAsync(_character, new PurchaseRequest { Kind = EquipmentKind.Cyberware, ItemId = id, GradeId = standard })).Item;
+            implant.Notes = "Keep install notes"; await _character.SetCreatedAsync(true); await _character.SetNuyenAsync(10000);
+            var quote = await ImplantUpgradeRules.QuoteAsync(_character, implant, alpha, 0, 0.5m, false);
+            Assert.AreEqual(700m, quote.Cost); Assert.AreEqual(500m, quote.TradeIn);
+            var upgrade = await ImplantUpgradeRules.ApplyAsync(_character, implant, alpha, 0, 0.5m, false);
+            Assert.AreEqual(RuleResult.Changed, upgrade.Result); Assert.AreEqual(9300m, _character.Nuyen); Assert.AreEqual(0.02m, _character.EssenceHole);
+            Assert.AreEqual("Keep install notes", implant.Notes); Assert.IsNull(upgrade.Expense.Undo);
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            try
+            {
+                Assert.IsTrue(await _character.SaveAsync(path, false, false));
+                using var loaded = new Character(); loaded.FileName = path; Assert.IsTrue(await loaded.LoadAsync());
+                var saved = await loaded.Cyberware.DeepFindByIdAsync(implant.InternalId); Assert.AreEqual("Alphaware", saved.Grade.Name);
+                Assert.AreEqual("Keep install notes", saved.Notes); Assert.AreEqual(0.02m, loaded.EssenceHole); Assert.AreEqual(9300m, loaded.Nuyen);
+            }
+            finally { if (File.Exists(path)) File.Delete(path); }
+            var legacy = new ExpenseLogEntry(_character); legacy.Create(-100m, "Old implant upgrade", ExpenseType.Nuyen, DateTime.Now);
+            var undo = new ExpenseUndo(); undo.CreateNuyen(NuyenExpenseType.AddGear, implant.InternalId); legacy.Undo = undo;
+            await _character.ExpenseEntries.AddWithSortAsync(legacy); await _character.ModifyNuyenAsync(-100m);
+            var messages = HostServices.Messages;
+            try { HostServices.Messages = new AcceptMessages(); Assert.AreEqual(RuleResult.NotAllowed, await ExpenseRules.UndoExpenseAsync(_character, legacy)); }
+            finally { HostServices.Messages = messages; }
+            Assert.AreEqual(9200m, _character.Nuyen); Assert.IsTrue(_character.ExpenseEntries.Contains(legacy)); Assert.AreEqual("Alphaware", implant.Grade.Name);
+        }
+
+        [TestMethod]
+        public async Task ImplantReplacementHonorsParentGradeAndCapacityAndPreservesChildren()
+        {
+            _settings.EnforceCapacity = true;
+            var grades = await _character.GetGradesListAsync(Improvement.ImprovementSource.Cyberware);
+            string standard = grades.First(x => x.Name == "Standard").SourceIDString, alpha = grades.First(x => x.Name == "Alphaware").SourceIDString;
+            string Id(string name) => _character.LoadData("cyberware.xml").SelectSingleNode("/chummer/cyberwares/cyberware[name='" + name + "']/id").InnerText;
+            var eyes = (Cyberware)(await PurchaseRules.PurchaseAsync(_character, new PurchaseRequest { Kind = EquipmentKind.Cyberware, ItemId = Id("Cybereyes Basic System"), Rating = 1, GradeId = standard })).Item;
+            var vision = (Cyberware)(await PurchaseRules.PurchaseAsync(_character, new PurchaseRequest { Kind = EquipmentKind.Cyberware, ItemId = Id("Vision Enhancement"), Rating = 1, GradeId = standard, Parent = eyes })).Item;
+            await PurchaseRules.PurchaseAsync(_character, new PurchaseRequest { Kind = EquipmentKind.Cyberware, ItemId = Id("Smartlink"), GradeId = standard, Parent = eyes });
+            var children = eyes.Children.ToArray();
+            Assert.IsFalse((await ImplantUpgradeRules.QuoteAsync(_character, vision, standard, 3, 0.5m, false)).CanApply);
+            Assert.AreEqual(RuleResult.NotAllowed, (await ImplantUpgradeRules.ApplyAsync(_character, vision, standard, 3, 0.5m, false)).Result);
+            Assert.IsNull(await ImplantUpgradeRules.QuoteAsync(_character, vision, alpha, 2, 0.5m, false));
+            Assert.AreEqual(RuleResult.Changed, (await ImplantUpgradeRules.ApplyAsync(_character, eyes, standard, 2, 0.5m, false)).Result);
+            CollectionAssert.AreEqual(children, eyes.Children.ToArray()); Assert.AreSame(eyes, vision.Parent);
+            Assert.AreEqual(RuleResult.Changed, (await ImplantUpgradeRules.ApplyAsync(_character, vision, standard, 3, 0.5m, false)).Result);
+            Assert.IsFalse((await ImplantUpgradeRules.QuoteAsync(_character, eyes, standard, 1, 0.5m, false)).CanApply);
+            Assert.AreEqual(2, eyes.Rating); Assert.AreEqual(3, vision.Rating); Assert.AreEqual(0, _character.ExpenseEntries.Count);
+        }
+
+        [TestMethod]
+        public async Task ImplantUpgradeRejectsFundsInvalidRatingsAndCancellationBeforeChangingState()
+        {
+            var grades = await _character.GetGradesListAsync(Improvement.ImprovementSource.Cyberware);
+            string standard = grades.First(x => x.Name == "Standard").SourceIDString, alpha = grades.First(x => x.Name == "Alphaware").SourceIDString;
+            string id = _character.LoadData("cyberware.xml").SelectSingleNode("/chummer/cyberwares/cyberware[name='Reaction Enhancers']/id").InnerText;
+            var implant = (Cyberware)(await PurchaseRules.PurchaseAsync(_character, new PurchaseRequest { Kind = EquipmentKind.Cyberware, ItemId = id, Rating = 1, GradeId = standard })).Item;
+            await _character.SetCreatedAsync(true); await _character.SetNuyenAsync(0);
+            Assert.AreEqual(RuleResult.NotEnoughNuyen, (await ImplantUpgradeRules.ApplyAsync(_character, implant, alpha, 2, 0.5m, false)).Result);
+            Assert.IsNull(await ImplantUpgradeRules.QuoteAsync(_character, implant, alpha, 99, 0.5m, false));
+            bool cancelled = false;
+            try { await ImplantUpgradeRules.ApplyAsync(_character, implant, alpha, 2, 0.5m, true, new System.Threading.CancellationToken(true)); }
+            catch (OperationCanceledException) { cancelled = true; }
+            Assert.IsTrue(cancelled); Assert.AreEqual(1, implant.Rating); Assert.AreEqual("Standard", implant.Grade.Name); Assert.AreEqual(0, _character.ExpenseEntries.Count);
+            Assert.AreEqual(RuleResult.Changed, (await ImplantUpgradeRules.ApplyAsync(_character, implant, alpha, 2, 0.5m, true)).Result);
+            Assert.AreEqual(0m, _character.Nuyen); Assert.AreEqual(2, implant.Rating); Assert.IsNull(_character.ExpenseEntries.Single().Undo);
+        }
+
+        [TestMethod]
         public async Task SustainedEffectsRetainSourceForceHitsAndPenaltyThroughSave()
         {
             _settings.DicePenaltySustaining = 2;
@@ -1067,6 +1180,37 @@ namespace Chummer.Tests.Rules
             var predator = entries.First(x => x.Name == "Ares Predator V" && x.File == "weapons.xml");
             Assert.AreEqual("426", predator.Page);
             Assert.AreEqual("SR5 426", predator.Source);
+        }
+
+        [TestMethod]
+        public async Task InventoryOrderPersistsAndRejectsPartialForeignAndNestedLists()
+        {
+            var first = new Gear(_character) { Name = "First", Category = "Test", Quantity = 2 };
+            var second = new Gear(_character) { Name = "Second", Category = "Test" };
+            var child = new Gear(_character) { Name = "Plugin", Parent = first };
+            await first.Children.AddAsync(child);
+            await _character.Gear.AddAsync(first); await _character.Gear.AddAsync(second);
+            Assert.AreEqual(RuleResult.NotAllowed, await InventoryOrderRules.ReorderAsync(_character, new object[] { first }));
+            Assert.AreEqual(RuleResult.NotAllowed, await InventoryOrderRules.ReorderAsync(_character, new object[] { first, first }));
+            Assert.AreEqual(RuleResult.NotAllowed, await InventoryOrderRules.ReorderAsync(_character, new object[] { first, child }));
+            using var foreign = new Character();
+            var outsider = new Gear(foreign);
+            Assert.AreEqual(RuleResult.NotAllowed, await InventoryOrderRules.ReorderAsync(_character, new object[] { first, outsider }));
+            using var cancellation = new System.Threading.CancellationTokenSource(); cancellation.Cancel();
+            await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => InventoryOrderRules.ReorderAsync(_character, new object[] { second, first }, cancellation.Token));
+            Assert.AreEqual(0, first.SortOrder);
+            Assert.AreEqual(RuleResult.Changed, await InventoryOrderRules.ReorderAsync(_character, new object[] { second, first }));
+            Assert.AreEqual(1, second.SortOrder); Assert.AreEqual(2, first.SortOrder);
+            Assert.AreSame(child, first.Children.Single()); Assert.AreEqual(2m, first.Quantity);
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            try
+            {
+                Assert.IsTrue(await _character.SaveAsync(path));
+                using var loaded = new Character(); Assert.IsTrue(await loaded.LoadAsync(path));
+                CollectionAssert.AreEqual(new[] { "Second", "First" }, loaded.Gear.OrderBy(x => x.SortOrder).Select(x => x.Name).ToArray());
+                Assert.AreEqual(child.InternalId, loaded.Gear.Single(x => x.Name == "First").Children.Single().InternalId);
+            }
+            finally { File.Delete(path); outsider.Dispose(); }
         }
 
         [TestMethod]

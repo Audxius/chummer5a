@@ -128,6 +128,30 @@ internal static class PacksScript
         await sustained.SaveAsync(character.Spells.Single(x => x.Name == "Prismatic burst"), 4, 3, true); await settle();
         Save(sustained, output, "31-sustained-effects"); sustained.Close();
         if (character.SustainingPenalty >= 0 || character.SustainedCollection.Count != 1) throw new InvalidOperationException("Sustained effect did not apply a dice-pool penalty.");
+        var eyes = character.Cyberware.First(x => x.Name.StartsWith("Cybereyes", StringComparison.Ordinal));
+        string eyesId = eyes.InternalId;
+        var eyeChildren = eyes.Children.Select(x => x.InternalId).ToArray();
+        var upgrade = new ImplantUpgradeWindow(runner, eyes); upgrade.Show();
+        await upgrade.ConfigureAsync("Alphaware", 2); await settle();
+        Save(upgrade, output, "32a-implant-upgrade");
+        await upgrade.ApplyAsync(); await settle();
+        if (eyes.InternalId != eyesId || eyes.Grade.Name != "Alphaware" || eyes.Rating != 2
+            || !eyeChildren.SequenceEqual(eyes.Children.Select(x => x.InternalId)))
+            throw new InvalidOperationException("Implant edit did not preserve the implant and its attachments.");
+        Save(window, output, "32b-upgraded-implant");
+        runner.SelectedInventoryItem = runner.InventoryGroups.SelectMany(x => x.Items).First(x => x.Name == "Glasses");
+        string movedId = runner.SelectedInventoryItem.Id;
+        var expectedOrder = runner.InventoryGroups.Single(x => x.Items.Any(i => i.Id == movedId)).Items.Select(x => x.Id).ToList();
+        int previousIndex = expectedOrder.IndexOf(movedId);
+        expectedOrder.RemoveAt(previousIndex); expectedOrder.Insert(previousIndex - 1, movedId);
+        runner.InventoryFilter = "Glasses";
+        await runner.MoveInventoryUpCommand.ExecuteAsync(null); await settle();
+        if (character.Gear.Single(x => x.InternalId == movedId).SortOrder <= 0
+            || runner.SelectedInventoryItem?.Id != movedId
+            || !expectedOrder.SequenceEqual(character.Gear.OrderBy(x => x.SortOrder).Select(x => x.InternalId)))
+            throw new InvalidOperationException("Inventory ordering did not persist or retain the selection.");
+        runner.InventoryFilter = ""; runner.InventoryKind = InventoryKind.Gear; await settle();
+        Save(window, output, "33-inventory-order");
         if (character.Gear.Single(x => x.Name == "Ammo: Regular Ammo").Quantity != 100 || character.Vehicles.Count != 1)
             throw new InvalidOperationException("PACKS items were not granted correctly.");
         Console.WriteLine("PACKS grants verified: " + character.Gear.Count + " gear, " + character.Weapons.Count + " weapons, " + character.Cyberware.Count + " implants, " + character.Vehicles.Count + " vehicles.");

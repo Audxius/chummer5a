@@ -9055,7 +9055,13 @@ namespace Chummer.Backend.Equipment
         /// <summary>
         /// Calculated Capacity of the Cyberware.
         /// </summary>
-        public async Task<string> GetCalculatedCapacityAsync(CultureInfo objCulture, CancellationToken token = default)
+        public Task<string> GetCalculatedCapacityAsync(CultureInfo objCulture, CancellationToken token = default)
+            => GetCalculatedCapacityCoreAsync(objCulture, GetRatingAsync, token);
+
+        internal Task<string> GetCalculatedCapacityForRatingAsync(CultureInfo culture, int rating, CancellationToken token)
+            => GetCalculatedCapacityCoreAsync(culture, t => Task.FromResult(rating), token);
+
+        private async Task<string> GetCalculatedCapacityCoreAsync(CultureInfo objCulture, Func<CancellationToken, Task<int>> funcRating, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
             IAsyncDisposable objLocker = await LockObject.EnterReadLockAsync(token).ConfigureAwait(false);
@@ -9065,7 +9071,7 @@ namespace Chummer.Backend.Equipment
                 string strCapacity = Capacity;
                 if (string.IsNullOrEmpty(strCapacity))
                     return 0.0m.ToString("#,0.##", objCulture);
-                strCapacity = await strCapacity.ProcessFixedValuesStringAsync(GetRatingAsync, token).ConfigureAwait(false);
+                strCapacity = await strCapacity.ProcessFixedValuesStringAsync(funcRating, token).ConfigureAwait(false);
 
                 if (strCapacity == "[*]")
                     return "*";
@@ -9073,8 +9079,8 @@ namespace Chummer.Backend.Equipment
                 int intPos = strCapacity.IndexOf("/[", StringComparison.Ordinal);
                 if (intPos != -1)
                 {
-                    string strFirstHalf = await strCapacity.Substring(0, intPos).ProcessFixedValuesStringAsync(GetRatingAsync, token).ConfigureAwait(false);
-                    string strSecondHalf = await strCapacity.Substring(intPos + 1).ProcessFixedValuesStringAsync(GetRatingAsync, token).ConfigureAwait(false);
+                    string strFirstHalf = await strCapacity.Substring(0, intPos).ProcessFixedValuesStringAsync(funcRating, token).ConfigureAwait(false);
+                    string strSecondHalf = await strCapacity.Substring(intPos + 1).ProcessFixedValuesStringAsync(funcRating, token).ConfigureAwait(false);
                     bool blnSquareBrackets = strFirstHalf.StartsWith('[');
                     if (blnSquareBrackets && strFirstHalf.Length > 2)
                         strFirstHalf = strFirstHalf.Substring(1, strFirstHalf.Length - 2);
@@ -9085,9 +9091,9 @@ namespace Chummer.Backend.Equipment
                         strFirstHalf = await strFirstHalf.CheapReplaceAsync("MinRating",
                                                              async t => (await GetMinRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
                         strFirstHalf = await strFirstHalf.CheapReplaceAsync("{Rating}",
-                                                         async t => (await GetRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
+                                                         async t => (await funcRating(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
                         strFirstHalf = await strFirstHalf.CheapReplaceAsync("Rating",
-                                                         async t => (await GetRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
+                                                         async t => (await funcRating(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
                         strFirstHalf = await ProcessAttributesInXPathAsync(strFirstHalf, token: token).ConfigureAwait(false);
                         try
                         {
@@ -9148,9 +9154,9 @@ namespace Chummer.Backend.Equipment
                         strSecondHalf = await strSecondHalf.CheapReplaceAsync("MinRating",
                                                              async t => (await GetMinRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
                         strSecondHalf = await strSecondHalf.CheapReplaceAsync("{Rating}",
-                                                         async t => (await GetRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
+                                                         async t => (await funcRating(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
                         strSecondHalf = await strSecondHalf.CheapReplaceAsync("Rating",
-                                                         async t => (await GetRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
+                                                         async t => (await funcRating(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
                         strSecondHalf = await ProcessAttributesInXPathAsync(strSecondHalf, token: token).ConfigureAwait(false);
                         try
                         {
@@ -9219,9 +9225,9 @@ namespace Chummer.Backend.Equipment
                     strCapacity = await strCapacity.CheapReplaceAsync("MinRating",
                                                          async t => (await GetMinRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
                     strCapacity = await strCapacity.CheapReplaceAsync("{Rating}",
-                                                     async t => (await GetRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
+                                                     async t => (await funcRating(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
                     strCapacity = await strCapacity.CheapReplaceAsync("Rating",
-                                                     async t => (await GetRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
+                                                     async t => (await funcRating(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
                     strCapacity = await ProcessAttributesInXPathAsync(strCapacity, token: token).ConfigureAwait(false);
                     (bool blnIsSuccess, object objProcess) =
                         await CommonFunctions.EvaluateInvariantXPathAsync(strCapacity, token).ConfigureAwait(false);
@@ -9345,9 +9351,9 @@ namespace Chummer.Backend.Equipment
 
                 string strESS = ESS;
                 if (blnSync)
-                    strESS = strESS.ProcessFixedValuesString(() => Rating, token);
+                    strESS = strESS.ProcessFixedValuesString(() => intRating, token);
                 else
-                    strESS = await strESS.ProcessFixedValuesStringAsync(GetRatingAsync, token).ConfigureAwait(false);
+                    strESS = await strESS.ProcessFixedValuesStringAsync(t => Task.FromResult(intRating), token).ConfigureAwait(false);
                 if (strESS.DoesNeedXPathProcessingToBeConvertedToNumber(out decimal decReturn))
                 {
                     if (strESS.HasValuesNeedingReplacementForXPathProcessing())
@@ -9362,10 +9368,10 @@ namespace Chummer.Backend.Equipment
                                                       () => MinRating.ToString(GlobalSettings.InvariantCultureInfo));
                             // ReSharper disable once MethodHasAsyncOverloadWithCancellation
                             strESS = strESS.CheapReplace("{Rating}",
-                                                  () => Rating.ToString(GlobalSettings.InvariantCultureInfo));
+                                                  () => intRating.ToString(GlobalSettings.InvariantCultureInfo));
                             // ReSharper disable once MethodHasAsyncOverloadWithCancellation
                             strESS = strESS.CheapReplace("Rating",
-                                                  () => Rating.ToString(GlobalSettings.InvariantCultureInfo));
+                                                  () => intRating.ToString(GlobalSettings.InvariantCultureInfo));
                             // ReSharper disable once MethodHasAsyncOverloadWithCancellation
                             strESS = ProcessAttributesInXPath(strESS, token: token);
                         }
@@ -9376,9 +9382,9 @@ namespace Chummer.Backend.Equipment
                             strESS = await strESS.CheapReplaceAsync("MinRating",
                                                              async t => (await GetMinRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
                             strESS = await strESS.CheapReplaceAsync("{Rating}",
-                                                             async t => (await GetRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
+                                                             t => Task.FromResult(intRating.ToString(GlobalSettings.InvariantCultureInfo)), token: token).ConfigureAwait(false);
                             strESS = await strESS.CheapReplaceAsync("Rating",
-                                                             async t => (await GetRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
+                                                             t => Task.FromResult(intRating.ToString(GlobalSettings.InvariantCultureInfo)), token: token).ConfigureAwait(false);
                             strESS = await ProcessAttributesInXPathAsync(strESS, token: token).ConfigureAwait(false);
                         }
                     }
@@ -9583,10 +9589,10 @@ namespace Chummer.Backend.Equipment
                                         () => MinRating.ToString(GlobalSettings.InvariantCultureInfo));
                                     // ReSharper disable once MethodHasAsyncOverloadWithCancellation
                                     strPostModifierExpression = strPostModifierExpression.CheapReplace("{Rating}",
-                                        () => Rating.ToString(GlobalSettings.InvariantCultureInfo));
+                                        () => intRating.ToString(GlobalSettings.InvariantCultureInfo));
                                     // ReSharper disable once MethodHasAsyncOverloadWithCancellation
                                     strPostModifierExpression = strPostModifierExpression.CheapReplace("Rating",
-                                        () => Rating.ToString(GlobalSettings.InvariantCultureInfo));
+                                        () => intRating.ToString(GlobalSettings.InvariantCultureInfo));
                                     // ReSharper disable once MethodHasAsyncOverloadWithCancellation
                                     strPostModifierExpression = ProcessAttributesInXPath(strPostModifierExpression, token: token);
                                 }
@@ -9597,9 +9603,9 @@ namespace Chummer.Backend.Equipment
                                     strPostModifierExpression = await strPostModifierExpression.CheapReplaceAsync("MinRating",
                                                                      async t => (await GetMinRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
                                     strPostModifierExpression = await strPostModifierExpression.CheapReplaceAsync("{Rating}",
-                                                                     async t => (await GetRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
+                                                                     t => Task.FromResult(intRating.ToString(GlobalSettings.InvariantCultureInfo)), token: token).ConfigureAwait(false);
                                     strPostModifierExpression = await strPostModifierExpression.CheapReplaceAsync("Rating",
-                                                                     async t => (await GetRatingAsync(t).ConfigureAwait(false)).ToString(GlobalSettings.InvariantCultureInfo), token: token).ConfigureAwait(false);
+                                                                     t => Task.FromResult(intRating.ToString(GlobalSettings.InvariantCultureInfo)), token: token).ConfigureAwait(false);
                                     strPostModifierExpression = await ProcessAttributesInXPathAsync(strPostModifierExpression, token: token).ConfigureAwait(false);
                                 }
                             }
@@ -14328,6 +14334,25 @@ namespace Chummer.Backend.Equipment
             {
                 await objLocker.DisposeAsync().ConfigureAwait(false);
             }
+        }
+
+        internal async Task ApplyUpgradeFieldsAsync(Grade grade, int rating, CancellationToken token)
+        {
+            var oldGrade = await GetGradeAsync(token).ConfigureAwait(false);
+            int oldRating = await GetRatingAsync(token).ConfigureAwait(false);
+            IAsyncDisposable locker = await LockObject.EnterWriteLockAsync(token).ConfigureAwait(false);
+            try
+            {
+                Interlocked.Decrement(ref _intProcessPropertyChanges);
+                try
+                {
+                    await SetRatingAsync(rating, token).ConfigureAwait(false);
+                    await SetGradeAsync(grade, token).ConfigureAwait(false);
+                }
+                finally { Interlocked.Increment(ref _intProcessPropertyChanges); }
+            }
+            finally { await locker.DisposeAsync().ConfigureAwait(false); }
+            await DoPropertyChangesAsync(oldRating != rating, oldGrade.SourceIDString != grade.SourceIDString || oldGrade.Name != grade.Name, token).ConfigureAwait(false);
         }
 
         public async Task Upgrade(Grade objGrade, int intRating, decimal refundPercentage, bool blnFree,

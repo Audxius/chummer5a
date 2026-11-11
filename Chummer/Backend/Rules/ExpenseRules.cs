@@ -658,6 +658,15 @@ namespace Chummer.Rules
                             // If the gear was already deleted manually we will not be able to locate it here.
                             Gear objGear = await objCharacter.Gear.DeepFindByIdAsync(strUndoId, token).ConfigureAwait(false)
                                            ?? (await objCharacter.Vehicles.FindVehicleGearAsync(strUndoId, token).ConfigureAwait(false)).Item1;
+                            // Old implant upgrades incorrectly recorded AddGear against an implant id.
+                            // Refunding that record cannot restore its former grade/rating.
+                            if (objGear == null && await objCharacter.Cyberware.DeepFindByIdAsync(strUndoId, token).ConfigureAwait(false) != null)
+                            {
+                                await MessageBoxes.ShowAsync(await LanguageManager.GetStringAsync("Message_UndoExpenseNotSupported", token: token).ConfigureAwait(false),
+                                    await LanguageManager.GetStringAsync("String_NotSupported", token: token).ConfigureAwait(false),
+                                    MessageButtons.OK, MessageIcon.Warning, token: token).ConfigureAwait(false);
+                                return RuleResult.NotAllowed;
+                            }
                             if (objGear == null)
                                 break;
                             await objGear.SetQuantityAsync(objGear.Quantity - objExpense.Undo.Qty, token).ConfigureAwait(false);

@@ -447,7 +447,7 @@ namespace Chummer.Desktop.ViewModels
             {
                 var items = _lstAllInventory.Where(x => x.Kind == kind && astrWords.All(w => x.SearchText.Contains(w))).ToList();
                 if (items.Count == 0 && astrWords.Length > 0) continue;
-                InventoryGroupViewModel objViewModel = new InventoryGroupViewModel(kind, items.OrderBy(x => x.Category, StringComparer.CurrentCulture).ThenBy(x => x.Name, StringComparer.CurrentCulture));
+                InventoryGroupViewModel objViewModel = new InventoryGroupViewModel(kind, items.OrderBy(x => x.SortOrder).ThenBy(x => x.Category, StringComparer.CurrentCulture).ThenBy(x => x.Name, StringComparer.CurrentCulture));
                 intShown += objViewModel.Items.Count;
                 InventoryGroups.Add(objViewModel);
             }
