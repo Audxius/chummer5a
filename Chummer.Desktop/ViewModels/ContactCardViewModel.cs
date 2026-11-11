@@ -33,11 +33,17 @@ namespace Chummer.Desktop.ViewModels
     {
         private readonly CharacterViewModel _objOwner;
         private readonly Contact _objContact;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ExpansionLabel))]
+        private bool _isExpanded;
+        public string ExpansionLabel => IsExpanded ? "Collapse" : "Expand";
+        public string SummaryDescription => HasNotes ? Notes : Subtitle;
 
         public ContactCardViewModel(CharacterViewModel objOwner, Contact objContact)
         {
             _objOwner = objOwner;
             _objContact = objContact;
+            _isExpanded = objOwner.ExpandedContactIds.ContainsKey(objContact.InternalId);
             CultureInfo objCulture = GlobalSettings.CultureInfo;
             Name = string.IsNullOrWhiteSpace(objContact.Name) ? "(unnamed)" : objContact.Name;
             Role = objContact.DisplayRole ?? string.Empty;
@@ -49,7 +55,7 @@ namespace Chummer.Desktop.ViewModels
             IsPet = objContact.EntityType == ContactType.Pet;
             IsReadOnly = objContact.ReadOnly;
             LoyaltyEnabled = objContact.LoyaltyEnabled && !IsReadOnly;
-            Notes = (objContact.Notes ?? string.Empty).Trim();
+            Notes = (objContact.Notes ?? string.Empty).RtfToPlainText().Trim();
 
             Initials = string.Concat(Name.Split(new[] { ' ', '-', '_' }, StringSplitOptions.RemoveEmptyEntries)
                                          .Where(x => char.IsLetterOrDigit(x[0])).Take(2).Select(x => char.ToUpper(x[0], objCulture)));
@@ -91,6 +97,7 @@ namespace Chummer.Desktop.ViewModels
         }
 
         public string Name { get; }
+        public string Id => _objContact.InternalId;
         public string Role { get; }
         public string Location { get; }
         public string Initials { get; }
@@ -114,6 +121,15 @@ namespace Chummer.Desktop.ViewModels
         public bool HasSubtitle => Subtitle.Length > 0;
         public string ConnectionText => Connection.ToString(GlobalSettings.CultureInfo);
         public string LoyaltyText => Loyalty.ToString(GlobalSettings.CultureInfo);
+        public bool CanIncreaseConnection => IsEditable && Connection < MaxConnection;
+        public bool CanDecreaseConnection => IsEditable && Connection > 1;
+        public bool CanIncreaseLoyalty => LoyaltyEnabled && Loyalty < 6;
+        public bool CanDecreaseLoyalty => LoyaltyEnabled && Loyalty > 1;
+        partial void OnIsExpandedChanged(bool value)
+        {
+            if (value) _objOwner.ExpandedContactIds.TryAdd(_objContact.InternalId, true);
+            else _objOwner.ExpandedContactIds.TryRemove(_objContact.InternalId, out _);
+        }
 
         /// <summary>Text matched by the contacts search box.</summary>
         public string SearchText => string.Join(" ", new[] { Name, Role, Location, Notes }.Concat(Facts.Select(x => x.Value)).Concat(Tags));
@@ -124,37 +140,22 @@ namespace Chummer.Desktop.ViewModels
         [RelayCommand]
         private Task Delete() => _objOwner.DeleteContactAsync(_objContact);
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanIncreaseConnection))]
         private Task ConnectionUp() => ChangeAsync(Connection + 1, true);
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanDecreaseConnection))]
         private Task ConnectionDown() => ChangeAsync(Connection - 1, true);
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanIncreaseLoyalty))]
         private Task LoyaltyUp() => ChangeAsync(Loyalty + 1, false);
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanDecreaseLoyalty))]
         private Task LoyaltyDown() => ChangeAsync(Loyalty - 1, false);
 
         // Same bounds as the legacy ContactControl: connection 1..MaxContactConnection, loyalty 1..6 when enabled.
         private async Task ChangeAsync(int intNew, bool blnConnection)
         {
-            if (IsReadOnly || intNew < 1)
-                return;
-            if (blnConnection)
-            {
-                if (intNew > MaxConnection)
-                    return;
-                await Task.Run(() => _objContact.SetConnectionAsync(intNew)).ConfigureAwait(true);
-            }
-            else
-            {
-                if (!LoyaltyEnabled || intNew > 6)
-                    return;
-                await Task.Run(() => _objContact.SetLoyaltyAsync(intNew)).ConfigureAwait(true);
-            }
-            _objOwner.MarkDirty();
-            _objOwner.Reload();
+            await _objOwner.RunRuleAsync(t => Chummer.Rules.ContactRules.SetRatingAsync(_objOwner.Character, _objContact, intNew, blnConnection, t));
         }
     }
 }

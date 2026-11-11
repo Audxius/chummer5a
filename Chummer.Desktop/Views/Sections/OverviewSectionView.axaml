@@ -1,147 +1,124 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:Chummer.Desktop.ViewModels"
-             xmlns:loc="using:Chummer.Desktop.Localization"
-             xmlns:conv="using:Chummer.Desktop.Converters"
-             xmlns:controls="using:Chummer.Desktop.Views.Controls"
-             x:Class="Chummer.Desktop.Views.Sections.OverviewSectionView"
-             x:DataType="vm:CharacterViewModel">
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:Chummer.Desktop.ViewModels" xmlns:conv="using:Chummer.Desktop.Converters" xmlns:controls="using:Chummer.Desktop.Views.Controls" x:Class="Chummer.Desktop.Views.Sections.OverviewSectionView" x:DataType="vm:CharacterViewModel">
+  <UserControl.Resources>
+    <DataTemplate x:Key="OverviewStat" x:DataType="vm:ItemStat">
+      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12" Margin="0,7">
+        <TextBlock Text="{Binding Label}" Classes="muted" TextWrapping="Wrap" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="1" Text="{Binding Value}" FontWeight="SemiBold" VerticalAlignment="Center" />
+        <Button Grid.Column="2" Classes="step" IsVisible="{Binding IsRollable}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RollCommand}" CommandParameter="{Binding RollName}" ToolTip.Tip="{Binding RollName}">
+          <PathIcon Data="{StaticResource Icon.Dice}" Width="14" Height="14" />
+        </Button>
+      </Grid>
+    </DataTemplate>
+  </UserControl.Resources>
   <ScrollViewer>
-    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" Margin="28,22" >
-      <!-- Vitals -->
-      <Border Grid.ColumnSpan="2" Classes="panel lit" Margin="0,0,0,20">
-        <Grid ColumnDefinitions="*,*,1.3*">
-          <StackPanel Spacing="12">
-            <TextBlock Text="CONDITION" Classes="h2" />
-            <StackPanel Spacing="4">
-              <TextBlock Text="{Binding PhysicalLabel}" Classes="label" />
-              <ItemsControl ItemsSource="{Binding PhysicalBoxes}">
-                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+    <StackPanel Margin="28,22" Spacing="20">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Overview" FontSize="24" FontWeight="SemiBold" />
+        <TextBlock Text="Your runner at a glance" Classes="muted" />
+      </StackPanel>
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="20">
+        <StackPanel Spacing="20">
+          <Border Classes="panel">
+            <StackPanel Spacing="14">
+              <TextBlock Text="Condition" FontSize="16" FontWeight="SemiBold" />
+              <StackPanel Spacing="7">
+                <TextBlock Text="{Binding PhysicalLabel}" Classes="muted" />
+                <ItemsControl ItemsSource="{Binding PhysicalBoxes}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <WrapPanel />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ConditionBoxViewModel">
+                      <Button Classes="cm" Command="{Binding ToggleCommand}" ToolTip.Tip="{Binding Tip}" BorderBrush="{StaticResource RedBrush}" Background="{Binding IsFilled, Converter={x:Static conv:BoolBrushConverter.Red}}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+              <StackPanel Spacing="7">
+                <TextBlock Text="{Binding StunLabel}" Classes="muted" />
+                <ItemsControl ItemsSource="{Binding StunBoxes}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <WrapPanel />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ConditionBoxViewModel">
+                      <Button Classes="cm" Command="{Binding ToggleCommand}" ToolTip.Tip="{Binding Tip}" BorderBrush="{StaticResource CyanBrush}" Background="{Binding IsFilled, Converter={x:Static conv:BoolBrushConverter.Cyan}}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+              <Border Height="1" Background="{StaticResource BorderBrush}" />
+              <controls:EdgePoolView />
+            </StackPanel>
+          </Border>
+          <Border Classes="panel">
+            <StackPanel>
+              <TextBlock Text="Combat" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" />
+              <ItemsControl ItemsSource="{Binding CombatStats}" ItemTemplate="{StaticResource OverviewStat}" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="20">
+          <Border Classes="panel">
+            <StackPanel Spacing="10">
+              <TextBlock Text="Attributes" FontSize="16" FontWeight="SemiBold" />
+              <ItemsControl ItemsSource="{Binding Attributes}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <UniformGrid Columns="2" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                  <DataTemplate x:DataType="vm:ConditionBoxViewModel">
-                    <Button Classes="cm" Command="{Binding ToggleCommand}" ToolTip.Tip="{Binding Tip}" BorderBrush="{StaticResource RedBrush}"
-                            Background="{Binding IsFilled, Converter={x:Static conv:BoolBrushConverter.Red}}" />
+                  <DataTemplate x:DataType="vm:AttributeViewModel">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,6,18,6">
+                      <TextBlock Text="{Binding LongName}" Classes="muted" />
+                      <TextBlock Grid.Column="1" Text="{Binding Display}" FontWeight="SemiBold" />
+                    </Grid>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
             </StackPanel>
-            <StackPanel Spacing="4">
-              <TextBlock Text="{Binding StunLabel}" Classes="label" />
-              <ItemsControl ItemsSource="{Binding StunBoxes}">
-                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+          </Border>
+          <Border Classes="panel">
+            <StackPanel>
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Limits and movement" FontSize="16" FontWeight="SemiBold" />
+                <Button Grid.Column="1" Content="Modifiers…" Command="{Binding EditLimitModifiersCommand}" />
+              </Grid>
+              <ItemsControl ItemsSource="{Binding DerivedStats}" ItemTemplate="{StaticResource OverviewStat}" />
+            </StackPanel>
+          </Border>
+          <Border Classes="panel">
+            <StackPanel Spacing="6">
+              <TextBlock Text="Qualities" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,6" />
+              <ItemsControl ItemsSource="{Binding PositiveQualities}">
                 <ItemsControl.ItemTemplate>
-                  <DataTemplate x:DataType="vm:ConditionBoxViewModel">
-                    <Button Classes="cm" Command="{Binding ToggleCommand}" ToolTip.Tip="{Binding Tip}" BorderBrush="{StaticResource CyanBrush}"
-                            Background="{Binding IsFilled, Converter={x:Static conv:BoolBrushConverter.Cyan}}" />
+                  <DataTemplate x:DataType="vm:QualityViewModel">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,5" ToolTip.Tip="{Binding Source}">
+                      <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
+                      <TextBlock Grid.Column="1" Text="{Binding KarmaText}" Foreground="{StaticResource GreenBrush}" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <ItemsControl ItemsSource="{Binding NegativeQualities}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:QualityViewModel">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,5" ToolTip.Tip="{Binding Source}">
+                      <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
+                      <TextBlock Grid.Column="1" Text="{Binding KarmaText}" Foreground="{StaticResource RedBrush}" />
+                    </Grid>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
             </StackPanel>
-            <controls:EdgePoolView />
-          </StackPanel>
-          <StackPanel Grid.Column="1" Spacing="8" Margin="20,0">
-            <TextBlock Text="COMBAT" Classes="h2" />
-            <ItemsControl ItemsSource="{Binding CombatStats}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="vm:ItemStat">
-                  <Panel>
-                    <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsPlain}" Margin="0,4">
-                      <TextBlock Text="{Binding Label}" Classes="muted" />
-                      <TextBlock Grid.Column="1" Text="{Binding Value}" FontWeight="SemiBold" />
-                    </Grid>
-                  <Button Classes="roll" Margin="-6,0" IsVisible="{Binding IsRollable}"
-                          Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RollCommand}" CommandParameter="{Binding RollName}"
-                          ToolTip.Tip="{Binding RollName, StringFormat='Click to roll {0} and copy it for Roll20'}" ToolTip.IsEnabled="{Binding IsRollable}">
-                    <Grid ColumnDefinitions="*,Auto,Auto">
-                      <TextBlock Text="{Binding Label}" Classes="muted" />
-                      <PathIcon Grid.Column="1" Classes="rollhint" Data="{StaticResource Icon.Dice}" Margin="0,0,8,0" IsVisible="{Binding IsRollable}" />
-                      <TextBlock Grid.Column="2" Text="{Binding Value}" FontWeight="SemiBold" />
-                    </Grid>
-                  </Button>
-                  </Panel>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </StackPanel>
-          <StackPanel Grid.Column="2" Spacing="8">
-            <TextBlock Text="LIMITS &amp; DERIVED" Classes="h2" />
-            <Button Content="LIMIT MODIFIERS" Command="{Binding EditLimitModifiersCommand}" />
-            <ItemsControl ItemsSource="{Binding DerivedStats}">
-              <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="vm:ItemStat">
-                  <Panel>
-                  <Border Classes="chip" Padding="10,6" MinWidth="96" Margin="0,0,6,6" IsVisible="{Binding IsPlain}">
-                    <StackPanel>
-                      <TextBlock Text="{Binding Label}" Classes="label" />
-                      <TextBlock Text="{Binding Value}" FontWeight="Bold" FontSize="16" Foreground="{StaticResource CyanBrush}" />
-                    </StackPanel>
-                  </Border>
-                  <Button Classes="roll" Margin="0,0,6,6" Padding="0" IsVisible="{Binding IsRollable}"
-                          Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RollCommand}" CommandParameter="{Binding RollName}"
-                          ToolTip.Tip="{Binding RollName, StringFormat='Click to roll {0} and copy it for Roll20'}" ToolTip.IsEnabled="{Binding IsRollable}">
-                    <Border Classes="chip" Padding="10,6" MinWidth="96">
-                      <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel>
-                          <TextBlock Text="{Binding Label}" Classes="label" />
-                          <TextBlock Text="{Binding Value}" FontWeight="Bold" FontSize="16" Foreground="{StaticResource CyanBrush}" />
-                        </StackPanel>
-                        <PathIcon Grid.Column="1" Classes="rollhint" Data="{StaticResource Icon.Dice}" VerticalAlignment="Top" Margin="6,0,0,0" IsVisible="{Binding IsRollable}" />
-                      </Grid>
-                    </Border>
-                  </Button>
-                  </Panel>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </StackPanel>
-        </Grid>
-      </Border>
-      <Border Grid.Row="1" Classes="panel lit" Margin="0,0,10,0" VerticalAlignment="Top">
-        <StackPanel Spacing="10">
-          <TextBlock Text="{loc:Tr Label_Attributes, Case=upper}" Classes="h2" />
-          <ItemsControl ItemsSource="{Binding Attributes}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="vm:AttributeViewModel">
-                <Grid ColumnDefinitions="28,60,*,48,30" Margin="0,4">
-                  <PathIcon Data="{Binding IconKey, Converter={StaticResource Icon}}" Width="16" Height="16" />
-                  <TextBlock Grid.Column="1" Text="{Binding Abbrev}" FontWeight="Bold" VerticalAlignment="Center" />
-                  <ProgressBar Grid.Column="2" Minimum="0" Maximum="1" Value="{Binding Fill}" Height="6"
-                               Foreground="{StaticResource CyanBrush}" Background="{StaticResource SurfaceBrush}" VerticalAlignment="Center" />
-                  <TextBlock Grid.Column="3" Text="{Binding Display}" HorizontalAlignment="Right" FontWeight="SemiBold" />
-                  <Button Grid.Column="4" Classes="ghost" Content="+" Padding="0" Width="22" Height="22" HorizontalAlignment="Right" HorizontalContentAlignment="Center"
-                          Command="{Binding QuickRaiseCommand}" IsEnabled="{Binding CanQuickRaise}" ToolTip.Tip="{Binding QuickRaiseTip}" ToolTip.ShowOnDisabled="True" />
-                </Grid>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
+          </Border>
         </StackPanel>
-      </Border>
-      <Border Grid.Row="1" Grid.Column="1" Classes="panel hot" Margin="10,0,0,0" VerticalAlignment="Top">
-        <StackPanel Spacing="8">
-          <TextBlock Text="{loc:Tr String_Qualities, Case=upper}" Classes="h2" Foreground="{StaticResource MagentaBrush}" />
-          <ItemsControl ItemsSource="{Binding PositiveQualities}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="vm:QualityViewModel">
-                <Grid ColumnDefinitions="*,Auto" Margin="0,3" ToolTip.Tip="{Binding Source}">
-                  <TextBlock Text="{Binding Name}" />
-                  <TextBlock Grid.Column="1" Text="{Binding KarmaText}" Foreground="{StaticResource GreenBrush}" />
-                </Grid>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-          <ItemsControl ItemsSource="{Binding NegativeQualities}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="vm:QualityViewModel">
-                <Grid ColumnDefinitions="*,Auto" Margin="0,3" ToolTip.Tip="{Binding Source}">
-                  <TextBlock Text="{Binding Name}" />
-                  <TextBlock Grid.Column="1" Text="{Binding KarmaText}" Foreground="{StaticResource RedBrush}" />
-                </Grid>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </StackPanel>
-      </Border>
-    </Grid>
+      </Grid>
+    </StackPanel>
   </ScrollViewer>
 </UserControl>

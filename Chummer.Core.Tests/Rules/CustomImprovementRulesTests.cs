@@ -1246,6 +1246,37 @@ namespace Chummer.Tests.Rules
         }
 
         [TestMethod]
+        public async Task ContactRatingsValidateOwnershipBoundsAndGroupLoyaltyAndPersist()
+        {
+            var contact = new Contact(_character) { Name = "Street doctor" };
+            await _character.Contacts.AddAsync(contact);
+            Assert.AreEqual(RuleResult.Changed, await ContactRules.SetRatingAsync(_character, contact, 3, true));
+            Assert.AreEqual(RuleResult.Changed, await ContactRules.SetRatingAsync(_character, contact, 4, false));
+            Assert.AreEqual(RuleResult.Cancelled, await ContactRules.SetRatingAsync(_character, contact, 4, false));
+            Assert.AreEqual(RuleResult.NotAllowed, await ContactRules.SetRatingAsync(_character, contact, 0, true));
+            Assert.AreEqual(RuleResult.NotAllowed, await ContactRules.SetRatingAsync(_character, contact, _character.MaxContactConnection + 1, true));
+            Assert.AreEqual(RuleResult.NotAllowed, await ContactRules.SetRatingAsync(_character, contact, 7, false));
+            using var foreign = new Character();
+            Assert.AreEqual(RuleResult.NotAllowed, await ContactRules.SetRatingAsync(foreign, contact, 2, true));
+            await contact.SetIsGroupAsync(true);
+            Assert.AreEqual(RuleResult.NotAllowed, await ContactRules.SetRatingAsync(_character, contact, 2, false));
+            await contact.SetIsGroupAsync(false);
+            using var cancellation = new System.Threading.CancellationTokenSource(); cancellation.Cancel();
+            await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => ContactRules.SetRatingAsync(_character, contact, 6, true, cancellation.Token));
+            Assert.AreEqual(3, contact.Connection); Assert.AreEqual(4, contact.Loyalty);
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            try
+            {
+                Assert.IsTrue(await _character.SaveAsync(path));
+                using var loaded = new Character(); Assert.IsTrue(await loaded.LoadAsync(path));
+                var restored = loaded.Contacts.Single(x => x.InternalId == contact.InternalId);
+                Assert.AreEqual(3, restored.Connection); Assert.AreEqual(4, restored.Loyalty);
+                Assert.AreEqual(0, _character.ExpenseEntries.Count);
+            }
+            finally { File.Delete(path); }
+        }
+
+        [TestMethod]
         public async Task TraditionSelectionUpdatesDrainAndCustomTraditionRejectsInvalidInput()
         {
             _character.MAGEnabled = true;

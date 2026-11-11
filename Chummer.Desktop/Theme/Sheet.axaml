@@ -6,7 +6,19 @@
     <Style Selector="Border.dossier">
       <Setter Property="Background" Value="{StaticResource PanelBrush}" />
       <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
-      <Setter Property="BorderThickness" Value="3,1,1,1" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="ToggleButton.contactExpand">
+      <Setter Property="Theme" Value="{StaticResource StableToggleTheme}" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+      <Setter Property="CornerRadius" Value="5" />
+    </Style>
+    <Style Selector="ToggleButton.contactExpand:pointerover, ToggleButton.contactExpand:checked">
+      <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
     </Style>
     <Style Selector="Border.dossier:pointerover">
       <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
@@ -79,6 +91,8 @@
       <Setter Property="Opacity" Value="1" />
     </Style>
     <Style Selector="ToggleButton.section">
+      <Setter Property="Theme" Value="{StaticResource StableToggleTheme}" />
+      <Setter Property="MinHeight" Value="40" />
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
       <Setter Property="BorderThickness" Value="0,0,0,2" />
@@ -87,6 +101,16 @@
       <Setter Property="Padding" Value="16,10" />
       <Setter Property="FontSize" Value="12" />
       <Setter Property="LetterSpacing" Value="1.5" />
+    </Style>
+    <Style Selector="ToggleButton.section:checked">
+      <Setter Property="BorderBrush" Value="{StaticResource MagentaBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+    <Style Selector="ToggleButton.section:pointerover">
+      <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
+    </Style>
+    <Style Selector="ToggleButton.section:focus-visible, ToggleButton.contactExpand:focus-visible">
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
     </Style>
     <Style Selector="ToggleButton.section:checked /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="Background" Value="Transparent" />
@@ -165,25 +189,6 @@
     </Style>
 
     <!-- ===== Inventory: game-style slots, badges and the detail panel ===== -->
-    <Style Selector="Button.inventoryRow">
-      <Setter Property="HorizontalAlignment" Value="Stretch" />
-      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-      <Setter Property="Padding" Value="12,10" />
-      <Setter Property="Margin" Value="0,0,0,4" />
-      <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
-      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-      <Setter Property="BorderBrush" Value="Transparent" />
-      <Setter Property="BorderThickness" Value="2,0,0,0" />
-      <Setter Property="CornerRadius" Value="6" />
-      <Setter Property="LetterSpacing" Value="0" />
-    </Style>
-    <Style Selector="Button.inventoryRow.selected /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
-    </Style>
-    <Style Selector="Button.inventoryRow:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
-    </Style>
     <Style Selector="Button.slot">
       <Setter Property="Padding" Value="0" />
       <Setter Property="Margin" Value="0,0,10,10" />

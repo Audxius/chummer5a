@@ -63,6 +63,10 @@ internal static class Program
                     if (!(objViewModel.CurrentPage is CharacterViewModel))
                         throw new InvalidOperationException("The screenshot character did not open: " + Path.GetFileName(args[1]));
                     Save(objWindow, strOut, "02-overview");
+                    if (Environment.GetEnvironmentVariable("CHUMMER_REVIEW_PAGES") == "1" && objViewModel.CurrentPage is CharacterViewModel pagesReview)
+                    {
+                        await PageReviewScript.RunAsync(objWindow, pagesReview, strOut, Settle); return 0;
+                    }
                     if (Environment.GetEnvironmentVariable("CHUMMER_REVIEW_LAYOUT") == "1" && objViewModel.CurrentPage is CharacterViewModel layoutReview)
                     {
                         layoutReview.ShowSectionCommand.Execute(CharacterSection.Inventory); await Settle();

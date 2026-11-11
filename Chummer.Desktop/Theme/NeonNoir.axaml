@@ -43,6 +43,21 @@
       <Color x:Key="SystemAccentColor">#FF00E5FF</Color>
       <Color x:Key="SystemAccentColorLight1">#FF5CF0FF</Color>
       <Color x:Key="SystemAccentColorDark1">#FF00A9BD</Color>
+      <ControlTheme x:Key="StableButtonTheme" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+              <ContentPresenter Name="StableContent" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Padding="{TemplateBinding Padding}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True" />
+            </Border>
+          </ControlTemplate>
+        </Setter>
+      </ControlTheme>
+      <ControlTheme x:Key="StableToggleTheme" TargetType="ToggleButton" BasedOn="{StaticResource StableButtonTheme}" />
     </ResourceDictionary>
   </Styles.Resources>
 
@@ -92,14 +107,12 @@
     <Setter Property="Padding" Value="14" />
   </Style>
   <Style Selector="Border.panel.lit">
-    <Setter Property="BorderThickness" Value="3,1,1,1" />
-    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
-    <Setter Property="BoxShadow" Value="0 0 18 0 #2200E5FF" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
   </Style>
   <Style Selector="Border.panel.hot">
-    <Setter Property="BorderThickness" Value="3,1,1,1" />
-    <Setter Property="BorderBrush" Value="{StaticResource MagentaBrush}" />
-    <Setter Property="BoxShadow" Value="0 0 18 0 #22FF2E88" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
   </Style>
   <Style Selector="Border.chip">
     <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />
@@ -147,7 +160,7 @@
   <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
-    <Setter Property="Foreground" Value="{StaticResource BorderBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
   </Style>
   <Style Selector="Button.ghost">
     <Setter Property="BorderThickness" Value="0" />
@@ -156,6 +169,7 @@
 
   <!-- Navigation rail entries -->
   <Style Selector="ToggleButton.nav, Button.nav">
+    <Setter Property="Theme" Value="{StaticResource StableButtonTheme}" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
     <Setter Property="BorderThickness" Value="3,0,0,0" />
@@ -167,6 +181,24 @@
     <Setter Property="FontSize" Value="12" />
     <Setter Property="FontWeight" Value="Normal" />
     <Setter Property="LetterSpacing" Value="1.5" />
+  </Style>
+  <Style Selector="ToggleButton.nav">
+    <Setter Property="Theme" Value="{StaticResource StableToggleTheme}" />
+  </Style>
+  <Style Selector="ToggleButton.nav:checked">
+    <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.nav:pointerover, Button.nav:pointerover">
+    <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+  </Style>
+  <Style Selector="ToggleButton.nav:focus-visible, Button.nav:focus-visible">
+    <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+  </Style>
+  <Style Selector="Button.nav:disabled, ToggleButton.nav:disabled, ToggleButton.section:disabled, Button.seg:disabled, ToggleButton.contactExpand:disabled">
+    <Setter Property="Opacity" Value="0.55" />
   </Style>
   <Style Selector="ToggleButton.nav:checked /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{StaticResource CyanDimBrush}" />

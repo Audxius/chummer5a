@@ -11,18 +11,23 @@ namespace Chummer.Desktop.ViewModels
     {
         /// <summary>Print / export the character sheet (legacy File > Print Character).</summary>
         [RelayCommand]
-        private Task Print() => SheetWindow.ShowAsync(new[] { Character });
+        private async Task Print() { await FlushInfoEditsAsync(); await SheetWindow.ShowAsync(new[] { Character }); }
 
         [RelayCommand]
-        private Task ExportCharacter() => DialogHost.ShowModalAsync(new CharacterExportWindow(Character), null);
+        private async Task ExportCharacter() { await FlushInfoEditsAsync(); await DialogHost.ShowModalAsync(new CharacterExportWindow(Character), null); }
 
         [RelayCommand]
-        private Task ExportPacksKit() => DialogHost.ShowModalAsync(new PacksExportWindow(Character), null);
+        private async Task ExportPacksKit() { await FlushInfoEditsAsync(); await DialogHost.ShowModalAsync(new PacksExportWindow(Character), null); }
 
         [RelayCommand]
         private Task EditLimitModifiers() => DialogHost.ShowModalAsync(new LimitModifiersWindow(this), null);
 
         [RelayCommand]
-        private Task PrintAllOpen() => SheetWindow.ShowAsync(MainWindowViewModel.Current.OpenCharacters.Select(x => x.Character).ToArray());
+        private async Task PrintAllOpen()
+        {
+            var runners = MainWindowViewModel.Current.OpenCharacters.ToArray();
+            foreach (var runner in runners) await runner.FlushInfoEditsAsync();
+            await SheetWindow.ShowAsync(runners.Select(x => x.Character).ToArray());
+        }
     }
 }

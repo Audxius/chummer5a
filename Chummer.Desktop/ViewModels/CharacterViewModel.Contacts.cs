@@ -3,6 +3,7 @@
 using System.Threading.Tasks;
 using Chummer.Backend.Enums;
 using Chummer.Desktop.Views.Dialogs;
+using Chummer.Rules;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Chummer.Desktop.ViewModels
@@ -10,6 +11,7 @@ namespace Chummer.Desktop.ViewModels
     /// <summary>Adding, editing and deleting contacts / enemies / pets (legacy CharacterShared.AddContact / DeleteContact, ContactControl).</summary>
     public sealed partial class CharacterViewModel
     {
+        internal System.Collections.Concurrent.ConcurrentDictionary<string, bool> ExpandedContactIds { get; } = new System.Collections.Concurrent.ConcurrentDictionary<string, bool>();
         [RelayCommand]
         private Task AddContact() => AddContactAsync(ContactType.Contact);
 
@@ -23,10 +25,10 @@ namespace Chummer.Desktop.ViewModels
         {
             string strTitle = eType == ContactType.Enemy ? "New enemy" : eType == ContactType.Pet ? "New pet" : "New contact";
             ContactFields objFields = new ContactFields();
-            int intMaxConnection = Character.MaxContactConnection;
+            int intMaxConnection = await ReadModelAsync(() => Task.FromResult(Character.MaxContactConnection));
             if (!await ContactEditorWindow.EditAsync(null, Character, objFields, strTitle, true, true, true, intMaxConnection).ConfigureAwait(true))
                 return;
-            await Task.Run(async () =>
+            await RunRuleAsync(async token =>
             {
                 Contact objContact = new Contact(Character);
                 try
@@ -34,6 +36,7 @@ namespace Chummer.Desktop.ViewModels
                     await objContact.SetEntityTypeAsync(eType).ConfigureAwait(false);
                     await Character.Contacts.AddAsync(objContact).ConfigureAwait(false);
                     objFields.ApplyTo(objContact);
+                    return RuleResult.Changed;
                 }
                 catch
                 {
@@ -49,26 +52,28 @@ namespace Chummer.Desktop.ViewModels
                     throw;
                 }
             }).ConfigureAwait(true);
-            MarkDirty();
-            Reload();
         }
 
         internal async Task EditContactAsync(Contact objContact)
         {
-            ContactFields objFields = await Task.Run(() => ContactFields.From(objContact)).ConfigureAwait(true);
-            string strTitle = "Edit " + (objContact.IsEnemy ? "enemy" : objContact.EntityType == ContactType.Pet ? "pet" : "contact");
-            if (!await ContactEditorWindow.EditAsync(null, Character, objFields, strTitle, objContact.GroupEnabled, objContact.FreeEnabled,
-                                                     objContact.LoyaltyEnabled && !objContact.ReadOnly, Character.MaxContactConnection).ConfigureAwait(true))
+            var snapshot = await ReadModelAsync(() => Task.FromResult((Fields: ContactFields.From(objContact),
+                Title: "Edit " + (objContact.IsEnemy ? "enemy" : objContact.EntityType == ContactType.Pet ? "pet" : "contact"),
+                Group: objContact.GroupEnabled, Free: objContact.FreeEnabled, Loyalty: objContact.LoyaltyEnabled && !objContact.ReadOnly, Maximum: Character.MaxContactConnection)));
+            ContactFields objFields = snapshot.Fields;
+            if (!await ContactEditorWindow.EditAsync(null, Character, objFields, snapshot.Title, snapshot.Group, snapshot.Free,
+                                                     snapshot.Loyalty, snapshot.Maximum).ConfigureAwait(true))
                 return;
-            await Task.Run(() => objFields.ApplyTo(objContact)).ConfigureAwait(true);
-            MarkDirty();
-            Reload();
+            await RunRuleAsync(_ =>
+            {
+                if (!Character.Contacts.Contains(objContact)) return Task.FromResult(RuleResult.NotAllowed);
+                objFields.ApplyTo(objContact); return Task.FromResult(RuleResult.Changed);
+            });
         }
 
         internal async Task DeleteContactAsync(Contact objContact)
         {
             string strKey;
-            switch (objContact.EntityType)
+            switch (await ReadModelAsync(() => Task.FromResult(objContact.EntityType)))
             {
                 case ContactType.Enemy:
                     strKey = "Message_DeleteEnemy";
@@ -82,9 +87,12 @@ namespace Chummer.Desktop.ViewModels
             }
             if (!await CommonFunctions.ConfirmDeleteAsync(await LanguageManager.GetStringAsync(strKey).ConfigureAwait(true)).ConfigureAwait(true))
                 return;
-            await Task.Run(() => Character.Contacts.RemoveAsync(objContact)).ConfigureAwait(true);
-            MarkDirty();
-            Reload();
+            await RunRuleAsync(async token =>
+            {
+                if (!await Character.Contacts.RemoveAsync(objContact, token)) return RuleResult.Cancelled;
+                ExpandedContactIds.TryRemove(objContact.InternalId, out _);
+                return RuleResult.Changed;
+            });
         }
     }
 }

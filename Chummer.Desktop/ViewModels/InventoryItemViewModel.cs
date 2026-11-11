@@ -128,7 +128,6 @@ namespace Chummer.Desktop.ViewModels
         public bool CanEditImplant { get; private set; }
         public int SortOrder { get; private set; }
         public bool CanReorder { get; private set; }
-        public string RowStatus => string.Join(" · ", new[] { HasQuantity ? "×" + QuantityText : "", ShowEquippedMarker ? "Equipped" : "" }.Where(x => x.Length > 0));
         public bool CanModifyEquipment => CanAddMod || CanEditImplant || CanAddWeaponMount || CanAddMountedWeapon || CanEditWeaponMount || IsLifestyle;
         public bool CanOrganizeEquipment => CanRename || CanReorder || CanSetLocation || HasLocation;
         public bool IsLifestyle => Item is Lifestyle;

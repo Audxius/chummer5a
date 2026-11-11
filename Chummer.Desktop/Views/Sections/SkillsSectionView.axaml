@@ -7,13 +7,26 @@
        Every row rolls on click; the spec chips and the spec-pool cell roll with that specialization. -->
   <UserControl.Styles>
     <Style Selector="Button.seg">
+      <Setter Property="Theme" Value="{StaticResource StableButtonTheme}" />
+      <Setter Property="MinHeight" Value="34" />
       <Setter Property="Padding" Value="12,5" />
       <Setter Property="FontSize" Value="11" />
       <Setter Property="LetterSpacing" Value="1.5" />
       <Setter Property="CornerRadius" Value="0" />
-      <Setter Property="Margin" Value="0,0,-1,0" />
+      <Setter Property="Margin" Value="0,0,4,0" />
       <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
       <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+    </Style>
+    <Style Selector="Button.seg:pointerover">
+      <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+    <Style Selector="Button.seg:focus-visible">
+      <Setter Property="BorderBrush" Value="{StaticResource CyanBrush}" />
+    </Style>
+    <Style Selector="Button.seg.on:pointerover">
+      <Setter Property="Background" Value="{StaticResource CyanBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource BaseBrush}" />
     </Style>
     <Style Selector="Button.seg.on">
       <Setter Property="Foreground" Value="{StaticResource BaseBrush}" />

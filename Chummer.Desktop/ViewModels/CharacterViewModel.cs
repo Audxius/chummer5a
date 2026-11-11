@@ -159,6 +159,11 @@ namespace Chummer.Desktop.ViewModels
 
         /// <summary>Editable identity / looks / notes (created on first use).</summary>
         public CharacterInfoViewModel Info => _objInfo ??= new CharacterInfoViewModel(this);
+        internal async Task FlushInfoEditsAsync()
+        {
+            if (CommitInfoEditor != null) await CommitInfoEditor();
+            if (_objInfo != null) await _objInfo.FlushAsync();
+        }
 
         /// <summary>Flags unsaved changes made through objects that do not raise Character.PropertyChanged (contacts...).</summary>
         internal void MarkDirty() => OnUi(() => IsDirty = true);
@@ -505,6 +510,7 @@ namespace Chummer.Desktop.ViewModels
         [RelayCommand]
         private async Task Save()
         {
+            await FlushInfoEditsAsync();
             if (string.IsNullOrEmpty(Character.FileName))
             {
                 await SaveAs();
@@ -516,6 +522,7 @@ namespace Chummer.Desktop.ViewModels
 
         public async Task<bool> ConfirmCloseAsync()
         {
+            await FlushInfoEditsAsync();
             if (!IsDirty)
                 return true;
             MessageResult eResult = await MessageBoxes.ShowAsync(
@@ -535,6 +542,7 @@ namespace Chummer.Desktop.ViewModels
 
         public async Task DisposeCharacterAsync()
         {
+            await FlushInfoEditsAsync();
             _isCharacterDisposed = true;
             Character.PropertyChanged -= CharacterOnPropertyChanged;
             if (await CharacterRegistry.OpenCharacters.ContainsAsync(Character).ConfigureAwait(false))

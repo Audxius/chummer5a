@@ -39,12 +39,21 @@ namespace Chummer.Desktop.ViewModels
         // ---------- shared ----------
 
         private int _pendingEngineMutations;
+        internal Func<Task> CommitInfoEditor { get; set; }
 
         /// <summary>Serialize multi-step dialog reads with sheet snapshots and engine mutations.</summary>
         internal async Task<T> ReadModelAsync<T>(Func<Task<T>> read)
         {
             await _engineOperationGate.WaitAsync().ConfigureAwait(false);
             try { return await Task.Run(read).ConfigureAwait(false); }
+            finally { _engineOperationGate.Release(); }
+        }
+
+        /// <summary>Commit metadata without replacing the editor's active field snapshots.</summary>
+        internal async Task WriteInfoAsync(Action<Character> write)
+        {
+            await _engineOperationGate.WaitAsync().ConfigureAwait(false);
+            try { await Task.Run(() => write(Character)).ConfigureAwait(false); }
             finally { _engineOperationGate.Release(); }
         }
 

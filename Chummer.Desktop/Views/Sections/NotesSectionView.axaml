@@ -1,115 +1,109 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:Chummer.Desktop.ViewModels"
-             xmlns:loc="using:Chummer.Desktop.Localization"
-             xmlns:conv="using:Chummer.Desktop.Converters"
-             x:Class="Chummer.Desktop.Views.Sections.NotesSectionView"
-             x:DataType="vm:CharacterViewModel">
-  <UserControl.Styles>
-    <Style Selector="TextBox.note">
-      <Setter Property="AcceptsReturn" Value="True" />
-      <Setter Property="TextWrapping" Value="Wrap" />
-      <Setter Property="MinHeight" Value="110" />
-      <Setter Property="VerticalContentAlignment" Value="Top" />
-    </Style>
-    <Style Selector="TextBlock.fieldlabel">
-      <Setter Property="FontSize" Value="10" />
-      <Setter Property="LetterSpacing" Value="1" />
-      <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
-      <Setter Property="Margin" Value="0,0,0,3" />
-    </Style>
-  </UserControl.Styles>
-  <ScrollViewer>
-    <Grid Margin="28,22" ColumnDefinitions="380,24,*" MaxWidth="1500" HorizontalAlignment="Left">
-      <!-- Identity and looks -->
-      <StackPanel Spacing="16">
-        <Border Classes="panel lit">
-          <StackPanel Spacing="10" DataContext="{Binding Info}" x:DataType="vm:CharacterInfoViewModel">
-            <TextBlock Text="IDENTITY" Classes="h2" />
-            <StackPanel>
-              <TextBlock Text="STREET NAME / ALIAS" Classes="fieldlabel" />
-              <TextBox Text="{Binding Alias, UpdateSourceTrigger=LostFocus}" FontSize="16" FontWeight="Bold" />
-            </StackPanel>
-            <StackPanel>
-              <TextBlock Text="REAL NAME" Classes="fieldlabel" />
-              <TextBox Text="{Binding CharacterName, UpdateSourceTrigger=LostFocus}" />
-            </StackPanel>
-            <StackPanel>
-              <TextBlock Text="PLAYER" Classes="fieldlabel" />
-              <TextBox Text="{Binding PlayerName, UpdateSourceTrigger=LostFocus}" />
-            </StackPanel>
-          </StackPanel>
-        </Border>
-        <Border Classes="panel lit">
-          <Grid ColumnDefinitions="*,12,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10" DataContext="{Binding Info}" x:DataType="vm:CharacterInfoViewModel">
-            <TextBlock Grid.ColumnSpan="3" Text="LOOKS" Classes="h2" />
-            <StackPanel Grid.Row="1">
-              <TextBlock Text="SEX" Classes="fieldlabel" />
-              <TextBox Text="{Binding Gender, UpdateSourceTrigger=LostFocus}" />
-            </StackPanel>
-            <StackPanel Grid.Row="1" Grid.Column="2">
-              <TextBlock Text="AGE" Classes="fieldlabel" />
-              <TextBox Text="{Binding Age, UpdateSourceTrigger=LostFocus}" />
-            </StackPanel>
-            <StackPanel Grid.Row="2">
-              <TextBlock Text="HEIGHT" Classes="fieldlabel" />
-              <TextBox Text="{Binding Height, UpdateSourceTrigger=LostFocus}" />
-            </StackPanel>
-            <StackPanel Grid.Row="2" Grid.Column="2">
-              <TextBlock Text="WEIGHT" Classes="fieldlabel" />
-              <TextBox Text="{Binding Weight, UpdateSourceTrigger=LostFocus}" />
-            </StackPanel>
-            <StackPanel Grid.Row="3">
-              <TextBlock Text="EYES" Classes="fieldlabel" />
-              <TextBox Text="{Binding Eyes, UpdateSourceTrigger=LostFocus}" />
-            </StackPanel>
-            <StackPanel Grid.Row="3" Grid.Column="2">
-              <TextBlock Text="HAIR" Classes="fieldlabel" />
-              <TextBox Text="{Binding Hair, UpdateSourceTrigger=LostFocus}" />
-            </StackPanel>
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:Chummer.Desktop.ViewModels" x:Class="Chummer.Desktop.Views.Sections.NotesSectionView" x:DataType="vm:CharacterViewModel">
+  <DockPanel Margin="28,22">
+    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,16">
+      <TextBlock Text="Info and notes" FontSize="24" FontWeight="SemiBold" />
+      <TextBlock Text="Identity, appearance and your runner's story" Classes="muted" />
+    </StackPanel>
+    <TabControl DataContext="{Binding Info}" x:DataType="vm:CharacterInfoViewModel">
+      <TabItem>
+        <TabItem.Header>
+          <TextBlock Text="Identity" FontSize="14" />
+        </TabItem.Header>
+        <ScrollViewer>
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="24" Margin="0,18,0,0">
+            <Border Classes="panel" VerticalAlignment="Top">
+              <StackPanel Spacing="14">
+                <TextBlock Text="Identity" FontSize="16" FontWeight="SemiBold" />
+                <StackPanel Spacing="5">
+                  <TextBlock Text="Street name / alias" Classes="muted" />
+                  <TextBox Text="{Binding Alias, UpdateSourceTrigger=LostFocus}" />
+                </StackPanel>
+                <StackPanel Spacing="5">
+                  <TextBlock Text="Real name" Classes="muted" />
+                  <TextBox Text="{Binding CharacterName, UpdateSourceTrigger=LostFocus}" />
+                </StackPanel>
+                <StackPanel Spacing="5">
+                  <TextBlock Text="Player" Classes="muted" />
+                  <TextBox Text="{Binding PlayerName, UpdateSourceTrigger=LostFocus}" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Classes="panel" VerticalAlignment="Top">
+              <StackPanel Spacing="14">
+                <TextBlock Text="Appearance" FontSize="16" FontWeight="SemiBold" />
+                <Grid ColumnDefinitions="90,*" ColumnSpacing="16">
+                  <TextBlock Text="Sex" Classes="muted" VerticalAlignment="Center" />
+                  <TextBox Grid.Column="1" Text="{Binding Gender, UpdateSourceTrigger=LostFocus}" />
+                </Grid>
+                <Grid ColumnDefinitions="90,*" ColumnSpacing="16">
+                  <TextBlock Text="Age" Classes="muted" VerticalAlignment="Center" />
+                  <TextBox Grid.Column="1" Text="{Binding Age, UpdateSourceTrigger=LostFocus}" />
+                </Grid>
+                <Grid ColumnDefinitions="90,*" ColumnSpacing="16">
+                  <TextBlock Text="Height" Classes="muted" VerticalAlignment="Center" />
+                  <TextBox Grid.Column="1" Text="{Binding Height, UpdateSourceTrigger=LostFocus}" />
+                </Grid>
+                <Grid ColumnDefinitions="90,*" ColumnSpacing="16">
+                  <TextBlock Text="Weight" Classes="muted" VerticalAlignment="Center" />
+                  <TextBox Grid.Column="1" Text="{Binding Weight, UpdateSourceTrigger=LostFocus}" />
+                </Grid>
+                <Grid ColumnDefinitions="90,*" ColumnSpacing="16">
+                  <TextBlock Text="Eyes" Classes="muted" VerticalAlignment="Center" />
+                  <TextBox Grid.Column="1" Text="{Binding Eyes, UpdateSourceTrigger=LostFocus}" />
+                </Grid>
+                <Grid ColumnDefinitions="90,*" ColumnSpacing="16">
+                  <TextBlock Text="Hair" Classes="muted" VerticalAlignment="Center" />
+                  <TextBox Grid.Column="1" Text="{Binding Hair, UpdateSourceTrigger=LostFocus}" />
+                </Grid>
+                <Grid ColumnDefinitions="90,*" ColumnSpacing="16">
+                  <TextBlock Text="Skin" Classes="muted" VerticalAlignment="Center" />
+                  <TextBox Grid.Column="1" Text="{Binding Skin, UpdateSourceTrigger=LostFocus}" />
+                </Grid>
+              </StackPanel>
+            </Border>
           </Grid>
-        </Border>
-        <Border Classes="panel lit">
-          <StackPanel DataContext="{Binding Info}" x:DataType="vm:CharacterInfoViewModel">
-            <TextBlock Text="SKIN" Classes="fieldlabel" />
-            <TextBox Text="{Binding Skin, UpdateSourceTrigger=LostFocus}" />
-          </StackPanel>
-        </Border>
-      </StackPanel>
-
-      <!-- Long texts -->
-      <StackPanel Grid.Column="2" Spacing="16" DataContext="{Binding Info}" x:DataType="vm:CharacterInfoViewModel">
-        <Border Classes="panel lit">
-          <StackPanel Spacing="6">
-            <TextBlock Text="{loc:Tr Label_Concept, Case=upper}" Classes="h2" />
-            <TextBox Classes="note" MinHeight="60" Text="{Binding Concept, UpdateSourceTrigger=LostFocus}" />
-          </StackPanel>
-        </Border>
-        <Border Classes="panel lit">
-          <StackPanel Spacing="6">
-            <TextBlock Text="{loc:Tr Label_Background, Case=upper}" Classes="h2" />
-            <TextBox Classes="note" MinHeight="160" Text="{Binding Background, UpdateSourceTrigger=LostFocus}" />
-          </StackPanel>
-        </Border>
-        <Border Classes="panel lit">
-          <StackPanel Spacing="6">
-            <TextBlock Text="{loc:Tr Label_Description, Case=upper}" Classes="h2" />
-            <TextBox Classes="note" Text="{Binding Description, UpdateSourceTrigger=LostFocus}" />
-          </StackPanel>
-        </Border>
-        <Border Classes="panel hot">
-          <StackPanel Spacing="6">
-            <TextBlock Text="{loc:Tr Tab_Notes, Case=upper}" Classes="h2" Foreground="{StaticResource MagentaBrush}" />
-            <TextBox Classes="note" MinHeight="160" Text="{Binding Notes, UpdateSourceTrigger=LostFocus}" />
-          </StackPanel>
-        </Border>
-        <Border Classes="panel hot">
-          <StackPanel Spacing="6">
-            <TextBlock Text="GM NOTES" Classes="h2" Foreground="{StaticResource MagentaBrush}" />
-            <TextBox Classes="note" Text="{Binding GameNotes, UpdateSourceTrigger=LostFocus}" />
-          </StackPanel>
-        </Border>
-      </StackPanel>
-    </Grid>
-  </ScrollViewer>
+        </ScrollViewer>
+      </TabItem>
+      <TabItem>
+        <TabItem.Header>
+          <TextBlock Text="Concept" FontSize="14" />
+        </TabItem.Header>
+        <Grid Margin="0,16,0,0">
+          <TextBox Text="{Binding Concept, UpdateSourceTrigger=LostFocus}" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top" Padding="18" />
+        </Grid>
+      </TabItem>
+      <TabItem>
+        <TabItem.Header>
+          <TextBlock Text="Background" FontSize="14" />
+        </TabItem.Header>
+        <Grid Margin="0,16,0,0">
+          <TextBox Text="{Binding Background, UpdateSourceTrigger=LostFocus}" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top" Padding="18" />
+        </Grid>
+      </TabItem>
+      <TabItem>
+        <TabItem.Header>
+          <TextBlock Text="Description" FontSize="14" />
+        </TabItem.Header>
+        <Grid Margin="0,16,0,0">
+          <TextBox Text="{Binding Description, UpdateSourceTrigger=LostFocus}" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top" Padding="18" />
+        </Grid>
+      </TabItem>
+      <TabItem>
+        <TabItem.Header>
+          <TextBlock Text="Notes" FontSize="14" />
+        </TabItem.Header>
+        <Grid Margin="0,16,0,0">
+          <TextBox Text="{Binding Notes, UpdateSourceTrigger=LostFocus}" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top" Padding="18" />
+        </Grid>
+      </TabItem>
+      <TabItem>
+        <TabItem.Header>
+          <TextBlock Text="GM notes" FontSize="14" />
+        </TabItem.Header>
+        <Grid Margin="0,16,0,0">
+          <TextBox Text="{Binding GameNotes, UpdateSourceTrigger=LostFocus}" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top" Padding="18" />
+        </Grid>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
 </UserControl>

@@ -6,6 +6,10 @@
              x:Class="Chummer.Desktop.Views.Sections.ContactsSectionView"
              x:DataType="vm:CharacterViewModel">
   <DockPanel Margin="28,22,28,0">
+    <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,16">
+      <TextBlock Text="Contacts" FontSize="24" FontWeight="SemiBold" />
+      <TextBlock Text="Your network, enemies and companions" Classes="muted" />
+    </StackPanel>
     <Grid DockPanel.Dock="Top" Margin="0,0,0,14" ColumnDefinitions="*,Auto">
       <TextBox Text="{Binding NetworkFilter}" PlaceholderText="Search contacts by name, role, location, payment, vice, notes… or spirits and sprites" Padding="40,9,10,9" />
       <PathIcon Data="{StaticResource Icon.Search}" Width="15" Height="15" HorizontalAlignment="Left" Margin="14,0,0,0" Classes="muted" IsHitTestVisible="False" />
@@ -23,15 +27,15 @@
           <TextBlock Text="sorted by connection + loyalty" Classes="muted" FontSize="11" VerticalAlignment="Center" />
         </StackPanel>
         <ItemsControl ItemsSource="{Binding ContactCards}" ItemTemplate="{StaticResource ContactCard}" IsVisible="{Binding HasContactCards}">
-          <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+          <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
         </ItemsControl>
         <TextBlock Text="ENEMIES" Classes="h2" Foreground="{StaticResource RedBrush}" IsVisible="{Binding HasEnemyCards}" Margin="0,8,0,0" />
         <ItemsControl ItemsSource="{Binding EnemyCards}" ItemTemplate="{StaticResource ContactCard}" IsVisible="{Binding HasEnemyCards}">
-          <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+          <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
         </ItemsControl>
         <TextBlock Text="PETS" Classes="h2" IsVisible="{Binding HasPetCards}" Margin="0,8,0,0" />
         <ItemsControl ItemsSource="{Binding PetCards}" ItemTemplate="{StaticResource ContactCard}" IsVisible="{Binding HasPetCards}">
-          <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+          <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
         </ItemsControl>
         <ItemsControl ItemsSource="{Binding NetworkGroups}" ItemTemplate="{StaticResource CardGroup}" Margin="0,8,0,0" />
       </StackPanel>

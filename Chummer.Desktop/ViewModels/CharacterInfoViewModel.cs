@@ -16,6 +16,8 @@ namespace Chummer.Desktop.ViewModels
         private readonly CharacterViewModel _objOwner;
         private readonly Character _objCharacter;
         private bool _blnLoading;
+        private Task _pendingWrites = Task.CompletedTask;
+        internal Task FlushAsync() => _pendingWrites;
 
         public CharacterInfoViewModel(CharacterViewModel objOwner)
         {
@@ -84,8 +86,14 @@ namespace Chummer.Desktop.ViewModels
         {
             if (_blnLoading)
                 return;
-            _ = Task.Run(() => funcWrite(_objCharacter));
             _objOwner.MarkDirty();
+            _pendingWrites = CommitAfterAsync(_pendingWrites, funcWrite);
+        }
+
+        private async Task CommitAfterAsync(Task previous, Action<Character> write)
+        {
+            await previous;
+            await _objOwner.WriteInfoAsync(write);
         }
     }
 }

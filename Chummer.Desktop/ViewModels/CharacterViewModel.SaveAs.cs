@@ -16,6 +16,7 @@ namespace Chummer.Desktop.ViewModels
         [RelayCommand]
         private async Task SaveAs()
         {
+            await FlushInfoEditsAsync();
             Window objMain = (Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
             if (objMain == null)
                 return;
@@ -46,6 +47,7 @@ namespace Chummer.Desktop.ViewModels
             bool blnSaved = false;
             try
             {
+                await FlushInfoEditsAsync();
                 blnSaved = await Character.SaveAsync().ConfigureAwait(true);
             }
             finally
