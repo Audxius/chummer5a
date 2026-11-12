@@ -18,7 +18,7 @@ namespace Chummer.Desktop.Views.Sections
         private readonly Action _back;
         private Bitmap _art;
         private bool _closed, _inspect;
-        private Grid _columns;
+        private Grid _columns, _facts;
         private readonly TextBlock _status = new TextBlock { TextWrapping = TextWrapping.Wrap };
         public ContactCardViewModel Profile => _card;
         public ContactProfileView(ContactCardViewModel card, Action back)
@@ -72,10 +72,10 @@ namespace Chummer.Desktop.Views.Sections
         }
         private Border Rating(string label, int value, System.Collections.Generic.IReadOnlyList<bool> pips, bool connection)
         {
-            var content = new StackPanel { Spacing = 12 };
+            var content = new StackPanel { Spacing = 10 };
+            content.Children.Add(Text(label, 13, true));
             var row = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto,Auto"), ColumnSpacing = 7 };
-            row.Children.Add(Text(label, 13, true));
-            var number = Text(value.ToString(), 25); number.FontWeight = FontWeight.SemiBold; Grid.SetColumn(number, 1); row.Children.Add(number);
+            var number = Text(value.ToString(), 25); number.FontWeight = FontWeight.SemiBold; row.Children.Add(number);
             var minus = ActionButton("−", () => (connection ? _card.ConnectionDownCommand : _card.LoyaltyDownCommand).ExecuteAsync(null), connection ? _card.CanDecreaseConnection : _card.CanDecreaseLoyalty);
             var plus = ActionButton("+", () => (connection ? _card.ConnectionUpCommand : _card.LoyaltyUpCommand).ExecuteAsync(null), connection ? _card.CanIncreaseConnection : _card.CanIncreaseLoyalty);
             minus.Classes.Add("step"); plus.Classes.Add("step"); Grid.SetColumn(minus, 2); Grid.SetColumn(plus, 3); row.Children.Add(minus); row.Children.Add(plus);
@@ -85,11 +85,22 @@ namespace Chummer.Desktop.Views.Sections
             content.Children.Add(bar); return Panel(content);
         }
         private void Resize()
-        { if (_columns != null) _columns.ColumnDefinitions[0].Width = new GridLength(Bounds.Width < 900 ? 230 : 360); }
+        {
+            if (_columns != null) _columns.ColumnDefinitions[0].Width = new GridLength(Bounds.Width < 900 ? 230 : 360);
+            if (_facts == null) return;
+            int count = Bounds.Width < 900 ? 1 : 2;
+            _facts.ColumnDefinitions = new ColumnDefinitions(count == 1 ? "*" : "*,*");
+            _facts.RowDefinitions.Clear();
+            for (int i = 0; i < _facts.Children.Count; i++)
+            {
+                if (i % count == 0) _facts.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+                Grid.SetRow(_facts.Children[i], i / count); Grid.SetColumn(_facts.Children[i], i % count);
+            }
+        }
         private void Draw()
         {
             if (_status.Parent is Panel previous) previous.Children.Remove(_status);
-            var root = new DockPanel();
+            var root = new DockPanel { MaxWidth = _inspect ? double.PositiveInfinity : 1180, HorizontalAlignment = HorizontalAlignment.Stretch };
             var heading = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), ColumnSpacing = 16, Margin = new Thickness(0, 0, 0, 20) };
             var title = new StackPanel { Spacing = 7 };
             var back = new Button { Content = _inspect ? "← Back to profile" : _card.IsPet ? "← Pets & cohorts" : "← Contacts", Classes = { "ghost" }, Padding = new Thickness(0, 3) };
@@ -124,12 +135,12 @@ namespace Chummer.Desktop.Views.Sections
                 inspect.Click += (_, _) => { _inspect = true; Draw(); }; left.Children.Add(inspect);
             }
             else left.Children.Add(new Border { Height = 230, Background = Brush("PanelBrush"), CornerRadius = new CornerRadius(6), Child = new TextBlock { Text = _card.Initials, FontSize = 60, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center } });
-            var right = new StackPanel { Spacing = 16 };
+            var right = new StackPanel { Spacing = 22 };
             var ratings = new Grid { ColumnDefinitions = new ColumnDefinitions("*,*"), ColumnSpacing = 12 };
             ratings.Children.Add(Rating("Connection", _card.Connection, _card.ConnectionPips, true));
             var loyalty = Rating("Loyalty", _card.Loyalty, _card.LoyaltyPips, false); Grid.SetColumn(loyalty, 1); ratings.Children.Add(loyalty); right.Children.Add(ratings);
-            var details = new StackPanel { Spacing = 16 }; details.Children.Add(Text("Details", 17));
-            var facts = new Grid { ColumnDefinitions = new ColumnDefinitions("*,*"), ColumnSpacing = 22, RowSpacing = 16 };
+            var details = new StackPanel { Spacing = 20 }; details.Children.Add(Text("Profile", 19));
+            var facts = _facts = new Grid { ColumnDefinitions = new ColumnDefinitions("*,*"), ColumnSpacing = 22, RowSpacing = 16 };
             for (int i = 0; i < _card.Facts.Count; ++i)
             {
                 if (i % 2 == 0) facts.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
@@ -138,7 +149,7 @@ namespace Chummer.Desktop.Views.Sections
             }
             details.Children.Add(facts);
             if (_card.HasTags) details.Children.Add(Text(string.Join(" · ", _card.Tags), 12, true));
-            right.Children.Add(Panel(details));
+            right.Children.Add(details);
             if (_card.HasNotes) { var notes = new StackPanel { Spacing = 10 }; notes.Children.Add(Text("Notes", 17)); notes.Children.Add(Text(_card.Notes)); right.Children.Add(Panel(notes)); }
             var sheet = new StackPanel { Spacing = 12 }; sheet.Children.Add(Text("Character sheet", 17));
             if (_card.LinkedStats.Count > 0)
@@ -147,12 +158,13 @@ namespace Chummer.Desktop.Views.Sections
                 if (_card.LinkedSkills.Count > 0) { sheet.Children.Add(Text("Trained skills", 14, true)); foreach (var skill in _card.LinkedSkills) sheet.Children.Add(Text(skill.Label + "  " + skill.Value)); }
                 sheet.Children.Add(ActionButton("Open full character sheet", async () => { string path = Path.GetFullPath(_card.LinkedFile); if (!File.Exists(path)) throw new IOException("Linked sheet not found. Link its current location."); await MainWindowViewModel.Current.OpenCharacterFileAsync(path); }));
             }
-            else
+            else if (!string.IsNullOrWhiteSpace(_card.LinkedFile))
             {
                 sheet.Children.Add(Text("No character sheet linked.", 13, true));
                 sheet.Children.Add(ActionButton("Link character sheet…", async () => { var file = await CharacterViewModel.PickContactFileAsync(TopLevel.GetTopLevel(this) as Window); if (file != null) await _card.LinkProfileAsync(file); }, _card.IsEditable));
             }
-            right.Children.Add(Panel(sheet)); right.Children.Add(_status);
+            if (_card.LinkedStats.Count > 0 || !string.IsNullOrWhiteSpace(_card.LinkedFile)) right.Children.Add(Panel(sheet));
+            right.Children.Add(_status);
             _columns.Children.Add(left); Grid.SetColumn(right, 1); _columns.Children.Add(right); Resize();
             root.Children.Add(new ScrollViewer { Content = _columns, Padding = new Thickness(0, 0, 0, 24) }); Content = root;
         }

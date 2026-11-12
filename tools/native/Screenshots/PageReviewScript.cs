@@ -253,6 +253,20 @@ internal static class PageReviewScript
 
     public static async Task CheckInlineProfilesAndRollsAsync(MainWindow window, CharacterViewModel runner, string output, Func<Task> settle)
     {
+        int qualityCount = runner.Character.Qualities.Count;
+        var qualityPicker = new Chummer.Desktop.Views.Dialogs.QualityPickerWindow(runner.Character);
+        qualityPicker.Show(window); await settle();
+        var qualityList = qualityPicker.GetVisualDescendants().OfType<ListBox>().Single();
+        qualityList.SelectedIndex = 0; await settle();
+        var description = qualityPicker.GetVisualDescendants().OfType<TextBlock>().Single(x => x.Name == "QualityPreviewDescription");
+        if (string.IsNullOrWhiteSpace(description.Text)) throw new InvalidOperationException("Quality picker has no selected explanation.");
+        var hoverRow = qualityPicker.GetVisualDescendants().OfType<Grid>().First(x => ToolTip.GetTip(x) is StackPanel);
+        var hoverPoint = hoverRow.TranslatePoint(new Point(20, 8), qualityPicker)!.Value;
+        qualityPicker.MouseMove(hoverPoint, RawInputModifiers.None); await Task.Delay(900); await settle();
+        if (!ToolTip.GetIsOpen(hoverRow)) throw new InvalidOperationException("Quality picker hover did not open its explanation.");
+        Save(qualityPicker, output, "59-quality-picker-explanation");
+        qualityPicker.Close(); await settle();
+        if (runner.Character.Qualities.Count != qualityCount) throw new InvalidOperationException("Quality preview changed the runner.");
         runner.ShowSectionCommand.Execute(CharacterSection.Skills); await settle();
         foreach (var button in window.GetVisualDescendants().OfType<Button>().Where(x => (x.Classes.Contains("nav") || x.Classes.Contains("section") || x.Classes.Contains("seg"))
             && x.IsVisible && x.GetVisualAncestors().OfType<Control>().All(c => c.IsVisible)).ToArray()) await CheckHoverAsync(window, button);
@@ -262,6 +276,11 @@ internal static class PageReviewScript
         var profile = window.GetVisualDescendants().OfType<ContactProfileView>().Single();
         if (window.OwnedWindows.Any() || !runner.HasContactProfile) throw new InvalidOperationException("Profile did not stay inside the character page.");
         Save(window, output, "60-inline-profile");
+        window.Width = 1920; window.Height = 1080; await settle();
+        Save(window, output, "60-inline-profile-wide");
+        window.Width = 980; window.Height = 720; await settle();
+        Save(window, output, "60-inline-profile-compact");
+        window.Width = 1440; window.Height = 900; await settle();
         var art = profile.GetVisualDescendants().OfType<Image>().Single(x => x.Name == "ContactProfileArtwork");
         if (art.Source is not Avalonia.Media.Imaging.Bitmap bitmap || bitmap.PixelSize.Width <= 256) throw new InvalidOperationException("Original contact art was not loaded.");
         Click(window, profile.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == "Enlarge artwork")); await settle();

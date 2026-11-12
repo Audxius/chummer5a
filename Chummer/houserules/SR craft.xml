@@ -550,10 +550,10 @@
       <type>No</type>
       <keywords>astral weapon mech attack magic tradition</keywords>
       <test>
-        <dice>{Max: {LOG} or {CHA} or {INT}} + {Weapon: Skill} v. {Action: Ranged Defense}</dice>
+        <dice>{Tradition Attribute} + {Weapon: Skill} v. {Action: Ranged Defense}</dice>
         <bonusstring>Astral weapons ignore conventional armor; attack with your tradition attribute + combat skill instead of Agility + combat skill.</bonusstring>
       </test>
-      <notes>Formula takes the highest of Logic/Charisma/Intuition; substitute your tradition's attribute. Defense test not specified by the book.</notes>
+      <notes>Uses the attribute from your recorded magical tradition; supply it explicitly if the tradition has no unique Logic, Charisma or Intuition attribute. Defense test not specified by the book.</notes>
     </action>
     <action>
       <id>7f5bcb00-cfcc-46be-8cd5-061d76541fd3</id>
@@ -936,10 +936,10 @@
       <type>No</type>
       <keywords>spellcrafting create spell design custom spell arcana</keywords>
       <test>
-        <dice>{Max: {LOG} or {CHA} or {INT}} + {Arcana}</dice>
+        <dice>{Tradition Attribute} + {Arcana}</dice>
         <bonusstring>Hits determine how many different properties you can pick for your spell. Glitch adds side effects; critical glitch may warrant a magic advancement table roll.</bonusstring>
       </test>
-      <notes>Use your tradition's main attribute (formula takes the highest of Logic/Charisma/Intuition). Drain starts at F for TL3 spells.</notes>
+      <notes>Uses your recorded tradition attribute. Drain starts at F for TL3 spells.</notes>
     </action>
     <action>
       <id>6eab93eb-d83c-4a35-9b68-12a37de34412</id>

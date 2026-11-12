@@ -409,6 +409,13 @@ namespace Chummer.Rolls
                     }
                     switch (strToken.ToUpperInvariant())
                     {
+                        case "TRADITION ATTRIBUTE":
+                            // Rework crafting uses the tradition's attribute, never the runner's best mental stat.
+                            string drain = objCharacter.MagicTradition.DrainExpression;
+                            string[] candidates = new[] { "LOG", "CHA", "INT" }.Where(x =>
+                                drain.IndexOf("{" + x + "}", StringComparison.OrdinalIgnoreCase) >= 0).ToArray();
+                            if (candidates.Length != 1) return Unknown(strToken);
+                            return Record("Tradition attribute (" + candidates[0] + ")", objCharacter.GetAttribute(candidates[0]).TotalValue);
                         case "INITIATIVE": return Record("Initiative", objCharacter.InitiativeValue);
                         case "INITIATIVE DICE": return Record("Initiative dice", objCharacter.InitiativeDice);
                         case "ASTRAL INITIATIVE": return Record("Astral initiative", objCharacter.AstralInitiativeValue);

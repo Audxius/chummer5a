@@ -28,7 +28,7 @@ The books often name a test without spelling out the pool. In those cases:
 - **Gunnery** uses AGI + Gunnery [Accuracy]. Jumped-in riggers in core SR5 would use LOG instead.
 - **"Appropriate mechanics test"** is LOG + the best of Automotive / Aeronautics / Nautical Mechanic [Mental].
 - **"Spellcasting / counterspelling"** is MAG + skill, and Assensing is INT + Assensing [Astral].
-- **Tradition attribute** (Spellcrafting, Astral Weapon Attack) is the best of LOG / CHA / INT, which may overstate the pool.
+- **Tradition attribute** (Spellcrafting, Astral Weapon Attack) comes from the runner's recorded drain expression. A unique LOG / CHA / INT attribute is resolved automatically; missing or ambiguous custom traditions require an explicit value rather than silently choosing the highest stat.
 - **Ammunition crafting** is LOG + Armorer. "Armoury check" with no attribute is LOG + Armorer.
 - **Networks:** a bare `[N]` after a pool was read as a **threshold**, not a limit, because that is how the book uses it.
   AI Depth is `{DEP}`.

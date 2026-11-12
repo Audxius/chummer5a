@@ -39,6 +39,36 @@ namespace Chummer.Rules
                 : "A situational quality. Check its rule reference for the specific triggers and exceptions.";
         }
 
+        /// <summary>Read-only catalog preview: never creates a quality or applies improvements.</summary>
+        public static string Description(System.Xml.XPath.XPathNavigator node)
+        {
+            if (node == null) return string.Empty;
+            string custom = node.SelectSingleNode("altdescription")?.Value;
+            if (string.IsNullOrWhiteSpace(custom)) custom = node.SelectSingleNode("description")?.Value;
+            if (!string.IsNullOrWhiteSpace(custom)) return custom.Trim();
+            string name = node.SelectSingleNode("name")?.Value ?? string.Empty;
+            return Summaries.TryGetValue(name, out string summary) ? summary
+                : "No rules description is supplied by this data pack. Consult the source reference below for this quality's effects and exceptions.";
+        }
+
+        public static string PreviewModifiers(System.Xml.XPath.XPathNavigator node)
+        {
+            if (node == null) return string.Empty;
+            var lines = new List<string>();
+            foreach (System.Xml.XPath.XPathNavigator effect in node.Select("bonus/skill | bonus/skillcategory | bonus/skillattribute | bonus/notoriety"))
+            {
+                string amount = effect.Name == "notoriety" ? effect.Value : effect.SelectSingleNode("bonus")?.Value;
+                if (!decimal.TryParse(amount, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal value)) continue;
+                string target = effect.Name == "notoriety" ? "Notoriety" : effect.SelectSingleNode("name")?.Value;
+                if (string.IsNullOrWhiteSpace(target)) continue;
+                string condition = effect.SelectSingleNode("condition")?.Value;
+                string label = effect.Name == "skillattribute" ? target + "-linked tests" : target;
+                lines.Add(label + ": " + value.ToString("+0.##;-0.##;0", CultureInfo.CurrentCulture)
+                    + (string.IsNullOrWhiteSpace(condition) ? "" : " (" + condition + ")"));
+            }
+            return string.Join("\n", lines);
+        }
+
         public static string Modifiers(Character character, Quality quality)
         {
             var ids = character.Qualities.Where(x => x.SourceID == quality.SourceID && x.Extra == quality.Extra && x.SourceName == quality.SourceName)

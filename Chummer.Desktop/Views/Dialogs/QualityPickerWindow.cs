@@ -108,6 +108,14 @@ namespace Chummer.Desktop.Views.Dialogs
                 };
                 Grid.SetColumn(txtCost, 1);
                 grdRow.Children.Add(txtCost);
+                var explanation = new StackPanel { Spacing = 8, MaxWidth = 360 };
+                explanation.Children.Add(new TextBlock { Text = x.Name, FontWeight = FontWeight.Bold });
+                explanation.Children.Add(new TextBlock { Text = Chummer.Rules.QualityDescriptionRules.Description(_objSelector.Node(x.Id)), TextWrapping = TextWrapping.Wrap });
+                string effects = Chummer.Rules.QualityDescriptionRules.PreviewModifiers(_objSelector.Node(x.Id));
+                if (!string.IsNullOrWhiteSpace(effects)) explanation.Children.Add(new TextBlock { Text = effects, TextWrapping = TextWrapping.Wrap });
+                explanation.Children.Add(new TextBlock { Text = _objSelector.SourceText(x.Id), FontSize = 12 });
+                ToolTip.SetTip(grdRow, explanation);
+                ToolTip.SetPlacement(grdRow, PlacementMode.Pointer);
                 return grdRow;
             });
             TextBlock txtCount = new TextBlock { Classes = { "label" } };
@@ -120,6 +128,8 @@ namespace Chummer.Desktop.Views.Dialogs
             TextBlock txtCostBig = new TextBlock { FontSize = 30, FontWeight = FontWeight.Black };
             TextBlock txtCostLabel = new TextBlock { Classes = { "label" }, Text = blnCareer ? "KARMA COST (CAREER)" : "KARMA" };
             TextBlock txtSource = new TextBlock { Classes = { "muted" } };
+            TextBlock txtDescription = new TextBlock { Name = "QualityPreviewDescription", TextWrapping = TextWrapping.Wrap, FontSize = 14, LineHeight = 22 };
+            TextBlock txtEffects = new TextBlock { TextWrapping = TextWrapping.Wrap, FontSize = 13, LineHeight = 20 };
             TextBlock txtRequirements = new TextBlock { TextWrapping = TextWrapping.Wrap };
             NumericUpDown nudRating = new NumericUpDown { Minimum = 1, Maximum = 1, Value = 1, Increment = 1, Width = 120, FormatString = "0" };
             TextBlock lblRating = new TextBlock { Text = "LEVELS", Classes = { "label" }, VerticalAlignment = VerticalAlignment.Center };
@@ -131,7 +141,7 @@ namespace Chummer.Desktop.Views.Dialogs
             {
                 Spacing = 8,
                 Margin = new Thickness(18, 0, 0, 0),
-                Children = { txtName, bdrType, new StackPanel { Spacing = 0, Children = { txtCostLabel, txtCostBig } }, txtSource, txtRequirements, pnlRating, chkFree, txtHint }
+                Children = { txtName, bdrType, txtDescription, txtEffects, new StackPanel { Spacing = 0, Children = { txtCostLabel, txtCostBig } }, txtSource, txtRequirements, pnlRating, chkFree, txtHint }
             };
 
             Button cmdOk = new Button { Content = "ADD", IsDefault = true, Classes = { "primary" }, MinWidth = 90 };
@@ -151,6 +161,9 @@ namespace Chummer.Desktop.Views.Dialogs
                 cmdOk.IsEnabled = cmdAgain.IsEnabled = true;
                 string strId = objRow.Id;
                 txtName.Text = objRow.Name;
+                txtDescription.Text = Chummer.Rules.QualityDescriptionRules.Description(_objSelector.Node(strId));
+                txtEffects.Text = Chummer.Rules.QualityDescriptionRules.PreviewModifiers(_objSelector.Node(strId));
+                txtEffects.IsVisible = !string.IsNullOrWhiteSpace(txtEffects.Text);
                 txtType.Text = objRow.Positive ? "POSITIVE" : "NEGATIVE";
                 txtType.Foreground = Brush(objRow.Positive ? "GreenBrush" : "RedBrush");
                 int intMax = _objSelector.MaximumRating(strId);

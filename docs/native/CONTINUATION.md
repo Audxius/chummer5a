@@ -1,4 +1,14 @@
-# Active continuation — 2026-11-11
+# Active continuation — 2026-11-12
+
+## Newest: quality catalog explanations, bounded contact profiles and tradition rules
+
+QualityPickerWindow now provides pointer-positioned hover explanations and a persistent selected-quality explanation, source, and supported base numeric modifiers/conditions. Preview reads XML directly without constructing a Quality or applying improvements. Custom description/altdescription takes precedence. Written descriptions remain incomplete across the catalog; unsupported prose is identified rather than invented. Supported modifier preview types currently cover skill, skill category, skill attribute and notoriety.
+
+Contact profiles now occupy at most1180 pixels with a fixed portrait column, compact labeled rating cards, unboxed metadata and no empty unlinked-character-sheet card. Metadata switches to one column at compact widths. Artwork inspection and links remain inside the existing navigation workflow. Screenshot review caught and corrected initial content-width shrinkage and compact metadata overflow.
+
+Read original SR craft.docx from Desktop/SR BOOKS: Astral Weapon Attack explicitly uses tradition attribute + combat skill; Spellcrafting explicitly uses tradition main attribute + Arcana. Replaced the old highest-of-LOG/CHA/INT guess in both catalog entries. New Tradition Attribute token resolves the unique LOG/CHA/INT token in recorded drain expression; missing/ambiguous traditions remain unknown for explicit user input. All140 non-golden core tests pass, including custom-preview nonmutation, signed conditional modifiers and three tradition attributes/ambiguity. No schema changes or writes to the original runner. Rework-book items/spells/techniques/progression beyond the existing roll catalog remain substantial unfinished work; a roll entry alone is not full rule implementation.
+
+UI review outputs: /tmp/chummer-native-review/quality-profile-v2 (quality picker hover, selected details, contact profile1920/1440/980, inline art and existing roll navigation checks). Logs: /tmp/chummer-quality-profile-v2.log, /tmp/chummer-native-tests.log. Scratch runner uses fallback settings; this does not establish private Beggers preset parity.
 
 ## Newest: profiles and artwork inside Contacts; visible roll picker restored
 

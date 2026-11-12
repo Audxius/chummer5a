@@ -1347,6 +1347,40 @@ namespace Chummer.Tests.Rules
         }
 
         [TestMethod]
+        public void QualityCatalogPreviewHonorsCustomTextWithoutCreatingAQuality()
+        {
+            var xml = new XmlDocument();
+            xml.LoadXml("<quality><name>First Impression</name><description>Custom house rule.</description></quality>");
+            int count = _character.Qualities.Count;
+            Assert.AreEqual("Custom house rule.", QualityDescriptionRules.Description(xml.DocumentElement.CreateNavigator()));
+            xml.LoadXml("<quality><name>First Impression</name></quality>");
+            StringAssert.Contains(QualityDescriptionRules.Description(xml.DocumentElement.CreateNavigator()), "first time");
+            xml.LoadXml("<quality><bonus><skillcategory><name>Social Active</name><bonus>-3</bonus><condition>First meeting</condition></skillcategory><notoriety>1</notoriety></bonus></quality>");
+            string effects = QualityDescriptionRules.PreviewModifiers(xml.DocumentElement.CreateNavigator());
+            StringAssert.Contains(effects, "Social Active: -3 (First meeting)");
+            StringAssert.Contains(effects, "Notoriety: +1");
+            Assert.AreEqual(count, _character.Qualities.Count);
+        }
+
+        [TestMethod]
+        public void ReworkTraditionAttributeUsesRecordedTraditionAndFlagsAmbiguity()
+        {
+            _character.MAGEnabled = true;
+            _character.MagicianEnabled = true;
+            var context = new Chummer.Rolls.RollContext(_character);
+            foreach (string attribute in new[] { "LOG", "CHA", "INT" })
+            {
+                _character.MagicTradition.DrainExpression = "{WIL} + {" + attribute + "}";
+                var result = Chummer.Rolls.DiceExpressionEvaluator.Evaluate("{Tradition Attribute}", context);
+                Assert.AreEqual(_character.GetAttribute(attribute).TotalValue, result.Value);
+                Assert.AreEqual(0, result.Unknowns.Count);
+                StringAssert.Contains(result.Breakdown, attribute);
+            }
+            _character.MagicTradition.DrainExpression = "{WIL} + {LOG} + {CHA}";
+            CollectionAssert.Contains(Chummer.Rolls.DiceExpressionEvaluator.Evaluate("{Tradition Attribute}", context).Unknowns, "Tradition Attribute");
+        }
+
+        [TestMethod]
         public async Task QualityHoverUsesDescriptionAndActualConditionalModifiers()
         {
             string id = _character.LoadData("qualities.xml").SelectSingleNode("/chummer/qualities/quality[name='First Impression']/id").InnerText;
