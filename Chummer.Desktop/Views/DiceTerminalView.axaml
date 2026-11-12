@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Chummer.Desktop.ViewModels"
              xmlns:conv="using:Chummer.Desktop.Converters"
+             xmlns:views="using:Chummer.Desktop.Views"
              x:Class="Chummer.Desktop.Views.DiceTerminalView"
              x:DataType="vm:DiceTerminalViewModel">
   <UserControl.Resources>
@@ -55,7 +56,7 @@
   <Grid RowDefinitions="Auto,*">
     <!-- Header -->
     <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="28,18">
-      <Grid ColumnDefinitions="Auto,*,Auto">
+      <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" RowSpacing="14">
         <StackPanel Orientation="Horizontal" Spacing="14">
           <PathIcon Data="{StaticResource Icon.Dice}" Width="34" Height="34" Classes="hot" />
           <StackPanel>
@@ -73,6 +74,11 @@
             </ComboBox.ItemTemplate>
           </ComboBox>
         </StackPanel>
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="10">
+          <Button Content="Action picker" Command="{Binding ShowActionsCommand}" />
+          <Button Name="LocalDiceNavigation" Content="Dice roller" Command="{Binding ShowLocalDiceCommand}" />
+          <Button Name="InitiativeNavigation" Content="Initiative tracker" Command="{Binding ShowInitiativeTrackerCommand}" />
+        </StackPanel>
       </Grid>
     </Border>
 
@@ -83,7 +89,9 @@
       <TextBlock Text="Rolls are computed from the runner's attributes, skills, gear and modifiers." Classes="muted" HorizontalAlignment="Center" />
     </StackPanel>
 
-    <Grid x:Name="RollWorkspace" Grid.Row="1" ColumnDefinitions="*,440" IsVisible="{Binding HasCharacter}">
+    <Border Grid.Row="1" IsVisible="{Binding ShowLocalRoller}"><views:LocalDiceView DataContext="{Binding LocalDice}" /></Border>
+    <Border Grid.Row="1" IsVisible="{Binding ShowInitiative}"><views:InitiativeView DataContext="{Binding Initiative}" /></Border>
+    <Grid x:Name="RollWorkspace" Grid.Row="1" ColumnDefinitions="*,440" IsVisible="{Binding HasActionWorkspace}">
       <!-- Search + results -->
       <DockPanel Margin="28,20,14,20">
         <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,12">

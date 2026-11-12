@@ -251,6 +251,64 @@ internal static class PageReviewScript
         Console.WriteLine("Page layout, contact profiles, linked cohorts, skill groups, pointer tooltips and full-width ledger checks passed.");
     }
 
+    public static async Task CheckEnginePromptsAsync(MainWindow window, CharacterViewModel runner, string output, Func<Task> settle)
+    {
+        var dialogs = new Chummer.Desktop.Services.AvaloniaDialogService();
+        using var armor = new Chummer.Backend.Equipment.Armor(runner.Character) { Name = "Full Body Armor", Category = "Armor" };
+        var request = new SelectArmorModRequest(runner.Character, armor) { AllowedCategories = "General", ExcludeGeneralCategory = true };
+        var picking = dialogs.ShowAsync(request, window); await settle();
+        var picker = window.OwnedWindows.Single();
+        var list = picker.GetVisualDescendants().OfType<ListBox>().Single();
+        list.SelectedIndex = 0; await settle(); Save(picker, output, "68-included-armor-choice");
+        var accept = picker.GetVisualDescendants().OfType<Button>().Single(x => x.IsDefault);
+        var point = accept.TranslatePoint(new Point(accept.Bounds.Width / 2, accept.Bounds.Height / 2), picker)!.Value;
+        picker.MouseDown(point, MouseButton.Left, RawInputModifiers.None); picker.MouseUp(point, MouseButton.Left, RawInputModifiers.None); await settle();
+        if (await picking != DialogOutcome.OK || string.IsNullOrWhiteSpace(request.SelectedArmorMod) || armor.ArmorMods.Count != 0) throw new InvalidOperationException("Included armor choice failed or mutated its preview.");
+        var cancelRequest = new SelectArmorModRequest(runner.Character, armor) { AllowedCategories = "General", ExcludeGeneralCategory = true };
+        picking = dialogs.ShowAsync(cancelRequest, window); await settle(); window.OwnedWindows.Single().Close(); await settle();
+        if (await picking != DialogOutcome.Cancel) throw new InvalidOperationException("Armor selection did not cancel.");
+        using var fresh = new Character { SettingsKey = runner.Character.SettingsKey };
+        string originalMetatype = fresh.Metatype;
+        var metatypePicking = dialogs.ShowAsync(new SelectMetatypePriorityRequest(fresh), window);
+        for (int i = 0; i < 20 && !window.OwnedWindows.Any(); i++) { await Task.Delay(100); await settle(); }
+        var editor = window.OwnedWindows.Single();
+        if (editor is not MetatypeWindow) throw new InvalidOperationException("Engine metatype prompt did not use the native editor.");
+        Save(editor, output, "69-engine-metatype-editor"); editor.Close(); await settle();
+        if (await metatypePicking != DialogOutcome.Cancel || fresh.Metatype != originalMetatype) throw new InvalidOperationException("Cancelled metatype prompt changed the character.");
+        string originalReader = GlobalSettings.PdfAppPath;
+        var optionsPicking = dialogs.ShowAsync(new EditGlobalSettingsRequest(), window); await settle();
+        var options = window.OwnedWindows.Single();
+        options.GetVisualDescendants().OfType<TextBox>().Single(x => x.Name == "PdfAppPath").Text = "/tmp/unsaved-pdf-reader";
+        Save(options, output, "70-engine-global-options"); options.Close(); await settle();
+        if (await optionsPicking != DialogOutcome.Cancel || GlobalSettings.PdfAppPath != originalReader) throw new InvalidOperationException("Cancelled global options changed the PDF reader.");
+        fresh.Name = "Critter power review";
+        var main = MainWindowViewModel.Current;
+        await CharacterRegistry.OpenCharacters.AddAsync(fresh); await main.OpenCharacterAsync(fresh);
+        var powerReview = (CharacterViewModel)main.CurrentPage; powerReview.ShowSectionCommand.Execute(CharacterSection.Abilities); await settle();
+        var addAction = powerReview.AbilitySections.Single(x => x.Title == "CRITTER POWERS").Actions.Single();
+        var addPower = window.GetVisualDescendants().OfType<Button>().Single(x => ReferenceEquals(x.Command, addAction.Command));
+        addPower.BringIntoView(); await settle(); Click(window, addPower);
+        var adding = ((CommunityToolkit.Mvvm.Input.IAsyncRelayCommand)addPower.Command).ExecutionTask; await settle();
+        if (adding == null) throw new InvalidOperationException("The critter-power add button did not start its command.");
+        for (int i = 0; i < 40 && !window.OwnedWindows.Any() && !adding.IsCompleted; i++) { await Task.Delay(100); Dispatcher.UIThread.RunJobs(); }
+        if (adding.IsCompleted) await adding;
+        var powerPicker = window.OwnedWindows.Single();
+        var powerChoices = powerPicker.GetVisualDescendants().OfType<ListBox>().Single();
+        powerChoices.SelectedItem = powerChoices.ItemsSource.Cast<ListItem>().Single(x => x.Name == "Accident"); await settle();
+        Save(powerPicker, output, "71-critter-power-picker");
+        var powerAccept = powerPicker.GetVisualDescendants().OfType<Button>().Single(x => x.IsDefault);
+        var powerPoint = powerAccept.TranslatePoint(new Point(powerAccept.Bounds.Width / 2, powerAccept.Bounds.Height / 2), powerPicker)!.Value;
+        powerPicker.MouseDown(powerPoint, MouseButton.Left, RawInputModifiers.None); powerPicker.MouseUp(powerPoint, MouseButton.Left, RawInputModifiers.None);
+        await adding; await settle();
+        if (fresh.CritterPowers.Single().Name != "Accident" || fresh.ExpenseEntries.Count != 0) throw new InvalidOperationException("Creation critter power did not add without spending karma.");
+        Save(window, output, "72-critter-power-added");
+        var powerCard = powerReview.AbilitySections.Single(x => x.Title == "CRITTER POWERS").Cards.Single();
+        await ((CommunityToolkit.Mvvm.Input.IAsyncRelayCommand)powerCard.RemoveCommand).ExecuteAsync(null); await settle();
+        if (fresh.CritterPowers.Count != 0) throw new InvalidOperationException("Critter power removal failed.");
+        powerReview.IsDirty = false; await main.CloseCharacterCommand.ExecuteAsync(powerReview); main.CurrentPage = runner;
+        Console.WriteLine("Native bundled armor and metatype engine prompts, read-only previews and cancellation passed.");
+    }
+
     public static async Task CheckInlineProfilesAndRollsAsync(MainWindow window, CharacterViewModel runner, string output, Func<Task> settle)
     {
         int qualityCount = runner.Character.Qualities.Count;
@@ -304,6 +362,26 @@ internal static class PageReviewScript
             throw new InvalidOperationException("Picker did not evaluate the selected action for this runner.");
         if (runner.Character.EdgeUsed != edge) throw new InvalidOperationException("Merely selecting a roll spent Edge.");
         Save(window, output, "62-roll-picker-compact");
+        Click(window, window.GetVisualDescendants().OfType<Button>().Single(x => x.Name == "LocalDiceNavigation")); await settle();
+        if (!dice.ShowLocalRoller || dice.LocalDice.Dice != Math.Clamp(dice.Pool, 0, 100)) throw new InvalidOperationException("Local dice did not inherit the selected pool.");
+        dice.LocalDice.Dice = 12; dice.LocalDice.RollCommand.Execute(null); await settle();
+        if (!dice.LocalDice.HasResult || dice.LocalDice.Faces.Count != 12) throw new InvalidOperationException("Local roller did not display its dice.");
+        if (runner.Character.EdgeUsed != edge) throw new InvalidOperationException("Generic local roller spent character Edge.");
+        Save(window, output, "64-local-dice-compact");
+        window.Width = 1440; window.Height = 900; await settle(); Save(window, output, "65-local-dice-wide");
+        Click(window, window.GetVisualDescendants().OfType<Button>().Single(x => x.Name == "InitiativeNavigation")); await settle();
+        var initiative = dice.Initiative; initiative.UseRunnerCommand.Execute(null);
+        if (initiative.Basis != runner.Character.InitiativeValue || initiative.Dice != runner.Character.InitiativeDice) throw new InvalidOperationException("Initiative import does not match the engine.");
+        initiative.Automatic = false; initiative.Dice = 2; initiative.ManualTotal = 7; initiative.Basis = 10; initiative.Name = "Fast runner";
+        Click(window, window.GetVisualDescendants().OfType<Button>().Single(x => x.Name == "InitiativeAdd")); await settle();
+        initiative.Name = "Guard"; initiative.Basis = 4; initiative.ManualTotal = 5;
+        Click(window, window.GetVisualDescendants().OfType<Button>().Single(x => x.Name == "InitiativeAdd")); await settle();
+        if (initiative.Combatants.Count != 2 || initiative.Session.Current?.Name != "Fast runner") throw new InvalidOperationException("Initiative combatants were not added in score order.");
+        Save(window, output, "66-initiative-wide");
+        Click(window, window.GetVisualDescendants().OfType<Button>().Single(x => x.Name == "InitiativeNext")); await settle();
+        if (initiative.Session.Current?.Name != "Guard") throw new InvalidOperationException("Next combatant did not advance initiative.");
+        window.Width = 980; window.Height = 720; await settle(); Save(window, output, "67-initiative-compact");
+        dice.ShowActionsCommand.Execute(null); await settle();
         using var other = new Character { SettingsKey = runner.Character.SettingsKey, Name = "Other runner" };
         await CharacterRegistry.OpenCharacters.AddAsync(other);
         await main.OpenCharacterAsync(other); var otherView = (CharacterViewModel)main.CurrentPage;

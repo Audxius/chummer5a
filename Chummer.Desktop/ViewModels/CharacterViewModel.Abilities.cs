@@ -201,6 +201,23 @@ namespace Chummer.Desktop.ViewModels
                 await RunRuleAsync(t => MagicRules.AddPowerAsync(Character, strId, t)).ConfigureAwait(true);
         }
 
+        internal async Task AddCritterPowerAsync()
+        {
+            var choices = await Task.Run(() => MagicRules.CritterPowerOptions(Character));
+            var selected = await PromptWindow.BrowseAsync(null, "Add critter power", _ => choices.Select(x => new ListItem(x.Id, x.Name)).ToList(),
+                item => choices.First(x => x.Id == item.Value?.ToString()).Details);
+            if (!selected.HasValue) return;
+            var choice = choices.First(x => x.Id == selected.Value.Value?.ToString());
+            int rating = 0;
+            if (choice.HasRating)
+            {
+                decimal? value = await PromptWindow.AskNumberAsync(null, choice.Name + " · rating", 1, 100, true);
+                if (!value.HasValue) return;
+                rating = (int)value.Value;
+            }
+            await RunRuleAsync(t => MagicRules.AddCritterPowerAsync(Character, choice.Id, rating, t));
+        }
+
         internal async Task AddComplexFormAsync()
         {
             if (!await OffUi(() => MagicRules.CheckCanAddComplexFormAsync(Character)).ConfigureAwait(true))

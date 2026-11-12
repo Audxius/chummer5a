@@ -26,6 +26,8 @@ using System.Threading.Tasks;
 using Chummer.Desktop.Localization;
 using Chummer.Desktop.Views;
 using Chummer.Selection;
+using Chummer.Backend.Equipment;
+using Chummer.Desktop.Views.Dialogs;
 
 namespace Chummer.Desktop.Services
 {
@@ -159,6 +161,18 @@ namespace Chummer.Desktop.Services
                     return await CharacterSettingsApplier.ApplyAsync(objCharacter, objSelected, false, blnForExisting, objCurrent.BuildMethod, owner).ConfigureAwait(true)
                         ? DialogOutcome.OK
                         : DialogOutcome.Cancel;
+                }
+                case SelectMetatypePriorityRequest _:
+                case SelectMetatypeKarmaRequest _:
+                {
+                    Character character = objRequest.ConstructorArguments.FirstOrDefault() as Character;
+                    if (character == null || character.Created) return DialogOutcome.Cancel;
+                    string dataFile = objRequest.ConstructorArguments.Skip(1).FirstOrDefault() as string;
+                    var selector = await Task.Run(() => new MetatypeSelector(character, dataFile)).ConfigureAwait(true);
+                    selector.ExoticSpecificPicker = name => ChooseOrTypeWindow.ShowAsync(name, Chummer.Rules.SkillRules.GetExoticSpecificOptions(character, name), true);
+                    var editor = new MetatypeWindow(selector, true);
+                    await DialogHost.ShowModalAsync(editor, owner).ConfigureAwait(true);
+                    return editor.Accepted ? DialogOutcome.OK : DialogOutcome.Cancel;
                 }
                 case SelectOptionalPowerRequest objOptional:
                 {
@@ -343,6 +357,25 @@ namespace Chummer.Desktop.Services
                     if (strChoice == null)
                         return DialogOutcome.Cancel;
                     objSpellCategory.SetResult(nameof(SelectSpellCategoryRequest.SelectedCategory), strChoice);
+                    return DialogOutcome.OK;
+                }
+                case EditGlobalSettingsRequest globalOptions:
+                {
+                    var editor = new GlobalOptionsWindow(LastCallArgument<string>(globalOptions, "DoLinkPdf"),
+                        globalOptions.Operations.Any(x => x.IsCall && x.Name == "DoLinkPdfReader"));
+                    await DialogHost.ShowModalAsync(editor, owner).ConfigureAwait(true);
+                    return editor.Accepted ? DialogOutcome.OK : DialogOutcome.Cancel;
+                }
+                case SelectArmorModRequest armorChoice:
+                {
+                    Character character = armorChoice.ConstructorArguments.FirstOrDefault() as Character;
+                    if (character == null) return DialogOutcome.Cancel;
+                    var parent = armorChoice.ConstructorArguments.Skip(1).FirstOrDefault() as Armor;
+                    var catalog = new EquipmentCatalog(character, EquipmentKind.ArmorMod, parent, armorChoice.AllowedCategories ?? string.Empty, armorChoice.ExcludeGeneralCategory);
+                    var choices = catalog.GetListing(new CatalogQuery { Free = true }).Rows;
+                    var selected = await PromptWindow.ChooseAsync(owner, "Choose included armor modification", choices.Select(x => new ListItem(x.Id, x.Name)).ToList(), string.Empty).ConfigureAwait(true);
+                    if (!selected.HasValue) return DialogOutcome.Cancel;
+                    armorChoice.SetResult(nameof(SelectArmorModRequest.SelectedArmorMod), selected.Value.Value?.ToString());
                     return DialogOutcome.OK;
                 }
                 case SelectWeaponCategoryRequest objWeaponCategory:

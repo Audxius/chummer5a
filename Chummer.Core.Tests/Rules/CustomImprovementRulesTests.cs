@@ -1347,6 +1347,104 @@ namespace Chummer.Tests.Rules
         }
 
         [TestMethod]
+        public void CritterPowerChoicesHonorBookVisibilityAndCategoryLimits()
+        {
+            _settings.BooksWritable.Clear(); _settings.BooksWritable.Add("SR5"); _settings.OnPropertyChanged(nameof(CharacterSettings.Books));
+            var choices = MagicRules.CritterPowerOptions(_character);
+            Assert.IsFalse(choices.Any(x => x.Id == "4aef932e-2d0f-4226-b00e-19c5398641bd"));
+            Assert.IsFalse(choices.Any(x => x.Name == "Combat Skill"));
+            Assert.IsTrue(choices.Any(x => x.Name == "Hardened Armor"));
+            ImprovementManager.CreateImprovement(_character, "Mundane", Improvement.ImprovementSource.Custom, "category-test",
+                Improvement.ImprovementType.LimitCritterPowerCategory, "");
+            choices = MagicRules.CritterPowerOptions(_character);
+            Assert.IsFalse(choices.Any(x => x.Name == "Hardened Armor"));
+            Assert.IsTrue(choices.All(x => x.Details.StartsWith("Mundane", StringComparison.Ordinal)));
+        }
+
+        [TestMethod]
+        public async Task CritterPowerRatingAppliesEffectsAndPersistsThroughLegacySave()
+        {
+            var choice = MagicRules.CritterPowerOptions(_character).Single(x => x.Name == "Hardened Armor");
+            int armorBefore = _character.TotalArmorRating;
+            Assert.AreEqual(RuleResult.NotAllowed, await MagicRules.AddCritterPowerAsync(_character, choice.Id, 0));
+            Assert.AreEqual(RuleResult.Changed, await MagicRules.AddCritterPowerAsync(_character, choice.Id, 4));
+            var power = _character.CritterPowers.Single(); Assert.AreEqual(4, power.Rating);
+            Assert.AreEqual(armorBefore + 4, _character.TotalArmorRating);
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            try
+            {
+                Assert.IsTrue(await _character.SaveAsync(path));
+                using var loaded = new Character(); Assert.IsTrue(await loaded.LoadAsync(path));
+                Assert.AreEqual(power.InternalId, loaded.CritterPowers.Single().InternalId);
+                Assert.AreEqual(armorBefore + 4, loaded.TotalArmorRating);
+            }
+            finally { File.Delete(path); }
+            Assert.IsTrue(await power.RemoveAsync(false)); Assert.AreEqual(armorBefore, _character.TotalArmorRating);
+        }
+
+        [TestMethod]
+        public async Task CareerCritterPowerChargesKarmaAndExpenseUndoRemovesIt()
+        {
+            _settings.BooksWritable.Add("HS"); _settings.OnPropertyChanged(nameof(CharacterSettings.Books));
+            await _character.SetCreatedAsync(true); _character.Karma = 20;
+            var choice = MagicRules.CritterPowerOptions(_character).Single(x => x.Id == "4aef932e-2d0f-4226-b00e-19c5398641bd");
+            bool confirm = GlobalSettings.ConfirmKarmaExpense; GlobalSettings.ConfirmKarmaExpense = false;
+            var messages = HostServices.Messages; HostServices.Messages = new AcceptMessages();
+            try
+            {
+                Assert.AreEqual(RuleResult.Changed, await MagicRules.AddCritterPowerAsync(_character, choice.Id));
+                Assert.AreEqual(11, _character.Karma); Assert.AreEqual(1, _character.CritterPowers.Count);
+                var expense = _character.ExpenseEntries.Single(); Assert.AreEqual(-9m, expense.Amount);
+                Assert.AreEqual(KarmaExpenseType.AddCritterPower, expense.Undo.KarmaType);
+                Assert.AreEqual(RuleResult.Changed, await ExpenseRules.UndoExpenseAsync(_character, expense));
+                Assert.AreEqual(20, _character.Karma); Assert.AreEqual(0, _character.CritterPowers.Count);
+            }
+            finally { GlobalSettings.ConfirmKarmaExpense = confirm; HostServices.Messages = messages; }
+        }
+
+        [TestMethod]
+        public async Task CritterPowerInsufficientFundsInvalidRatingsAndUnknownIdsDoNotMutate()
+        {
+            _settings.BooksWritable.Add("HS"); _settings.OnPropertyChanged(nameof(CharacterSettings.Books));
+            await _character.SetCreatedAsync(true); _character.Karma = 0;
+            var choice = MagicRules.CritterPowerOptions(_character).Single(x => x.Id == "4aef932e-2d0f-4226-b00e-19c5398641bd");
+            var messages = HostServices.Messages; HostServices.Messages = new AcceptMessages();
+            int improvements = _character.Improvements.Count;
+            try
+            {
+                Assert.AreEqual(RuleResult.NotEnoughKarma, await MagicRules.AddCritterPowerAsync(_character, choice.Id));
+                Assert.AreEqual(RuleResult.NotAllowed, await MagicRules.AddCritterPowerAsync(_character, choice.Id, 1));
+                Assert.AreEqual(RuleResult.NotAllowed, await MagicRules.AddCritterPowerAsync(_character, Guid.NewGuid().ToString()));
+                Assert.AreEqual(0, _character.CritterPowers.Count); Assert.AreEqual(0, _character.ExpenseEntries.Count);
+                Assert.AreEqual(improvements, _character.Improvements.Count); Assert.AreEqual(0, _character.Karma);
+            }
+            finally { HostServices.Messages = messages; }
+        }
+
+        [TestMethod]
+        public void IncludedArmorModCatalogUsesRequestedCategoryInsteadOfNormalParentCategories()
+        {
+            _settings.BooksWritable.Add("RG"); _settings.OnPropertyChanged(nameof(CharacterSettings.Books));
+            using var armor = new Armor(_character) { Name = "Ares Victory: Globetrotter Jacket", Category = "High-Fashion Armor Clothing" };
+            var catalog = new EquipmentCatalog(_character, EquipmentKind.ArmorMod, armor, "Custom Liners (Rating 4)", true);
+            var rows = catalog.GetListing(new CatalogQuery { Free = true }).Rows;
+            Assert.IsTrue(rows.Count > 0);
+            Assert.IsTrue(rows.All(x => x.Category == "Custom Liners (Rating 4)"));
+            Assert.AreEqual(0, armor.ArmorMods.Count);
+        }
+
+        [TestMethod]
+        public void ArmorModCatalogRejectsHelmetForTheWrongParent()
+        {
+            using var full = new Armor(_character) { Name = "Full Body Armor", Category = "Armor" };
+            using var coat = new Armor(_character) { Name = "Lined Coat", Category = "Armor" };
+            var fullChoices = new EquipmentCatalog(_character, EquipmentKind.ArmorMod, full, "General", true).GetListing(new CatalogQuery { Free = true }).Rows;
+            var coatChoices = new EquipmentCatalog(_character, EquipmentKind.ArmorMod, coat, "General", true).GetListing(new CatalogQuery { Free = true }).Rows;
+            Assert.IsTrue(fullChoices.Any(x => x.Name == "Full Body Armor: Helmet"));
+            Assert.IsFalse(coatChoices.Any(x => x.Name == "Full Body Armor: Helmet"));
+        }
+
+        [TestMethod]
         public void QualityCatalogPreviewHonorsCustomTextWithoutCreatingAQuality()
         {
             var xml = new XmlDocument();

@@ -53,12 +53,33 @@ namespace Chummer.Desktop.ViewModels
         public DiceTerminalViewModel(MainWindowViewModel objShell)
         {
             _objShell = objShell;
+            Initiative = new InitiativeViewModel(() => SelectedCharacter);
             Formatter = new Roll20Formatter();
             LoadPreferences();
             objShell.OpenCharacters.CollectionChanged += OpenCharactersOnCollectionChanged;
         }
 
         public Roll20Formatter Formatter { get; }
+        public LocalDiceViewModel LocalDice { get; } = new();
+        public InitiativeViewModel Initiative { get; }
+        [ObservableProperty] private bool _showInitiative;
+        partial void OnShowInitiativeChanged(bool value)
+        {
+            if (value) ShowLocalRoller = false;
+            OnPropertyChanged(nameof(HasActionWorkspace)); OnPropertyChanged(nameof(HasNoCharacter));
+        }
+        [RelayCommand] private void ShowInitiativeTracker() => ShowInitiative = true;
+        [ObservableProperty] private bool _showLocalRoller;
+        public bool HasActionWorkspace => HasCharacter && !ShowLocalRoller && !ShowInitiative;
+        partial void OnShowLocalRollerChanged(bool value)
+        { if (value) ShowInitiative = false; OnPropertyChanged(nameof(HasActionWorkspace)); OnPropertyChanged(nameof(HasNoCharacter)); }
+        [RelayCommand] private void ShowActions() { ShowLocalRoller = false; ShowInitiative = false; }
+        [RelayCommand] private void ShowLocalDice()
+        {
+            if (!ShowLocalRoller && HasSelection) LocalDice.Dice = Math.Clamp(Pool, 0, 100);
+            LocalDice.Gremlins = SelectedCharacter?.Character.Qualities.FirstOrDefault(x => x.Name.StartsWith("Gremlins", StringComparison.Ordinal))?.Levels ?? 0;
+            ShowLocalRoller = true;
+        }
 
         public RollCatalog Catalog => _objCatalog;
 
@@ -70,6 +91,7 @@ namespace Chummer.Desktop.ViewModels
         /// </summary>
         public async Task RollForAsync(CharacterViewModel objViewModel, string strRollName)
         {
+            ShowActions();
             if (objViewModel == null || string.IsNullOrEmpty(strRollName))
                 return;
             _objShell.CurrentPage = this;
@@ -96,6 +118,7 @@ namespace Chummer.Desktop.ViewModels
         /// <summary>Opens the terminal on one roll (from global search).</summary>
         public void ShowRoll(RollAction objAction)
         {
+            ShowActions();
             _objShell.CurrentPage = this;
             Activate();
             Query = objAction.DisplayName;
@@ -160,7 +183,7 @@ namespace Chummer.Desktop.ViewModels
         partial void OnSumSuffixChanged(string value) => OnPropertyChanged(nameof(DiceSuffix));
 
         public bool HasCharacter => SelectedCharacter != null;
-        public bool HasNoCharacter => SelectedCharacter == null;
+        public bool HasNoCharacter => SelectedCharacter == null && !ShowLocalRoller && !ShowInitiative;
         public bool HasSelection => SelectedRoll != null;
         public bool NeedsWeapon => SelectedRoll?.Action.Needs.HasFlag(RollNeeds.Weapon) == true;
         public bool NeedsVehicle => SelectedRoll?.Action.Needs.HasFlag(RollNeeds.Vehicle) == true;
@@ -208,6 +231,7 @@ namespace Chummer.Desktop.ViewModels
             _objSearchCancel?.Cancel();
             OnPropertyChanged(nameof(HasCharacter));
             OnPropertyChanged(nameof(HasNoCharacter));
+            OnPropertyChanged(nameof(HasActionWorkspace));
             _objLoadTask = LoadCharacterAsync(value);
         }
 

@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:vm="using:Chummer.Desktop.ViewModels" x:Class="Chummer.Desktop.Views.LocalDiceView" x:DataType="vm:LocalDiceViewModel">
+ <ScrollViewer>
+  <StackPanel Margin="28,24" MaxWidth="1000" HorizontalAlignment="Stretch" Spacing="22">
+   <TextBlock Text="Dice roller" Classes="h1" />
+   <TextBlock Text="Roll locally, inspect every die, and reroll misses. Character resources are managed on the character sheet." Classes="muted" TextWrapping="Wrap" />
+   <WrapPanel>
+    <StackPanel Spacing="7" Margin="0,0,20,12"><TextBlock Text="DICE" Classes="label" /><NumericUpDown Name="LocalDicePool" Minimum="0" Maximum="100" Increment="1" Value="{Binding Dice}" Width="125" FormatString="0" /></StackPanel>
+    <StackPanel Spacing="7" Margin="0,0,20,12"><TextBlock Text="THRESHOLD" Classes="label" /><NumericUpDown Minimum="0" Maximum="100" Increment="1" Value="{Binding Threshold}" Width="125" FormatString="0" /></StackPanel>
+    <StackPanel Spacing="7" Margin="0,0,20,12"><TextBlock Text="GREMLINS" Classes="label" /><NumericUpDown Minimum="0" Maximum="100" Increment="1" Value="{Binding Gremlins}" Width="125" FormatString="0" /></StackPanel>
+    <StackPanel Spacing="7" Margin="0,0,0,12"><TextBlock Text="METHOD" Classes="label" /><ComboBox ItemsSource="{Binding Methods}" SelectedIndex="{Binding Method}" Width="230" /></StackPanel>
+   </WrapPanel>
+   <WrapPanel>
+    <CheckBox Content="Rule of Six" IsChecked="{Binding RuleOfSix}" IsEnabled="{Binding CanExplode}" Margin="0,0,22,10" ToolTip.Tip="Sixes add another die; available with the standard method." />
+    <CheckBox Content="Rushed job" IsChecked="{Binding RushedJob}" Margin="0,0,22,10" ToolTip.Tip="Ones and twos count toward glitches." />
+    <CheckBox Content="Cinematic" IsChecked="{Binding Cinematic}" Margin="0,0,22,10" ToolTip.Tip="Standard rolls count fours as hits too." />
+    <CheckBox Content="Variable glitch" IsChecked="{Binding VariableGlitch}" Margin="0,0,22,10" ToolTip.Tip="Glitch threshold is hits plus one, reduced by Gremlins." />
+    <CheckBox Content="Bubble die" IsChecked="{Binding BubbleDie}" Margin="0,0,22,10" ToolTip.Tip="Roll a deciding die for borderline even pools, or whenever variable glitch is used. It cannot add hits." />
+   </WrapPanel>
+   <StackPanel Orientation="Horizontal" Spacing="12">
+    <Button Name="LocalRoll" Content="Roll dice" Classes="primary" Command="{Binding RollCommand}" />
+    <Button Content="Reroll misses" Command="{Binding RerollCommand}" IsEnabled="{Binding HasResult}" />
+   </StackPanel>
+   <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="20">
+    <StackPanel Spacing="12">
+     <TextBlock Name="LocalRollSummary" Text="{Binding Summary}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" />
+     <TextBlock Text="{Binding Detail}" Classes="muted" TextWrapping="Wrap" />
+     <ItemsControl ItemsSource="{Binding Faces}">
+      <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:DieFaceViewModel"><Border Padding="12,8" Margin="0,0,8,8" Background="{StaticResource SurfaceBrush}" BorderBrush="{Binding Color}" BorderThickness="1"><TextBlock Text="{Binding Label}" Foreground="{Binding Color}" FontSize="20" /></Border></DataTemplate></ItemsControl.ItemTemplate>
+     </ItemsControl>
+    </StackPanel>
+   </Border>
+   <TextBlock Text="RECENT ROLLS" Classes="label" IsVisible="{Binding HasResult}" />
+   <ItemsControl ItemsSource="{Binding History}"><ItemsControl.ItemTemplate><DataTemplate x:DataType="x:String"><TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,12" /></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+  </StackPanel>
+ </ScrollViewer>
+</UserControl>

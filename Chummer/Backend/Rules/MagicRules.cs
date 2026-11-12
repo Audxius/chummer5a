@@ -34,7 +34,7 @@ namespace Chummer.Rules
     /// tsMartialArtsAddTechnique_Click, PowersTabUserControl, CharacterShared.AddSpirit/AddSprite/DeleteSpirit).
     /// The pickers run in the UI; these methods take the chosen id and apply legacy's costs, checks and expense entries.
     /// </summary>
-    public static class MagicRules
+    public static partial class MagicRules
     {
         // ---------- spells ----------
 

@@ -163,7 +163,7 @@ namespace Chummer.Selection
         private readonly string _strParentCategoryFilter = string.Empty;
         private Dictionary<string, string> _dicCategoryNames;
 
-        public EquipmentCatalog(Character objCharacter, EquipmentKind eKind, object objParent = null)
+        public EquipmentCatalog(Character objCharacter, EquipmentKind eKind, object objParent = null, string armorCategories = null, bool excludeGeneralArmorCategory = false)
         {
             _objCharacter = objCharacter ?? throw new ArgumentNullException(nameof(objCharacter));
             Kind = eKind;
@@ -233,7 +233,12 @@ namespace Chummer.Selection
             IsCareer = objCharacter.Created;
 
             // Mods / plugins only list what fits the owner (legacy tsAddArmorMod_Click, PickGear addoncategory).
-            if (eKind == EquipmentKind.ArmorMod && objParent is Armor objArmor)
+            if (eKind == EquipmentKind.ArmorMod && armorCategories != null)
+            {
+                AddAllowed(armorCategories);
+                if (!excludeGeneralArmorCategory) _setAllowedCategories.Add("General");
+            }
+            else if (eKind == EquipmentKind.ArmorMod && objParent is Armor objArmor)
             {
                 XPathNavigator xmlArmor = objArmor.GetNodeXPath();
                 string strForce = xmlArmor?.SelectSingleNode("forcemodcategory")?.Value;
@@ -502,7 +507,14 @@ namespace Chummer.Selection
                     return xmlItem.RequirementsMet(_objCharacter, Parent as Cyberware);
                 }
                 case EquipmentKind.ArmorMod:
+                {
+                    XPathNavigator xmlParent = (Parent as IHasXmlDataNode)?.GetNodeXPath();
+                    XPathNavigator forbidden = xmlItem.SelectSingleNode("forbidden/parentdetails");
+                    if (forbidden != null && xmlParent.ProcessFilterOperationNode(forbidden, false)) return false;
+                    XPathNavigator required = xmlItem.SelectSingleNode("required/parentdetails");
+                    if (required != null && !xmlParent.ProcessFilterOperationNode(required, false)) return false;
                     return xmlItem.RequirementsMet(_objCharacter, Parent);
+                }
                 case EquipmentKind.VehicleMod:
                     return xmlItem.SelectSingleNode("hide") == null && xmlItem.RequirementsMet(_objCharacter, Parent);
                 case EquipmentKind.WeaponMountMod:

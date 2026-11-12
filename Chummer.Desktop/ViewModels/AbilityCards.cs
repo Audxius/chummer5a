@@ -358,12 +358,20 @@ namespace Chummer.Desktop.ViewModels
                 lstReturn.Add(objGroup);
             }
 
-            // ----- critter powers (read-only, like before) -----
-            List<AbilityCardViewModel> lstCritter = objCharacter.CritterPowers.ToList().Select(x => new AbilityCardViewModel(InventoryItemViewModel.Card(
+            // ----- critter powers -----
+            List<AbilityCardViewModel> lstCritter = objCharacter.CritterPowers.ToList().Select(x =>
+            {
+                var card = new AbilityCardViewModel(InventoryItemViewModel.Card(
                 x.CurrentDisplayName, x.DisplayCategory(L), "Icon.Spirit", x.DisplayType(L) + "   " + x.DisplayAction(L), x.Rating > 0 ? "R" + x.Rating.ToString(C) : string.Empty,
-                new[] { new ItemStat("Type", x.DisplayType(L)), new ItemStat("Action", x.DisplayAction(L)), new ItemStat("Range", x.DisplayRange(L)), new ItemStat("Duration", x.DisplayDuration(L)) }))).ToList();
-            if (lstCritter.Count > 0)
-                lstReturn.Add(new AbilityGroupViewModel("CRITTER POWERS", "Icon.Spirit", lstCritter));
+                new[] { new ItemStat("Type", x.DisplayType(L)), new ItemStat("Action", x.DisplayAction(L)), new ItemStat("Range", x.DisplayRange(L)), new ItemStat("Duration", x.DisplayDuration(L)) }, x.Notes, Src(x.Source, x.Page)));
+                if (x.Grade == 0) card.RemoveCommand = Remove(objOwner, x);
+                card.RemoveTip = "Remove this critter power";
+                return card;
+            }).ToList();
+            var critterGroup = new AbilityGroupViewModel("CRITTER POWERS", "Icon.Spirit", lstCritter) { EmptyText = "No critter powers." };
+            critterGroup.Actions.Add(new AbilityAction("ADD CRITTER POWER", "Choose an optional power or restore a removed innate power",
+                new AsyncRelayCommand(objOwner.AddCritterPowerAsync)));
+            lstReturn.Add(critterGroup);
 
             // ----- spirits / sprites -----
             List<Spirit> lstSpiritObjects = objCharacter.Spirits.ToList();

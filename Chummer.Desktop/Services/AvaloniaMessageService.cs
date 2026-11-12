@@ -34,8 +34,11 @@ namespace Chummer.Desktop.Services
     /// </summary>
     internal static class ModalHelper
     {
+        private static WeakReference<Window> s_shellWindow;
+        internal static void RegisterShell(Window window) => s_shellWindow = new WeakReference<Window>(window);
         public static Window MainWindow =>
-            (Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+            (Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow
+            ?? (s_shellWindow != null && s_shellWindow.TryGetTarget(out var shell) ? shell : null);
 
         public static Window ResolveOwner(object owner)
         {

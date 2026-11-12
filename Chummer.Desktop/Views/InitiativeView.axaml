@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:vm="using:Chummer.Desktop.ViewModels" x:Class="Chummer.Desktop.Views.InitiativeView" x:DataType="vm:InitiativeViewModel">
+ <ScrollViewer><StackPanel Margin="28,24" MaxWidth="1100" Spacing="18">
+  <TextBlock Text="Initiative tracker" Classes="h1" />
+  <TextBlock Text="{Binding RoundLabel}" FontSize="18" />
+  <TextBlock Text="{Binding ActingLabel}" Foreground="{StaticResource CyanBrush}" FontSize="22" TextWrapping="Wrap" />
+  <WrapPanel>
+   <Button Content="Next combatant" Name="InitiativeNext" Command="{Binding NextCommand}" Classes="primary" Margin="0,0,8,8" />
+   <Button Content="Next pass (−10)" Command="{Binding NextPassCommand}" Margin="0,0,8,8" />
+   <Button Content="New turn · reroll all" Command="{Binding NewTurnCommand}" Margin="0,0,8,8" />
+   <Button Content="Sort by initiative" Command="{Binding SortCommand}" Margin="0,0,8,8" />
+  </WrapPanel>
+  <ListBox ItemsSource="{Binding Combatants}" SelectedItem="{Binding Selected}" MinHeight="100" MaxHeight="300" Name="InitiativeCombatants">
+   <ListBox.ItemTemplate><DataTemplate x:DataType="vm:InitiativeRow"><Grid ColumnDefinitions="*,90,100" Margin="8,7">
+    <TextBlock Text="{Binding Name}" FontSize="17" /><TextBlock Grid.Column="1" Text="{Binding Score}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource CyanBrush}" />
+    <TextBlock Grid.Column="2" Text="{Binding Status}" VerticalAlignment="Center" />
+   </Grid></DataTemplate></ListBox.ItemTemplate>
+  </ListBox>
+  <WrapPanel>
+   <Button Content="−10" Command="{Binding AdjustCommand}" CommandParameter="-10" Margin="0,0,8,8" /><Button Content="−5" Command="{Binding AdjustCommand}" CommandParameter="-5" Margin="0,0,8,8" /><Button Content="−1" Command="{Binding AdjustCommand}" CommandParameter="-1" Margin="0,0,8,8" />
+   <Button Content="+1" Command="{Binding AdjustCommand}" CommandParameter="1" Margin="0,0,8,8" /><Button Content="+5" Command="{Binding AdjustCommand}" CommandParameter="5" Margin="0,0,8,8" /><Button Content="+10" Command="{Binding AdjustCommand}" CommandParameter="10" Margin="0,0,8,8" />
+   <Button Content="Delay" Command="{Binding DelayCommand}" Margin="0,0,8,8" /><Button Content="Resume delayed action" Command="{Binding ResumeCommand}" Margin="0,0,8,8" /><Button Content="Remove" Command="{Binding RemoveCommand}" Margin="0,0,8,8" />
+  </WrapPanel>
+  <StackPanel Orientation="Horizontal" Spacing="10"><TextBlock Text="Selected score" VerticalAlignment="Center" /><NumericUpDown Value="{Binding Score}" Minimum="-1000" Maximum="1000" Width="120" FormatString="0" /><Button Content="Set score" Command="{Binding SetScoreCommand}" /></StackPanel>
+  <Border Background="{StaticResource PanelBrush}" Padding="18"><StackPanel Spacing="14">
+   <TextBlock Text="Add combatant" FontSize="18" />
+   <WrapPanel><ComboBox ItemsSource="{Binding RunnerModes}" SelectedIndex="{Binding RunnerMode}" Width="190" Margin="0,0,10,8" /><Button Content="Use selected runner" Command="{Binding UseRunnerCommand}" Margin="0,0,0,8" /></WrapPanel>
+   <TextBox Text="{Binding Name}" PlaceholderText="Combatant name" Name="InitiativeName" />
+   <WrapPanel>
+    <StackPanel Spacing="6" Margin="0,0,20,8"><TextBlock Text="BASE INITIATIVE" Classes="label" /><NumericUpDown Value="{Binding Basis}" Minimum="-1000" Maximum="1000" FormatString="0" Width="130" /></StackPanel>
+    <StackPanel Spacing="6" Margin="0,0,20,8"><TextBlock Text="DICE" Classes="label" /><NumericUpDown Value="{Binding Dice}" Minimum="0" Maximum="100" FormatString="0" Width="100" /></StackPanel>
+    <StackPanel Spacing="6" Margin="0,0,20,8"><TextBlock Text="MANUAL DICE TOTAL" Classes="label" /><NumericUpDown Value="{Binding ManualTotal}" Minimum="0" Maximum="600" FormatString="0" Width="130" IsEnabled="{Binding !Automatic}" /></StackPanel>
+   </WrapPanel>
+   <StackPanel Orientation="Horizontal" Spacing="18"><CheckBox Content="Roll automatically" IsChecked="{Binding Automatic}" /><Button Content="Add combatant" Name="InitiativeAdd" Command="{Binding AddCommand}" /></StackPanel>
+  </StackPanel></Border>
+  <TextBlock Text="{Binding Message}" Foreground="{StaticResource RedBrush}" TextWrapping="Wrap" />
+ </StackPanel></ScrollViewer>
+</UserControl>

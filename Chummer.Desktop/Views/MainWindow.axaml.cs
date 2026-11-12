@@ -13,6 +13,7 @@ namespace Chummer.Desktop.Views
     {
         public MainWindow()
         {
+            Chummer.Desktop.Services.ModalHelper.RegisterShell(this);
             AvaloniaXamlLoader.Load(this);
             DataContextChanged += (sender, args) =>
             {
