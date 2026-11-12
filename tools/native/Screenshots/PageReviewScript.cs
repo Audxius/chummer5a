@@ -391,6 +391,30 @@ internal static class PageReviewScript
             throw new InvalidOperationException("Picker did not evaluate the selected action for this runner.");
         if (runner.Character.EdgeUsed != edge) throw new InvalidOperationException("Merely selecting a roll spent Edge.");
         Save(window, output, "62-roll-picker-compact");
+        string selectedWeaponId = dice.SelectedWeapon?.Id;
+        var contextWeapon = new Chummer.Backend.Equipment.Weapon(runner.Character) { Name = "Context refresh probe" };
+        var childWeapon = new Chummer.Backend.Equipment.Weapon(runner.Character) { Name = "Underbarrel context probe" };
+        var contextVehicle = new Chummer.Backend.Equipment.Vehicle(runner.Character) { Name = "Context vehicle" };
+        var mountedWeapon = new Chummer.Backend.Equipment.Weapon(runner.Character) { Name = "Mounted context probe" };
+        await runner.RunRuleAsync(async token =>
+        {
+            await contextWeapon.Children.AddAsync(childWeapon, token); await runner.Character.Weapons.AddAsync(contextWeapon, token);
+            await contextVehicle.Weapons.AddAsync(mountedWeapon, token); await runner.Character.Vehicles.AddAsync(contextVehicle, token);
+            return RuleResult.Changed;
+        });
+        runner.OpenRollPickerCommand.Execute(null); await dice.WaitForCatalogAsync(); await settle();
+        if (!dice.Weapons.Any(x => x.Id == contextWeapon.InternalId) || !dice.Weapons.Any(x => x.Id == childWeapon.InternalId) || !dice.Weapons.Any(x => x.Id == mountedWeapon.InternalId))
+            throw new InvalidOperationException("Returning to the picker did not refresh root, underbarrel and vehicle weapons.");
+        if (selectedWeaponId != null && dice.SelectedWeapon?.Id != selectedWeaponId) throw new InvalidOperationException("Context refresh lost the selected weapon.");
+        dice.SelectedWeapon = dice.Weapons.Single(x => x.Id == childWeapon.InternalId);
+        await runner.RunRuleAsync(async token =>
+        {
+            await runner.Character.Weapons.RemoveAsync(contextWeapon, token); await runner.Character.Vehicles.RemoveAsync(contextVehicle, token);
+            contextWeapon.Dispose(); contextVehicle.Dispose(); return RuleResult.Changed;
+        });
+        runner.OpenRollPickerCommand.Execute(null); await dice.WaitForCatalogAsync(); await settle();
+        if (dice.Weapons.Any(x => x.Id == childWeapon.InternalId) || ReferenceEquals(dice.SelectedWeapon?.Value, childWeapon)) throw new InvalidOperationException("The picker retained a removed/disposed weapon.");
+        if (runner.Character.EdgeUsed != edge) throw new InvalidOperationException("Refreshing equipment contexts spent Edge.");
         Click(window, window.GetVisualDescendants().OfType<Button>().Single(x => x.Name == "LocalDiceNavigation")); await settle();
         if (!dice.ShowLocalRoller || dice.LocalDice.Dice != Math.Clamp(dice.Pool, 0, 100)) throw new InvalidOperationException("Local dice did not inherit the selected pool.");
         dice.LocalDice.Dice = 12; dice.LocalDice.RollCommand.Execute(null); await settle();
@@ -416,6 +440,11 @@ internal static class PageReviewScript
         await main.OpenCharacterAsync(other); var otherView = (CharacterViewModel)main.CurrentPage;
         otherView.OpenRollPickerCommand.Execute(null); await dice.WaitForCatalogAsync(); await settle();
         if (!ReferenceEquals(dice.SelectedCharacter, otherView)) throw new InvalidOperationException("Roll picker retained the previously selected runner.");
+        runner.OpenRollPickerCommand.Execute(null); otherView.OpenRollPickerCommand.Execute(null); runner.OpenRollPickerCommand.Execute(null);
+        await dice.WaitForCatalogAsync(); await settle();
+        if (!ReferenceEquals(dice.SelectedCharacter, runner) || dice.Weapons.Any(x => x.Value is Chummer.Backend.Equipment.Weapon weapon && !ReferenceEquals(weapon.CharacterObject, runner.Character))
+            || runner.Character.Weapons.Count > 0 && !dice.Weapons.Any(x => x.Id == runner.Character.Weapons.First().InternalId))
+            throw new InvalidOperationException("Rapid runner switching applied stale equipment choices.");
         await main.CloseCharacterCommand.ExecuteAsync(otherView); await dice.WaitForCatalogAsync();
         main.CurrentPage = runner; runner.OpenRollPickerCommand.Execute(null); await dice.WaitForCatalogAsync(); await settle();
         if (!ReferenceEquals(dice.SelectedCharacter, runner)) throw new InvalidOperationException("Returning to the runner did not restore its roll catalog.");

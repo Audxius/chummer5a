@@ -1,5 +1,15 @@
 # Active continuation — 2026-11-12
 
+## Newest: dice equipment contexts stay current
+
+Prior repair checkpoint960061048 was pushed. Continued without asking because interchangeability is still the user's requirement. DiceTerminal.Activate now awaits its prior actor load, rebuilds context choices through the runner's model gate, retains selected context IDs and modifier/force state when possible, and reevaluates the pool. ContextOption captures its ID when built so a later refresh need not query disposed models. Removed equipment falls back to a valid remaining choice. Root, underbarrel, vehicle, mount and vehicle-mod weapons are included and deduplicated; mounted labels include the vehicle name.
+
+Actor loads use generation checks so rapid A→B→A changes cannot apply old lists. Returning to a cached actor refreshes generated actions. Catalogs are invalidated when the actor's preset key changes and cleared for closed actors, including actors closed while another runner is selected. Existing action search/catalog concurrency and live XML changes without preset-key changes still deserve audit; do not infer that every cache issue is solved.
+
+Desktop build and whitespace checks pass. UI review /tmp/chummer-native-review/context-verified and /tmp/chummer-context-verified-ui.log passes: adding root/underbarrel/vehicle weapons while away from the picker, retaining selection, removing and disposing the selected nested weapon, returning without stale references, unchanged Edge, rapid actor switching, plus existing inline contacts/art, local dice and initiative checks. Core was unchanged; the163-test result belongs to the preceding repair checkpoint. Original character/settings were not written.
+
+Next functional gap investigated: inventory moves/transfers and creation copy/paste. Legacy CharacterShared.CopyObject and CharacterCreate.mnuEditPaste_Click serialize existing equipment and associated generated weapons/vehicles. Parent move rules should preserve IDs, forbid cycles/included-item moves, honor actual target compatibility and capacity, and update equipment effects. Core ICanPaste.AllowPasteObject exists but inspect implementations before trusting it (some simply return false). Do not claim transfers implemented just because ordering or location labels exist. Other full-replacement gaps remain below and in feature-matrix.md.
+
 ## Newest: transactional source-bonus refresh and legacy migration queue
 
 Prior checkpoint6baef76d1 implemented utilities, critter powers and all declared engine prompt handlers. Continued because user explicitly demands interchangeability. Full replacement is still not established; do not stop at a completion claim or invent a percentage.

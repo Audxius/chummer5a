@@ -44,6 +44,8 @@ namespace Chummer.Desktop.ViewModels
         private const string SettingsKeyName = "DiceTerminal";
         private readonly MainWindowViewModel _objShell;
         private readonly Dictionary<Character, RollCatalog> _dicCatalogs = new Dictionary<Character, RollCatalog>();
+        private readonly Dictionary<Character, string> _catalogPresets = new();
+        private int _characterLoadVersion;
         private readonly HashSet<string> _setFavorites = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly List<string> _lstRecent = new List<string>();
         private RollCatalog _objCatalog;
@@ -207,19 +209,18 @@ namespace Chummer.Desktop.ViewModels
                 SelectedCharacter = current ?? Characters.FirstOrDefault();
             else
             {
-                // Stats may have changed (damage taken, gear bought) since the last visit.
-                _objCatalog?.RefreshCharacterRolls(SelectedCharacter.Character);
-                RefreshRollChoices();
-                _ = SearchAsync();
-                Evaluate();
+                _objLoadTask = RefreshActiveCharacterAsync(SelectedCharacter, _objLoadTask, _characterLoadVersion);
             }
         }
 
         private void OpenCharactersOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            foreach (var character in _dicCatalogs.Keys.Where(c => !Characters.Any(x => ReferenceEquals(x.Character, c))).ToArray())
+            { _dicCatalogs.Remove(character); _catalogPresets.Remove(character); }
             if (SelectedCharacter != null && !Characters.Contains(SelectedCharacter))
             {
                 _dicCatalogs.Remove(SelectedCharacter.Character);
+                _catalogPresets.Remove(SelectedCharacter.Character);
                 SelectedCharacter = Characters.FirstOrDefault();
             }
             else if (SelectedCharacter == null)
@@ -232,10 +233,10 @@ namespace Chummer.Desktop.ViewModels
             OnPropertyChanged(nameof(HasCharacter));
             OnPropertyChanged(nameof(HasNoCharacter));
             OnPropertyChanged(nameof(HasActionWorkspace));
-            _objLoadTask = LoadCharacterAsync(value);
+            _objLoadTask = LoadCharacterAsync(value, ++_characterLoadVersion);
         }
 
-        private async Task LoadCharacterAsync(CharacterViewModel objViewModel)
+        private async Task LoadCharacterAsync(CharacterViewModel objViewModel, int version)
         {
             SelectedRoll = null;
             RefreshRollChoices();
@@ -247,17 +248,19 @@ namespace Chummer.Desktop.ViewModels
                 return;
             Character objCharacter = objViewModel.Character;
             RollCatalog objCatalog;
-            if (!_dicCatalogs.TryGetValue(objCharacter, out objCatalog))
+            if (!_dicCatalogs.TryGetValue(objCharacter, out objCatalog) || _catalogPresets.GetValueOrDefault(objCharacter) != objCharacter.SettingsKey)
             {
-                objCatalog = await Task.Run(() => RollCatalog.Load(objCharacter)).ConfigureAwait(true);
-                if (!ReferenceEquals(SelectedCharacter, objViewModel)) return;
+                objCatalog = await objViewModel.ReadModelAsync(() => Task.FromResult(RollCatalog.Load(objCharacter))).ConfigureAwait(true);
+                if (!ReferenceEquals(SelectedCharacter, objViewModel) || version != _characterLoadVersion) return;
                 _dicCatalogs[objCharacter] = objCatalog;
+                _catalogPresets[objCharacter] = objCharacter.SettingsKey;
             }
-            if (!ReferenceEquals(SelectedCharacter, objViewModel))
+            if (!ReferenceEquals(SelectedCharacter, objViewModel) || version != _characterLoadVersion)
                 return;
             _objCatalog = objCatalog;
-            List<ContextOption>[] alstOptions = await Task.Run(() => BuildContextOptions(objCharacter)).ConfigureAwait(true);
-            if (!ReferenceEquals(SelectedCharacter, objViewModel)) return;
+            List<ContextOption>[] alstOptions = await objViewModel.ReadModelAsync(() => Task.FromResult(BuildContextOptions(objCharacter))).ConfigureAwait(true);
+            if (!ReferenceEquals(SelectedCharacter, objViewModel) || version != _characterLoadVersion) return;
+            objCatalog.RefreshCharacterRolls(objCharacter);
             _blnSuppressEvaluate = true;
             try
             {
@@ -288,10 +291,43 @@ namespace Chummer.Desktop.ViewModels
             await SearchAsync().ConfigureAwait(true);
         }
 
+        private async Task RefreshActiveCharacterAsync(CharacterViewModel runner, Task previous, int version)
+        {
+            await previous.ConfigureAwait(true);
+            if (!ReferenceEquals(SelectedCharacter, runner) || version != _characterLoadVersion) return;
+            if (_catalogPresets.GetValueOrDefault(runner.Character) != runner.Character.SettingsKey)
+            { await LoadCharacterAsync(runner, version).ConfigureAwait(true); return; }
+            _objSearchCancel?.Cancel();
+            var options = await runner.ReadModelAsync(() => Task.FromResult(BuildContextOptions(runner.Character))).ConfigureAwait(true);
+            if (!ReferenceEquals(SelectedCharacter, runner) || version != _characterLoadVersion) return;
+            var ids = new[] { SelectedWeapon?.Id, SelectedVehicle?.Id, SelectedSpell?.Id, SelectedDevice?.Id, SelectedSpirit?.Id };
+            _blnSuppressEvaluate = true;
+            try
+            {
+                Reset(Weapons, options[0]); Reset(Vehicles, options[1]); Reset(SpellOptions, options[2]); Reset(Devices, options[3]); Reset(SpiritOptions, options[4]);
+                ContextOption Pick(ObservableCollection<ContextOption> choices, string id) => choices.FirstOrDefault(x => id != null && x.Id == id) ?? choices.FirstOrDefault(x => x.IsDefault) ?? choices.FirstOrDefault();
+                SelectedWeapon = Pick(Weapons, ids[0]); SelectedVehicle = Pick(Vehicles, ids[1]); SelectedSpell = Pick(SpellOptions, ids[2]);
+                SelectedDevice = Pick(Devices, ids[3]); SelectedSpirit = Pick(SpiritOptions, ids[4]);
+            }
+            finally { _blnSuppressEvaluate = false; }
+            _objCatalog?.RefreshCharacterRolls(runner.Character);
+            RefreshRollChoices(); await SearchAsync().ConfigureAwait(true); Evaluate();
+        }
+
         private static List<ContextOption>[] BuildContextOptions(Character objCharacter)
         {
-            List<ContextOption> lstWeapons = objCharacter.Weapons.ToList()
-                                                         .Select(x => new ContextOption(x.CurrentDisplayName, x, x.Equipped))
+            static IEnumerable<Weapon> Flatten(IEnumerable<Weapon> weapons)
+            { foreach (var weapon in weapons) { yield return weapon; foreach (var child in Flatten(weapon.Children)) yield return child; } }
+            var allWeapons = Flatten(objCharacter.Weapons).ToList();
+            foreach (var vehicle in objCharacter.Vehicles)
+            {
+                allWeapons.AddRange(Flatten(vehicle.Weapons));
+                foreach (var mod in vehicle.Mods) allWeapons.AddRange(Flatten(mod.Weapons));
+                foreach (var mount in vehicle.WeaponMounts)
+                { allWeapons.AddRange(Flatten(mount.Weapons)); foreach (var mod in mount.Mods) allWeapons.AddRange(Flatten(mod.Weapons)); }
+            }
+            List<ContextOption> lstWeapons = allWeapons.DistinctBy(x => x.InternalId)
+                                                         .Select(x => new ContextOption((x.ParentVehicle == null ? "" : x.ParentVehicle.CurrentDisplayName + " · ") + x.CurrentDisplayName, x, x.Equipped))
                                                          .OrderByDescending(x => x.IsDefault).ThenBy(x => x.Name, StringComparer.CurrentCulture).ToList();
             List<ContextOption> lstVehicles = objCharacter.Vehicles.ToList().Select(x => new ContextOption(x.CurrentDisplayName, x)).ToList();
             List<ContextOption> lstSpells = objCharacter.Spells.ToList().Select(x => new ContextOption(x.CurrentDisplayName, x))
@@ -675,11 +711,13 @@ namespace Chummer.Desktop.ViewModels
             Name = strName;
             Value = objValue;
             IsDefault = blnDefault;
+            Id = (objValue as IHasInternalId)?.InternalId;
         }
 
         public string Name { get; }
         public object Value { get; }
         public bool IsDefault { get; }
+        public string Id { get; }
 
         public override string ToString() => Name;
     }
