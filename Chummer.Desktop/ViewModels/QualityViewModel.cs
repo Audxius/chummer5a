@@ -89,6 +89,7 @@ namespace Chummer.Desktop.ViewModels
             RemoveCommand = new AsyncRelayCommand(() => _objOwner.RunRuleAsync(t => QualityRules.RemoveAsync(_objOwner.Character, _objQuality, t)));
             LevelUpCommand = new AsyncRelayCommand(() => _objOwner.RunRuleAsync(t => QualityRules.SetLevelsAsync(_objOwner.Character, _objQuality, Levels + 1, t)));
             LevelDownCommand = new AsyncRelayCommand(() => _objOwner.RunRuleAsync(t => QualityRules.SetLevelsAsync(_objOwner.Character, _objQuality, Levels - 1, t)));
+            ReapplyCommand = new AsyncRelayCommand(() => _objOwner.ReapplyImprovementSourcesAsync(new[] { _objQuality.InternalId }));
         }
 
         /// <summary>One card per quality, levels folded together like the legacy quality tree.</summary>
@@ -116,6 +117,7 @@ namespace Chummer.Desktop.ViewModels
         public string EffectSummary { get; }
         public bool HasEffectSummary => EffectSummary.Length > 0;
         public bool HasNotes => Notes.Length > 0;
+        public IAsyncRelayCommand ReapplyCommand { get; }
         public string Origin { get; } = string.Empty;
         public bool HasOrigin => Origin.Length > 0;
 

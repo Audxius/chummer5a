@@ -254,7 +254,8 @@ internal static class PageReviewScript
     public static async Task CheckEnginePromptsAsync(MainWindow window, CharacterViewModel runner, string output, Func<Task> settle)
     {
         var dialogs = new Chummer.Desktop.Services.AvaloniaDialogService();
-        using var armor = new Chummer.Backend.Equipment.Armor(runner.Character) { Name = "Full Body Armor", Category = "Armor" };
+        using (var armor = new Chummer.Backend.Equipment.Armor(runner.Character) { Name = "Full Body Armor", Category = "Armor" })
+        {
         var request = new SelectArmorModRequest(runner.Character, armor) { AllowedCategories = "General", ExcludeGeneralCategory = true };
         var picking = dialogs.ShowAsync(request, window); await settle();
         var picker = window.OwnedWindows.Single();
@@ -267,6 +268,7 @@ internal static class PageReviewScript
         var cancelRequest = new SelectArmorModRequest(runner.Character, armor) { AllowedCategories = "General", ExcludeGeneralCategory = true };
         picking = dialogs.ShowAsync(cancelRequest, window); await settle(); window.OwnedWindows.Single().Close(); await settle();
         if (await picking != DialogOutcome.Cancel) throw new InvalidOperationException("Armor selection did not cancel.");
+        }
         using var fresh = new Character { SettingsKey = runner.Character.SettingsKey };
         string originalMetatype = fresh.Metatype;
         var metatypePicking = dialogs.ShowAsync(new SelectMetatypePriorityRequest(fresh), window);
@@ -305,7 +307,34 @@ internal static class PageReviewScript
         var powerCard = powerReview.AbilitySections.Single(x => x.Title == "CRITTER POWERS").Cards.Single();
         await ((CommunityToolkit.Mvvm.Input.IAsyncRelayCommand)powerCard.RemoveCommand).ExecuteAsync(null); await settle();
         if (fresh.CritterPowers.Count != 0) throw new InvalidOperationException("Critter power removal failed.");
+        string qualityId = fresh.LoadData("qualities.xml").SelectSingleNode("/chummer/qualities/quality[name='First Impression']/id").InnerText;
+        await powerReview.RunRuleAsync(t => QualityRules.AddAsync(fresh, qualityId, 1, true, t)); await settle();
+        string bonuses = QualityDescriptionRules.Modifiers(fresh, fresh.Qualities.Single());
+        powerReview.ShowSectionCommand.Execute(CharacterSection.Improvements); await settle();
+        var refresh = window.GetVisualDescendants().OfType<Button>().Single(x => x.Content as string == "Refresh source bonuses");
+        Click(window, refresh); var refreshing = ((CommunityToolkit.Mvvm.Input.IAsyncRelayCommand)refresh.Command).ExecutionTask;
+        if (refreshing == null) throw new InvalidOperationException("Source refresh button did not start.");
+        await refreshing; await settle();
+        if (QualityDescriptionRules.Modifiers(fresh, fresh.Qualities.Single()) != bonuses) throw new InvalidOperationException("UI refresh changed the quality's actual bonuses.");
+        Save(window, output, "73-source-bonuses-refreshed");
         powerReview.IsDirty = false; await main.CloseCharacterCommand.ExecuteAsync(powerReview); main.CurrentPage = runner;
+        var cyberSource = Improvement.ImprovementSource.Cyberware;
+        var standard = (await runner.Character.GetGradesListAsync(cyberSource)).First(x => x.Name == "Standard");
+        var skilljackNode = runner.Character.LoadData("cyberware.xml").SelectSingleNode("/chummer/cyberwares/cyberware[name='Skilljack']");
+        var skilljack = new Chummer.Backend.Equipment.Cyberware(runner.Character);
+        await skilljack.CreateAsync(skilljackNode, standard, cyberSource, 2, new System.Collections.Generic.List<Chummer.Backend.Equipment.Weapon>(), new System.Collections.Generic.List<Chummer.Backend.Equipment.Vehicle>());
+        await runner.Character.Cyberware.AddAsync(skilljack);
+        string skilljackId = skilljack.InternalId;
+        runner.Character.Improvements.Single(x => x.SourceName == skilljackId && x.ImproveType == Improvement.ImprovementType.SkillsoftAccess).Value = 0;
+        string migrationFile = Path.Combine(output, "migration-review.chum5");
+        if (!await runner.Character.SaveAsync(migrationFile, false, false)) throw new InvalidOperationException("Could not prepare the migration fixture.");
+        runner.IsDirty = false; await main.CloseCharacterCommand.ExecuteAsync(runner);
+        await main.OpenCharacterFileAsync(migrationFile); await settle();
+        var repaired = (CharacterViewModel)main.CurrentPage;
+        if (!repaired.IsDirty || repaired.Character.Improvements.Single(x => x.SourceName == skilljackId && x.ImproveType == Improvement.ImprovementType.SkillsoftAccess).Value != 2)
+            throw new InvalidOperationException("Opening a legacy skilljack save did not run its queued repair.");
+        Save(window, output, "74-legacy-load-repaired");
+        repaired.IsDirty = false; await main.CloseCharacterCommand.ExecuteAsync(repaired);
         Console.WriteLine("Native bundled armor and metatype engine prompts, read-only previews and cancellation passed.");
     }
 

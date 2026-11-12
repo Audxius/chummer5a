@@ -276,6 +276,7 @@
                   <WrapPanel>
                     <Button Classes="act" Content="Move up" IsVisible="{Binding CanReorder}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).MoveInventoryUpCommand}" />
                     <Button Classes="act" Content="Move down" IsVisible="{Binding CanReorder}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).MoveInventoryDownCommand}" />
+                    <Button Classes="act" Content="Refresh source bonuses" IsVisible="{Binding CanReapplyBonuses}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).ReapplyInventoryImprovementsCommand}" />
                     <Button Classes="act" Content="Rename" IsVisible="{Binding CanRename}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RenameItemCommand}" />
                     <Button Classes="act" Content="LOCATION…" IsVisible="{Binding CanSetLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).SetItemLocationCommand}" />
                     <Button Classes="act" Content="Rename location" IsVisible="{Binding HasLocation}" Command="{Binding $parent[UserControl].((vm:CharacterViewModel)DataContext).RenameItemLocationCommand}" />

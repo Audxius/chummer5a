@@ -244,6 +244,7 @@ namespace Chummer.Desktop.ViewModels
         public bool CanSellNow => CanSell && IsCareer;
         public bool CanRemove { get; private set; }
         public bool CanEditNotes => Item is IHasNotes;
+        public bool CanReapplyBonuses => Item is Gear || Item is Armor || Item is ArmorMod || Item is Cyberware || Item is Weapon;
         public bool HasActions => Item != null;
 
         /// <summary>Everything searchable about the item, lower-cased.</summary>

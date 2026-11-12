@@ -165,12 +165,14 @@ namespace Chummer.Desktop.ViewModels
         public async Task OpenCharacterAsync(Character objCharacter)
         {
             CharacterViewModel objViewModel = OpenCharacters.FirstOrDefault(x => ReferenceEquals(x.Character, objCharacter));
+            bool opened = objViewModel == null;
             if (objViewModel == null)
             {
                 objViewModel = await CharacterViewModel.CreateAsync(objCharacter);
                 OpenCharacters.Add(objViewModel);
             }
             CurrentPage = objViewModel;
+            if (opened) await objViewModel.CheckPendingImprovementRepairsAsync();
         }
     }
 }

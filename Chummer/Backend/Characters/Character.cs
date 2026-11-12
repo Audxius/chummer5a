@@ -14321,18 +14321,6 @@ namespace Chummer
                     }, token).ConfigureAwait(false);
                     if (setIds.Count == 0)
                         return lstReturn;
-                    await Improvements.ForEachWithBreakAsync(x =>
-                    {
-                        if (setIds.Remove(x.InternalId))
-                        {
-                            lstReturn.Add(x);
-                            if (setIds.Count == 0)
-                                return false;
-                        }
-                        return true;
-                    }, token).ConfigureAwait(false);
-                    if (setIds.Count == 0)
-                        return lstReturn;
                     await Arts.ForEachWithBreakAsync(x =>
                     {
                         if (setIds.Remove(x.InternalId))
@@ -14812,6 +14800,19 @@ namespace Chummer
                         if (setIds.Count == 0)
                             return lstReturn;
                     }
+                    // Improvement.InternalId is its SourceName. Prefer the actual source item before this fallback.
+                    await Improvements.ForEachWithBreakAsync(x =>
+                    {
+                        if (setIds.Remove(x.InternalId))
+                        {
+                            lstReturn.Add(x);
+                            if (setIds.Count == 0)
+                                return false;
+                        }
+                        return true;
+                    }, token).ConfigureAwait(false);
+                    if (setIds.Count == 0)
+                        return lstReturn;
                     return lstReturn;
                 }
                 finally

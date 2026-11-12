@@ -54,6 +54,15 @@ namespace Chummer.Tests.Rules
                 => Task.FromResult(Show(owner, message, caption, buttons, icon, defaultButton));
         }
 
+        private sealed class CancelRepairSelections : IDialogService
+        {
+            public int Calls { get; private set; }
+            public DialogOutcome Show(DialogRequest request, object owner = null, System.Threading.CancellationToken token = default)
+            { Calls++; return DialogOutcome.Cancel; }
+            public Task<DialogOutcome> ShowAsync(DialogRequest request, object owner = null, System.Threading.CancellationToken token = default)
+                => Task.FromResult(Show(request, owner, token));
+        }
+
         [TestInitialize]
         public async Task Setup()
         {
@@ -1344,6 +1353,108 @@ namespace Chummer.Tests.Rules
                 Assert.AreEqual("A blue van.", loaded[1].Body);
             }
             finally { File.Delete(path); }
+        }
+
+        [TestMethod]
+        public async Task LegacySkilljackMigrationQueueRefreshesItsRecordedRating()
+        {
+            var source = Improvement.ImprovementSource.Cyberware;
+            var grade = (await _character.GetGradesListAsync(source)).First(x => x.Name == "Standard");
+            var node = _character.LoadData("cyberware.xml").SelectSingleNode("/chummer/cyberwares/cyberware[name='Skilljack']");
+            var implant = new Cyberware(_character);
+            await implant.CreateAsync(node, grade, source, 2, new System.Collections.Generic.List<Weapon>(), new System.Collections.Generic.List<Vehicle>());
+            await _character.Cyberware.AddAsync(implant);
+            var effect = _character.Improvements.Single(x => x.ImproveType == Improvement.ImprovementType.SkillsoftAccess);
+            effect.Value = 0; // A legacy save defect explicitly queued for repair by Character.LoadAsync.
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".chum5");
+            try
+            {
+                Assert.IsTrue(await _character.SaveAsync(path, false, false));
+                using var loaded = new Character(); await loaded.SetFileNameAsync(path); Assert.IsTrue(await loaded.LoadAsync(path));
+                var pending = await loaded.TakeInternalIdsNeedingReapplyImprovementsAsync();
+                Assert.IsNotNull(pending); CollectionAssert.Contains(pending.ToArray(), implant.InternalId);
+                var result = await ImprovementReapplyRules.ApplyAsync(loaded, pending.ToArray());
+                Assert.AreEqual(RuleResult.Changed, result.Outcome);
+                Assert.AreEqual(2m, loaded.Improvements.Single(x => x.ImproveType == Improvement.ImprovementType.SkillsoftAccess).Value);
+                Assert.AreEqual(implant.InternalId, loaded.Cyberware.Single().InternalId); Assert.AreEqual(path, loaded.FileName);
+            }
+            finally { File.Delete(path); }
+        }
+
+        [TestMethod]
+        public async Task ScopedReapplyHandlesSourceSuffixesAndLeavesOtherBonusesUntouched()
+        {
+            foreach (string name in new[] { "First Impression", "Analytical Mind" })
+            {
+                var node = _character.LoadData("qualities.xml").SelectSingleNode("/chummer/qualities/quality[name='" + name + "']");
+                Assert.AreEqual(RuleResult.Changed, await QualityRules.AddAsync(_character, node["id"].InnerText, 1, true));
+            }
+            var selected = _character.Qualities.Single(x => x.Name == "First Impression");
+            var other = _character.Qualities.Single(x => x.Name == "Analytical Mind");
+            var selectedEffect = _character.Improvements.First(x => x.SourceName == selected.InternalId);
+            var otherEffect = _character.Improvements.First(x => x.SourceName == other.InternalId);
+            string before = QualityDescriptionRules.Modifiers(_character, selected);
+            var result = await ImprovementReapplyRules.ApplyAsync(_character, new[] { selected.InternalId + "Wireless" });
+            Assert.AreEqual(RuleResult.Changed, result.Outcome);
+            Assert.IsFalse(_character.Improvements.Contains(selectedEffect)); Assert.IsTrue(_character.Improvements.Contains(otherEffect));
+            Assert.AreEqual(before, QualityDescriptionRules.Modifiers(_character, selected));
+        }
+
+        [TestMethod]
+        public async Task ReapplyRestoresQualityBonusesWithoutSpendingOrChangingIdentity()
+        {
+            var id = _character.LoadData("qualities.xml").SelectSingleNode("/chummer/qualities/quality[name='First Impression']/id").InnerText;
+            Assert.AreEqual(RuleResult.Changed, await QualityRules.AddAsync(_character, id, 1, true));
+            var quality = _character.Qualities.Single(); string internalId = quality.InternalId;
+            int karma = _character.Karma; decimal funds = _character.Nuyen; string file = _character.FileName;
+            string before = QualityDescriptionRules.Modifiers(_character, quality);
+            var result = await ImprovementReapplyRules.ApplyAsync(_character);
+            Assert.AreEqual(RuleResult.Changed, result.Outcome); Assert.IsFalse(result.Restored);
+            Assert.AreEqual(internalId, _character.Qualities.Single().InternalId);
+            Assert.AreEqual(before, QualityDescriptionRules.Modifiers(_character, _character.Qualities.Single()));
+            Assert.AreEqual(karma, _character.Karma); Assert.AreEqual(funds, _character.Nuyen); Assert.AreEqual(file, _character.FileName);
+            Assert.AreEqual(0, _character.ExpenseEntries.Count);
+        }
+
+        [TestMethod]
+        public async Task ReapplyPreservesRecordedEffectsOfUnavailableCustomDefinitions()
+        {
+            var xml = _character.LoadData("qualities.xml");
+            var node = xml.SelectSingleNode("/chummer/qualities/quality[name='First Impression']").CloneNode(true);
+            node["id"].InnerText = Guid.NewGuid().ToString(); node["name"].InnerText = "Private quality unavailable in installed data";
+            var quality = new Quality(_character);
+            await quality.CreateAsync(node, QualitySource.Selected, new System.Collections.Generic.List<Weapon>());
+            await _character.Qualities.AddAsync(quality);
+            string before = QualityDescriptionRules.Modifiers(_character, quality);
+            Assert.IsTrue(before.Contains("+2"));
+            Assert.IsNull(await quality.GetNodeAsync(), "The private test definition must be absent from installed data.");
+            var owners = await _character.GetItemsByInternalIdsAsync(new[] { quality.InternalId });
+            Assert.IsTrue(owners.Contains(quality), "Expected " + quality.InternalId + "; owners " + string.Join(",", owners.Select(x => x.InternalId + ":" + x.GetType().Name)) + "; qualities " + string.Join(",", _character.Qualities.Select(x => x.InternalId)));
+            var result = await ImprovementReapplyRules.ApplyAsync(_character);
+            Assert.AreEqual(RuleResult.Changed, result.Outcome);
+            StringAssert.Contains(result.OutdatedItems, quality.Name);
+            Assert.AreEqual(before, QualityDescriptionRules.Modifiers(_character, quality));
+        }
+
+        [TestMethod]
+        public async Task CancelledReapplyRestoresEntireModelAndOriginalFileName()
+        {
+            var node = _character.LoadData("qualities.xml").SelectSingleNode("/chummer/qualities/quality[name='Exceptional Attribute']");
+            var quality = new Quality(_character);
+            await quality.CreateAsync(node, QualitySource.Selected, new System.Collections.Generic.List<Weapon>(), "AGI");
+            await _character.Qualities.AddAsync(quality); quality.Extra = "";
+            int maximum = _character.AGI.TotalMaximum; string id = quality.InternalId; string file = _character.FileName;
+            int improvements = _character.Improvements.Count;
+            var originalDialogs = HostServices.Dialogs; var cancel = new CancelRepairSelections(); HostServices.Dialogs = cancel;
+            try
+            {
+                var result = await ImprovementReapplyRules.ApplyAsync(_character);
+                Assert.AreEqual(RuleResult.Cancelled, result.Outcome); Assert.IsTrue(result.Restored); Assert.IsTrue(cancel.Calls > 0);
+                Assert.AreEqual(maximum, _character.AGI.TotalMaximum);
+                Assert.AreEqual(improvements, _character.Improvements.Count);
+                Assert.AreEqual(id, _character.Qualities.Single().InternalId); Assert.AreEqual(file, _character.FileName);
+            }
+            finally { HostServices.Dialogs = originalDialogs; }
         }
 
         [TestMethod]

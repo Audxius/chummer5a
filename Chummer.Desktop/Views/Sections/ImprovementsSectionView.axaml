@@ -4,9 +4,10 @@
              x:Class="Chummer.Desktop.Views.Sections.ImprovementsSectionView"
              x:DataType="vm:CharacterViewModel">
   <DockPanel Margin="28,18,28,24">
-    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" ColumnSpacing="16" Margin="0,0,0,16">
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="16" Margin="0,0,0,16">
       <TextBox Text="{Binding ImprovementFilter}" PlaceholderText="Search custom improvements, groups and effects…" />
-      <Button Grid.Column="1" Content="+ CUSTOM IMPROVEMENT" Command="{Binding AddCustomImprovementCommand}" Classes="primary" />
+      <Button Grid.Column="1" Content="Refresh source bonuses" Command="{Binding ReapplyAllImprovementsCommand}" ToolTip.Tip="Rebuild item and ability bonuses from the installed game data. Cancelled selections restore the previous character state." />
+      <Button Grid.Column="2" Content="+ CUSTOM IMPROVEMENT" Command="{Binding AddCustomImprovementCommand}" Classes="primary" />
     </Grid>
     <ScrollViewer>
       <ItemsControl ItemsSource="{Binding CustomImprovements}">
